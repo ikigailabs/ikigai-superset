@@ -72,6 +72,8 @@ if TYPE_CHECKING:
     from superset.connectors.sqla.models import TableColumn
     from superset.models.core import Database
 
+import requests
+
 logger = logging.getLogger()
 
 
@@ -767,6 +769,28 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
                         extra=extra,
                     )
                 ]
+
+        # Raw Error Collected:
+        PARAMS = {
+            'message':cls._extract_error_message(ex),
+            'error':cls.engine_name
+        }
+
+
+        # To see output of PARAMS uncomment below:
+        # print(PARAMS)   
+        # due to some issue with superset you will need to edit file and save to refresh superset to get this output 
+
+
+        # Send to API:
+        # API_NAME = 'test'
+        # BASE_URL = 'test.com'
+        # URL = 'https://'+BASE_URL+'/pypr/'+API_NAME
+        # response = requests.get(url=URL, params=PARAMS)
+
+        # If API responds change error message:
+        # if response.status_code == 200:
+        #     //return statement here
 
         return [
             SupersetError(
