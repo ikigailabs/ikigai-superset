@@ -795,7 +795,7 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
         return [
             SupersetError(
                 error_type=SupersetErrorType.GENERIC_DB_ENGINE_ERROR,
-                message="Anmol Error captured",
+                message=cls._extract_error_message(ex),
                 level=ErrorLevel.ERROR,
                 extra={"engine_name": cls.engine_name},
             )

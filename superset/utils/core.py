@@ -638,7 +638,8 @@ def error_msg_from_exception(ex: Exception) -> str:
             msg = ex.message.get("message")  # type: ignore
         elif ex.message:  # type: ignore
             msg = ex.message  # type: ignore
-    return msg or str(ex)
+    # return msg or str(ex)
+    return "Anmol Error"
 
 
 def markdown(raw: str, markup_wrap: Optional[bool] = False) -> str:
