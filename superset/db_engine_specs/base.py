@@ -778,8 +778,7 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
 
 
         # To see output of PARAMS uncomment below:
-        # print(PARAMS)   
-        # due to some issue with superset you will need to edit file and save to refresh superset to get this output 
+        # print(PARAMS)
 
 
         # Send to API:
@@ -797,7 +796,7 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
                 error_type=SupersetErrorType.GENERIC_DB_ENGINE_ERROR,
                 message=cls._extract_error_message(ex),
                 level=ErrorLevel.ERROR,
-                extra={"engine_name": cls.engine_name},
+                extra={"engine_name": "SQL"},
             )
         ]
 
