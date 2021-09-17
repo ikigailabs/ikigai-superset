@@ -796,7 +796,7 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
                 error_type=SupersetErrorType.GENERIC_DB_ENGINE_ERROR,
                 message=cls._extract_error_message(ex),
                 level=ErrorLevel.ERROR,
-                extra={"engine_name": "SQL"},
+                extra={"engine_name": cls.engine_name},
             )
         ]
 
