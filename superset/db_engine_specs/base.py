@@ -753,6 +753,11 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
     def extract_errors(
         cls, ex: Exception, context: Optional[Dict[str, Any]] = None
     ) -> List[SupersetError]:
+        ### IKIGAI
+        # Personal Variables
+        DB_NAME='Dremio'
+        DB_NAME_REPLACE='SQL'
+
         raw_message = cls._extract_error_message(ex)
 
         context = context or {}
@@ -770,33 +775,14 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
                     )
                 ]
 
-        # Raw Error Collected:
-        PARAMS = {
-            'message':cls._extract_error_message(ex),
-            'error':cls.engine_name
-        }
-
-
-        # To see output of PARAMS uncomment below:
-        # print(PARAMS)
-
-
-        # Send to API:
-        # API_NAME = 'test'
-        # BASE_URL = 'test.com'
-        # URL = 'https://'+BASE_URL+'/pypr/'+API_NAME
-        # response = requests.get(url=URL, params=PARAMS)
-
-        # If API responds change error message:
-        # if response.status_code == 200:
-        #     //return statement here
+        # Moved API call to superset/utils/core.py to catch broader set of errors
 
         return [
             SupersetError(
                 error_type=SupersetErrorType.GENERIC_DB_ENGINE_ERROR,
                 message=cls._extract_error_message(ex),
                 level=ErrorLevel.ERROR,
-                extra={"engine_name": cls.engine_name},
+                extra={"engine_name":DB_NAME_REPLACE} if cls.engine_name==DB_NAME else {"engine_name": cls.engine_name},
             )
         ]
 

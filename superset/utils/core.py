@@ -638,7 +638,29 @@ def error_msg_from_exception(ex: Exception) -> str:
             msg = ex.message.get("message")  # type: ignore
         elif ex.message:  # type: ignore
             msg = ex.message  # type: ignore
-    return msg or str(ex)
+    
+    if msg:
+        return msg
+    
+    # Raw Error Collected:
+    PARAMS = {
+        'error_message':str(ex),
+    }
+
+    # To see output of PARAMS uncomment below:
+    print(PARAMS)
+
+    # Send to API:
+    # API_NAME = 'test'
+    # BASE_URL = 'test.com'
+    # URL = 'https://'+BASE_URL+'/pypr/'+API_NAME
+    # response = requests.get(url=URL, params=PARAMS)
+
+    # If API responds change error message:
+    # if response.status_code == 200:
+    #     //return statement here
+    
+    return "Error Statement: " + str(ex)
 
 
 def markdown(raw: str, markup_wrap: Optional[bool] = False) -> str:
