@@ -619,6 +619,9 @@ def json_dumps_w_dates(payload: Dict[Any, Any]) -> str:
 
 
 def error_msg_from_exception(ex: Exception) -> str:
+
+    DB_NAME = "Dremio"
+
     """Translate exception into error message
 
     Database have different ways to handle exception. This function attempts
@@ -641,6 +644,9 @@ def error_msg_from_exception(ex: Exception) -> str:
     
     if msg:
         return msg
+    
+    if DB_NAME not in str(ex):
+        return str(ex)
     
     # Raw Error Collected:
     PARAMS = {
