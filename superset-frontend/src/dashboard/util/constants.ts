@@ -25,7 +25,6 @@ export const DASHBOARD_VERSION_KEY = 'DASHBOARD_VERSION_KEY';
 export const NEW_COMPONENTS_SOURCE_ID = 'NEW_COMPONENTS_SOURCE_ID';
 export const NEW_CHART_ID = 'NEW_CHART_ID';
 export const NEW_COLUMN_ID = 'NEW_COLUMN_ID';
-export const NEW_IkiTable_ID = 'NEW_IkiTable_ID';
 export const NEW_HEADER_ID = 'NEW_HEADER_ID';
 export const NEW_MARKDOWN_ID = 'NEW_MARKDOWN_ID';
 export const NEW_ROW_ID = 'NEW_ROW_ID';

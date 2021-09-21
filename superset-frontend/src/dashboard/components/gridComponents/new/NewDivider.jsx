@@ -28,7 +28,7 @@ export default function DraggableNewDivider() {
     <DraggableNewComponent
       id={NEW_DIVIDER_ID}
       type={DIVIDER_TYPE}
-      label={t('Divider')}
+      label={t('Divider3')}
       className="divider-placeholder"
     />
   );
