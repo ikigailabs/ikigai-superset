@@ -116,6 +116,8 @@ if TYPE_CHECKING:
     from superset.connectors.base.models import BaseColumn, BaseDatasource
     from superset.models.core import Database
 
+#Custom Imports (ikigai):
+import requests
 
 logging.getLogger("MARKDOWN").setLevel(logging.INFO)
 logger = logging.getLogger(__name__)
@@ -619,9 +621,10 @@ def json_dumps_w_dates(payload: Dict[Any, Any]) -> str:
 
 
 def error_msg_from_exception(ex: Exception) -> str:
-
+    # Will be changed to environment variables later
     DB_NAME = "Dremio"
-
+    BASE_URL = "https://dev-api.ikigailabs.io/"
+    DREMIO_PARSE_ENDPOINT = "pypr/parse-dremio-error"
     """Translate exception into error message
 
     Database have different ways to handle exception. This function attempts
@@ -650,23 +653,21 @@ def error_msg_from_exception(ex: Exception) -> str:
     
     # Raw Error Collected:
     PARAMS = {
-        'error_message':str(ex),
+        'error_string':str(ex),
     }
 
     # To see output of PARAMS uncomment below:
     print(PARAMS)
 
     # Send to API:
-    # API_NAME = 'test'
-    # BASE_URL = 'test.com'
-    # URL = 'https://'+BASE_URL+'/pypr/'+API_NAME
-    # response = requests.get(url=URL, params=PARAMS)
+    URL = BASE_URL+DREMIO_PARSE_ENDPOINT
+    response = requests.post(url=URL, params=PARAMS)
 
     # If API responds change error message:
-    # if response.status_code == 200:
-    #     //return statement here
+    if response.status_code != 200:
+        return str(ex)
     
-    return "Error Statement: " + str(ex)
+    return str(response.json())
 
 
 def markdown(raw: str, markup_wrap: Optional[bool] = False) -> str:
