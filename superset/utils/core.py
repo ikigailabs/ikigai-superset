@@ -661,17 +661,20 @@ def error_msg_from_exception(ex: Exception) -> str:
 
     # Send to API:
     URL = BASE_URL+DREMIO_PARSE_ENDPOINT
-    response = requests.post(url=URL, data=PARAMS)
+    response = requests.post(
+        url=URL, 
+        data=json.dumps(PARAMS))
 
     # If API responds change error message:
-    if response.status_code != 200:
-        return str(ex)
+    # if response.status_code != 200:
+    #     return "[" + str(response.status_code) + "]" + "Unable to connect to Error Reporting API for detailed info: " + str(ex)
     
     return str(response.json())
 
 
 def markdown(raw: str, markup_wrap: Optional[bool] = False) -> str:
     safe_markdown_tags = [
+
         "h1",
         "h2",
         "h3",
