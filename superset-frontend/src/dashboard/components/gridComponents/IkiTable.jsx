@@ -76,17 +76,11 @@ class IkiTable extends React.PureComponent {
             )}
 
             <div className="dashboard-component dashboard-component-ikitable">
-              <div
-                style={{
-                  width: '300px',
-                  height: '300px',
-                  backgroundColor: 'red',
-                  color: 'white',
-                  padding: '24px',
-                }}
-              >
-                Iki Table
-              </div>
+              <iframe
+                src="http://localhost:3000/widget/dataset/table?project_id=1r4mD5OOm2H3tK7bfNFo1z4prhl"
+                title="IkiTable Component"
+                className="ikitable-iframe"
+              />
             </div>
 
             {dropIndicatorProps && <div {...dropIndicatorProps} />}
