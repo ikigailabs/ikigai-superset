@@ -637,6 +637,7 @@ def error_message_beautifier_dremio(response):
     if len(error) != 0:
         msg = msg + '\n Error Type: ' + error
 #         msg = msg + '\n ' + error_type_suggestor(error) #auto suggests possible errors
+    return msg
     
 
 def error_msg_from_exception(ex: Exception) -> str:
