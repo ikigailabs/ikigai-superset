@@ -619,6 +619,25 @@ def json_int_dttm_ser(obj: Any) -> float:
 def json_dumps_w_dates(payload: Dict[Any, Any]) -> str:
     return json.dumps(payload, default=json_int_dttm_ser)
 
+def error_type_suggestor(error): # need to add dictionary to display possible solutions
+    pass
+
+def error_message_beautifier_dremio(response):
+    project = response.json()['project']['name'].strip()
+    dataset = response.json()['dataset']['name'].strip()
+    chart = response.json()['chart']['name'].strip()
+    error = response.json()['error_type'].strip()
+    msg = 'We found an error in the query you are trying to run. '
+    if len(project) != 0:
+        msg = msg + '\n Project: ' + project
+    if len(dataset) != 0:
+        msg = msg + '\n Dataset: ' + dataset
+    if len(chart) != 0:
+        msg = msg + '\n Chart: ' + chart
+    if len(error) != 0:
+        msg = msg + '\n Error Type: ' + error
+#         msg = msg + '\n ' + error_type_suggestor(error) #auto suggests possible errors
+    
 
 def error_msg_from_exception(ex: Exception) -> str:
     # Will be changed to environment variables later
@@ -651,13 +670,13 @@ def error_msg_from_exception(ex: Exception) -> str:
     if DB_NAME not in str(ex):
         return str(ex)
     
-    # Raw Error Collected:
+    error_msg = str(ex)
+    if "ikigai-datasets-dev" in error_msg:
+        error_msg = error_msg.replace("ikigai-datasets-dev", "ikigai-datasets-virtual")
+    
     PARAMS = {
-        'error_string':bytes(re.sub(' +', ' ', str(ex)), 'utf-8').decode('unicode_escape'),
+        'error_string':bytes(re.sub(' +', ' ', error_msg), 'utf-8').decode('unicode_escape'),
     }
-
-    # To see output of PARAMS uncomment below:
-    print(PARAMS)
 
     # Send to API:
     URL = BASE_URL+DREMIO_PARSE_ENDPOINT
@@ -665,11 +684,11 @@ def error_msg_from_exception(ex: Exception) -> str:
         url=URL, 
         data=json.dumps(PARAMS))
 
-    # If API responds change error message:
-    # if response.status_code != 200:
-    #     return "[" + str(response.status_code) + "]" + "Unable to connect to Error Reporting API for detailed info: " + str(ex)
+    # If API does not respond as expected:
+    if response.status_code != 200:
+        return "[" + str(response.status_code) + "]" + "Unable to connect to Error Reporting API for detailed info: " + str(ex)
     
-    return str(response.json())
+    return error_message_beautifier_dremio(response)
 
 
 def markdown(raw: str, markup_wrap: Optional[bool] = False) -> str:
