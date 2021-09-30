@@ -653,7 +653,7 @@ def error_msg_from_exception(ex: Exception) -> str:
     
     # Raw Error Collected:
     PARAMS = {
-        'error_string':str(ex),
+        'error_string':bytes(re.sub(' +', ' ', str(ex)), 'utf-8').decode('unicode_escape'),
     }
 
     # To see output of PARAMS uncomment below:
@@ -661,7 +661,7 @@ def error_msg_from_exception(ex: Exception) -> str:
 
     # Send to API:
     URL = BASE_URL+DREMIO_PARSE_ENDPOINT
-    response = requests.post(url=URL, params=PARAMS)
+    response = requests.post(url=URL, data=PARAMS)
 
     # If API responds change error message:
     if response.status_code != 200:
