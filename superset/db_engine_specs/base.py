@@ -72,7 +72,7 @@ if TYPE_CHECKING:
     from superset.connectors.sqla.models import TableColumn
     from superset.models.core import Database
 
-import requests
+import os
 
 logger = logging.getLogger()
 
@@ -755,10 +755,9 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
     ) -> List[SupersetError]:
         ### IKIGAI
         # Personal Variables
-        # TODO: env vars
-        DB_NAME='Dremio'
-        DB_NAME_REPLACE='SQL'
-
+        DB_NAME = os.environ.get("DB_NAME")
+        DB_NAME_REPLACE = os.environ.get("DB_NAME_REPLACE")
+        
         raw_message = cls._extract_error_message(ex)
 
         context = context or {}
