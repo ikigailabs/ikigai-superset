@@ -620,31 +620,80 @@ def json_dumps_w_dates(payload: Dict[Any, Any]) -> str:
     return json.dumps(payload, default=json_int_dttm_ser)
 
 def error_type_suggestor(error): # need to add dictionary to display possible solutions
-    pass
+    common = "Oops, looks like we ran into an error!"
+    error_messages = {
+        "CONNECTION": "Its a miracle but looks like" \
+            " our application is not able to connect" \
+                "to our database server! Please try again later",
+        "DATA READ": common + \
+            " This error usually occurs when the file you are trying to use is corrupted or incomplete.",
+        "DATA WRITE":  common + \
+            "This usually occurs when there is an unsupported data type being used.",
+        "FUNCTION": common + \
+            "This usually occurs when there is a type conversion error or \"Flatten\" is misused.",
+        "PARSE": common + \
+            "This usually occurs when > theres a type in the SQL syntax or" \
+                " > trying to reference a missing table or" \
+                    " > misusing an SQL keyword or" \
+                        " > theres a function name resolution error.",
+        "PERMISSION": "Oops! Looks like you don't have access to this data!",
+        "PLAN": "There seems to be an error in your SQL query which will result in an error!" \
+            " Please try to correct it or contact IkigaiLabs support.",
+        "RESOURCE": "We ran into a small trouble executing that for you. Can you please run in again?",
+        "SYSTEM": "There seems to be an error in your SQL query which will result in an error!" \
+            " Please try to correct it or contact IkigaiLabs support.",
+        "UNSUPPORTED OPERATION": "The operation you are trying is not supported by our system." \
+            "Please contact IkigaiLabs for support or use the LIVE HELP feature below.",
+        "VALIDATION": common + \
+            " This error usually occurs when mathematical function are applied to non numeric columns.",
+        "OUT OF MEMORY": "Your dataset seems to be a bit too large for our resources." \
+            " Can you perhaps break it down into smaller chunks? Contact IkigaiLabs if that is not the case.",
+        "SCHEMA CHANGE": "This error sometimes resolves itself by re running the query, why not give it a shot! ;)",
+        "IO EXCEPTION": "Oops looks like we ran into an error." \
+            " Try re running the query, if you till see this error contact IkigaiLabs.",
+        "CONCURRENT MODIFICATION": "This error sometimes resolves itself by re running the query, why not give it a shot! ;)",
+        "INVALID DATASET METADATA": "Dataset metadata seems to be out of date." \
+            "Triggering a dataset refresh should resolve this. Contact IkigaiLabs to do so!",
+        "REFLECTION ERROR": "There seems to be an Internal Reflection Error in our system, if re running the query" \
+            " does not resolve this contact IkigaiLabs.",
+        "SOURCE_BAD_STATE": "Source seems to be in a Bad State, if re running the query" \
+            " does not resolve this contact IkigaiLabs.",
+        "JSON FIELD CHANGE": "This type of error is usually resolved by re running the query." \
+            " If it still exists, contact IkigaiLabs for assistance.",
+        "RESOURCE TIMEOUT": "Your access to this resource has timed out, try re running the query." \
+            " If the problem still persists try relogging in or contact IkigaiLabs.",
+        "RETRY ATTEMPT ERROR": "We tried to run your query again and again, still looks like we are running in an error." \
+            "How about contacting IkigaiLabs for assistance?",
+        "REFRESH DATASET ERROR": "Looks like we had an Internal Error while Refreshing the Dataset." \
+            "Try re running the query or contact IkigaiLabs for further assisstance.",
+        "PDFS RETRIABLE ERROR": "This is a rare incident. Re running the query might solve it! :)"
+    }
+    return error_messages.get(error, "Looks like we ran into an unknown error. Please contact IkigaiLabs for assistance.")
 
 def error_message_beautifier_dremio(response):
     project = response.json()['project']['name'].strip()
     dataset = response.json()['dataset']['name'].strip()
     chart = response.json()['chart']['name'].strip()
     error = response.json()['error_type'].strip()
-    msg = 'We found an error in the query you are trying to run. '
+    breaker = " |"
+    msg = []
+    msg.append('We found an error in the query you are trying to run. ')
     if len(project) != 0:
-        msg = msg + '\n Project: ' + project
+        msg.append(f'{breaker} Project: {project} ')
     if len(dataset) != 0:
-        msg = msg + '\n Dataset: ' + dataset
+        msg.append(f'{breaker} Dataset: {dataset} ')
     if len(chart) != 0:
-        msg = msg + '\n Chart: ' + chart
+        msg.append(f'{breaker} Chart: {chart} ')
     if len(error) != 0:
-        msg = msg + '\n Error Type: ' + error
-#         msg = msg + '\n ' + error_type_suggestor(error) #auto suggests possible errors
-    return msg
+        msg.append(f'{breaker} Error Type: {error} ')
+        msg.append( f'{breaker} Suggestion: {error_type_suggestor(error)}')
+    return "".join(msg)
     
 
 def error_msg_from_exception(ex: Exception) -> str:
-    # Will be changed to environment variables later
-    DB_NAME = "Dremio"
-    BASE_URL = "https://dev-api.ikigailabs.io/"
-    DREMIO_PARSE_ENDPOINT = "pypr/parse-dremio-error"
+    DB_NAME = os.environ.get("DB_NAME")
+    BASE_URL = os.environ.get("BASE_URL")
+    DREMIO_PARSE_ENDPOINT = os.environ.get("DREMIO_PARSE_ENDPOINT")
     """Translate exception into error message
 
     Database have different ways to handle exception. This function attempts
@@ -676,7 +725,7 @@ def error_msg_from_exception(ex: Exception) -> str:
         error_msg = error_msg.replace("ikigai-datasets-dev", "ikigai-datasets-virtual")
     
     PARAMS = {
-        'error_string':bytes(re.sub(' +', ' ', error_msg), 'utf-8').decode('unicode_escape'),
+        'error_string':error_msg,
     }
 
     # Send to API:

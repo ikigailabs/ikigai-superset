@@ -755,6 +755,7 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
     ) -> List[SupersetError]:
         ### IKIGAI
         # Personal Variables
+        # TODO: env vars
         DB_NAME='Dremio'
         DB_NAME_REPLACE='SQL'
 
