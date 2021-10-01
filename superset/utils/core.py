@@ -619,7 +619,7 @@ def json_int_dttm_ser(obj: Any) -> float:
 def json_dumps_w_dates(payload: Dict[Any, Any]) -> str:
     return json.dumps(payload, default=json_int_dttm_ser)
 
-def error_type_suggestor(error): # need to add dictionary to display possible solutions
+def error_type_suggestor(error): # TODO: port this into maybe a file? ask amar for suggestions
     common = "Oops, looks like we ran into an error!"
     error_messages = {
         "CONNECTION": "Its a miracle but looks like" \
@@ -736,7 +736,7 @@ def error_msg_from_exception(ex: Exception) -> str:
 
     # If API does not respond as expected:
     if response.status_code != 200:
-        return "[" + str(response.status_code) + "]" + "Unable to connect to Error Reporting API for detailed info: " + str(ex)
+        return f'[{response.status_code}] Unable to connect to Error Reporting API please contact IkigaiLabs for further assistance.'
     
     return error_message_beautifier_dremio(response)
 
