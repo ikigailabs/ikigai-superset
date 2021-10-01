@@ -15,6 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 """Utility functions used across Superset"""
+import requests
 import collections
 import decimal
 import errno
@@ -59,6 +60,7 @@ from typing import (
     Union,
 )
 from urllib.parse import unquote_plus
+from urllib.parse import urljoin
 
 import bleach
 import markdown as md
@@ -115,9 +117,6 @@ except ImportError:
 if TYPE_CHECKING:
     from superset.connectors.base.models import BaseColumn, BaseDatasource
     from superset.models.core import Database
-
-#Custom Imports (ikigai):
-import requests
 
 logging.getLogger("MARKDOWN").setLevel(logging.INFO)
 logger = logging.getLogger(__name__)
@@ -638,44 +637,44 @@ def error_type_suggestor(error): # TODO: port this into maybe a file? ask amar f
                         " > theres a function name resolution error.",
         "PERMISSION": "Oops! Looks like you don't have access to this data!",
         "PLAN": "There seems to be an error in your SQL query which will result in an error!" \
-            " Please try to correct it or contact IkigaiLabs support.",
+            " Please try to correct it or contact support support.",
         "RESOURCE": "We ran into a small trouble executing that for you. Can you please run in again?",
         "SYSTEM": "There seems to be an error in your SQL query which will result in an error!" \
-            " Please try to correct it or contact IkigaiLabs support.",
+            " Please try to correct it or contact support support.",
         "UNSUPPORTED OPERATION": "The operation you are trying is not supported by our system." \
-            "Please contact IkigaiLabs for support or use the LIVE HELP feature below.",
+            "Please contact support for support or use the LIVE HELP feature below.",
         "VALIDATION": common + \
             " This error usually occurs when mathematical function are applied to non numeric columns.",
         "OUT OF MEMORY": "Your dataset seems to be a bit too large for our resources." \
-            " Can you perhaps break it down into smaller chunks? Contact IkigaiLabs if that is not the case.",
+            " Can you perhaps break it down into smaller chunks? Contact support if that is not the case.",
         "SCHEMA CHANGE": "This error sometimes resolves itself by re running the query, why not give it a shot! ;)",
         "IO EXCEPTION": "Oops looks like we ran into an error." \
-            " Try re running the query, if you till see this error contact IkigaiLabs.",
+            " Try re running the query, if you till see this error contact support.",
         "CONCURRENT MODIFICATION": "This error sometimes resolves itself by re running the query, why not give it a shot! ;)",
         "INVALID DATASET METADATA": "Dataset metadata seems to be out of date." \
-            "Triggering a dataset refresh should resolve this. Contact IkigaiLabs to do so!",
+            "Triggering a dataset refresh should resolve this. Contact support to do so!",
         "REFLECTION ERROR": "There seems to be an Internal Reflection Error in our system, if re running the query" \
-            " does not resolve this contact IkigaiLabs.",
+            " does not resolve this contact support.",
         "SOURCE_BAD_STATE": "Source seems to be in a Bad State, if re running the query" \
-            " does not resolve this contact IkigaiLabs.",
+            " does not resolve this contact support.",
         "JSON FIELD CHANGE": "This type of error is usually resolved by re running the query." \
-            " If it still exists, contact IkigaiLabs for assistance.",
+            " If it still exists, contact support for assistance.",
         "RESOURCE TIMEOUT": "Your access to this resource has timed out, try re running the query." \
-            " If the problem still persists try relogging in or contact IkigaiLabs.",
+            " If the problem still persists try relogging in or contact support.",
         "RETRY ATTEMPT ERROR": "We tried to run your query again and again, still looks like we are running in an error." \
-            "How about contacting IkigaiLabs for assistance?",
+            "How about contacting support for assistance?",
         "REFRESH DATASET ERROR": "Looks like we had an Internal Error while Refreshing the Dataset." \
-            "Try re running the query or contact IkigaiLabs for further assisstance.",
+            "Try re running the query or contact support for further assisstance.",
         "PDFS RETRIABLE ERROR": "This is a rare incident. Re running the query might solve it! :)"
     }
-    return error_messages.get(error, "Looks like we ran into an unknown error. Please contact IkigaiLabs for assistance.")
+    return error_messages.get(error, "Looks like we ran into an unknown error. Please contact support for assistance.")
 
 def error_message_beautifier_dremio(response):
     project = response.json()['project']['name'].strip()
     dataset = response.json()['dataset']['name'].strip()
     chart = response.json()['chart']['name'].strip()
     error = response.json()['error_type'].strip()
-    breaker = " |"
+    breaker = " |" # TODO: move to place contents of above function will be moved to
     msg = []
     msg.append('We found an error in the query you are trying to run. ')
     if len(project) != 0:
@@ -720,30 +719,25 @@ def error_msg_from_exception(ex: Exception) -> str:
     if DB_NAME not in str(ex):
         return str(ex)
     
-    error_msg = str(ex)
-    if "ikigai-datasets-dev" in error_msg:
-        error_msg = error_msg.replace("ikigai-datasets-dev", "ikigai-datasets-virtual")
-    
-    PARAMS = {
-        'error_string':error_msg,
+    PAYLOAD = {
+        'error_string':str(ex),
     }
 
     # Send to API:
-    URL = BASE_URL+DREMIO_PARSE_ENDPOINT
+    URL = urljoin(BASE_URL, DREMIO_PARSE_ENDPOINT)
     response = requests.post(
         url=URL, 
-        data=json.dumps(PARAMS))
+        data=json.dumps(PAYLOAD))
 
     # If API does not respond as expected:
     if response.status_code != 200:
-        return f'[{response.status_code}] Unable to connect to Error Reporting API please contact IkigaiLabs for further assistance.'
+        return f'[{response.status_code}] Unable to connect to Error Reporting API please contact support for further assistance.'
     
     return error_message_beautifier_dremio(response)
 
 
 def markdown(raw: str, markup_wrap: Optional[bool] = False) -> str:
     safe_markdown_tags = [
-
         "h1",
         "h2",
         "h3",

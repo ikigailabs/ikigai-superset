@@ -15,6 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 # pylint: disable=unused-argument
+import os
 import json
 import logging
 import re
@@ -71,8 +72,6 @@ if TYPE_CHECKING:
     # prevent circular imports
     from superset.connectors.sqla.models import TableColumn
     from superset.models.core import Database
-
-import os
 
 logger = logging.getLogger()
 
@@ -757,7 +756,7 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
         # Personal Variables
         DB_NAME = os.environ.get("DB_NAME")
         DB_NAME_REPLACE = os.environ.get("DB_NAME_REPLACE")
-        
+
         raw_message = cls._extract_error_message(ex)
 
         context = context or {}
@@ -774,8 +773,6 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
                         extra=extra,
                     )
                 ]
-
-        # Moved API call to superset/utils/core.py to catch broader set of errors
 
         return [
             SupersetError(
