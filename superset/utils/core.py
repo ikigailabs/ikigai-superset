@@ -618,7 +618,9 @@ def json_int_dttm_ser(obj: Any) -> float:
 def json_dumps_w_dates(payload: Dict[Any, Any]) -> str:
     return json.dumps(payload, default=json_int_dttm_ser)
 
-def error_type_suggestor(error): # TODO: port this into maybe a file? ask amar for suggestions
+
+def get_error_description(error):
+    '''Dictionary to return user friendly error description based on error type.'''
     common = "Oops, looks like we ran into an error!"
     error_messages = {
         "CONNECTION": "Its a miracle but looks like" \
@@ -669,7 +671,9 @@ def error_type_suggestor(error): # TODO: port this into maybe a file? ask amar f
     }
     return error_messages.get(error, "Looks like we ran into an unknown error. Please contact support for assistance.")
 
-def error_message_beautifier_dremio(response):
+
+def parse_error_components(response):
+    '''Fetches components from APIs response and generates a helpful string.'''
     project = response.json()['project']['name'].strip()
     dataset = response.json()['dataset']['name'].strip()
     chart = response.json()['chart']['name'].strip()
@@ -677,19 +681,27 @@ def error_message_beautifier_dremio(response):
     breaker = " |" # TODO: move to place contents of above function will be moved to
     msg = []
     msg.append('We found an error in the query you are trying to run. ')
-    if len(project) != 0:
+    if len(project):
         msg.append(f'{breaker} Project: {project} ')
-    if len(dataset) != 0:
+    if len(dataset):
         msg.append(f'{breaker} Dataset: {dataset} ')
-    if len(chart) != 0:
+    if len(chart):
         msg.append(f'{breaker} Chart: {chart} ')
-    if len(error) != 0:
+    if len(error):
         msg.append(f'{breaker} Error Type: {error} ')
-        msg.append( f'{breaker} Suggestion: {error_type_suggestor(error)}')
+        msg.append( f'{breaker} Suggestion: {get_error_description(error)}')
     return "".join(msg)
     
 
 def error_msg_from_exception(ex: Exception) -> str:
+    '''Superset function [DONT CHANGE NAME] with minor changes to assist with Dremio Error Reporting.
+    Main Use: 
+    - Captures error message
+    - Checks if error message has "Dremio" in it
+        - If not does not affect supersets pipeline
+        - If yes stores it in "PAYLOAD"
+    - Call API and send response to parser
+    - Send parser functions reply to superset error output'''
     DB_NAME = os.environ.get("DB_NAME")
     BASE_URL = os.environ.get("BASE_URL")
     DREMIO_PARSE_ENDPOINT = os.environ.get("DREMIO_PARSE_ENDPOINT")
@@ -733,7 +745,7 @@ def error_msg_from_exception(ex: Exception) -> str:
     if response.status_code != 200:
         return f'[{response.status_code}] Unable to connect to Error Reporting API please contact support for further assistance.'
     
-    return error_message_beautifier_dremio(response)
+    return parse_error_components(response)
 
 
 def markdown(raw: str, markup_wrap: Optional[bool] = False) -> str:

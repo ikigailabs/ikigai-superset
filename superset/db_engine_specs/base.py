@@ -755,7 +755,7 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
         ### IKIGAI
         # Personal Variables
         DB_NAME = os.environ.get("DB_NAME")
-        DB_NAME_REPLACE = os.environ.get("DB_NAME_REPLACE")
+        ALTERNATE_DB_NAME = os.environ.get("ALTERNATE_DB_NAME")
 
         raw_message = cls._extract_error_message(ex)
 
@@ -779,7 +779,7 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
                 error_type=SupersetErrorType.GENERIC_DB_ENGINE_ERROR,
                 message=cls._extract_error_message(ex),
                 level=ErrorLevel.ERROR,
-                extra={"engine_name":DB_NAME_REPLACE} if cls.engine_name==DB_NAME else {"engine_name": cls.engine_name},
+                extra={"engine_name":ALTERNATE_DB_NAME} if cls.engine_name==DB_NAME else {"engine_name": cls.engine_name},
             )
         ]
 
