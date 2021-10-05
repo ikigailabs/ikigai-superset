@@ -622,13 +622,12 @@ def json_dumps_w_dates(payload: Dict[Any, Any]) -> str:
 
 
 def error_msg_from_exception(ex: Exception) -> str:
-    '''Superset function [DONT CHANGE NAME] with minor changes to assist with Dremio Error Reporting.
-    Main Use: 
+    '''Superset function with minor changes to assist with Dremio Error Reporting.
     - Captures error message
     - Checks if error message has "Dremio" in it
         - If not does not affect supersets pipeline
         - If yes stores it in "PAYLOAD"
-    - Call API and send response to parser
+    - send response to parser
     - Send parser functions reply to superset error output'''
     DB_NAME = os.environ.get("DB_NAME")
     BASE_URL = os.environ.get("BASE_URL")
@@ -656,18 +655,20 @@ def error_msg_from_exception(ex: Exception) -> str:
     if msg:
         return msg
     
+    # If error is not from dremio
     if DB_NAME not in str(ex):
         return str(ex)
     
-    PAYLOAD = {
+    # Load error string to be sent
+    payload = {
         'error_string':str(ex),
     }
 
     # Send to API:
-    URL = urljoin(BASE_URL, DREMIO_PARSE_ENDPOINT)
+    url = urljoin(BASE_URL, DREMIO_PARSE_ENDPOINT)
     response = requests.post(
-        url=URL, 
-        data=json.dumps(PAYLOAD))
+        url=url, 
+        data=json.dumps(payload))
 
     # If API does not respond as expected:
     if response.status_code != 200:
