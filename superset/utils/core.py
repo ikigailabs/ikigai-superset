@@ -622,13 +622,13 @@ def json_dumps_w_dates(payload: Dict[Any, Any]) -> str:
 
 
 def error_msg_from_exception(ex: Exception) -> str:
-    '''Superset function with minor changes to assist with Dremio Error Reporting.
+    """Superset function with minor changes to assist with Dremio Error Reporting.
     - Captures error message
     - Checks if error message has "Dremio" in it
         - If not does not affect supersets pipeline
         - If yes stores it in "PAYLOAD"
     - send response to parser
-    - Send parser functions reply to superset error output'''
+    - Send parser functions reply to superset error output"""
     DB_NAME = os.environ.get("DB_NAME")
     BASE_URL = os.environ.get("BASE_URL")
     DREMIO_PARSE_ENDPOINT = os.environ.get("DREMIO_PARSE_ENDPOINT")

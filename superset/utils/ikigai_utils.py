@@ -1,11 +1,11 @@
-'''
+"""
 All custom functions implemented here
 If there is custom code elsewhere inside a function, 
 the function is from superset so best not to mess with it much :)
-'''
+"""
 
 def get_error_description(error):
-    '''Dictionary to return user friendly error description based on error type.'''
+    """Dictionary to return user friendly error description based on error type."""
     common = "Oops, looks like we ran into an error!"
     error_messages = {
         "CONNECTION": "Its a miracle but looks like" \
@@ -58,7 +58,7 @@ def get_error_description(error):
 
 
 def parse_error_components(response):
-    '''Fetches components from APIs response and generates a helpful string.'''
+    """Fetches components from APIs response and generates a helpful string."""
 
     # Breaker to seperate appends
     breaker = " |"

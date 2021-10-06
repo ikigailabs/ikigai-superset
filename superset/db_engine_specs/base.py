@@ -752,8 +752,10 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
     def extract_errors(
         cls, ex: Exception, context: Optional[Dict[str, Any]] = None
     ) -> List[SupersetError]:
-        ### IKIGAI
-        # Personal Variables
+        """Changes made to original codebase:
+        - Ternary operator to change heading from "Dremio Error" to
+        "SQL Error"
+        """
         DB_NAME = os.environ.get("DB_NAME")
         ALTERNATE_DB_NAME = os.environ.get("ALTERNATE_DB_NAME")
 
