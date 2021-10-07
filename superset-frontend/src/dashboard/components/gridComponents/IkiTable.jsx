@@ -37,9 +37,129 @@ const propTypes = {
 };
 
 class IkiTable extends React.PureComponent {
+  projectId = '';
+
   constructor(props) {
     super(props);
+    this.state = {
+      referrerUrl: '',
+      // projectId: '',
+    };
     this.handleDeleteComponent = this.handleDeleteComponent.bind(this);
+  }
+
+  componentDidMount() {
+    const { referrer } = document;
+    /* const url =
+      window.location !== window.parent.location
+        ? document.referrer
+        : document.location.href; */
+    this.setState(
+      {
+        referrerUrl: referrer,
+      },
+      () => {
+        this.handleIncomingWindowMsg(referrer);
+        // window.top.postMessage('superset-to-parent/get-project-id', referrer);
+        const iframeUrlString = document.getElementById('ikitable-iframe').src;
+        const iframeUrl = new URL(iframeUrlString);
+        const iframeUrlQuery = new URLSearchParams(iframeUrl);
+        const urlProjectId = iframeUrlQuery.get('project_id');
+        console.log(
+          'iframeUrlQuery',
+          iframeUrlQuery,
+          'iframeUrl',
+          iframeUrl,
+          'urlProjectId',
+          urlProjectId,
+        );
+        if (!urlProjectId) {
+          window.parent.postMessage(
+            'superset-to-parent/get-project-id',
+            referrer,
+          );
+        }
+      },
+    );
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  handleIncomingWindowMsg(referrer) {
+    console.log('handleIncomingWindowMsg superset comp', referrer);
+    window.addEventListener('message', event => {
+      if (event.origin === 'http://localhost:3000') {
+        console.log('ikitable received 1: ', event.data);
+        const messageObject = JSON.parse(event.data);
+        /* const infoObject = {
+          info: 'superset-to-table/get-project-id',
+          data: event.data,
+        }; */
+        // const infoData = JSON.stringify(infoObject);
+        // window.parent.postMessage(infoData, referrer);
+        if (
+          messageObject.info &&
+          messageObject.data &&
+          messageObject.dataType
+        ) {
+          const { dataType } = messageObject;
+          let messageData;
+          let widgetUrl;
+          if (dataType === 'object') {
+            messageData = JSON.parse(messageObject.data);
+          } else {
+            messageData = messageObject.data;
+          }
+          if (
+            messageObject.info === 'top-window-to-superset/sending-project-id'
+          ) {
+            if (this.projectId === '') {
+              this.projectId = messageData;
+              widgetUrl = `${referrer}widget/dataset/table?project_id=${this.projectId}`;
+              console.log('widgetUrl', widgetUrl);
+              document.getElementById('ikitable-iframe').src = widgetUrl;
+            }
+          } else if (
+            messageObject.info === 'widget-to-superset/sending-datasets-ids'
+          ) {
+            console.log('messageData', messageData);
+            // widgetUrl = `${referrer}widget/dataset/table?project_id=${messageData}`;
+            widgetUrl = document.getElementById('ikitable-iframe').src;
+            /* const iframeUrlString =
+              document.getElementById('ikitable-iframe').src; */
+            // const iframeUrl = new URL(iframeUrlString);
+            const tableType = messageData.tableType
+              ? messageData.tableType
+              : '';
+            widgetUrl += `&table_type=${tableType}`;
+            console.log('tableType', tableType);
+            // iframeUrl.searchParams.set('table_type', tableType);
+            if (messageData.datasets) {
+              Object.keys(messageData.datasets).forEach(
+                (messageDataObject, messageDataKey) => {
+                  console.log(
+                    'messageDataObject',
+                    messageDataObject,
+                    'messageDataKey',
+                    messageDataKey,
+                    'messageData.datasets[messageDataObject]',
+                    messageData.datasets[messageDataObject],
+                  );
+                  widgetUrl += `&${messageDataObject}=${messageData.datasets[messageDataObject]}`;
+                  /* iframeUrl.searchParams.set(
+                    messageDataKey,
+                    messageData.datasets[messageDataKey],
+                  ); */
+                },
+              );
+            }
+            console.log('widgetUrl', widgetUrl);
+            document.getElementById('ikitable-iframe').src = widgetUrl;
+          }
+        }
+      }
+      //console.log('ikitable received: ', event);
+      // can message back using event.source.postMessage(...)
+    });
   }
 
   handleDeleteComponent() {
@@ -77,7 +197,8 @@ class IkiTable extends React.PureComponent {
 
             <div className="dashboard-component dashboard-component-ikitable">
               <iframe
-                src="http://localhost:3000/widget/dataset/table?project_id=1r4mD5OOm2H3tK7bfNFo1z4prhl"
+                id="ikitable-iframe"
+                src="http://localhost:3000/widget/dataset/table"
                 title="IkiTable Component"
                 className="ikitable-iframe"
               />
