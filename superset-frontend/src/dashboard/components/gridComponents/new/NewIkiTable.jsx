@@ -16,32 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-export const CHART_TYPE = 'CHART';
-export const COLUMN_TYPE = 'COLUMN';
-export const DASHBOARD_HEADER_TYPE = 'HEADER';
-export const DASHBOARD_GRID_TYPE = 'GRID';
-export const DASHBOARD_ROOT_TYPE = 'ROOT';
-export const DIVIDER_TYPE = 'DIVIDER';
-export const HEADER_TYPE = 'HEADER';
-export const MARKDOWN_TYPE = 'MARKDOWN';
-export const NEW_COMPONENT_SOURCE_TYPE = 'NEW_COMPONENT_SOURCE';
-export const ROW_TYPE = 'ROW';
-export const TABS_TYPE = 'TABS';
-export const TAB_TYPE = 'TAB';
-export const IKI_TABLE_TYPE = 'IKI_TABLE';
+import React from 'react';
+import { t } from '@superset-ui/core';
 
-export default {
-  CHART_TYPE,
-  COLUMN_TYPE,
-  DASHBOARD_HEADER_TYPE,
-  DASHBOARD_GRID_TYPE,
-  DASHBOARD_ROOT_TYPE,
-  DIVIDER_TYPE,
-  HEADER_TYPE,
-  MARKDOWN_TYPE,
-  NEW_COMPONENT_SOURCE_TYPE,
-  ROW_TYPE,
-  TABS_TYPE,
-  TAB_TYPE,
-  IKI_TABLE_TYPE,
-};
+import { IKI_TABLE_TYPE } from '../../../util/componentTypes';
+import { NEW_IKI_TABLE_ID } from '../../../util/constants';
+import DraggableNewComponent from './DraggableNewComponent';
+
+export default function DraggableNewDivider() {
+  return (
+    <DraggableNewComponent
+      id={NEW_IKI_TABLE_ID}
+      type={IKI_TABLE_TYPE}
+      label={t('Table')}
+      className="fa fa-table"
+    />
+  );
+}

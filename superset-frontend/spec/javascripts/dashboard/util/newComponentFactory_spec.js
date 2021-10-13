@@ -30,6 +30,7 @@ import {
   ROW_TYPE,
   TABS_TYPE,
   TAB_TYPE,
+  IKI_TABLE_TYPE,
 } from 'src/dashboard/util/componentTypes';
 
 const types = [
@@ -44,6 +45,7 @@ const types = [
   ROW_TYPE,
   TABS_TYPE,
   TAB_TYPE,
+  IKI_TABLE_TYPE,
 ];
 
 describe('newEntityFactory', () => {
