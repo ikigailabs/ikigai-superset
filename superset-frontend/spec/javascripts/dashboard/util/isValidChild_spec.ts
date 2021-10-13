@@ -141,7 +141,6 @@ describe('isValidChild', () => {
       [ROOT, GRID, ROW, [TABS]],
       [ROOT, GRID, ROW, [TAB]],
       [ROOT, GRID, ROW, [DIVIDER]],
-      [ROOT, GRID, ROW, COLUMN, [TABS]],
       [ROOT, GRID, ROW, COLUMN, [TAB]],
       [ROOT, GRID, ROW, COLUMN, ROW, [DIVIDER]],
       [ROOT, GRID, ROW, COLUMN, ROW, COLUMN, [ROW]], // too nested

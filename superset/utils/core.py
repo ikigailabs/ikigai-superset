@@ -15,6 +15,8 @@
 # specific language governing permissions and limitations
 # under the License.
 """Utility functions used across Superset"""
+# pylint: disable=too-many-lines
+import requests
 import collections
 import decimal
 import errno
@@ -59,6 +61,9 @@ from typing import (
     Union,
 )
 from urllib.parse import unquote_plus
+from urllib.parse import urljoin
+
+from superset.utils.ikigai_utils import parse_error_components
 
 import bleach
 import markdown as md
@@ -619,6 +624,16 @@ def json_dumps_w_dates(payload: Dict[Any, Any]) -> str:
 
 
 def error_msg_from_exception(ex: Exception) -> str:
+    """Superset function with minor changes to assist with Dremio Error Reporting.
+    - Captures error message
+    - Checks if error message has "Dremio" in it
+        - If not does not affect supersets pipeline
+        - If yes stores it in "PAYLOAD"
+    - send response to parser
+    - Send parser functions reply to superset error output"""
+    ERR_DB_NAME = os.environ.get("ERR_DB_NAME")
+    BASE_URL = os.environ.get("BASE_URL")
+    DREMIO_PARSE_ENDPOINT = os.environ.get("DREMIO_PARSE_ENDPOINT")
     """Translate exception into error message
 
     Database have different ways to handle exception. This function attempts
@@ -638,7 +653,30 @@ def error_msg_from_exception(ex: Exception) -> str:
             msg = ex.message.get("message")  # type: ignore
         elif ex.message:  # type: ignore
             msg = ex.message  # type: ignore
-    return msg or str(ex)
+    
+    if msg:
+        return msg
+
+    # If error is not from dremio
+    if ERR_DB_NAME not in str(ex):
+        return str(ex)
+
+    # Load error string to be sent
+    payload = {
+        'error_string':str(ex),
+    }
+
+    # Send to API:
+    url = urljoin(BASE_URL, DREMIO_PARSE_ENDPOINT)
+    response = requests.post(
+        url=url, 
+        data=json.dumps(payload))
+
+    # If API does not respond as expected:
+    if response.status_code != 200:
+        return f'[{response.status_code}] Unable to connect to Error Reporting API please contact support for further assistance.'
+
+    return parse_error_components(response)
 
 
 def markdown(raw: str, markup_wrap: Optional[bool] = False) -> str:
@@ -1174,7 +1212,7 @@ def merge_extra_filters(form_data: Dict[str, Any]) -> None:
             time_extra = date_options.get(filter_column)
             if time_extra:
                 time_extra_value = filtr.get("val")
-                if time_extra_value:
+                if time_extra_value and time_extra_value != NO_TIME_RANGE:
                     form_data[time_extra] = time_extra_value
                     applied_time_extras[filter_column] = time_extra_value
             elif filtr["val"]:
@@ -1639,7 +1677,7 @@ def get_time_filter_status(
             )
 
     time_range = applied_time_extras.get(ExtraFiltersTimeColumnType.TIME_RANGE)
-    if time_range and time_range != NO_TIME_RANGE:
+    if time_range:
         # are there any temporal columns to assign the time grain to?
         if temporal_columns:
             applied.append({"column": ExtraFiltersTimeColumnType.TIME_RANGE})
@@ -1761,3 +1799,25 @@ def parse_boolean_string(bool_str: Optional[str]) -> bool:
         return bool(strtobool(bool_str.lower()))
     except ValueError:
         return False
+
+
+def apply_max_row_limit(limit: int, max_limit: Optional[int] = None,) -> int:
+    """
+    Override row limit if max global limit is defined
+
+    :param limit: requested row limit
+    :param max_limit: Maximum allowed row limit
+    :return: Capped row limit
+
+    >>> apply_max_row_limit(100000, 10)
+    10
+    >>> apply_max_row_limit(10, 100000)
+    10
+    >>> apply_max_row_limit(0, 10000)
+    10000
+    """
+    if max_limit is None:
+        max_limit = current_app.config["SQL_MAX_ROW"]
+    if limit != 0:
+        return min(max_limit, limit)
+    return max_limit
