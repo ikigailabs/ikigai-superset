@@ -38,11 +38,6 @@ import {
   GRID_BASE_UNIT,
 } from 'src/dashboard/util/constants';
 
-// const dashURL = 'https://dev-ui.ikigailabs.io';
-// const dashURL = 'http://localhost:3000';
-const dashURL = document.referrer.substring(0, document.referrer.length - 1);
-const iframeEmptyURL = `${dashURL}/widget/dataset/table?mode=edit`;
-
 const propTypes = {
   id: PropTypes.string.isRequired,
   parentId: PropTypes.string.isRequired,
@@ -73,17 +68,12 @@ const propTypes = {
 
 const defaultProps = {};
 
-/* const MARKDOWN_PLACE_HOLDER = `<iframe
-                  id="ikitable-widget-${this.props.component.id}"
-                  src="${dashURL}/widget/dataset/table?mode=edit"
-                  title="IkiTable Component"
-                  className="ikitable-widget"
-                  style="height:100%;"
-                />`; */
+// let MARKDOWN_PLACE_HOLDER = '';
+const MARKDOWN_PLACE_HOLDER = ``;
 
-const MARKDOWN_ERROR_MESSAGE = t('This component has an error.');
+const MARKDOWN_ERROR_MESSAGE = t('This markdown component has an error.');
 
-class IkiTable extends React.PureComponent {
+class IkiProcessBuilder extends React.PureComponent {
   constructor(props) {
     super(props);
     this.state = {
@@ -93,7 +83,7 @@ class IkiTable extends React.PureComponent {
       editorMode: 'preview',
       undoLength: props.undoLength,
       redoLength: props.redoLength,
-      iframeUrl: iframeEmptyURL,
+      iframeUrl: '',
       referrerUrl: '',
       projectId: '',
     };
@@ -108,35 +98,12 @@ class IkiTable extends React.PureComponent {
   }
 
   componentDidMount() {
-    // console.log('IkiTable componentDidMount', this.props, this.state);
-    // console.log('ref',document.referrer,'dash',dashURL,'win loc',window.location);
     this.props.logEvent(LOG_ACTIONS_RENDER_CHART, {
       viz_type: 'markdown',
       start_offset: this.renderStartTime,
       ts: new Date().getTime(),
       duration: Logger.getTimestamp() - this.renderStartTime,
     });
-    if (!this.props.component.meta.code) {
-      this.setState(
-        {
-          iframeUrl: iframeEmptyURL,
-        },
-        () => {
-          this.handleIncomingWindowMsg();
-          window.parent.postMessage(
-            'superset-to-parent/get-project-id',
-            dashURL,
-          );
-        },
-      );
-    } else {
-      const widgetUrlString = document.getElementById(
-        `ikitable-widget-${this.props.component.id}`,
-      ).src;
-      this.setState({
-        iframeUrl: widgetUrlString,
-      });
-    }
   }
 
   static getDerivedStateFromProps(nextProps, state) {
@@ -206,140 +173,6 @@ class IkiTable extends React.PureComponent {
     }
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  handleIncomingWindowMsg() {
-    const { projectId } = this.state;
-    window.addEventListener('message', event => {
-      if (event.origin === dashURL) {
-        // console.log('ikitable received 1: ', event.data);
-        const messageObject = JSON.parse(event.data);
-        if (
-          messageObject.info &&
-          messageObject.data &&
-          messageObject.dataType
-        ) {
-          const { dataType } = messageObject;
-          let messageData;
-          let widgetUrl;
-          if (dataType === 'object') {
-            messageData = JSON.parse(messageObject.data);
-          } else {
-            messageData = messageObject.data;
-          }
-          if (
-            messageObject.info === 'top-window-to-superset/sending-project-id'
-          ) {
-            const tempMarkdownSouce = this.state.markdownSource;
-            if ((!projectId || projectId === '') && !tempMarkdownSouce) {
-              widgetUrl = new URL(
-                document.getElementById(
-                  `ikitable-widget-${this.props.component.id}`,
-                ).src,
-              );
-              const widgetUrlQuery = new URLSearchParams(widgetUrl);
-              widgetUrlQuery.set('mode', 'edit');
-              widgetUrlQuery.set('project_id', messageData);
-              widgetUrl.search = widgetUrlQuery.toString();
-              // console.log('widgetUrl123', widgetUrl);
-              this.setState(
-                {
-                  iframeUrl: widgetUrl,
-                  projectId: messageData,
-                },
-                () => {
-                  const tempIframe = `<iframe
-                    id="ikitable-widget-${this.props.component.id}"
-                    src="${widgetUrl}"
-                    title="IkiTable Component"
-                    className="ikitable-widget"
-                    style="height:100%;"
-                  />`;
-                  this.handleIkiTableChange(tempIframe);
-                  document.getElementById(
-                    `ikitable-widget-${this.props.component.id}`,
-                  ).src = widgetUrl;
-                },
-              );
-            }
-          } else if (
-            messageObject.info === 'widget-to-superset/sending-datasets-ids'
-          ) {
-            console.log('widget-to-superset/sending-datasets-ids');
-            console.log('messageObject', messageObject);
-            const widgetUrl = new URL(
-              document.getElementById(
-                `ikitable-widget-${this.props.component.id}`,
-              ).src,
-            );
-            console.log('widgetUrl', widgetUrl);
-            // const widgetUrlQuery = new URLSearchParams(widgetUrl);
-            const widgetUrlQueryTblType = widgetUrl.searchParams.get(
-              'table_type',
-            );
-            const widgetUrlQueryTblMode = widgetUrl.searchParams.get('mode');
-            const widgetUrlQueryProjectId = widgetUrl.searchParams.get(
-              'project_id',
-            );
-            console.log(
-              'widgetUrlQueryTblType',
-              widgetUrlQueryTblType,
-              'widgetUrlQueryTblMode',
-              widgetUrlQueryTblMode,
-            );
-            if (!widgetUrlQueryTblType) {
-              console.log('table type not set!');
-              widgetUrl.searchParams.set('mode', 'preview');
-              const tableType = messageData.tableType
-                ? messageData.tableType
-                : '';
-              let tempProjectId = '';
-              if (messageData.projectId) {
-                tempProjectId = messageData.projectId
-                  ? messageData.projectId
-                  : '';
-              } else {
-                tempProjectId = widgetUrlQueryProjectId;
-              }
-              if (tempProjectId || tempProjectId !== '') {
-                widgetUrl.searchParams.set('project_id', tempProjectId);
-              }
-              widgetUrl.searchParams.set('table_type', tableType);
-              if (messageData.datasets) {
-                Object.keys(messageData.datasets).forEach(messageDataObject => {
-                  widgetUrl.searchParams.set(
-                    messageDataObject,
-                    messageData.datasets[messageDataObject],
-                  );
-                });
-              }
-              // widgetUrl.search = widgetUrlQuery.toString();
-              console.log('last step - widgetUrl', widgetUrl);
-              this.setState(
-                {
-                  iframeUrl: widgetUrl,
-                },
-                () => {
-                  // console.log('widgetUrl...', widgetUrl);
-                  const tempIframe = `<iframe
-                      id="ikitable-widget-${this.props.component.id}"
-                      src="${widgetUrl}"
-                      title="IkiTable Component"
-                      className="ikitable-widget"
-                      style="height:100%;"
-                    />`;
-                  this.handleIkiTableChange(tempIframe);
-                  document.getElementById(
-                    `ikitable-widget-${this.props.component.id}`,
-                  ).src = widgetUrl;
-                },
-              );
-            }
-          }
-        }
-      }
-    });
-  }
-
   setEditor(editor) {
     editor.getSession().setUseWrapMode(true);
     this.setState({
@@ -394,36 +227,6 @@ class IkiTable extends React.PureComponent {
     });
   }
 
-  handleIkiTableChange(nextValue) {
-    // console.log('handleIkiTableChange', nextValue);
-    this.setState(
-      {
-        markdownSource: nextValue,
-      },
-      () => {
-        // this.handleMarkdownChange();
-        // this.updateMarkdownContent();
-      },
-    );
-    const { updateComponents, component } = this.props;
-    /* console.log(
-      'updateMarkdownContent',
-      component.meta.code,
-      this.state.markdownSource,
-    ); */
-    if (component.meta.code !== nextValue) {
-      updateComponents({
-        [component.id]: {
-          ...component,
-          meta: {
-            ...component.meta,
-            code: nextValue,
-          },
-        },
-      });
-    }
-  }
-
   handleDeleteComponent() {
     const { deleteComponent, id, parentId } = this.props;
     deleteComponent(id, parentId);
@@ -440,37 +243,51 @@ class IkiTable extends React.PureComponent {
   }
 
   renderEditMode() {
-    const { markdownSource, hasError } = this.state;
-    let iframe = '';
-    if (markdownSource) {
-      iframe = markdownSource;
-    } else {
-      iframe = `<iframe
-                  id="ikitable-widget-${this.props.component.id}"
-                  src="${dashURL}/widget/dataset/table?mode=edit"
-                  title="IkiTable Component"
-                  className="ikitable-widget"
-                  style="height:100%;"
-                />`;
-    }
-    return <SafeMarkdown source={hasError ? MARKDOWN_ERROR_MESSAGE : iframe} />;
+    const { hasError, markdownSource } = this.state;
+    // console.log('renderEditMode', 'markdownSource', markdownSource);
+
+    return (
+      <SafeMarkdown
+        source={
+          hasError
+            ? MARKDOWN_ERROR_MESSAGE
+            : markdownSource || MARKDOWN_PLACE_HOLDER
+        }
+      />
+    );
+    /* return (
+      <MarkdownEditor
+        onChange={this.handleMarkdownChange}
+        width="100%"
+        height="100%"
+        showGutter={false}
+        editorProps={{ $blockScrolling: true }}
+        value={
+          // this allows "select all => delete" to give an empty editor
+          typeof markdownSource === 'string'
+            ? markdownSource
+            : MARKDOWN_PLACE_HOLDER
+        }
+        readOnly={false}
+        onLoad={this.setEditor}
+        data-test="editor"
+      />
+    ); */
   }
 
   renderPreviewMode() {
-    const { markdownSource, hasError } = this.state;
-    let iframe = '';
-    if (markdownSource) {
-      iframe = markdownSource;
-    } else {
-      iframe = `<iframe
-                  id="ikitable-widget-${this.props.component.id}"
-                  src="${dashURL}/widget/dataset/table?mode=edit"
-                  title="IkiTable Component"
-                  className="ikitable-widget"
-                  style="height:100%;"
-                />`;
-    }
-    return <SafeMarkdown source={hasError ? MARKDOWN_ERROR_MESSAGE : iframe} />;
+    const { hasError, markdownSource } = this.state;
+    // console.log('renderPreviewMode', 'markdownSource', markdownSource);
+
+    return (
+      <SafeMarkdown
+        source={
+          hasError
+            ? MARKDOWN_ERROR_MESSAGE
+            : markdownSource || MARKDOWN_PLACE_HOLDER
+        }
+      />
+    );
   }
 
   render() {
@@ -551,7 +368,7 @@ class IkiTable extends React.PureComponent {
               >
                 <div
                   ref={dragSourceRef}
-                  className="dashboard-component-inner"
+                  className="dashboard-component-ikitable dashboard-component-inner"
                   data-test="dashboard-component-chart-holder"
                 >
                   {
@@ -571,8 +388,8 @@ class IkiTable extends React.PureComponent {
   }
 }
 
-IkiTable.propTypes = propTypes;
-IkiTable.defaultProps = defaultProps;
+IkiProcessBuilder.propTypes = propTypes;
+IkiProcessBuilder.defaultProps = defaultProps;
 
 function mapStateToProps(state) {
   return {
@@ -580,4 +397,4 @@ function mapStateToProps(state) {
     redoLength: state.dashboardLayout.future.length,
   };
 }
-export default connect(mapStateToProps)(IkiTable);
+export default connect(mapStateToProps)(IkiProcessBuilder);
