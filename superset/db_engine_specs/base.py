@@ -760,7 +760,7 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
         - Ternary operator to change heading from "Dremio Error" to
         "SQL Error"
         """
-        DB_NAME = os.environ.get("DB_NAME")
+        ERR_DB_NAME = os.environ.get("ERR_DB_NAME")
         ALTERNATE_DB_NAME = os.environ.get("ALTERNATE_DB_NAME")
 
         raw_message = cls._extract_error_message(ex)
@@ -785,7 +785,7 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
                 error_type=SupersetErrorType.GENERIC_DB_ENGINE_ERROR,
                 message=cls._extract_error_message(ex),
                 level=ErrorLevel.ERROR,
-                extra={"engine_name":ALTERNATE_DB_NAME} if cls.engine_name==DB_NAME else {"engine_name": cls.engine_name},
+                extra={"engine_name":ALTERNATE_DB_NAME} if cls.engine_name==ERR_DB_NAME else {"engine_name": cls.engine_name},
             )
         ]
 

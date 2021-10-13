@@ -631,7 +631,7 @@ def error_msg_from_exception(ex: Exception) -> str:
         - If yes stores it in "PAYLOAD"
     - send response to parser
     - Send parser functions reply to superset error output"""
-    DB_NAME = os.environ.get("DB_NAME")
+    ERR_DB_NAME = os.environ.get("ERR_DB_NAME")
     BASE_URL = os.environ.get("BASE_URL")
     DREMIO_PARSE_ENDPOINT = os.environ.get("DREMIO_PARSE_ENDPOINT")
     """Translate exception into error message
@@ -658,7 +658,7 @@ def error_msg_from_exception(ex: Exception) -> str:
         return msg
 
     # If error is not from dremio
-    if DB_NAME not in str(ex):
+    if ERR_DB_NAME not in str(ex):
         return str(ex)
 
     # Load error string to be sent
