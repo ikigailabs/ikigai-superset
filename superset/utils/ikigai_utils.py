@@ -60,8 +60,7 @@ def get_error_description(error):
 def parse_error_components(response):
     """Fetches components from APIs response and generates a helpful string."""
 
-    # Breaker to seperate appends
-    breaker = " |"
+    breaker = ","
 
     project = response.json()['project']['name'].strip()
     dataset = response.json()['dataset']['name'].strip()
@@ -70,12 +69,18 @@ def parse_error_components(response):
     msg = []
     msg.append('We found an error in the query you are trying to run. ')
     if len(project):
-        msg.append(f'{breaker} Project: {project} ')
+        msg.append(f'Error found in: ( Project: {project} ')
     if len(dataset):
         msg.append(f'{breaker} Dataset: {dataset} ')
+    else:
+        msg.append(').')
     if len(chart):
         msg.append(f'{breaker} Chart: {chart} ')
+    else:
+        msg.append(').')
     if len(error):
-        msg.append(f'{breaker} Error Type: {error} ')
-        msg.append( f'{breaker} Suggestion: {get_error_description(error)}')
+        msg.append(f'{breaker} Error Type: {error} ).')
+        msg.append( f' Suggestion: {get_error_description(error)}')
+    else:
+        msg.append(').')
     return "".join(msg)
