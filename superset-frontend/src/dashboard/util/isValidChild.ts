@@ -43,7 +43,6 @@ import {
   ROW_TYPE,
   TABS_TYPE,
   TAB_TYPE,
-  IKI_TABLE_TYPE,
 } from './componentTypes';
 
 import { DASHBOARD_ROOT_DEPTH as rootDepth } from './constants';
@@ -64,7 +63,6 @@ const parentMaxDepthLookup = {
   [DASHBOARD_GRID_TYPE]: {
     [CHART_TYPE]: depthOne,
     [MARKDOWN_TYPE]: depthOne,
-    [IKI_TABLE_TYPE]: depthOne,
     [COLUMN_TYPE]: depthOne,
     [DIVIDER_TYPE]: depthOne,
     [HEADER_TYPE]: depthOne,
@@ -75,7 +73,6 @@ const parentMaxDepthLookup = {
   [ROW_TYPE]: {
     [CHART_TYPE]: depthFour,
     [MARKDOWN_TYPE]: depthFour,
-    [IKI_TABLE_TYPE]: depthFour,
     [COLUMN_TYPE]: depthFour,
   },
 
@@ -86,7 +83,6 @@ const parentMaxDepthLookup = {
   [TAB_TYPE]: {
     [CHART_TYPE]: depthFive,
     [MARKDOWN_TYPE]: depthFive,
-    [IKI_TABLE_TYPE]: depthFive,
     [COLUMN_TYPE]: depthThree,
     [DIVIDER_TYPE]: depthFive,
     [HEADER_TYPE]: depthFive,
@@ -98,7 +94,6 @@ const parentMaxDepthLookup = {
     [CHART_TYPE]: depthFive,
     [HEADER_TYPE]: depthFive,
     [MARKDOWN_TYPE]: depthFive,
-    [IKI_TABLE_TYPE]: depthFive,
     [ROW_TYPE]: depthThree,
     [DIVIDER_TYPE]: depthThree,
     [TABS_TYPE]: depthThree,
@@ -109,7 +104,6 @@ const parentMaxDepthLookup = {
   [DIVIDER_TYPE]: {},
   [HEADER_TYPE]: {},
   [MARKDOWN_TYPE]: {},
-  [IKI_TABLE_TYPE]: {},
 };
 
 interface IsValidChildProps {
