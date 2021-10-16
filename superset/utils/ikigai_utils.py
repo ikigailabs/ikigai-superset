@@ -80,5 +80,5 @@ def parse_error_components(response):
         msg.append(f'{breaker} Error Type: {error} ).')
         msg.append( f' Suggestion: {get_error_description(error)}')
     if (len(project) or len(dataset) or len(chart)) and len(error)==0:
-        msg.append(' )')
+        msg.append(' ).')
     return "".join(msg)
