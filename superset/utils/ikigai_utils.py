@@ -68,19 +68,17 @@ def parse_error_components(response):
     error = response.json()['error_type'].strip()
     msg = []
     msg.append('We found an error in the query you are trying to run. ')
+    if len(project) or len(dataset) or len(chart) or len(error):
+        msg.append('Error found in: (')
     if len(project):
-        msg.append(f'Error found in: ( Project: {project} ')
+        msg.append(f' Project: {project}')
     if len(dataset):
-        msg.append(f'{breaker} Dataset: {dataset} ')
-    else:
-        msg.append(').')
+        msg.append(f'{breaker} Dataset: {dataset}')
     if len(chart):
-        msg.append(f'{breaker} Chart: {chart} ')
-    else:
-        msg.append(').')
+        msg.append(f'{breaker} Chart: {chart}')
     if len(error):
         msg.append(f'{breaker} Error Type: {error} ).')
         msg.append( f' Suggestion: {get_error_description(error)}')
-    else:
-        msg.append(').')
+    if (len(project) or len(dataset) or len(chart)) and len(error)==0:
+        msg.append(' )')
     return "".join(msg)
