@@ -2630,7 +2630,7 @@ function OmniContainer() {
 
 /***/ }),
 
-/***/ 76198:
+/***/ 39863:
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
@@ -2954,6 +2954,7 @@ const parentMaxDepthLookup = {
   [componentTypes/* DASHBOARD_GRID_TYPE */.BG]: {
     [componentTypes/* CHART_TYPE */.dW]: depthOne,
     [componentTypes/* MARKDOWN_TYPE */.xh]: depthOne,
+    [componentTypes/* IKI_TABLE_TYPE */.aG]: depthOne,
     [componentTypes/* COLUMN_TYPE */.BA]: depthOne,
     [componentTypes/* DIVIDER_TYPE */.hE]: depthOne,
     [componentTypes/* HEADER_TYPE */.Nc]: depthOne,
@@ -2971,6 +2972,7 @@ const parentMaxDepthLookup = {
   [componentTypes/* TAB_TYPE */.gn]: {
     [componentTypes/* CHART_TYPE */.dW]: depthFive,
     [componentTypes/* MARKDOWN_TYPE */.xh]: depthFive,
+    [componentTypes/* IKI_TABLE_TYPE */.aG]: depthFive,
     [componentTypes/* COLUMN_TYPE */.BA]: depthThree,
     [componentTypes/* DIVIDER_TYPE */.hE]: depthFive,
     [componentTypes/* HEADER_TYPE */.Nc]: depthFive,
@@ -2981,6 +2983,7 @@ const parentMaxDepthLookup = {
     [componentTypes/* CHART_TYPE */.dW]: depthFive,
     [componentTypes/* HEADER_TYPE */.Nc]: depthFive,
     [componentTypes/* MARKDOWN_TYPE */.xh]: depthFive,
+    [componentTypes/* IKI_TABLE_TYPE */.aG]: depthFive,
     [componentTypes/* ROW_TYPE */.Os]: depthThree,
     [componentTypes/* DIVIDER_TYPE */.hE]: depthThree,
     [componentTypes/* TABS_TYPE */.yR]: depthThree },
@@ -2989,7 +2992,8 @@ const parentMaxDepthLookup = {
   [componentTypes/* CHART_TYPE */.dW]: {},
   [componentTypes/* DIVIDER_TYPE */.hE]: {},
   [componentTypes/* HEADER_TYPE */.Nc]: {},
-  [componentTypes/* MARKDOWN_TYPE */.xh]: {} };
+  [componentTypes/* MARKDOWN_TYPE */.xh]: {},
+  [componentTypes/* IKI_TABLE_TYPE */.aG]: {} };
 
 function isValidChild(child) {
   const { parentType, childType, parentDepth } = child;
@@ -4740,6 +4744,42 @@ function mapDispatchToProps(dispatch) {
 }
 
 /* harmony default export */ const containers_SliceAdder = ((0,es/* connect */.$j)(mapStateToProps, mapDispatchToProps)(components_SliceAdder));
+;// CONCATENATED MODULE: ./src/dashboard/components/gridComponents/new/NewIkiTable.jsx
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+
+
+
+
+
+
+function NewIkiTable_DraggableNewDivider() {
+  return (
+    (0,emotion_react_browser_esm.jsx)(DraggableNewComponent, {
+      id: constants/* NEW_IKI_TABLE_ID */.VY,
+      type: componentTypes/* IKI_TABLE_TYPE */.aG,
+      label: (0,TranslatorSingleton.t)('Table'),
+      className: "fa fa-table" }));
+
+
+}
 ;// CONCATENATED MODULE: ./src/dashboard/components/BuilderComponentPane.tsx
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -4772,6 +4812,7 @@ function mapDispatchToProps(dispatch) {
 
 
 
+
 const SUPERSET_HEADER_HEIGHT = 59;
 const BuilderComponentPaneTabs = (0,style/* styled */.iK)(components_Tabs/* default */.ZP)`
   line-height: inherit;
@@ -4791,7 +4832,8 @@ const BuilderComponentPane = ({ topOffset = 0 }) => (0,emotion_react_browser_esm
 (0,emotion_react_browser_esm.jsx)(DraggableNewColumn, null),
 (0,emotion_react_browser_esm.jsx)(DraggableNewHeader, null),
 (0,emotion_react_browser_esm.jsx)(NewMarkdown_DraggableNewDivider, null),
-(0,emotion_react_browser_esm.jsx)(DraggableNewDivider, null)),
+(0,emotion_react_browser_esm.jsx)(DraggableNewDivider, null),
+(0,emotion_react_browser_esm.jsx)(NewIkiTable_DraggableNewDivider, null)),
 
 (0,emotion_react_browser_esm.jsx)(components_Tabs/* default.TabPane */.ZP.TabPane, { key: 2, tab: (0,TranslatorSingleton.t)('Charts'), className: "tab-charts" },
 (0,emotion_react_browser_esm.jsx)(containers_SliceAdder, { height: height + (isSticky ? SUPERSET_HEADER_HEIGHT : 0) }))))))));
@@ -16136,6 +16178,556 @@ function Tabs_mapStateToProps(state) {
 
 }
 /* harmony default export */ const gridComponents_Tabs = ((0,es/* connect */.$j)(Tabs_mapStateToProps)(Tabs));
+;// CONCATENATED MODULE: ./src/dashboard/components/gridComponents/IkiTable.jsx
+ /**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+const dashURL = 'https://dev-ui.ikigailabs.io';
+// const dashURL = 'http://localhost:3000';
+const iframeEmptyURL = `${dashURL}/widget/dataset/table`;
+
+const IkiTable_propTypes = {
+  id: (prop_types_default()).string.isRequired,
+  parentId: (prop_types_default()).string.isRequired,
+  component: propShapes/* componentShape.isRequired */.cP.isRequired,
+  parentComponent: propShapes/* componentShape.isRequired */.cP.isRequired,
+  index: (prop_types_default()).number.isRequired,
+  depth: (prop_types_default()).number.isRequired,
+  editMode: (prop_types_default()).bool.isRequired,
+
+  // from redux
+  logEvent: (prop_types_default()).func.isRequired,
+  addDangerToast: (prop_types_default()).func.isRequired,
+  undoLength: (prop_types_default()).number.isRequired,
+  redoLength: (prop_types_default()).number.isRequired,
+
+  // grid related
+  availableColumnCount: (prop_types_default()).number.isRequired,
+  columnWidth: (prop_types_default()).number.isRequired,
+  onResizeStart: (prop_types_default()).func.isRequired,
+  onResize: (prop_types_default()).func.isRequired,
+  onResizeStop: (prop_types_default()).func.isRequired,
+
+  // dnd
+  deleteComponent: (prop_types_default()).func.isRequired,
+  handleComponentDrop: (prop_types_default()).func.isRequired,
+  updateComponents: (prop_types_default()).func.isRequired };
+
+
+const IkiTable_defaultProps = {};
+
+/* const MARKDOWN_PLACE_HOLDER = `<iframe
+                  id="ikitable-widget"
+                  src="http://localhost:3000/widget/dataset/table"
+                  title="IkiTable Component"
+                  className="ikitable-widget"
+                  style="height:100%;"
+                />`; */
+
+const IkiTable_MARKDOWN_ERROR_MESSAGE = (0,TranslatorSingleton.t)('This markdown component has an error.');
+
+class IkiTable_Markdown extends react.PureComponent {
+  constructor(props) {
+    super(props);
+    this.state = {
+      isFocused: false,
+      markdownSource: props.component.meta.code,
+      editor: null,
+      editorMode: 'preview',
+      undoLength: props.undoLength,
+      redoLength: props.redoLength,
+      iframeUrl: '',
+      referrerUrl: '',
+      projectId: '' };
+
+    this.renderStartTime = LogUtils/* Logger.getTimestamp */.Yd.getTimestamp();
+
+    this.handleChangeFocus = this.handleChangeFocus.bind(this);
+    this.handleChangeEditorMode = this.handleChangeEditorMode.bind(this);
+    this.handleMarkdownChange = this.handleMarkdownChange.bind(this);
+    this.handleDeleteComponent = this.handleDeleteComponent.bind(this);
+    this.handleResizeStart = this.handleResizeStart.bind(this);
+    this.setEditor = this.setEditor.bind(this);
+  }
+
+  componentDidMount() {
+    this.props.logEvent(LogUtils/* LOG_ACTIONS_RENDER_CHART */.aD, {
+      viz_type: 'markdown',
+      start_offset: this.renderStartTime,
+      ts: new Date().getTime(),
+      duration: LogUtils/* Logger.getTimestamp */.Yd.getTimestamp() - this.renderStartTime });
+
+    /* const markdownEditor = document.getElementById('markdown-editor');
+    const markdownPreview = document.getElementById('markdown-preview');
+    console.log(
+      'markdownEditor',
+      markdownEditor,
+      'markdownPreview',
+      markdownPreview,
+    ); */
+    /* const supersetUrlString = window.location.href;
+    const supersetUrl = new URL(supersetUrlString);
+    const supersetUrlQuery = new URLSearchParams(supersetUrl);
+    const supersetUrlQueryTest1 = supersetUrlQuery.get('test1');
+    console.log(
+      'supersetUrlString',
+      supersetUrlString,
+      'supersetUrlQueryTest1',
+      supersetUrlQueryTest1,
+    ); */
+    // const { referrer } = document;
+    const referrer = dashURL;
+    /* const url =
+      window.location !== window.parent.location
+        ? document.referrer
+        : document.location.href; */
+    let iframeSrc = '';
+    const widgetUrlString = document.getElementById('ikitable-widget').src;
+    console.log('componentDidMount widgetUrlString', widgetUrlString);
+    if (widgetUrlString === '') {
+      iframeSrc = iframeEmptyURL;
+    } else {
+      iframeSrc = widgetUrlString;
+    }
+    this.setState(
+    {
+      iframeUrl: iframeSrc,
+      referrerUrl: referrer },
+
+    () => {
+      this.handleIncomingWindowMsg();
+      // window.top.postMessage('superset-to-parent/get-project-id', referrer);
+      // const widgetUrl = new URL(widgetUrlString);
+      // const widgetUrlQuery = new URLSearchParams(widgetUrl);
+      // const urlProjectId = widgetUrlQuery.get('project_id');
+      /* console.log(
+        'widgetUrlQuery',
+        widgetUrlQuery,
+        'widgetUrl',
+        widgetUrl,
+        'urlProjectId',
+        urlProjectId,
+      ); */
+      window.parent.postMessage(
+      'superset-to-parent/get-project-id',
+      referrer);
+
+    });
+
+  }
+
+  static getDerivedStateFromProps(nextProps, state) {
+    const {
+      hasError,
+      editorMode,
+      markdownSource,
+      undoLength,
+      redoLength } =
+    state;
+    const {
+      component: nextComponent,
+      undoLength: nextUndoLength,
+      redoLength: nextRedoLength } =
+    nextProps;
+    // user click undo or redo ?
+    if (nextUndoLength !== undoLength || nextRedoLength !== redoLength) {
+      return {
+        ...state,
+        undoLength: nextUndoLength,
+        redoLength: nextRedoLength,
+        markdownSource: nextComponent.meta.code,
+        hasError: false };
+
+    }
+    if (
+    !hasError &&
+    editorMode === 'preview' &&
+    nextComponent.meta.code !== markdownSource)
+    {
+      return {
+        ...state,
+        markdownSource: nextComponent.meta.code };
+
+    }
+
+    return state;
+  }
+
+  static getDerivedStateFromError() {
+    return {
+      hasError: true };
+
+  }
+
+  componentDidUpdate(prevProps) {
+    if (
+    this.state.editor && (
+    prevProps.component.meta.width !== this.props.component.meta.width ||
+    prevProps.columnWidth !== this.props.columnWidth))
+    {
+      this.state.editor.resize(true);
+    }
+    // pre-load AceEditor when entering edit mode
+    if (this.props.editMode) {
+      AsyncAceEditor/* MarkdownEditor.preload */.cE.preload();
+    }
+  }
+
+  componentDidCatch() {
+    if (this.state.editor && this.state.editorMode === 'preview') {
+      this.props.addDangerToast(
+      (0,TranslatorSingleton.t)(
+      'This markdown component has an error. Please revert your recent changes.'));
+
+
+    }
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  handleIncomingWindowMsg() {
+    const { referrerUrl, projectId } = this.state;
+    console.log('handleIncomingWindowMsg superset comp', referrerUrl);
+    window.addEventListener('message', (event) => {
+      if (event.origin === dashURL) {
+        console.log('ikitable received 1: ', event.data);
+        const messageObject = JSON.parse(event.data);
+        /* const infoObject = {
+          info: 'superset-to-table/get-project-id',
+          data: event.data,
+        }; */
+        // const infoData = JSON.stringify(infoObject);
+        // window.parent.postMessage(infoData, referrerUrl);
+        if (
+        messageObject.info &&
+        messageObject.data &&
+        messageObject.dataType)
+        {
+          const { dataType } = messageObject;
+          let messageData;
+          let widgetUrl;
+          if (dataType === 'object') {
+            messageData = JSON.parse(messageObject.data);
+          } else {
+            messageData = messageObject.data;
+          }
+          if (
+          messageObject.info === 'top-window-to-superset/sending-project-id')
+          {
+            console.log('this.state.projectId', projectId);
+            if (!projectId || projectId === '') {
+              // this.projectId = messageData;
+              widgetUrl = `${referrerUrl}/widget/dataset/table?project_id=${messageData}`;
+              console.log('widgetUrl', widgetUrl);
+              this.setState({
+                iframeUrl: widgetUrl,
+                projectId: messageData });
+
+              document.getElementById('ikitable-widget').src = widgetUrl;
+            }
+          } else if (
+          messageObject.info === 'widget-to-superset/sending-datasets-ids')
+          {
+            console.log('messageData', messageData);
+            // widgetUrl = `${referrerUrl}widget/dataset/table?project_id=${messageData}`;
+            widgetUrl = document.getElementById('ikitable-widget').src;
+            const widgetUrlQuery = new (url_search_params_default())(widgetUrl);
+            const widgetUrlQueryTableType = widgetUrlQuery.get('table_type');
+            console.log(
+            'widgetUrlQuery',
+            widgetUrlQuery,
+            'widgetUrlQueryTableType',
+            widgetUrlQueryTableType);
+
+            /* const widgetUrlString =
+              document.getElementById('ikitable-widget').src; */
+            // const widgetUrl = new URL(widgetUrlString);
+            if (!widgetUrlQueryTableType || widgetUrlQueryTableType === '') {
+              const tableType = messageData.tableType ?
+              messageData.tableType :
+              '';
+              widgetUrl = `${widgetUrl}&table_type=${tableType}`;
+              console.log('tableType', tableType);
+              // widgetUrl.searchParams.set('table_type', tableType);
+              if (messageData.datasets) {
+                Object.keys(messageData.datasets).forEach(
+                (messageDataObject, messageDataKey) => {
+                  console.log(
+                  'messageDataObject',
+                  messageDataObject,
+                  'messageDataKey',
+                  messageDataKey,
+                  'messageData.datasets[messageDataObject]',
+                  messageData.datasets[messageDataObject]);
+
+                  widgetUrl += `&${messageDataObject}=${messageData.datasets[messageDataObject]}`;
+                  /* widgetUrl.searchParams.set(
+                    messageDataKey,
+                    messageData.datasets[messageDataKey],
+                  ); */
+                });
+
+              }
+              this.setState({
+                iframeUrl: widgetUrl });
+
+              console.log('widgetUrl', widgetUrl);
+              document.getElementById('ikitable-widget').src = widgetUrl;
+            }
+          }
+        }
+      }
+      // console.log('ikitable received: ', event);
+      // can message back using event.source.postMessage(...)
+    });
+  }
+
+  setEditor(editor) {
+    editor.getSession().setUseWrapMode(true);
+    this.setState({
+      editor });
+
+  }
+
+  handleChangeFocus(nextFocus) {
+    const nextFocused = !!nextFocus;
+    const nextEditMode = nextFocused ? 'edit' : 'preview';
+    this.setState(() => ({ isFocused: nextFocused }));
+    this.handleChangeEditorMode(nextEditMode);
+  }
+
+  handleChangeEditorMode(mode) {
+    const nextState = {
+      ...this.state,
+      editorMode: mode };
+
+    if (mode === 'preview') {
+      this.updateMarkdownContent();
+      nextState.hasError = false;
+    }
+
+    this.setState(nextState);
+  }
+
+  updateMarkdownContent() {
+    const { updateComponents, component } = this.props;
+    if (component.meta.code !== this.state.markdownSource) {
+      updateComponents({
+        [component.id]: {
+          ...component,
+          meta: {
+            ...component.meta,
+            code: this.state.markdownSource } } });
+
+
+
+    }
+  }
+
+  handleMarkdownChange(nextValue) {
+    this.setState({
+      markdownSource: nextValue });
+
+  }
+
+  handleDeleteComponent() {
+    const { deleteComponent, id, parentId } = this.props;
+    deleteComponent(id, parentId);
+  }
+
+  handleResizeStart(e) {
+    const { editorMode } = this.state;
+    const { editMode, onResizeStart } = this.props;
+    const isEditing = editorMode === 'edit';
+    onResizeStart(e);
+    if (editMode && isEditing) {
+      this.updateMarkdownContent();
+    }
+  }
+
+  renderEditMode() {
+    return (
+      (0,emotion_react_browser_esm.jsx)(AsyncAceEditor/* MarkdownEditor */.cE, {
+        id: "markdown-editor",
+        onChange: this.handleMarkdownChange,
+        width: "100%",
+        height: "100%",
+        showGutter: false,
+        editorProps: { $blockScrolling: true },
+        value:
+        // this allows "select all => delete" to give an empty editor
+        typeof this.state.markdownSource === 'string' ?
+        this.state.markdownSource :
+        `<iframe
+                  id="ikitable-widget"
+                  src="${this.state.iframeUrl}"
+                  title="IkiTable Component"
+                  className="ikitable-widget"
+                  style="height:100%;"
+                />`,
+
+        readOnly: false,
+        onLoad: this.setEditor,
+        "data-test": "editor" }));
+
+
+  }
+
+  renderPreviewMode() {
+    const { hasError } = this.state;
+
+    return (
+      (0,emotion_react_browser_esm.jsx)(SafeMarkdown/* default */.Z, {
+        id: "markdown-preview",
+        source:
+        hasError ?
+        IkiTable_MARKDOWN_ERROR_MESSAGE :
+        this.state.markdownSource ||
+        `<iframe
+                  id="ikitable-widget"
+                  src="${this.state.iframeUrl}"
+                  title="IkiTable Component"
+                  className="ikitable-widget"
+                  style="height:100%;"
+                />` }));
+
+
+
+  }
+
+  render() {
+    const { isFocused, editorMode } = this.state;
+
+    const {
+      component,
+      parentComponent,
+      index,
+      depth,
+      availableColumnCount,
+      columnWidth,
+      onResize,
+      onResizeStop,
+      handleComponentDrop,
+      editMode } =
+    this.props;
+
+    // inherit the size of parent columns
+    const widthMultiple =
+    parentComponent.type === componentTypes/* COLUMN_TYPE */.BA ?
+    parentComponent.meta.width || constants/* GRID_MIN_COLUMN_COUNT */.cx :
+    component.meta.width || constants/* GRID_MIN_COLUMN_COUNT */.cx;
+
+    const isEditing = editorMode === 'edit';
+
+    return (
+      (0,emotion_react_browser_esm.jsx)(DragDroppable, {
+        component: component,
+        parentComponent: parentComponent,
+        orientation: parentComponent.type === componentTypes/* ROW_TYPE */.Os ? 'column' : 'row',
+        index: index,
+        depth: depth,
+        onDrop: handleComponentDrop,
+        disableDragDrop: isFocused,
+        editMode: editMode },
+
+      ({ dropIndicatorProps, dragSourceRef }) =>
+      (0,emotion_react_browser_esm.jsx)(WithPopoverMenu, {
+        onChangeFocus: this.handleChangeFocus,
+        menuItems: [
+        (0,emotion_react_browser_esm.jsx)(MarkdownModeDropdown, {
+          id: `${component.id}-mode`,
+          value: this.state.editorMode,
+          onChange: this.handleChangeEditorMode }),
+
+        (0,emotion_react_browser_esm.jsx)(DeleteComponentButton, { onDelete: this.handleDeleteComponent })],
+
+        editMode: editMode },
+
+      (0,emotion_react_browser_esm.jsx)("div", {
+        "data-test": "dashboard-markdown-editor",
+        className: classnames_default()(
+        'dashboard-markdown',
+        isEditing && 'dashboard-markdown--editing'),
+
+        id: component.id },
+
+      (0,emotion_react_browser_esm.jsx)(resizable_ResizableContainer, {
+        id: component.id,
+        adjustableWidth: parentComponent.type === componentTypes/* ROW_TYPE */.Os,
+        adjustableHeight: true,
+        widthStep: columnWidth,
+        widthMultiple: widthMultiple,
+        heightStep: constants/* GRID_BASE_UNIT */.cd,
+        heightMultiple: component.meta.height,
+        minWidthMultiple: constants/* GRID_MIN_COLUMN_COUNT */.cx,
+        minHeightMultiple: constants/* GRID_MIN_ROW_UNITS */.AA,
+        maxWidthMultiple: availableColumnCount + widthMultiple,
+        onResizeStart: this.handleResizeStart,
+        onResize: onResize,
+        onResizeStop: onResizeStop,
+        editMode: isFocused ? false : editMode },
+
+      (0,emotion_react_browser_esm.jsx)("div", {
+        ref: dragSourceRef,
+        className: "dashboard-component dashboard-component-chart-holder",
+        "data-test": "dashboard-component-chart-holder" },
+
+      editMode && isEditing ?
+      this.renderEditMode() :
+      this.renderPreviewMode()))),
+
+
+
+      dropIndicatorProps && (0,emotion_react_browser_esm.jsx)("div", dropIndicatorProps))));
+
+
+
+
+  }}
+
+
+IkiTable_Markdown.propTypes = IkiTable_propTypes;
+IkiTable_Markdown.defaultProps = IkiTable_defaultProps;
+
+function IkiTable_mapStateToProps(state) {
+  return {
+    undoLength: state.dashboardLayout.past.length,
+    redoLength: state.dashboardLayout.future.length };
+
+}
+/* harmony default export */ const IkiTable = ((0,es/* connect */.$j)(IkiTable_mapStateToProps)(IkiTable_Markdown));
 ;// CONCATENATED MODULE: ./src/dashboard/components/gridComponents/index.js
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -16175,6 +16767,8 @@ function Tabs_mapStateToProps(state) {
 
 
 
+
+
 const componentLookup = {
   [componentTypes/* CHART_TYPE */.dW]: gridComponents_ChartHolder,
   [componentTypes/* MARKDOWN_TYPE */.xh]: gridComponents_Markdown,
@@ -16183,7 +16777,8 @@ const componentLookup = {
   [componentTypes/* HEADER_TYPE */.Nc]: gridComponents_Header,
   [componentTypes/* ROW_TYPE */.Os]: gridComponents_Row,
   [componentTypes/* TAB_TYPE */.gn]: Tab,
-  [componentTypes/* TABS_TYPE */.yR]: gridComponents_Tabs };
+  [componentTypes/* TABS_TYPE */.yR]: gridComponents_Tabs,
+  [componentTypes/* IKI_TABLE_TYPE */.aG]: IkiTable };
 // EXTERNAL MODULE: ./src/dashboard/util/getDetailedComponentWidth.js
 var getDetailedComponentWidth = __webpack_require__(72673);
 ;// CONCATENATED MODULE: ./src/dashboard/containers/DashboardComponent.jsx

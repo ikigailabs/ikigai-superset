@@ -289,7 +289,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 (0,src_setup_setupPlugins__WEBPACK_IMPORTED_MODULE_7__/* ["default"] */ .Z)();
-const DashboardContainer = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.lazy(() => Promise.all(/* import() | DashboardContainer */[__webpack_require__.e(3906), __webpack_require__.e(9480), __webpack_require__.e(4365), __webpack_require__.e(8279), __webpack_require__.e(193), __webpack_require__.e(5618), __webpack_require__.e(452)]).then(__webpack_require__.bind(__webpack_require__, 76198)));
+const DashboardContainer = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.lazy(() => Promise.all(/* import() | DashboardContainer */[__webpack_require__.e(3906), __webpack_require__.e(9480), __webpack_require__.e(4365), __webpack_require__.e(8279), __webpack_require__.e(193), __webpack_require__.e(5618), __webpack_require__.e(452)]).then(__webpack_require__.bind(__webpack_require__, 39863)));
 const originalDocumentTitle = document.title;
 const DashboardPage = () => {
   const dispatch = (0,react_redux__WEBPACK_IMPORTED_MODULE_1__/* .useDispatch */ .I0)();
