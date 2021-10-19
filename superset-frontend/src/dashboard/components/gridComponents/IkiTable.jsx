@@ -113,6 +113,7 @@ class Markdown extends React.PureComponent {
       ts: new Date().getTime(),
       duration: Logger.getTimestamp() - this.renderStartTime,
     });
+    console.log('componentDidMount editMode', this.props.editMode);
     /* const markdownEditor = document.getElementById('markdown-editor');
     const markdownPreview = document.getElementById('markdown-preview');
     console.log(
@@ -401,7 +402,34 @@ class Markdown extends React.PureComponent {
   }
 
   renderEditMode() {
+    const { hasError, iframeUrl } = this.state;
+    console.log('renderEditMode:', iframeUrl);
+    const widgetUrl = new URL(iframeUrl);
+    console.log('widgetUrl:', widgetUrl);
+    const widgetUrlQuery = new URLSearchParams(widgetUrl);
+    console.log('widgetUrlQuery:', widgetUrlQuery);
+    const urlProjectId = widgetUrlQuery.get('project_id');
+    console.log('urlProjectId:', urlProjectId);
+
     return (
+      <SafeMarkdown
+        id="markdown-preview"
+        source={
+          hasError
+            ? MARKDOWN_ERROR_MESSAGE
+            : this.state.markdownSource ||
+              `<iframe
+                  id="ikitable-widget"
+                  src="${this.state.iframeUrl}"
+                  title="IkiTable Component"
+                  className="ikitable-widget"
+                  style="height:100%;"
+                />`
+        }
+      />
+    );
+
+    /* return (
       <MarkdownEditor
         id="markdown-editor"
         onChange={this.handleMarkdownChange}
@@ -425,11 +453,12 @@ class Markdown extends React.PureComponent {
         onLoad={this.setEditor}
         data-test="editor"
       />
-    );
+    ); */
   }
 
   renderPreviewMode() {
-    const { hasError } = this.state;
+    const { hasError, iframeUrl } = this.state;
+    console.log('renderPreviewMode:', iframeUrl);
 
     return (
       <SafeMarkdown
@@ -452,6 +481,7 @@ class Markdown extends React.PureComponent {
 
   render() {
     const { isFocused, editorMode } = this.state;
+    // const { isFocused } = this.state;
 
     const {
       component,
@@ -473,6 +503,9 @@ class Markdown extends React.PureComponent {
         : component.meta.width || GRID_MIN_COLUMN_COUNT;
 
     const isEditing = editorMode === 'edit';
+    // const isEditing = false;
+
+    console.log('editMode', editMode);
 
     return (
       <DragDroppable
@@ -501,8 +534,8 @@ class Markdown extends React.PureComponent {
             <div
               data-test="dashboard-markdown-editor"
               className={cx(
-                'dashboard-markdown',
-                isEditing && 'dashboard-markdown--editing',
+                'dashboard-component-ikitable',
+                isEditing && 'dashboard-component-ikitable--editing',
               )}
               id={component.id}
             >
@@ -524,12 +557,13 @@ class Markdown extends React.PureComponent {
               >
                 <div
                   ref={dragSourceRef}
-                  className="dashboard-component dashboard-component-chart-holder"
+                  className="dashboard-component-ikitable dashboard-component-inner"
                   data-test="dashboard-component-chart-holder"
                 >
-                  {editMode && isEditing
-                    ? this.renderEditMode()
-                    : this.renderPreviewMode()}
+                  {
+                    // editMode && isEditing
+                    editMode ? this.renderEditMode() : this.renderPreviewMode()
+                  }
                 </div>
               </ResizableContainer>
             </div>
