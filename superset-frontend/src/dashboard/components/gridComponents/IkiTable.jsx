@@ -38,8 +38,9 @@ import {
   GRID_BASE_UNIT,
 } from 'src/dashboard/util/constants';
 
-const dashURL = 'https://dev-ui.ikigailabs.io';
+// const dashURL = 'https://dev-ui.ikigailabs.io';
 // const dashURL = 'http://localhost:3000';
+const dashURL = document.referrer.substring(0, document.referrer.length - 1);
 const iframeEmptyURL = `${dashURL}/widget/dataset/table?mode=edit`;
 
 const propTypes = {
@@ -110,7 +111,7 @@ class IkiTable extends React.PureComponent {
   componentDidMount() {
     // console.log('IkiTable componentDidMount', this.props, this.state);
     const { referrer } = document;
-    console.log('document.referrer', referrer);
+    console.log('document.referrer', referrer, dashURL);
     this.props.logEvent(LOG_ACTIONS_RENDER_CHART, {
       viz_type: 'markdown',
       start_offset: this.renderStartTime,
