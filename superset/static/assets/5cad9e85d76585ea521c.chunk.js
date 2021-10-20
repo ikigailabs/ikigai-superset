@@ -16215,8 +16215,9 @@ function Tabs_mapStateToProps(state) {
 
 
 
-const dashURL = 'https://dev-ui.ikigailabs.io';
+// const dashURL = 'https://dev-ui.ikigailabs.io';
 // const dashURL = 'http://localhost:3000';
+const dashURL = document.referrer.substring(0, document.referrer.length - 1);
 const iframeEmptyURL = `${dashURL}/widget/dataset/table?mode=edit`;
 
 const IkiTable_propTypes = {
@@ -16287,7 +16288,7 @@ class IkiTable extends react.PureComponent {
   componentDidMount() {
     // console.log('IkiTable componentDidMount', this.props, this.state);
     const { referrer } = document;
-    console.log('document.referrer', referrer);
+    console.log('document.referrer', referrer, dashURL);
     this.props.logEvent(LogUtils/* LOG_ACTIONS_RENDER_CHART */.aD, {
       viz_type: 'markdown',
       start_offset: this.renderStartTime,

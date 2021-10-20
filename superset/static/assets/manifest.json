@@ -32,7 +32,7 @@
     },
     "spa": {
       "css": [
-        "\\static\\assets\\spa.d3a348ecb6da0f76422d.entry.css"
+        "\\static\\assets\\spa.d853d0693969bd34c2e5.entry.css"
       ],
       "js": [
         "\\static\\assets\\1965.7d7781976e6750941d20.entry.js",
@@ -59,7 +59,7 @@
         "\\static\\assets\\3375.33a372e191c1a1cc5676.entry.js",
         "\\static\\assets\\7173.c4e90be3ed435c47714f.entry.js",
         "\\static\\assets\\3418.571f32a96cdbc08c4e38.entry.js",
-        "\\static\\assets\\spa.d3a348ecb6da0f76422d.entry.js"
+        "\\static\\assets\\spa.d853d0693969bd34c2e5.entry.js"
       ]
     },
     "addSlice": {
