@@ -29,6 +29,7 @@ export const ROW_TYPE = 'ROW';
 export const TABS_TYPE = 'TABS';
 export const TAB_TYPE = 'TAB';
 export const IKI_TABLE_TYPE = 'IKI_TABLE';
+export const IKI_PROCESS_BUILDER_TYPE = 'IKI_PROCESS_BUILDER';
 
 export default {
   CHART_TYPE,
@@ -44,4 +45,5 @@ export default {
   TABS_TYPE,
   TAB_TYPE,
   IKI_TABLE_TYPE,
+  IKI_PROCESS_BUILDER_TYPE,
 };
