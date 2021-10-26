@@ -167,7 +167,8 @@ class IkiTable extends React.PureComponent {
     const widgetUrl = new URL(iframeSrc);
     const widgetUrlQuery = new URLSearchParams(widgetUrl.search);
     const widgetUrlQueryProjectId = widgetUrlQuery.get('project_id');
-    /* console.log(
+    const widgetUrlQueryMode = widgetUrlQuery.get('mode');
+    console.log(
       'componentDidMount',
       'widgetUrl',
       widgetUrl,
@@ -175,7 +176,9 @@ class IkiTable extends React.PureComponent {
       widgetUrlQuery,
       'pId',
       widgetUrlQueryProjectId,
-    ); */
+      'widgetUrlQueryMode',
+      widgetUrlQueryMode,
+    );
     if (!widgetUrlQueryProjectId || widgetUrlQueryProjectId === '') {
       this.handleIncomingWindowMsg();
       window.parent.postMessage('superset-to-parent/get-project-id', dashURL);
@@ -328,11 +331,17 @@ class IkiTable extends React.PureComponent {
             widgetUrl = document.getElementById('ikitable-widget').src;
             const widgetUrlQuery = new URLSearchParams(widgetUrl);
             const widgetUrlQueryTableType = widgetUrlQuery.get('table_type');
+            /* widgetUrlQuery.set('mode', 'preview');
+            const widgetUrlQueryMode = widgetUrlQuery.get('mode'); */
             /* console.log(
               'widgetUrlQuery',
               widgetUrlQuery,
               'widgetUrlQueryTableType',
               widgetUrlQueryTableType,
+              'widgetUrl',
+              widgetUrl,
+              'widgetUrlQueryMode',
+              widgetUrlQueryMode,
             ); */
             /* const widgetUrlString =
               document.getElementById('ikitable-widget').src; */
@@ -361,6 +370,17 @@ class IkiTable extends React.PureComponent {
                     ); */
                 });
               }
+              const widgetUrlCopy = new URL(widgetUrl);
+              const widgetUrlQueryCopy = new URLSearchParams(widgetUrlCopy);
+              widgetUrlQueryCopy.set('mode', 'preview');
+              const widgetUrlQueryModeCopy = widgetUrlQueryCopy.get('mode');
+              widgetUrlCopy.search = widgetUrlQueryCopy.toString();
+              /*console.log(
+                'widgetUrlQueryModeCopy',
+                widgetUrlQueryModeCopy,
+                'widgetUrlCopy',
+                widgetUrlCopy,
+              ); */
               this.setState(
                 {
                   iframeUrl: widgetUrl,
@@ -376,7 +396,7 @@ class IkiTable extends React.PureComponent {
                   this.handleIkiTableChange(tempIframe);
                 },
               );
-              // console.log('widgetUrl', widgetUrl);
+              console.log('widgetUrl', widgetUrl);
               // document.getElementById('ikitable-widget').src = widgetUrl;
             }
           }
