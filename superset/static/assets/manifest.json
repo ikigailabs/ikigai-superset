@@ -5,13 +5,13 @@
       "css": [],
       "js": [
         "/static/assets/vendors.4de2c713.entry.js",
-        "/static/assets/preamble.b6775962.entry.js"
+        "/static/assets/preamble.92bcbca0.entry.js"
       ]
     },
     "theme": {
       "css": [],
       "js": [
-        "/static/assets/theme.0fdc2d46.entry.js"
+        "/static/assets/theme.286e9f90.entry.js"
       ]
     },
     "menu": {
@@ -19,7 +19,7 @@
       "js": [
         "/static/assets/vendors.4de2c713.entry.js",
         "/static/assets/vendors-node_modules_ctrl_tinycolor_dist_module_index_js-node_modules_superset-ui_core_esm_co-00657b.e5eaa9b6.entry.js",
-        "/static/assets/menu.a41cc218.entry.js"
+        "/static/assets/menu.4cf4cda0.entry.js"
       ]
     },
     "spa": {
@@ -29,7 +29,7 @@
         "/static/assets/vendors-node_modules_ctrl_tinycolor_dist_module_index_js-node_modules_superset-ui_core_esm_co-00657b.e5eaa9b6.entry.js",
         "/static/assets/vendors-node_modules_superset-ui_chart-controls_esm_components_InfoTooltipWithTrigger_js-node-ad511f.1a901c2d.entry.js",
         "/static/assets/src_dashboard_actions_hydrate_js.cd84c14b.entry.js",
-        "/static/assets/spa.0a038feb.entry.js"
+        "/static/assets/spa.8d9aef4e.entry.js"
       ]
     },
     "addSlice": {
@@ -39,7 +39,7 @@
         "/static/assets/thumbnail.b1764eed.entry.js",
         "/static/assets/vendors-node_modules_ctrl_tinycolor_dist_module_index_js-node_modules_superset-ui_core_esm_co-00657b.e5eaa9b6.entry.js",
         "/static/assets/vendors-node_modules_superset-ui_chart-controls_lib_index_js-node_modules_superset-ui_legacy--925531.e7406df6.entry.js",
-        "/static/assets/addSlice.5cd3d438.entry.js"
+        "/static/assets/addSlice.23010241.entry.js"
       ]
     },
     "explore": {
@@ -51,7 +51,7 @@
         "/static/assets/vendors-node_modules_superset-ui_chart-controls_lib_index_js-node_modules_superset-ui_legacy--925531.e7406df6.entry.js",
         "/static/assets/vendors-node_modules_superset-ui_chart-controls_esm_components_InfoTooltipWithTrigger_js-node-ad511f.1a901c2d.entry.js",
         "/static/assets/src_dashboard_actions_hydrate_js.cd84c14b.entry.js",
-        "/static/assets/explore.4ba22939.entry.js"
+        "/static/assets/explore.36f3c9cf.entry.js"
       ]
     },
     "sqllab": {
@@ -60,7 +60,7 @@
         "/static/assets/vendors.4de2c713.entry.js",
         "/static/assets/vendors-node_modules_ctrl_tinycolor_dist_module_index_js-node_modules_superset-ui_core_esm_co-00657b.e5eaa9b6.entry.js",
         "/static/assets/vendors-node_modules_superset-ui_chart-controls_esm_components_InfoTooltipWithTrigger_js-node-ad511f.1a901c2d.entry.js",
-        "/static/assets/sqllab.4d82e2ac.entry.js"
+        "/static/assets/sqllab.61bdcff5.entry.js"
       ]
     },
     "profile": {
@@ -68,14 +68,14 @@
       "js": [
         "/static/assets/vendors.4de2c713.entry.js",
         "/static/assets/vendors-node_modules_ctrl_tinycolor_dist_module_index_js-node_modules_superset-ui_core_esm_co-00657b.e5eaa9b6.entry.js",
-        "/static/assets/profile.44760a7f.entry.js"
+        "/static/assets/profile.eadefb7a.entry.js"
       ]
     },
     "showSavedQuery": {
       "css": [],
       "js": [
         "/static/assets/vendors.4de2c713.entry.js",
-        "/static/assets/showSavedQuery.04fbb8da.entry.js"
+        "/static/assets/showSavedQuery.5745bf8f.entry.js"
       ]
     }
   }
