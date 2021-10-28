@@ -74,15 +74,15 @@ const propTypes = {
 const defaultProps = {};
 
 // let MARKDOWN_PLACE_HOLDER = '';
-const MARKDOWN_PLACE_HOLDER = `<iframe
+/* const MARKDOWN_PLACE_HOLDER = `<iframe
                   id="ikitable-widget"
                   src="${dashURL}/widget/dataset/table?mode=edit"
                   title="IkiTable Component"
                   className="ikitable-widget"
                   style="height:100%;"
-                />`;
+                />`; */
 
-const MARKDOWN_ERROR_MESSAGE = t('This markdown component has an error.');
+// const MARKDOWN_ERROR_MESSAGE = t('This markdown component has an error.');
 
 class IkiTable extends React.PureComponent {
   constructor(props) {
@@ -94,7 +94,7 @@ class IkiTable extends React.PureComponent {
       editorMode: 'preview',
       undoLength: props.undoLength,
       redoLength: props.redoLength,
-      iframeUrl: '',
+      iframeUrl: iframeEmptyURL,
       referrerUrl: '',
       projectId: '',
     };
@@ -110,50 +110,34 @@ class IkiTable extends React.PureComponent {
 
   componentDidMount() {
     // console.log('IkiTable componentDidMount', this.props, this.state);
-    const { referrer } = document;
-    console.log('document.referrer', referrer, dashURL);
+    /* const { referrer } = document;
+    console.log(
+      'document.referrer',
+      referrer,
+      'dashURL',
+      dashURL,
+      'window.location',
+      window.location,
+    ); */
     this.props.logEvent(LOG_ACTIONS_RENDER_CHART, {
       viz_type: 'markdown',
       start_offset: this.renderStartTime,
       ts: new Date().getTime(),
       duration: Logger.getTimestamp() - this.renderStartTime,
     });
-    // console.log('componentDidMount editMode', this.props.editMode);
-    /* const markdownEditor = document.getElementById('markdown-editor');
-    const markdownPreview = document.getElementById('markdown-preview');
-    console.log(
-      'markdownEditor',
-      markdownEditor,
-      'markdownPreview',
-      markdownPreview,
-    ); */
-    /* const supersetUrlString = window.location.href;
-    const supersetUrl = new URL(supersetUrlString);
-    const supersetUrlQuery = new URLSearchParams(supersetUrl);
-    const supersetUrlQueryTest1 = supersetUrlQuery.get('test1');
-    console.log(
-      'supersetUrlString',
-      supersetUrlString,
-      'supersetUrlQueryTest1',
-      supersetUrlQueryTest1,
-    ); */
-    // const { referrer } = document;
-    // const referrer = dashURL;
-    /* const url =
-      window.location !== window.parent.location
-        ? document.referrer
-        : document.location.href; */
-    let iframeSrc = '';
+    /* let iframeSrc = '';
     let widgetUrlString = '';
-    if (document.getElementById('ikitable-widget')) {
-      widgetUrlString = document.getElementById('ikitable-widget').src;
+    if (document.getElementById(`ikitable-widget-${this.props.component.id}`)) {
+      widgetUrlString = document.getElementById(
+        `ikitable-widget-${this.props.component.id}`,
+      ).src;
       // console.log('componentDidMount widgetUrlString', widgetUrlString);
     }
     if (widgetUrlString === '') {
       iframeSrc = iframeEmptyURL;
     } else {
       iframeSrc = widgetUrlString;
-    }
+    } */
     /* const tempIframe = `<iframe
                   id="ikitable-widget"
                   src="${iframeSrc}"
@@ -164,40 +148,84 @@ class IkiTable extends React.PureComponent {
     console.log('componentDidMount tempIframe', tempIframe); */
     // this.handleIkiTableChange(tempIframe);
     // MARKDOWN_PLACE_HOLDER = tempIframe;
-    const widgetUrl = new URL(iframeSrc);
+    /* const widgetUrl = new URL(iframeSrc);
     const widgetUrlQuery = new URLSearchParams(widgetUrl.search);
     const widgetUrlQueryProjectId = widgetUrlQuery.get('project_id');
+    const widgetUrlQueryMode = widgetUrlQuery.get('mode'); */
     /* console.log(
       'componentDidMount',
+      'this.props.component.meta.code',
+      this.props.component.meta.code,
+      'this.state.markdownSource',
+      this.state.markdownSource,
+      'widgetUrlString',
+      widgetUrlString,
+      'iframeSrc',
+      iframeSrc,
       'widgetUrl',
       widgetUrl,
       'widgetUrlQuery',
       widgetUrlQuery,
       'pId',
       widgetUrlQueryProjectId,
+      'widgetUrlQueryMode',
+      widgetUrlQueryMode,
     ); */
-    if (!widgetUrlQueryProjectId || widgetUrlQueryProjectId === '') {
+    /* console.log(
+      'this.props.component',
+      this.props.component,
+      'widgetUrlString',
+      widgetUrlString,
+      'widgetUrlQueryMode',
+      widgetUrlQueryMode,
+    ); */
+    /* console.log('this.state.projectId', this.state.projectId);
+    if (this.state.projectId === '') {
       this.handleIncomingWindowMsg();
       window.parent.postMessage('superset-to-parent/get-project-id', dashURL);
     } else {
-      this.setState({
-        projectId: widgetUrlQueryProjectId,
-      });
-    }
-    /* this.setState(
-      {
-        iframeUrl: iframeSrc,
-        referrerUrl: referrer,
-        markdownSource: tempIframe,
-      },
-      () => {
-        this.handleIncomingWindowMsg();
-        window.parent.postMessage(
-          'superset-to-parent/get-project-id',
-          referrer,
-        );
-      },
-    ); */
+      this.handleIncomingWindowMsg();
+    } */
+    /* if (!this.props.component.meta.code && widgetUrlQueryMode !== 'preview') {
+      this.setState(
+        {
+          iframeUrl: iframeEmptyURL,
+        },
+        () => {
+          this.handleIncomingWindowMsg();
+          window.parent.postMessage(
+            'superset-to-parent/get-project-id',
+            dashURL,
+          );
+        },
+      );
+    } */
+    /* this.handleIncomingWindowMsg();
+    window.parent.postMessage('superset-to-parent/get-project-id', dashURL); */
+    /* if (
+      (!widgetUrlQueryProjectId || widgetUrlQueryProjectId === '') &&
+      (!widgetUrlQueryMode || widgetUrlQueryMode !== 'preview')
+    ) {
+      this.handleIncomingWindowMsg();
+      window.parent.postMessage('superset-to-parent/get-project-id', dashURL);
+    } else if (widgetUrlQueryProjectId && widgetUrlQueryProjectId !== '') {
+      console.log('else if widgetUrlQueryProjectId', widgetUrlQueryProjectId);
+      this.setState(
+        {
+          projectId: widgetUrlQueryProjectId,
+        },
+        () => {
+          const iframeEmptyURL2 = new URL(iframeEmptyURL);
+          const iframeEmptyURL2Query = new URLSearchParams(
+            iframeEmptyURL2.search,
+          );
+          iframeEmptyURL2Query.set('project_id', widgetUrlQueryProjectId);
+          iframeEmptyURL2.search = iframeEmptyURL2Query.toString();
+          console.log('iframeEmptyURL2', iframeEmptyURL2);
+          // document.getElementById('ikitable-widget').src = iframeEmptyURL2;
+        },
+      );
+    } */
   }
 
   static getDerivedStateFromProps(nextProps, state) {
@@ -270,15 +298,27 @@ class IkiTable extends React.PureComponent {
   // eslint-disable-next-line class-methods-use-this
   handleIncomingWindowMsg() {
     const { projectId } = this.state;
-    // console.log('handleIncomingWindowMsg superset comp', referrerUrl);
+    // console.log('handleIncomingWindowMsg superset comp', projectId);
+    // const tempIframeUrl = new URL(this.state.iframeUrl);
+    /* const tempIframeUrl = document.getElementById(
+      `ikitable-widget-${this.props.component.id}`,
+    ).src;
+    const tempIframeUrlQuery = new URLSearchParams(tempIframeUrl);
+    const tempIframeUrlQueryMode = tempIframeUrlQuery.get('mode');
+    console.log(
+      'handleIncomingWindowMsg - iframeURL...',
+      tempIframeUrl,
+      'tempIframeUrlQueryMode',
+      tempIframeUrlQueryMode,
+    ); */
     window.addEventListener('message', event => {
       if (event.origin === dashURL) {
         // console.log('ikitable received 1: ', event.data);
         const messageObject = JSON.parse(event.data);
         /* const infoObject = {
-          info: 'superset-to-table/get-project-id',
-          data: event.data,
-        }; */
+            info: 'superset-to-table/get-project-id',
+            data: event.data,
+          }; */
         // const infoData = JSON.stringify(infoObject);
         // window.parent.postMessage(infoData, referrerUrl);
         if (
@@ -298,10 +338,37 @@ class IkiTable extends React.PureComponent {
             messageObject.info === 'top-window-to-superset/sending-project-id'
           ) {
             // console.log('this.state.projectId', projectId);
-            if (!projectId || projectId === '') {
+            /* const tempIframeUrl = new URL(this.state.iframeUrl);
+              const tempIframeUrlQuery = new URLSearchParams(tempIframeUrl);
+              const tempIframeUrlQueryMode = tempIframeUrlQuery.get('mode'); */
+            /* const tempIframeUrlQueryProjectId = tempIframeUrlQuery.get(
+                'project_id',
+              ); */
+            /* console.log(
+                'on get project ID',
+                'check markdownSource',
+                this.state.markdownSource,
+                tempIframeUrl,
+                'tempIframeUrlQueryMode',
+                tempIframeUrlQueryMode,
+                'tempIframeUrlQueryProjectId',
+                tempIframeUrlQueryProjectId,
+              ); */
+            const tempMarkdownSouce = this.state.markdownSource;
+            // console.log('tempMarkdownSouce1', tempMarkdownSouce);
+            if ((!projectId || projectId === '') && !tempMarkdownSouce) {
               // this.projectId = messageData;
-              widgetUrl = `${dashURL}/widget/dataset/table?mode=edit&project_id=${messageData}`;
-              // console.log('widgetUrl', widgetUrl);
+              // widgetUrl = `${dashURL}/widget/dataset/table?mode=edit&project_id=${messageData}`;
+              widgetUrl = new URL(
+                document.getElementById(
+                  `ikitable-widget-${this.props.component.id}`,
+                ).src,
+              );
+              const widgetUrlQuery = new URLSearchParams(widgetUrl);
+              widgetUrlQuery.set('mode', 'edit');
+              widgetUrlQuery.set('project_id', messageData);
+              widgetUrl.search = widgetUrlQuery.toString();
+              // console.log('widgetUrl123', widgetUrl);
               this.setState(
                 {
                   iframeUrl: widgetUrl,
@@ -309,13 +376,16 @@ class IkiTable extends React.PureComponent {
                 },
                 () => {
                   const tempIframe = `<iframe
-                  id="ikitable-widget"
-                  src="${widgetUrl}"
-                  title="IkiTable Component"
-                  className="ikitable-widget"
-                  style="height:100%;"
-                />`;
+                    id="ikitable-widget-${this.props.component.id}"
+                    src="${widgetUrl}"
+                    title="IkiTable Component"
+                    className="ikitable-widget"
+                    style="height:100%;"
+                  />`;
                   this.handleIkiTableChange(tempIframe);
+                  /* document.getElementById(
+                      `ikitable-widget-${this.props.component.id}`,
+                    ).src = widgetUrl; */
                 },
               );
               // document.getElementById('ikitable-widget').src = widgetUrl;
@@ -323,67 +393,119 @@ class IkiTable extends React.PureComponent {
           } else if (
             messageObject.info === 'widget-to-superset/sending-datasets-ids'
           ) {
-            // console.log('messageData', messageData);
-            // widgetUrl = `${referrerUrl}widget/dataset/table?project_id=${messageData}`;
-            widgetUrl = document.getElementById('ikitable-widget').src;
-            const widgetUrlQuery = new URLSearchParams(widgetUrl);
-            const widgetUrlQueryTableType = widgetUrlQuery.get('table_type');
-            /* console.log(
-              'widgetUrlQuery',
-              widgetUrlQuery,
-              'widgetUrlQueryTableType',
-              widgetUrlQueryTableType,
+            /* const tempMarkdownSouce2 = document.createElement('div');
+            tempMarkdownSouce2.innerHTML = this.state.markdownSource;
+            const tempMarkdownSouce2Url = new URL(
+              tempMarkdownSouce2.firstChild.src,
             ); */
-            /* const widgetUrlString =
-              document.getElementById('ikitable-widget').src; */
-            // const widgetUrl = new URL(widgetUrlString);
-            if (!widgetUrlQueryTableType || widgetUrlQueryTableType === '') {
-              const tableType = messageData.tableType
-                ? messageData.tableType
-                : '';
-              widgetUrl = `${widgetUrl}&table_type=${tableType}`;
-              // console.log('tableType', tableType);
-              // widgetUrl.searchParams.set('table_type', tableType);
-              if (messageData.datasets) {
-                Object.keys(messageData.datasets).forEach(messageDataObject => {
-                  /* console.log(
-                      'messageDataObject',
-                      messageDataObject,
-                      'messageDataKey',
-                      messageDataKey,
-                      'messageData.datasets[messageDataObject]',
-                      messageData.datasets[messageDataObject],
-                    ); */
-                  widgetUrl += `&${messageDataObject}=${messageData.datasets[messageDataObject]}`;
-                  /* widgetUrl.searchParams.set(
-                      messageDataKey,
-                      messageData.datasets[messageDataKey],
-                    ); */
-                });
-              }
-              this.setState(
-                {
-                  iframeUrl: widgetUrl,
-                },
-                () => {
-                  const tempIframe = `<iframe
-                  id="ikitable-widget"
-                  src="${widgetUrl}"
-                  title="IkiTable Component"
-                  className="ikitable-widget"
-                  style="height:100%;"
-                />`;
-                  this.handleIkiTableChange(tempIframe);
-                },
+            const tempMarkdownSouce2Url = new URL(
+              document.getElementById(
+                `ikitable-widget-${this.props.component.id}`,
+              ).src,
+            );
+            const tempMarkdownSouce2Query = new URLSearchParams(
+              tempMarkdownSouce2Url,
+            );
+            const iframeTblType = tempMarkdownSouce2Url.searchParams.get(
+              'table_type',
+            );
+            const iframeTblMode = tempMarkdownSouce2Query.get('mode');
+            console.log(
+              'tempMarkdownSouce2Url',
+              tempMarkdownSouce2Url,
+              'iframeTblType',
+              iframeTblType,
+              'iframeTblMode',
+              iframeTblMode,
+            );
+            if (!iframeTblType) {
+              widgetUrl = new URL(
+                document.getElementById(
+                  `ikitable-widget-${this.props.component.id}`,
+                ).src,
               );
-              // console.log('widgetUrl', widgetUrl);
-              // document.getElementById('ikitable-widget').src = widgetUrl;
+              /* console.log(
+                  'widget-to-superset/sending-datasets-ids ... widgetUrl',
+                  widgetUrl,
+                  'messageData',
+                  messageData,
+                ); */
+              const widgetUrlQuery = new URLSearchParams(widgetUrl);
+              const widgetUrlQueryTableType = widgetUrlQuery.get('table_type');
+              const widgetUrlQueryProjectId = widgetUrlQuery.get('project_id');
+              widgetUrlQuery.set('mode', 'preview');
+              // widgetUrlQuery.set('project_id', widgetUrlQueryProjectId);
+              widgetUrl.search = widgetUrlQuery.toString();
+
+              if (
+                (!widgetUrlQueryTableType || widgetUrlQueryTableType === '') &&
+                messageData.projectId
+              ) {
+                const tableType = messageData.tableType
+                  ? messageData.tableType
+                  : '';
+                let tempProjectId = '';
+                if (messageData.projectId) {
+                  tempProjectId = messageData.projectId
+                    ? messageData.projectId
+                    : '';
+                } else {
+                  tempProjectId = widgetUrlQueryProjectId;
+                }
+                // console.log('tempProjectId', tempProjectId);
+                // widgetUrl = `${widgetUrl}&table_type=${tableType}`;
+                if (tempProjectId || tempProjectId !== '') {
+                  widgetUrlQuery.set('project_id', tempProjectId);
+                }
+                widgetUrlQuery.set('table_type', tableType);
+                widgetUrl.search = widgetUrlQuery.toString();
+                // console.log('tableType', tableType);
+                // widgetUrl.searchParams.set('table_type', tableType);
+                if (messageData.datasets) {
+                  Object.keys(messageData.datasets).forEach(
+                    messageDataObject => {
+                      // widgetUrl += `&${messageDataObject}=${messageData.datasets[messageDataObject]}`;
+                      widgetUrlQuery.set(
+                        messageDataObject,
+                        messageData.datasets[messageDataObject],
+                      );
+                    },
+                  );
+                  widgetUrl.search = widgetUrlQuery.toString();
+                }
+                this.setState(
+                  {
+                    iframeUrl: widgetUrl,
+                  },
+                  () => {
+                    // console.log('widgetUrl...', widgetUrl);
+                    const tempIframe = `<iframe
+                      id="ikitable-widget-${this.props.component.id}"
+                      src="${widgetUrl}"
+                      title="IkiTable Component"
+                      className="ikitable-widget"
+                      style="height:100%;"
+                    />`;
+                    this.handleIkiTableChange(tempIframe);
+                    /* document.getElementById(
+                        `ikitable-widget-${this.props.component.id}`,
+                      ).src = widgetUrl; */
+                    window.removeEventListener('message', event => {
+                      console.log(
+                        'window message event removed for: ',
+                        this.props.component.id,
+                        event,
+                      );
+                    });
+                  },
+                );
+                // console.log('widgetUrl', widgetUrl);
+              }
             }
           }
         }
       }
       // console.log('ikitable received: ', event);
-      // can message back using event.source.postMessage(...)
     });
   }
 
@@ -487,51 +609,93 @@ class IkiTable extends React.PureComponent {
   }
 
   renderEditMode() {
-    const { hasError, markdownSource } = this.state;
-    // console.log('renderEditMode', 'markdownSource', markdownSource);
+    let iframe;
+    if (!this.props.component.meta.code) {
+      let iframeUrl = new URL(iframeEmptyURL);
+      if (
+        document.getElementById(`ikitable-widget-${this.props.component.id}`)
+      ) {
+        iframeUrl = new URL(
+          document.getElementById(
+            `ikitable-widget-${this.props.component.id}`,
+          ).src,
+        );
+      }
+      const tempIframeUrlQuery = new URLSearchParams(iframeUrl);
+      const tempIframeUrlQueryMode = tempIframeUrlQuery.get('mode');
+      /* console.log(
+        'tempIframeUrlQueryMode',
+        tempIframeUrlQueryMode,
+        'this.state.projectId',
+        this.state.projectId,
+      ); */
+      if (
+        (!tempIframeUrlQueryMode || tempIframeUrlQueryMode === 'edit') &&
+        this.state.projectId === ''
+      ) {
+        /* this.handleIncomingWindowMsg();
+        window.parent.postMessage('superset-to-parent/get-project-id', dashURL); */
+      } else {
+        // this.handleIncomingWindowMsg();
+      }
+      iframe = `<iframe
+                  id="ikitable-widget-${this.props.component.id}"
+                  src="${iframeUrl}"
+                  title="IkiTable Component"
+                  className="ikitable-widget"
+                  style="height:100%;"
+                />`;
+    } else {
+      iframe = this.props.component.meta.code;
+    }
+    // console.log('renderEditMode', 'iframe', iframe);
 
-    return (
-      <SafeMarkdown
-        source={
-          hasError
-            ? MARKDOWN_ERROR_MESSAGE
-            : markdownSource || MARKDOWN_PLACE_HOLDER
-        }
-      />
-    );
-    /* return (
-      <MarkdownEditor
-        onChange={this.handleMarkdownChange}
-        width="100%"
-        height="100%"
-        showGutter={false}
-        editorProps={{ $blockScrolling: true }}
-        value={
-          // this allows "select all => delete" to give an empty editor
-          typeof markdownSource === 'string'
-            ? markdownSource
-            : MARKDOWN_PLACE_HOLDER
-        }
-        readOnly={false}
-        onLoad={this.setEditor}
-        data-test="editor"
-      />
-    ); */
+    return <SafeMarkdown source={iframe} />;
   }
 
   renderPreviewMode() {
-    const { hasError, markdownSource } = this.state;
-    // console.log('renderPreviewMode', 'markdownSource', markdownSource);
+    let iframe;
+    if (!this.props.component.meta.code) {
+      let iframeUrl = new URL(iframeEmptyURL);
+      if (
+        document.getElementById(`ikitable-widget-${this.props.component.id}`)
+      ) {
+        iframeUrl = new URL(
+          document.getElementById(
+            `ikitable-widget-${this.props.component.id}`,
+          ).src,
+        );
+      }
+      const tempIframeUrlQuery = new URLSearchParams(iframeUrl);
+      const tempIframeUrlQueryMode = tempIframeUrlQuery.get('mode');
+      /* console.log(
+        'tempIframeUrlQueryMode',
+        tempIframeUrlQueryMode,
+        'this.state.projectId',
+        this.state.projectId,
+      ); */
+      if (
+        (!tempIframeUrlQueryMode || tempIframeUrlQueryMode === 'edit') &&
+        this.state.projectId === ''
+      ) {
+        this.handleIncomingWindowMsg();
+        window.parent.postMessage('superset-to-parent/get-project-id', dashURL);
+      } else {
+        // this.handleIncomingWindowMsg();
+      }
+      iframe = `<iframe
+                  id="ikitable-widget-${this.props.component.id}"
+                  src="${iframeUrl}"
+                  title="IkiTable Component"
+                  className="ikitable-widget"
+                  style="height:100%;"
+                />`;
+    } else {
+      iframe = this.props.component.meta.code;
+    }
+    // console.log('renderPreviewMode', 'iframe', iframe);
 
-    return (
-      <SafeMarkdown
-        source={
-          hasError
-            ? MARKDOWN_ERROR_MESSAGE
-            : markdownSource || MARKDOWN_PLACE_HOLDER
-        }
-      />
-    );
+    return <SafeMarkdown source={iframe} />;
   }
 
   render() {
@@ -612,7 +776,7 @@ class IkiTable extends React.PureComponent {
               >
                 <div
                   ref={dragSourceRef}
-                  className="dashboard-component-ikitable dashboard-component-inner"
+                  className="dashboard-component-inner"
                   data-test="dashboard-component-chart-holder"
                 >
                   {
