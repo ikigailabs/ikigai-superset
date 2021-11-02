@@ -29,6 +29,7 @@ import {
   TABS_TYPE,
   TAB_TYPE,
   IKI_TABLE_TYPE,
+  IKI_PROCESS_BUILDER_TYPE,
 } from './componentTypes';
 
 import {
@@ -57,7 +58,8 @@ const typeToDefaultMetaData = {
     defaultText: t('Tab title'),
     placeholder: t('Tab title'),
   },
-  [IKI_TABLE_TYPE]: { width: GRID_DEFAULT_CHART_WIDTH, height: 100 },
+  [IKI_TABLE_TYPE]: { width: GRID_DEFAULT_CHART_WIDTH, height: 50 },
+  [IKI_PROCESS_BUILDER_TYPE]: { width: GRID_DEFAULT_CHART_WIDTH, height: 50 },
 };
 
 function uuid(type) {

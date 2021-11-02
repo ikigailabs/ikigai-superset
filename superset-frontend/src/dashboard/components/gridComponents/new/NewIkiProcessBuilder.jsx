@@ -28,7 +28,7 @@ export default function DraggableNewDivider() {
     <DraggableNewComponent
       id={NEW_IKI_PROCESS_BUILDER_ID}
       type={IKI_PROCESS_BUILDER_TYPE}
-      label={t('Process Builder')}
+      label={t('Process Diagram')}
       className="fa fa-columns"
     />
   );
