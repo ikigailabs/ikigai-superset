@@ -144,7 +144,7 @@ const ExploreActionButtons = (props: ExploreActionButtonsProps) => {
       className="btn-group results"
       role="group"
       data-test="btn-group-results"
-      style="display:none;"
+      style={{display: 'none'}}
     >
       {latestQueryFormData && (
         <>
