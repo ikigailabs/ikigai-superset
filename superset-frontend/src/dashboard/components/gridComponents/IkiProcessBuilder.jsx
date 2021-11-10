@@ -20,6 +20,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import cx from 'classnames';
+// import JSONCrush from 'jsoncrush';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import LZString from 'lz-string';
 
 import { t, SafeMarkdown } from '@superset-ui/core';
 import { Logger, LOG_ACTIONS_RENDER_CHART } from 'src/logger/LogUtils';
@@ -37,6 +40,13 @@ import {
   GRID_MIN_ROW_UNITS,
   GRID_BASE_UNIT,
 } from 'src/dashboard/util/constants';
+
+/* const widgetReferrerURL = document.referrer.substring(
+  0,
+  document.referrer.length - 1,
+); */
+const widgetReferrerURL = 'http://localhost:3000';
+const iframeEmptyURL = `${widgetReferrerURL}/widget/diagram/builder`;
 
 const propTypes = {
   id: PropTypes.string.isRequired,
@@ -69,7 +79,8 @@ const propTypes = {
 const defaultProps = {};
 
 // let MARKDOWN_PLACE_HOLDER = '';
-const MARKDOWN_PLACE_HOLDER = ``;
+/* const MARKDOWN_PLACE_HOLDER = `<div id="widget"><iframe id="widget-iframe" src=${iframeEmptyURL} title="IkiTable Process Diagram Component"
+                    class="ikiprocessdiagram-widget" style="width: 100%; height: 100%;"></iframe><div id="widget-data" style="display: none;"></div></div>`; */
 
 const MARKDOWN_ERROR_MESSAGE = t('This markdown component has an error.');
 
@@ -104,6 +115,41 @@ class IkiProcessBuilder extends React.PureComponent {
       ts: new Date().getTime(),
       duration: Logger.getTimestamp() - this.renderStartTime,
     });
+
+    if (!this.props.component.meta.code) {
+      this.setState(
+        {
+          iframeUrl: `${iframeEmptyURL}?mode=edit`,
+        },
+        () => {
+          this.handleIncomingWindowMsg();
+        },
+      );
+    } else {
+      const widgetData = document.getElementById(
+        `widget-data-${this.props.component.id}`,
+      ).innerHTML;
+      const crossWindowMessage = {
+        info: 'superset-to-widget/set-data',
+        data: widgetData,
+        dataType: 'object',
+      };
+      const crossBrowserInfoString = JSON.stringify(crossWindowMessage);
+      const compresed = LZString.compressToEncodedURIComponent(
+        crossBrowserInfoString,
+      );
+      document.getElementById(
+        `widget-iframe-${this.props.component.id}`,
+      ).src = `${iframeEmptyURL}?mode=preview&data=${compresed}`;
+      this.setState(
+        {
+          iframeUrl: `${iframeEmptyURL}?mode=preview&data=${compresed}`,
+        },
+        () => {
+          this.handleIncomingWindowMsg();
+        },
+      );
+    }
   }
 
   static getDerivedStateFromProps(nextProps, state) {
@@ -173,6 +219,54 @@ class IkiProcessBuilder extends React.PureComponent {
     }
   }
 
+  // eslint-disable-next-line class-methods-use-this
+  handleIncomingWindowMsg() {
+    window.addEventListener('message', event => {
+      if (event.origin === widgetReferrerURL) {
+        // console.log('process diagram received 1: ', event.data);
+        const messageObject = JSON.parse(event.data);
+        if (
+          messageObject.info &&
+          messageObject.data &&
+          messageObject.dataType
+        ) {
+          const { dataType } = messageObject;
+          let messageData;
+          if (dataType === 'object') {
+            messageData = JSON.parse(messageObject.data);
+          } else {
+            messageData = messageObject.data;
+          }
+          if (messageObject.info === 'widget-to-superset/edit') {
+            // console.log('message info === edit ', messageData);
+            if (document.getElementById(`widget-${this.props.component.id}`)) {
+              if (
+                document.getElementById(
+                  `widget-data-${this.props.component.id}`,
+                )
+              ) {
+                const tempMarkdown = `<div id="widget-${
+                  this.props.component.id
+                }" class="ikiprocessdiagram-widget"><iframe id="widget-iframe-${
+                  this.props.component.id
+                }" src="${iframeEmptyURL}?mode=edit" title="IkiTable Process Diagram Component"
+                    class="ikiprocessdiagram-iframe"></iframe><div id="widget-data-${
+                      this.props.component.id
+                    }" class="ikiprocessdiagram-widget-data">${JSON.stringify(
+                  messageData,
+                )}</div></div>`;
+                document.getElementById(
+                  `widget-data-${this.props.component.id}`,
+                ).innerHTML = JSON.stringify(messageData);
+                this.handleIkiProcessBuilderChange(tempMarkdown);
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+
   setEditor(editor) {
     editor.getSession().setUseWrapMode(true);
     this.setState({
@@ -188,6 +282,7 @@ class IkiProcessBuilder extends React.PureComponent {
   }
 
   handleChangeEditorMode(mode) {
+    // console.log('handleChangeEditorMode', mode);
     const nextState = {
       ...this.state,
       editorMode: mode,
@@ -242,52 +337,72 @@ class IkiProcessBuilder extends React.PureComponent {
     }
   }
 
-  renderEditMode() {
-    const { hasError, markdownSource } = this.state;
-    // console.log('renderEditMode', 'markdownSource', markdownSource);
-
-    return (
-      <SafeMarkdown
-        source={
-          hasError
-            ? MARKDOWN_ERROR_MESSAGE
-            : markdownSource || MARKDOWN_PLACE_HOLDER
-        }
-      />
+  handleIkiProcessBuilderChange(nextValue) {
+    // console.log('handleIkiTableChange', nextValue);
+    this.setState(
+      {
+        markdownSource: nextValue,
+      },
+      () => {
+        // this.handleMarkdownChange();
+        // this.updateMarkdownContent();
+      },
     );
-    /* return (
-      <MarkdownEditor
-        onChange={this.handleMarkdownChange}
-        width="100%"
-        height="100%"
-        showGutter={false}
-        editorProps={{ $blockScrolling: true }}
-        value={
-          // this allows "select all => delete" to give an empty editor
-          typeof markdownSource === 'string'
-            ? markdownSource
-            : MARKDOWN_PLACE_HOLDER
-        }
-        readOnly={false}
-        onLoad={this.setEditor}
-        data-test="editor"
-      />
+    const { updateComponents, component } = this.props;
+    /* console.log(
+      'updateMarkdownContent',
+      component.meta.code,
+      this.state.markdownSource,
     ); */
+    if (component.meta.code !== nextValue) {
+      updateComponents({
+        [component.id]: {
+          ...component,
+          meta: {
+            ...component.meta,
+            code: nextValue,
+          },
+        },
+      });
+    }
+  }
+
+  renderEditMode() {
+    // const { markdownSource, hasError, iframeUrl } = this.state;
+    const { hasError, iframeUrl } = this.state;
+    // const { editMode } = this.props;
+    // console.log('renderEditMode', this.props, this.state);
+    // eslint-disable-next-line no-unused-vars
+    // const mode = editMode ? 'edit' : 'preview';
+    const html = `<div id="widget-${this.props.component.id}" class="ikiprocessdiagram-widget"><iframe id="widget-iframe-${this.props.component.id}" src="${iframeUrl}" title="IkiTable Process Diagram Component"
+                    class="ikiprocessdiagram-iframe"></iframe><div id="widget-data-${this.props.component.id}" class="ikiprocessdiagram-widget-data"></div></div>`;
+    /* let html = '';
+    if (markdownSource) {
+      html = markdownSource;
+    } else {
+      html = `<div id="widget-${this.props.component.id}" class="ikiprocessdiagram-widget"><iframe id="widget-iframe-${this.props.component.id}" src="${iframeUrl}" title="IkiTable Process Diagram Component"
+                    class="ikiprocessdiagram-iframe"></iframe><div id="widget-data-${this.props.component.id}" class="ikiprocessdiagram-widget-data"></div></div>`;
+    } */
+    return <SafeMarkdown source={hasError ? MARKDOWN_ERROR_MESSAGE : html} />;
   }
 
   renderPreviewMode() {
-    const { hasError, markdownSource } = this.state;
-    // console.log('renderPreviewMode', 'markdownSource', markdownSource);
-
-    return (
-      <SafeMarkdown
-        source={
-          hasError
-            ? MARKDOWN_ERROR_MESSAGE
-            : markdownSource || MARKDOWN_PLACE_HOLDER
-        }
-      />
-    );
+    // const { markdownSource, hasError, iframeUrl } = this.state;
+    const { hasError, iframeUrl } = this.state;
+    // const { editMode } = this.props;
+    // console.log('renderPreviewMode', this.props, this.state);
+    // eslint-disable-next-line no-unused-vars
+    // const mode = editMode ? 'edit' : 'preview';
+    const html = `<div id="widget-${this.props.component.id}" class="ikiprocessdiagram-widget"><iframe id="widget-iframe-${this.props.component.id}" src="${iframeUrl}" title="IkiTable Process Diagram Component"
+                    class="ikiprocessdiagram-iframe"></iframe><div id="widget-data-${this.props.component.id}" class="ikiprocessdiagram-widget-data"></div></div>`;
+    /* let html = '';
+    if (markdownSource) {
+      html = markdownSource;
+    } else {
+      html = `<div id="widget-${this.props.component.id}" class="ikiprocessdiagram-widget"><iframe id="widget-iframe-${this.props.component.id}" src="${iframeUrl}" title="IkiTable Process Diagram Component"
+                    class="ikiprocessdiagram-iframe"></iframe><div id="widget-data-${this.props.component.id}" class="ikiprocessdiagram-widget-data"></div></div>`;
+    } */
+    return <SafeMarkdown source={hasError ? MARKDOWN_ERROR_MESSAGE : html} />;
   }
 
   render() {
@@ -345,8 +460,8 @@ class IkiProcessBuilder extends React.PureComponent {
             <div
               data-test="dashboard-markdown-editor"
               className={cx(
-                'dashboard-component-ikitable',
-                isEditing && 'dashboard-component-ikitable--editing',
+                'dashboard-component-ikiprocessbuilder',
+                isEditing && 'dashboard-component-ikiprocessbuilder--editing',
               )}
               id={component.id}
             >
@@ -368,7 +483,7 @@ class IkiProcessBuilder extends React.PureComponent {
               >
                 <div
                   ref={dragSourceRef}
-                  className="dashboard-component-ikitable dashboard-component-inner"
+                  className="dashboard-component-ikiprocessbuilder dashboard-component-inner"
                   data-test="dashboard-component-chart-holder"
                 >
                   {
