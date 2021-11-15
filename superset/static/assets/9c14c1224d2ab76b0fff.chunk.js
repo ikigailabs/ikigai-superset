@@ -5322,7 +5322,7 @@ function NewIkiProcessBuilder_DraggableNewDivider() {
     (0,emotion_react_browser_esm.jsx)(DraggableNewComponent, {
       id: constants/* NEW_IKI_PROCESS_BUILDER_ID */.uq,
       type: componentTypes/* IKI_PROCESS_BUILDER_TYPE */.Ap,
-      label: (0,TranslatorSingleton.t)('Process Builder'),
+      label: (0,TranslatorSingleton.t)('Process Diagram'),
       className: "fa fa-columns" }));
 
 
@@ -17379,11 +17379,11 @@ var lz_string_default = /*#__PURE__*/__webpack_require__.n(lz_string);
 
 
 
-/* const widgetReferrerURL = document.referrer.substring(
-  0,
-  document.referrer.length - 1,
-); */
-const widgetReferrerURL = 'http://localhost:3000';
+const widgetReferrerURL = document.referrer.substring(
+0,
+document.referrer.length - 1);
+
+// const widgetReferrerURL = 'http://localhost:3000';
 const IkiProcessBuilder_iframeEmptyURL = `${widgetReferrerURL}/widget/diagram/builder`;
 
 const IkiProcessBuilder_propTypes = {
@@ -17431,10 +17431,7 @@ class IkiProcessBuilder extends react.PureComponent {
       editor: null,
       editorMode: 'preview',
       undoLength: props.undoLength,
-      redoLength: props.redoLength,
-      iframeUrl: '',
-      referrerUrl: '',
-      projectId: '' };
+      redoLength: props.redoLength };
 
     this.renderStartTime = LogUtils/* Logger.getTimestamp */.Yd.getTimestamp();
 
@@ -17455,14 +17452,7 @@ class IkiProcessBuilder extends react.PureComponent {
 
 
     if (!this.props.component.meta.code) {
-      this.setState(
-      {
-        iframeUrl: `${IkiProcessBuilder_iframeEmptyURL}?mode=edit` },
-
-      () => {
-        this.handleIncomingWindowMsg();
-      });
-
+      this.handleIncomingWindowMsg();
     } else {
       const widgetUrl = new (url_default())(
       document.getElementById(
@@ -17472,7 +17462,7 @@ class IkiProcessBuilder extends react.PureComponent {
       const definitionData = document.getElementById(
       `ikiprocessdiagram-widget-${this.props.component.id}`).
       dataset.definition;
-      widgetUrl.searchParams.set('mode', 'edit');
+      widgetUrl.searchParams.set('mode', 'preview');
       widgetUrl.searchParams.set('data', definitionData);
       document.getElementById(
       `ikiprocessdiagram-widget-${this.props.component.id}`).
@@ -17484,16 +17474,8 @@ class IkiProcessBuilder extends react.PureComponent {
                         className="ikiprocessdiagram-widget"
                         data-definition="${definitionData}"
                       ></iframe>`;
-      this.setState(
-      {
-        iframeUrl: widgetUrl,
-        definition: definitionData },
-
-      () => {
-        this.handleIkiProcessBuilderChange(tempIframe);
-        // this.handleIncomingWindowMsg();
-      });
-
+      this.handleIkiProcessBuilderChange(tempIframe);
+      this.handleIncomingWindowMsg();
     }
   }
 
@@ -17552,6 +17534,67 @@ class IkiProcessBuilder extends react.PureComponent {
     if (this.props.editMode) {
       AsyncAceEditor/* MarkdownEditor.preload */.cE.preload();
     }
+
+    // console.log('componentDidUpdate', prevProps.editMode, this.props.editMode);
+    if (prevProps.editMode && !this.props.editMode) {
+      // console.log('from edit to preview');
+      if (
+      document.getElementById(
+      `ikiprocessdiagram-widget-${this.props.component.id}`))
+
+      {
+        const widgetUrl = new (url_default())(
+        document.getElementById(
+        `ikiprocessdiagram-widget-${this.props.component.id}`).
+        src);
+
+        const definitionData = document.getElementById(
+        `ikiprocessdiagram-widget-${this.props.component.id}`).
+        dataset.definition;
+        widgetUrl.searchParams.set('mode', 'preview');
+        widgetUrl.searchParams.set('data', definitionData);
+        document.getElementById(
+        `ikiprocessdiagram-widget-${this.props.component.id}`).
+        src = widgetUrl;
+        const tempIframe = `<iframe
+                            id="ikiprocessdiagram-widget-${this.props.component.id}"
+                            src="${widgetUrl}"
+                            title="IkiProcessDiagram Component"
+                            className="ikiprocessdiagram-widget"
+                            data-definition="${definitionData}"
+                          ></iframe>`;
+        this.handleSaveAndResetComponent(tempIframe);
+      }
+    } else if (!prevProps.editMode && this.props.editMode) {
+      // console.log('from preview to edit');
+      if (
+      document.getElementById(
+      `ikiprocessdiagram-widget-${this.props.component.id}`))
+
+      {
+        const widgetUrl = new (url_default())(
+        document.getElementById(
+        `ikiprocessdiagram-widget-${this.props.component.id}`).
+        src);
+
+        const definitionData = document.getElementById(
+        `ikiprocessdiagram-widget-${this.props.component.id}`).
+        dataset.definition;
+        widgetUrl.searchParams.set('mode', 'edit');
+        widgetUrl.searchParams.set('data', definitionData);
+        document.getElementById(
+        `ikiprocessdiagram-widget-${this.props.component.id}`).
+        src = widgetUrl;
+        const tempIframe = `<iframe
+                            id="ikiprocessdiagram-widget-${this.props.component.id}"
+                            src="${widgetUrl}"
+                            title="IkiProcessDiagram Component"
+                            className="ikiprocessdiagram-widget"
+                            data-definition="${definitionData}"
+                          ></iframe>`;
+        this.handleSaveAndResetComponent(tempIframe);
+      }
+    }
   }
 
   componentDidCatch() {
@@ -17594,35 +17637,53 @@ class IkiProcessBuilder extends react.PureComponent {
               `ikiprocessdiagram-widget-${this.props.component.id}`).
               src);
 
-              widgetUrl.searchParams.set('mode', 'edit');
-              const infoString = JSON.stringify(messageData);
-              const infoStringCompresed = lz_string_default().compressToEncodedURIComponent(
-              infoString);
+              const widgetUrlMode = widgetUrl.searchParams.get('mode');
+              // widgetUrl.searchParams.set('mode', 'edit');
+              if (widgetUrlMode === 'edit') {
+                const infoString = JSON.stringify(messageData);
+                const infoStringCompresed = lz_string_default().compressToEncodedURIComponent(
+                infoString);
 
-              widgetUrl.searchParams.set('data', infoStringCompresed);
-              const tempIframe = `<iframe
-                        id="ikiprocessdiagram-widget-${this.props.component.id}"
-                        src="${widgetUrl}"
-                        title="IkiProcessDiagram Component"
-                        className="ikiprocessdiagram-widget"
-                        data-definition="${infoStringCompresed}"
-                      ></iframe>`;
-              this.setState(
-              {
-                iframeUrl: widgetUrl },
-
-              () => {
+                // widgetUrl.searchParams.set('data', infoStringCompresed);
+                const tempIframe = `<iframe
+                          id="ikiprocessdiagram-widget-${this.props.component.id}"
+                          src="${widgetUrl}"
+                          title="IkiProcessDiagram Component"
+                          className="ikiprocessdiagram-widget"
+                          data-definition="${infoStringCompresed}"
+                        ></iframe>`;
                 this.handleIkiProcessBuilderChange(tempIframe);
                 document.getElementById(
                 `ikiprocessdiagram-widget-${this.props.component.id}`).
-                src = widgetUrl;
-              });
-
+                dataset.definition = infoStringCompresed;
+                /* document.getElementById(
+                      `ikiprocessdiagram-widget-${this.props.component.id}`,
+                    ).src = widgetUrl; */
+              }
             }
           }
         }
       }
     });
+  }
+
+  handleSaveAndResetComponent(nextValue) {
+    // console.log('handleSaveAndResetComponent', nextValue);
+    this.setState({
+      markdownSource: nextValue });
+
+    const { updateComponents, component } = this.props;
+    if (component.meta.code !== nextValue) {
+      updateComponents({
+        [component.id]: {
+          ...component,
+          meta: {
+            ...component.meta,
+            code: nextValue } } });
+
+
+
+    }
   }
 
   setEditor(editor) {
@@ -17697,21 +17758,10 @@ class IkiProcessBuilder extends react.PureComponent {
 
   handleIkiProcessBuilderChange(nextValue) {
     // console.log('handleIkiTableChange', nextValue);
-    this.setState(
-    {
-      markdownSource: nextValue },
-
-    () => {
-      // this.handleMarkdownChange();
-      // this.updateMarkdownContent();
-    });
+    this.setState({
+      markdownSource: nextValue });
 
     const { updateComponents, component } = this.props;
-    /* console.log(
-      'updateMarkdownContent',
-      component.meta.code,
-      this.state.markdownSource,
-    ); */
     if (component.meta.code !== nextValue) {
       updateComponents({
         [component.id]: {
@@ -17731,7 +17781,7 @@ class IkiProcessBuilder extends react.PureComponent {
     if (markdownSource) {
       html = markdownSource;
     } else {
-      html = `<iframe id="ikiprocessdiagram-widget-${this.props.component.id}" src="${IkiProcessBuilder_iframeEmptyURL}" title="IkiProcessDiagram Component" class="ikiprocessdiagram-iframe"></iframe>`;
+      html = `<iframe id="ikiprocessdiagram-widget-${this.props.component.id}" src="${IkiProcessBuilder_iframeEmptyURL}?mode=edit" title="IkiProcessDiagram Component" class="ikiprocessdiagram-iframe"></iframe>`;
     }
     return (0,emotion_react_browser_esm.jsx)(SafeMarkdown/* default */.Z, { source: hasError ? IkiProcessBuilder_MARKDOWN_ERROR_MESSAGE : html });
   }
@@ -17742,7 +17792,7 @@ class IkiProcessBuilder extends react.PureComponent {
     if (markdownSource) {
       html = markdownSource;
     } else {
-      html = `<iframe id="ikiprocessdiagram-widget-${this.props.component.id}" src="${IkiProcessBuilder_iframeEmptyURL}" title="IkiProcessDiagram Component" class="ikiprocessdiagram-iframe"></iframe>`;
+      html = `<iframe id="ikiprocessdiagram-widget-${this.props.component.id}" src="${IkiProcessBuilder_iframeEmptyURL}?mode=edit" title="IkiProcessDiagram Component" class="ikiprocessdiagram-iframe"></iframe>`;
     }
     return (0,emotion_react_browser_esm.jsx)(SafeMarkdown/* default */.Z, { source: hasError ? IkiProcessBuilder_MARKDOWN_ERROR_MESSAGE : html });
   }
