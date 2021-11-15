@@ -197,9 +197,9 @@ class IkiProcessBuilder extends React.PureComponent {
       MarkdownEditor.preload();
     }
 
-    console.log('componentDidUpdate', prevProps.editMode, this.props.editMode);
+    // console.log('componentDidUpdate', prevProps.editMode, this.props.editMode);
     if (prevProps.editMode && !this.props.editMode) {
-      console.log('from edit to preview');
+      // console.log('from edit to preview');
       if (
         document.getElementById(
           `ikiprocessdiagram-widget-${this.props.component.id}`,
@@ -228,7 +228,7 @@ class IkiProcessBuilder extends React.PureComponent {
         this.handleSaveAndResetComponent(tempIframe);
       }
     } else if (!prevProps.editMode && this.props.editMode) {
-      console.log('from preview to edit');
+      // console.log('from preview to edit');
       if (
         document.getElementById(
           `ikiprocessdiagram-widget-${this.props.component.id}`,
@@ -330,7 +330,7 @@ class IkiProcessBuilder extends React.PureComponent {
   }
 
   handleSaveAndResetComponent(nextValue) {
-    console.log('handleSaveAndResetComponent', nextValue);
+    // console.log('handleSaveAndResetComponent', nextValue);
     this.setState({
       markdownSource: nextValue,
     });
