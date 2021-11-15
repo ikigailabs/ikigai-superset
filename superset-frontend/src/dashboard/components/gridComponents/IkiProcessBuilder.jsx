@@ -41,11 +41,11 @@ import {
   GRID_BASE_UNIT,
 } from 'src/dashboard/util/constants';
 
-/* const widgetReferrerURL = document.referrer.substring(
+const widgetReferrerURL = document.referrer.substring(
   0,
   document.referrer.length - 1,
-); */
-const widgetReferrerURL = 'http://localhost:3000';
+);
+// const widgetReferrerURL = 'http://localhost:3000';
 const iframeEmptyURL = `${widgetReferrerURL}/widget/diagram/builder`;
 
 const propTypes = {
@@ -137,7 +137,7 @@ class IkiProcessBuilder extends React.PureComponent {
                         data-definition="${definitionData}"
                       ></iframe>`;
       this.handleIkiProcessBuilderChange(tempIframe);
-      // this.handleIncomingWindowMsg();
+      this.handleIncomingWindowMsg();
     }
   }
 
@@ -299,26 +299,29 @@ class IkiProcessBuilder extends React.PureComponent {
                   `ikiprocessdiagram-widget-${this.props.component.id}`,
                 ).src,
               );
-              widgetUrl.searchParams.set('mode', 'edit');
-              const infoString = JSON.stringify(messageData);
-              const infoStringCompresed = LZString.compressToEncodedURIComponent(
-                infoString,
-              );
-              // widgetUrl.searchParams.set('data', infoStringCompresed);
-              const tempIframe = `<iframe
-                        id="ikiprocessdiagram-widget-${this.props.component.id}"
-                        src="${widgetUrl}"
-                        title="IkiProcessDiagram Component"
-                        className="ikiprocessdiagram-widget"
-                        data-definition="${infoStringCompresed}"
-                      ></iframe>`;
-              this.handleIkiProcessBuilderChange(tempIframe);
-              document.getElementById(
-                `ikiprocessdiagram-widget-${this.props.component.id}`,
-              ).dataset.definition = infoStringCompresed;
-              /* document.getElementById(
-                    `ikiprocessdiagram-widget-${this.props.component.id}`,
-                  ).src = widgetUrl; */
+              const widgetUrlMode = widgetUrl.searchParams.get('mode');
+              // widgetUrl.searchParams.set('mode', 'edit');
+              if (widgetUrlMode === 'edit') {
+                const infoString = JSON.stringify(messageData);
+                const infoStringCompresed = LZString.compressToEncodedURIComponent(
+                  infoString,
+                );
+                // widgetUrl.searchParams.set('data', infoStringCompresed);
+                const tempIframe = `<iframe
+                          id="ikiprocessdiagram-widget-${this.props.component.id}"
+                          src="${widgetUrl}"
+                          title="IkiProcessDiagram Component"
+                          className="ikiprocessdiagram-widget"
+                          data-definition="${infoStringCompresed}"
+                        ></iframe>`;
+                this.handleIkiProcessBuilderChange(tempIframe);
+                document.getElementById(
+                  `ikiprocessdiagram-widget-${this.props.component.id}`,
+                ).dataset.definition = infoStringCompresed;
+                /* document.getElementById(
+                      `ikiprocessdiagram-widget-${this.props.component.id}`,
+                    ).src = widgetUrl; */
+              }
             }
           }
         }
