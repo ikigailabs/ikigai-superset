@@ -17,14 +17,10 @@
 
 import pandas as pd
 
-<<<<<<< HEAD
 import pandas as pd
 
 from superset.charts.post_processing import apply_post_process, pivot_df
 from superset.utils.core import GenericDataType, QueryStatus
-=======
-from superset.charts.post_processing import pivot_df
->>>>>>> ikigailabs-dev
 
 
 def test_pivot_df_no_cols_no_rows_single_metric():
@@ -249,7 +245,6 @@ def test_pivot_df_single_row_two_metrics():
             "SUM(num)": {0: 118065, 1: 47123},
             "MAX(num)": {0: 2588, 1: 1280},
         }
-<<<<<<< HEAD
     ],
 }
 
@@ -668,8 +663,6 @@ def test_pivot_df_single_row_two_metrics():
             "SUM(num)": {0: 118065, 1: 47123},
             "MAX(num)": {0: 2588, 1: 1280},
         }
-=======
->>>>>>> ikigailabs-dev
     )
     assert (
         df.to_markdown()
@@ -696,17 +689,10 @@ def test_pivot_df_single_row_two_metrics():
     assert (
         pivoted.to_markdown()
         == """
-<<<<<<< HEAD
 | gender   |   SUM(num) |   MAX(num) |
 |:---------|-----------:|-----------:|
 | boy      |      47123 |       1280 |
 | girl     |     118065 |       2588 |
-=======
-|           |   ('SUM(num)',) |   ('MAX(num)',) |
-|:----------|----------------:|----------------:|
-| ('boy',)  |           47123 |            1280 |
-| ('girl',) |          118065 |            2588 |
->>>>>>> ikigailabs-dev
     """.strip()
     )
 
@@ -726,15 +712,9 @@ def test_pivot_df_single_row_two_metrics():
     assert (
         pivoted.to_markdown()
         == """
-<<<<<<< HEAD
 | metric      |   ('SUM(num)', 'boy') |   ('SUM(num)', 'girl') |   ('MAX(num)', 'boy') |   ('MAX(num)', 'girl') |
 |:------------|----------------------:|-----------------------:|----------------------:|-----------------------:|
 | Total (Sum) |                 47123 |                 118065 |                  1280 |                   2588 |
-=======
-|                  |   ('SUM(num)', 'boy') |   ('SUM(num)', 'girl') |   ('MAX(num)', 'boy') |   ('MAX(num)', 'girl') |
-|:-----------------|----------------------:|-----------------------:|----------------------:|-----------------------:|
-| ('Total (Sum)',) |                 47123 |                 118065 |                  1280 |                   2588 |
->>>>>>> ikigailabs-dev
     """.strip()
     )
 
@@ -754,17 +734,10 @@ def test_pivot_df_single_row_two_metrics():
     assert (
         pivoted.to_markdown()
         == """
-<<<<<<< HEAD
 | gender   |   SUM(num) |   MAX(num) |
 |:---------|-----------:|-----------:|
 | boy      |      47123 |       1280 |
 | girl     |     118065 |       2588 |
-=======
-|           |   ('SUM(num)',) |   ('MAX(num)',) |
-|:----------|----------------:|----------------:|
-| ('boy',)  |           47123 |            1280 |
-| ('girl',) |          118065 |            2588 |
->>>>>>> ikigailabs-dev
     """.strip()
     )
 
@@ -808,7 +781,6 @@ def test_pivot_df_single_row_two_metrics():
     assert (
         pivoted.to_markdown()
         == """
-<<<<<<< HEAD
 |                          |   Total (Sum) |
 |:-------------------------|--------------:|
 | ('SUM(num)', 'boy')      |         47123 |
@@ -818,17 +790,6 @@ def test_pivot_df_single_row_two_metrics():
 | ('MAX(num)', 'girl')     |          2588 |
 | ('MAX(num)', 'Subtotal') |          3868 |
 | ('Total (Sum)', '')      |        169056 |
-=======
-|                          |   ('Total (Sum)',) |
-|:-------------------------|-------------------:|
-| ('SUM(num)', 'boy')      |              47123 |
-| ('SUM(num)', 'girl')     |             118065 |
-| ('SUM(num)', 'Subtotal') |             165188 |
-| ('MAX(num)', 'boy')      |               1280 |
-| ('MAX(num)', 'girl')     |               2588 |
-| ('MAX(num)', 'Subtotal') |               3868 |
-| ('Total (Sum)', '')      |             169056 |
->>>>>>> ikigailabs-dev
     """.strip()
     )
 
@@ -848,7 +809,6 @@ def test_pivot_df_single_row_two_metrics():
     assert (
         pivoted.to_markdown()
         == """
-<<<<<<< HEAD
 |                      |   Total (Sum) |
 |:---------------------|--------------:|
 | ('boy', 'SUM(num)')  |         47123 |
@@ -858,17 +818,6 @@ def test_pivot_df_single_row_two_metrics():
 | ('girl', 'MAX(num)') |          2588 |
 | ('girl', 'Subtotal') |        120653 |
 | ('Total (Sum)', '')  |        169056 |
-=======
-|                      |   ('Total (Sum)',) |
-|:---------------------|-------------------:|
-| ('boy', 'SUM(num)')  |              47123 |
-| ('boy', 'MAX(num)')  |               1280 |
-| ('boy', 'Subtotal')  |              48403 |
-| ('girl', 'SUM(num)') |             118065 |
-| ('girl', 'MAX(num)') |               2588 |
-| ('girl', 'Subtotal') |             120653 |
-| ('Total (Sum)', '')  |             169056 |
->>>>>>> ikigailabs-dev
     """.strip()
     )
 
@@ -1013,17 +962,10 @@ def test_pivot_df_complex():
     assert (
         pivoted.to_markdown()
         == """
-<<<<<<< HEAD
 | state   |   ('SUM(num)', 'boy', 'Edward') |   ('SUM(num)', 'boy', 'Tony') |   ('SUM(num)', 'girl', 'Amy') |   ('SUM(num)', 'girl', 'Cindy') |   ('SUM(num)', 'girl', 'Dawn') |   ('SUM(num)', 'girl', 'Sophia') |   ('MAX(num)', 'boy', 'Edward') |   ('MAX(num)', 'boy', 'Tony') |   ('MAX(num)', 'girl', 'Amy') |   ('MAX(num)', 'girl', 'Cindy') |   ('MAX(num)', 'girl', 'Dawn') |   ('MAX(num)', 'girl', 'Sophia') |
 |:--------|--------------------------------:|------------------------------:|------------------------------:|--------------------------------:|-------------------------------:|---------------------------------:|--------------------------------:|------------------------------:|------------------------------:|--------------------------------:|-------------------------------:|---------------------------------:|
 | CA      |                           31290 |                          3765 |                         45426 |                           14149 |                          11403 |                            18859 |                            1280 |                           598 |                          2227 |                             842 |                           1157 |                             2588 |
 | FL      |                            9395 |                          2673 |                         14740 |                            1218 |                           5089 |                             7181 |                             389 |                           247 |                           854 |                             217 |                            461 |                             1187 |
-=======
-|         |   ('SUM(num)', 'boy', 'Edward') |   ('SUM(num)', 'boy', 'Tony') |   ('SUM(num)', 'girl', 'Amy') |   ('SUM(num)', 'girl', 'Cindy') |   ('SUM(num)', 'girl', 'Dawn') |   ('SUM(num)', 'girl', 'Sophia') |   ('MAX(num)', 'boy', 'Edward') |   ('MAX(num)', 'boy', 'Tony') |   ('MAX(num)', 'girl', 'Amy') |   ('MAX(num)', 'girl', 'Cindy') |   ('MAX(num)', 'girl', 'Dawn') |   ('MAX(num)', 'girl', 'Sophia') |
-|:--------|--------------------------------:|------------------------------:|------------------------------:|--------------------------------:|-------------------------------:|---------------------------------:|--------------------------------:|------------------------------:|------------------------------:|--------------------------------:|-------------------------------:|---------------------------------:|
-| ('CA',) |                           31290 |                          3765 |                         45426 |                           14149 |                          11403 |                            18859 |                            1280 |                           598 |                          2227 |                             842 |                           1157 |                             2588 |
-| ('FL',) |                            9395 |                          2673 |                         14740 |                            1218 |                           5089 |                             7181 |                             389 |                           247 |                           854 |                             217 |                            461 |                             1187 |
->>>>>>> ikigailabs-dev
     """.strip()
     )
 
@@ -1100,7 +1042,6 @@ def test_pivot_df_complex():
     assert (
         pivoted.to_markdown()
         == """
-<<<<<<< HEAD
 |                                |    CA |    FL |
 |:-------------------------------|------:|------:|
 | ('SUM(num)', 'boy', 'Edward')  | 31290 |  9395 |
@@ -1115,22 +1056,6 @@ def test_pivot_df_complex():
 | ('MAX(num)', 'girl', 'Cindy')  |   842 |   217 |
 | ('MAX(num)', 'girl', 'Dawn')   |  1157 |   461 |
 | ('MAX(num)', 'girl', 'Sophia') |  2588 |  1187 |
-=======
-|                                |   ('CA',) |   ('FL',) |
-|:-------------------------------|----------:|----------:|
-| ('SUM(num)', 'boy', 'Edward')  |     31290 |      9395 |
-| ('SUM(num)', 'boy', 'Tony')    |      3765 |      2673 |
-| ('SUM(num)', 'girl', 'Amy')    |     45426 |     14740 |
-| ('SUM(num)', 'girl', 'Cindy')  |     14149 |      1218 |
-| ('SUM(num)', 'girl', 'Dawn')   |     11403 |      5089 |
-| ('SUM(num)', 'girl', 'Sophia') |     18859 |      7181 |
-| ('MAX(num)', 'boy', 'Edward')  |      1280 |       389 |
-| ('MAX(num)', 'boy', 'Tony')    |       598 |       247 |
-| ('MAX(num)', 'girl', 'Amy')    |      2227 |       854 |
-| ('MAX(num)', 'girl', 'Cindy')  |       842 |       217 |
-| ('MAX(num)', 'girl', 'Dawn')   |      1157 |       461 |
-| ('MAX(num)', 'girl', 'Sophia') |      2588 |      1187 |
->>>>>>> ikigailabs-dev
     """.strip()
     )
 
@@ -1150,7 +1075,6 @@ def test_pivot_df_complex():
     assert (
         pivoted.to_markdown()
         == """
-<<<<<<< HEAD
 |                                |    CA |    FL |
 |:-------------------------------|------:|------:|
 | ('boy', 'Edward', 'SUM(num)')  | 31290 |  9395 |
@@ -1165,22 +1089,6 @@ def test_pivot_df_complex():
 | ('girl', 'Dawn', 'MAX(num)')   |  1157 |   461 |
 | ('girl', 'Sophia', 'SUM(num)') | 18859 |  7181 |
 | ('girl', 'Sophia', 'MAX(num)') |  2588 |  1187 |
-=======
-|                                |   ('CA',) |   ('FL',) |
-|:-------------------------------|----------:|----------:|
-| ('boy', 'Edward', 'SUM(num)')  |     31290 |      9395 |
-| ('boy', 'Edward', 'MAX(num)')  |      1280 |       389 |
-| ('boy', 'Tony', 'SUM(num)')    |      3765 |      2673 |
-| ('boy', 'Tony', 'MAX(num)')    |       598 |       247 |
-| ('girl', 'Amy', 'SUM(num)')    |     45426 |     14740 |
-| ('girl', 'Amy', 'MAX(num)')    |      2227 |       854 |
-| ('girl', 'Cindy', 'SUM(num)')  |     14149 |      1218 |
-| ('girl', 'Cindy', 'MAX(num)')  |       842 |       217 |
-| ('girl', 'Dawn', 'SUM(num)')   |     11403 |      5089 |
-| ('girl', 'Dawn', 'MAX(num)')   |      1157 |       461 |
-| ('girl', 'Sophia', 'SUM(num)') |     18859 |      7181 |
-| ('girl', 'Sophia', 'MAX(num)') |      2588 |      1187 |
->>>>>>> ikigailabs-dev
     """.strip()
     )
 
@@ -1197,10 +1105,6 @@ def test_pivot_df_complex():
         show_columns_total=True,
         apply_metrics_on_rows=True,
     )
-<<<<<<< HEAD
-=======
-    print(pivoted.to_markdown())
->>>>>>> ikigailabs-dev
     assert (
         pivoted.to_markdown()
         == """

@@ -1203,10 +1203,6 @@ class TestChartApi(SupersetTestCase, ApiOwnersTestCaseMixin, InsertChartMixin):
         self.login(username="admin")
         request_payload = get_query_context("birth_names")
         del request_payload["queries"][0]["row_limit"]
-<<<<<<< HEAD
-=======
-
->>>>>>> ikigailabs-dev
         rv = self.post_assert_metric(CHART_DATA_URI, request_payload, "data")
         response_payload = json.loads(rv.data.decode("utf-8"))
         result = response_payload["result"][0]
@@ -1260,27 +1256,6 @@ class TestChartApi(SupersetTestCase, ApiOwnersTestCaseMixin, InsertChartMixin):
         request_payload["result_type"] = utils.ChartDataResultType.SAMPLES
         request_payload["queries"][0]["row_limit"] = 10
         rv = self.post_assert_metric(CHART_DATA_URI, request_payload, "data")
-<<<<<<< HEAD
-=======
-        response_payload = json.loads(rv.data.decode("utf-8"))
-        result = response_payload["result"][0]
-        self.assertEqual(result["rowcount"], 10)
-
-    @pytest.mark.usefixtures("load_birth_names_dashboard_with_slices")
-    @mock.patch(
-        "superset.utils.core.current_app.config", {**app.config, "SQL_MAX_ROW": 5},
-    )
-    def test_chart_data_sql_max_row_sample_limit(self):
-        """
-        Chart data API: Ensure requested sample response row count doesn't
-        exceed SQL max row limit
-        """
-        self.login(username="admin")
-        request_payload = get_query_context("birth_names")
-        request_payload["result_type"] = utils.ChartDataResultType.SAMPLES
-        request_payload["queries"][0]["row_limit"] = 10000000
-        rv = self.post_assert_metric(CHART_DATA_URI, request_payload, "data")
->>>>>>> ikigailabs-dev
         response_payload = json.loads(rv.data.decode("utf-8"))
         result = response_payload["result"][0]
         self.assertEqual(result["rowcount"], 5)

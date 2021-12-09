@@ -374,15 +374,11 @@ export const DndMetricSelect = (props: any) => {
         canDrop={canDrop}
         valuesRenderer={valuesRenderer}
         accept={DND_ACCEPTED_TYPES}
-<<<<<<< HEAD
         ghostButtonText={tn(
           'Drop column or metric here',
           'Drop columns or metrics here',
           multi ? 2 : 1,
         )}
-=======
-        ghostButtonText={ghostButtonText}
->>>>>>> ikigailabs-dev
         displayGhostButton={multi || value.length === 0}
         onClickGhostButton={
           isFeatureEnabled(FeatureFlag.ENABLE_DND_WITH_CLICK_UX)

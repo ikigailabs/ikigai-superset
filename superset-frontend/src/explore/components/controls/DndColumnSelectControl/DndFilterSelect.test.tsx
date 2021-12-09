@@ -65,25 +65,9 @@ test('renders with value', () => {
 });
 
 test('renders options with saved metric', () => {
-<<<<<<< HEAD
   render(<DndFilterSelect {...defaultProps} formData={['saved_metric']} />, {
     useDnd: true,
   });
-=======
-  render(
-    <DndFilterSelect
-      {...defaultProps}
-      formData={{
-        ...baseFormData,
-        ...DEFAULT_FORM_DATA,
-        metrics: ['saved_metric'],
-      }}
-    />,
-    {
-      useDnd: true,
-    },
-  );
->>>>>>> ikigailabs-dev
   expect(screen.getByText('Drop columns or metrics here')).toBeInTheDocument();
 });
 
@@ -112,24 +96,8 @@ test('renders options with adhoc metric', () => {
     expression: 'AVG(birth_names.num)',
     metric_name: 'avg__num',
   });
-<<<<<<< HEAD
   render(<DndFilterSelect {...defaultProps} formData={[adhocMetric]} />, {
     useDnd: true,
   });
-=======
-  render(
-    <DndFilterSelect
-      {...defaultProps}
-      formData={{
-        ...baseFormData,
-        ...DEFAULT_FORM_DATA,
-        metrics: [adhocMetric],
-      }}
-    />,
-    {
-      useDnd: true,
-    },
-  );
->>>>>>> ikigailabs-dev
   expect(screen.getByText('Drop columns or metrics here')).toBeInTheDocument();
 });

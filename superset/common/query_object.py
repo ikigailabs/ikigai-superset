@@ -93,7 +93,6 @@ class QueryObject:  # pylint: disable=too-many-instance-attributes
     inner_to_dttm: Optional[datetime]
     is_rowcount: bool
     is_timeseries: bool
-<<<<<<< HEAD
     time_shift: Optional[timedelta]
     groupby: List[str]
     metrics: Optional[List[Metric]]
@@ -102,8 +101,6 @@ class QueryObject:  # pylint: disable=too-many-instance-attributes
     filter: List[QueryObjectFilterClause]
     timeseries_limit: int
     timeseries_limit_metric: Optional[Metric]
-=======
->>>>>>> ikigailabs-dev
     order_desc: bool
     orderby: List[OrderBy]
     metrics: Optional[List[Metric]]
@@ -129,17 +126,11 @@ class QueryObject:  # pylint: disable=too-many-instance-attributes
         extras: Optional[Dict[str, Any]] = None,
         filters: Optional[List[QueryObjectFilterClause]] = None,
         granularity: Optional[str] = None,
-<<<<<<< HEAD
         metrics: Optional[List[Metric]] = None,
         groupby: Optional[List[str]] = None,
-        filters: Optional[List[QueryObjectFilterClause]] = None,
         time_range: Optional[str] = None,
         time_shift: Optional[str] = None,
-=======
-        is_rowcount: bool = False,
->>>>>>> ikigailabs-dev
         is_timeseries: Optional[bool] = None,
-        metrics: Optional[List[Metric]] = None,
         order_desc: bool = True,
         orderby: Optional[List[OrderBy]] = None,
         post_processing: Optional[List[Optional[Dict[str, Any]]]] = None,
@@ -149,8 +140,6 @@ class QueryObject:  # pylint: disable=too-many-instance-attributes
         series_columns: Optional[List[str]] = None,
         series_limit: int = 0,
         series_limit_metric: Optional[Metric] = None,
-        time_range: Optional[str] = None,
-        time_shift: Optional[str] = None,
         **kwargs: Any,
     ):
         columns = columns or []

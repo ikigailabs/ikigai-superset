@@ -356,7 +356,6 @@ function dbReducer(
       query_input = Object.entries(query)
         .map(([key, value]) => `${key}=${value}`)
         .join('&');
-<<<<<<< HEAD
 
       if (
         action.payload.backend === 'bigquery' &&
@@ -377,15 +376,12 @@ function dbReducer(
           query_input,
         };
       }
-=======
->>>>>>> ikigailabs-dev
 
       if (
         action.payload.encrypted_extra &&
         action.payload.configuration_method ===
           CONFIGURATION_METHOD.DYNAMIC_FORM
       ) {
-<<<<<<< HEAD
         // pull catalog from engine params
         const engineParamsCatalog = extra_json?.engine_params?.catalog;
 
@@ -400,23 +396,6 @@ function dbReducer(
           })),
           query_input,
         } as DatabaseObject;
-=======
-        const engineParamsCatalog = Object.keys(
-          extra_json?.engine_params?.catalog || {},
-        ).map(e => ({
-          name: e,
-          value: extra_json?.engine_params?.catalog[e],
-        }));
-        return {
-          ...action.payload,
-          engine: action.payload.backend || trimmedState.engine,
-          configuration_method: action.payload.configuration_method,
-          extra_json: deserializeExtraJSON,
-          catalog: engineParamsCatalog,
-          parameters: action.payload.parameters,
-          query_input,
-        };
->>>>>>> ikigailabs-dev
       }
 
       return {
@@ -564,18 +543,9 @@ const DatabaseModal: FunctionComponent<DatabaseModalProps> = ({
       );
       const paramConfigArray = Object.keys(parameters_schema || {});
 
-<<<<<<< HEAD
       const engine = dbToUpdate.backend || dbToUpdate.engine;
       if (engine === 'bigquery' && dbToUpdate.parameters?.credentials_info) {
         // wrap encrypted_extra in credentials_info only for BigQuery
-=======
-      paramConfigArray.forEach(paramConfig => {
-        /*
-         * Parameters that are annotated with the `x-encrypted-extra` properties should be moved to
-         * `encrypted_extra`, so that they are stored encrypted in the backend when the database is
-         * created or edited.
-         */
->>>>>>> ikigailabs-dev
         if (
           parameters_schema[paramConfig]['x-encrypted-extra'] &&
           dbToUpdate.parameters?.[paramConfig]
@@ -885,14 +855,8 @@ const DatabaseModal: FunctionComponent<DatabaseModalProps> = ({
     const { hostname } = window.location;
     let ipAlert = connectionAlert?.REGIONAL_IPS?.default || '';
     const regionalIPs = connectionAlert?.REGIONAL_IPS || {};
-<<<<<<< HEAD
     Object.entries(regionalIPs).forEach(([regex, ipRange]) => {
       if (regex.match(hostname)) {
-=======
-    Object.entries(regionalIPs).forEach(([ipRegion, ipRange]) => {
-      const regex = new RegExp(ipRegion);
-      if (hostname.match(regex)) {
->>>>>>> ikigailabs-dev
         ipAlert = ipRange;
       }
     });

@@ -1064,10 +1064,7 @@ class SqlaTable(Model, BaseDatasource):  # pylint: disable=too-many-public-metho
         # filter out the pseudo column  __timestamp from columns
         columns = columns or []
         columns = [col for col in columns if col != utils.DTTM_ALIAS]
-<<<<<<< HEAD
         time_grain = extras.get("time_grain_sqla")
-=======
->>>>>>> ikigailabs-dev
         dttm_col = columns_by_name.get(granularity) if granularity else None
 
         if need_groupby:
@@ -1075,15 +1072,9 @@ class SqlaTable(Model, BaseDatasource):  # pylint: disable=too-many-public-metho
             columns = groupby or columns
             for selected in columns:
                 # if groupby field/expr equals granularity field/expr
-<<<<<<< HEAD
                 if selected == granularity:
                     sqla_col = columns_by_name[selected]
                     outer = sqla_col.get_timestamp_expression(time_grain, selected)
-=======
-                table_col = columns_by_name.get(selected)
-                if table_col and table_col.type_generic == GenericDataType.TEMPORAL:
-                    outer = table_col.get_timestamp_expression(time_grain, selected)
->>>>>>> ikigailabs-dev
                 # if groupby field equals a selected column
                 elif table_col:
                     outer = table_col.get_sqla_col()
@@ -1302,7 +1293,6 @@ class SqlaTable(Model, BaseDatasource):  # pylint: disable=too-many-public-metho
         if row_offset:
             qry = qry.offset(row_offset)
 
-<<<<<<< HEAD
         if (
             is_timeseries  # pylint: disable=too-many-boolean-expressions
             and timeseries_limit
@@ -1311,10 +1301,6 @@ class SqlaTable(Model, BaseDatasource):  # pylint: disable=too-many-public-metho
             and dttm_col
         ):
             if db_engine_spec.allows_joins:
-=======
-        if series_limit and groupby_series_columns:
-            if db_engine_spec.allows_joins and db_engine_spec.allows_subqueries:
->>>>>>> ikigailabs-dev
                 # some sql dialects require for order by expressions
                 # to also be in the select clause -- others, e.g. vertica,
                 # require a unique inner alias

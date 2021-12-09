@@ -26,16 +26,12 @@ import { NO_TIME_RANGE, TIME_FILTER_MAP } from 'src/explore/constants';
 import { getChartIdsInFilterScope } from 'src/dashboard/util/activeDashboardFilters';
 import { ChartConfiguration, Filters } from 'src/dashboard/reducers/types';
 import { DataMaskStateWithId, DataMaskType } from 'src/dataMask/types';
-<<<<<<< HEAD
 import {
   ensureIsArray,
   FeatureFlag,
   FilterState,
   isFeatureEnabled,
 } from '@superset-ui/core';
-=======
-import { areObjectsEqual } from 'src/reduxUtils';
->>>>>>> ikigailabs-dev
 import { Layout } from '../../types';
 import { getTreeCheckedItems } from '../nativeFilters/FiltersConfigModal/FiltersConfigForm/FilterScope/utils';
 

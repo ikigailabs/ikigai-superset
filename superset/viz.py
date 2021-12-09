@@ -1260,11 +1260,7 @@ class NVD3TimeSeriesViz(NVD3Viz):
         query_obj = super().query_obj()
         sort_by = self.form_data.get(
             "timeseries_limit_metric"
-<<<<<<< HEAD
         ) or utils.get_first_metric_name(d.get("metrics") or [])
-=======
-        ) or utils.get_first_metric_name(query_obj.get("metrics") or [])
->>>>>>> ikigailabs-dev
         is_asc = not self.form_data.get("order_desc")
         if sort_by:
             sort_by_label = utils.get_metric_name(sort_by)
@@ -2141,13 +2137,8 @@ class FilterBoxViz(BaseViz):
                         for row in df.itertuples(index=False)
                     ]
             else:
-<<<<<<< HEAD
                 d[col] = []
         return d
-=======
-                data[col] = []
-        return data
->>>>>>> ikigailabs-dev
 
 
 class ParallelCoordinatesViz(BaseViz):
@@ -2531,11 +2522,7 @@ class BaseDeckGLViz(BaseViz):
             filter_ = simple_filter_to_adhoc(
                 {"col": column, "op": "IS NOT NULL", "val": ""}
             )
-<<<<<<< HEAD
             fd["adhoc_filters"].append(filter_)
-=======
-            self.form_data["adhoc_filters"].append(filter_)
->>>>>>> ikigailabs-dev
 
     def query_obj(self) -> QueryObjectDict:
         # add NULL filters

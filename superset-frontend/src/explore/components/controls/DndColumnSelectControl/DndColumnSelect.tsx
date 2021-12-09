@@ -16,13 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-<<<<<<< HEAD
 import React, { useCallback, useMemo } from 'react';
 import { tn } from '@superset-ui/core';
-=======
-import React, { useCallback, useMemo, useState } from 'react';
-import { FeatureFlag, isFeatureEnabled, tn } from '@superset-ui/core';
->>>>>>> ikigailabs-dev
 import { ColumnMeta } from '@superset-ui/chart-controls';
 import { isEmpty } from 'lodash';
 import DndSelectLabel from 'src/explore/components/controls/DndColumnSelectControl/DndSelectLabel';
@@ -30,14 +25,8 @@ import OptionWrapper from 'src/explore/components/controls/DndColumnSelectContro
 import { OptionSelector } from 'src/explore/components/controls/DndColumnSelectControl/utils';
 import { DatasourcePanelDndItem } from 'src/explore/components/DatasourcePanel/types';
 import { DndItemType } from 'src/explore/components/DndItemType';
-<<<<<<< HEAD
 import { StyledColumnOption } from 'src/explore/components/optionRenderers';
 import { useComponentDidUpdate } from 'src/common/hooks/useComponentDidUpdate';
-=======
-import { useComponentDidUpdate } from 'src/common/hooks/useComponentDidUpdate';
-import ColumnSelectPopoverTrigger from './ColumnSelectPopoverTrigger';
-import { DndControlProps } from './types';
->>>>>>> ikigailabs-dev
 
 export type DndColumnSelectProps = DndControlProps<string> & {
   options: Record<string, ColumnMeta>;
@@ -216,7 +205,6 @@ export function DndColumnSelect(props: DndColumnSelectProps) {
     : tn('Drop column here', 'Drop columns here', multi ? 2 : 1);
 
   return (
-<<<<<<< HEAD
     <DndSelectLabel<string | string[], ColumnMeta[]>
       onDrop={onDrop}
       canDrop={canDrop}
@@ -229,33 +217,5 @@ export function DndColumnSelect(props: DndColumnSelectProps) {
       }
       {...props}
     />
-=======
-    <div>
-      <DndSelectLabel
-        onDrop={onDrop}
-        canDrop={canDrop}
-        valuesRenderer={valuesRenderer}
-        accept={DndItemType.Column}
-        displayGhostButton={multi || optionSelector.values.length === 0}
-        ghostButtonText={ghostButtonText || defaultGhostButtonText}
-        onClickGhostButton={
-          isFeatureEnabled(FeatureFlag.ENABLE_DND_WITH_CLICK_UX)
-            ? openPopover
-            : undefined
-        }
-        {...props}
-      />
-      <ColumnSelectPopoverTrigger
-        columns={popoverOptions}
-        onColumnEdit={addNewColumnWithPopover}
-        isControlledComponent
-        togglePopover={togglePopover}
-        closePopover={closePopover}
-        visible={newColumnPopoverVisible}
-      >
-        <div />
-      </ColumnSelectPopoverTrigger>
-    </div>
->>>>>>> ikigailabs-dev
   );
 }

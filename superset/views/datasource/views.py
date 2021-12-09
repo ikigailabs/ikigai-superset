@@ -189,11 +189,6 @@ class Datasource(BaseSupersetView):
                     table_name=params["table_name"],
                     schema_name=params["schema_name"],
                 )
-<<<<<<< HEAD:superset/views/datasource/views.py
         except (NoResultFound, NoSuchTableError):
             raise DatasetNotFoundError
-=======
-        except (NoResultFound, NoSuchTableError) as ex:
-            raise DatasetNotFoundError() from ex
->>>>>>> ikigailabs-dev:superset/views/datasource/views.py
         return self.json_response(external_metadata)

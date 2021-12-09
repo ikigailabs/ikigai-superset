@@ -121,16 +121,7 @@ const StyledLabelWrapper = styled.div`
 const checkboxGenerator = (d, onChange) => (
   <CheckboxControl value={d} onChange={onChange} />
 );
-<<<<<<< HEAD
 const DATA_TYPES = ['STRING', 'NUMERIC', 'DATETIME', 'BOOLEAN'];
-=======
-const DATA_TYPES = [
-  { value: 'STRING', label: 'STRING' },
-  { value: 'NUMERIC', label: 'NUMERIC' },
-  { value: 'DATETIME', label: 'DATETIME' },
-  { value: 'BOOLEAN', label: 'BOOLEAN' },
-];
->>>>>>> ikigailabs-dev
 
 const DATASOURCE_TYPES_ARR = [
   { key: 'physical', label: t('Physical (table or view)') },

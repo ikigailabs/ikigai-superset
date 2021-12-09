@@ -898,11 +898,6 @@ export function updateSavedQuery(query) {
 
 export function queryEditorSetSql(queryEditor, sql) {
   return function (dispatch) {
-<<<<<<< HEAD
-=======
-    // saved query and set tab state use this action
-    dispatch({ type: QUERY_EDITOR_SET_SQL, queryEditor, sql });
->>>>>>> ikigailabs-dev
     if (isFeatureEnabled(FeatureFlag.SQLLAB_BACKEND_PERSISTENCE)) {
       return SupersetClient.put({
         endpoint: encodeURI(`/tabstateview/${queryEditor.id}`),
@@ -919,11 +914,7 @@ export function queryEditorSetSql(queryEditor, sql) {
         ),
       );
     }
-<<<<<<< HEAD
     return dispatch({ type: QUERY_EDITOR_SET_SQL, queryEditor, sql });
-=======
-    return Promise.resolve();
->>>>>>> ikigailabs-dev
   };
 }
 

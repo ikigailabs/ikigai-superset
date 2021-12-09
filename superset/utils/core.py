@@ -101,18 +101,7 @@ from superset.exceptions import (
     SupersetException,
     SupersetTimeoutException,
 )
-<<<<<<< HEAD
 from superset.typing import AdhocMetric, FilterValues, FlaskResponse, FormData, Metric
-=======
-from superset.typing import (
-    AdhocMetric,
-    AdhocMetricColumn,
-    FilterValues,
-    FlaskResponse,
-    FormData,
-    Metric,
-)
->>>>>>> ikigailabs-dev
 from superset.utils.dates import datetime_to_epoch, EPOCH
 from superset.utils.hashing import md5_sha_from_dict, md5_sha_from_str
 
@@ -1103,17 +1092,10 @@ def simple_filter_to_adhoc(
     if filter_clause.get("isExtra"):
         result["isExtra"] = True
     result["filterOptionName"] = md5_sha_from_dict(cast(Dict[Any, Any], result))
-<<<<<<< HEAD
 
     return result
 
 
-=======
-
-    return result
-
-
->>>>>>> ikigailabs-dev
 def form_data_to_adhoc(form_data: Dict[str, Any], clause: str) -> AdhocFilterClause:
     if clause not in ("where", "having"):
         raise ValueError(__("Unsupported clause type: %(clause)s", clause=clause))
@@ -1169,13 +1151,9 @@ def merge_extra_form_data(form_data: Dict[str, Any]) -> None:
     )
     if append_filters:
         adhoc_filters.extend(
-<<<<<<< HEAD
             simple_filter_to_adhoc(
                 {"isExtra": True, **fltr}  # type: ignore
             )
-=======
-            simple_filter_to_adhoc({"isExtra": True, **fltr})  # type: ignore
->>>>>>> ikigailabs-dev
             for fltr in append_filters
             if fltr
         )

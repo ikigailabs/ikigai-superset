@@ -236,10 +236,7 @@ const MetricsControl = ({
           datasource={datasource}
           savedMetric={emptySavedMetric}
           datasourceType={datasourceType}
-<<<<<<< HEAD
           createNew
-=======
->>>>>>> ikigailabs-dev
         >
           {trigger}
         </AdhocMetricPopoverTrigger>

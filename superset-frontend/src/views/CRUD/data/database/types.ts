@@ -45,22 +45,11 @@ export type DatabaseObject = {
     password?: string;
     encryption?: boolean;
     credentials_info?: string;
-<<<<<<< HEAD
     query?: Record<string, string>;
     catalog?: Record<string, string>;
   };
   configuration_method: CONFIGURATION_METHOD;
   engine?: string;
-=======
-    service_account_info?: string;
-    query?: Record<string, string>;
-    catalog?: Record<string, string>;
-    properties?: Record<string, any>;
-  };
-  configuration_method: CONFIGURATION_METHOD;
-  engine?: string;
-  paramProperties?: Record<string, any>;
->>>>>>> ikigailabs-dev
 
   // Performance
   cache_timeout?: string;

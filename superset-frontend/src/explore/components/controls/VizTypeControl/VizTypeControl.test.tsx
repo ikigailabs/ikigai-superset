@@ -113,20 +113,11 @@ describe('VizTypeControl', () => {
       screen.getByTestId(getTestId('search-input')),
       'time series',
     );
-<<<<<<< HEAD
     await waitForEffects();
 
     expect(visualizations).toHaveTextContent(/Time-series Table/);
     expect(visualizations).toHaveTextContent(/Time-series Chart/);
     expect(visualizations).toHaveTextContent(/Mixed Time-Series/);
     expect(visualizations).not.toHaveTextContent(/Line Chart/);
-=======
-    await waitFor(() => {
-      expect(visualizations).toHaveTextContent(/Time-series Table/);
-      expect(visualizations).toHaveTextContent(/Time-series Chart/);
-      expect(visualizations).toHaveTextContent(/Mixed Time-Series/);
-      expect(visualizations).not.toHaveTextContent(/Line Chart/);
-    });
->>>>>>> ikigailabs-dev
   });
 });
