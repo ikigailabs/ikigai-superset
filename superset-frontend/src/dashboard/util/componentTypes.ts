@@ -28,6 +28,8 @@ export const NEW_COMPONENT_SOURCE_TYPE = 'NEW_COMPONENT_SOURCE';
 export const ROW_TYPE = 'ROW';
 export const TABS_TYPE = 'TABS';
 export const TAB_TYPE = 'TAB';
+export const IKI_TABLE_TYPE = 'IKI_TABLE';
+export const IKI_PROCESS_BUILDER_TYPE = 'IKI_PROCESS_BUILDER';
 
 export default {
   CHART_TYPE,
@@ -42,4 +44,6 @@ export default {
   ROW_TYPE,
   TABS_TYPE,
   TAB_TYPE,
+  IKI_TABLE_TYPE,
+  IKI_PROCESS_BUILDER_TYPE,
 };

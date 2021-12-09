@@ -16,12 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { useSelector } from 'react-redux';
-import { FeatureFlag, isFeatureEnabled } from 'src/featureFlags';
+// import { useSelector } from 'react-redux';
+// import { FeatureFlag, isFeatureEnabled } from 'src/featureFlags';
 import { useEffect, useState } from 'react';
 import { URL_PARAMS } from 'src/constants';
 import { getUrlParam } from 'src/utils/urlUtils';
-import { RootState } from 'src/dashboard/types';
+// import { RootState } from 'src/dashboard/types';
 import {
   useFilters,
   useNativeFiltersDataMask,
@@ -34,20 +34,21 @@ export const useNativeFilters = () => {
   const [dashboardFiltersOpen, setDashboardFiltersOpen] = useState(
     getUrlParam(URL_PARAMS.showFilters) ?? true,
   );
-  const showNativeFilters = useSelector<RootState, boolean>(
+  /* const showNativeFilters = useSelector<RootState, boolean>(
     state => state.dashboardInfo.metadata?.show_native_filters,
-  );
-  const canEdit = useSelector<RootState, boolean>(
+  ); */
+  /* const canEdit = useSelector<RootState, boolean>(
     ({ dashboardInfo }) => dashboardInfo.dash_edit_perm,
-  );
+  ); */
 
   const filters = useFilters();
   const filterValues = Object.values<Filter>(filters);
 
-  const nativeFiltersEnabled =
+  /* const nativeFiltersEnabled =
     showNativeFilters &&
     isFeatureEnabled(FeatureFlag.DASHBOARD_NATIVE_FILTERS) &&
-    (canEdit || (!canEdit && filterValues.length !== 0));
+    (canEdit || (!canEdit && filterValues.length !== 0)); */
+  const nativeFiltersEnabled = false;
 
   const requiredFirstFilter = filterValues.filter(
     filter => filter.requiredFirst,

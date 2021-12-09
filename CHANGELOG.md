@@ -17,6 +17,7 @@ specific language governing permissions and limitations
 under the License.
 -->
 ## Change Log
+<<<<<<< HEAD
 ### 1.3.2
 **Fixes**
 - [#16928](https://github.com/apache/superset/pull/16928) fix: handle mixed time-series error (@yougyoung94)
@@ -68,6 +69,9 @@ under the License.
 - [#16193](https://github.com/apache/superset/pull/16193) refactor: external metadata fetch API (@zhaoyongjie)
 
 ### 1.3.0 (Fri Aug 13 20:41:03 2021 -0700)
+=======
+### 1.3.0 (2021-08-13)
+>>>>>>> ikigailabs-dev
 **Database Migrations**
 - [#16160](https://github.com/apache/superset/pull/16160) feat: change query predicate to text (@eschutho)
 - [#16077](https://github.com/apache/superset/pull/16077) fix: ensure that users viewing chart does not automatically save edit data (@pkdotson)

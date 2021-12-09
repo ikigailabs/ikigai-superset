@@ -43,12 +43,14 @@ import {
   ROW_TYPE,
   TABS_TYPE,
   TAB_TYPE,
+  IKI_TABLE_TYPE,
+  IKI_PROCESS_BUILDER_TYPE,
 } from './componentTypes';
 
 import { DASHBOARD_ROOT_DEPTH as rootDepth } from './constants';
 
 const depthOne = rootDepth + 1;
-const depthTwo = rootDepth + 2;
+// const depthTwo = rootDepth + 2; // Meantime no need
 const depthThree = rootDepth + 3;
 const depthFour = rootDepth + 4;
 const depthFive = rootDepth + 5;
@@ -63,6 +65,8 @@ const parentMaxDepthLookup = {
   [DASHBOARD_GRID_TYPE]: {
     [CHART_TYPE]: depthOne,
     [MARKDOWN_TYPE]: depthOne,
+    [IKI_TABLE_TYPE]: depthOne,
+    [IKI_PROCESS_BUILDER_TYPE]: depthOne,
     [COLUMN_TYPE]: depthOne,
     [DIVIDER_TYPE]: depthOne,
     [HEADER_TYPE]: depthOne,
@@ -77,25 +81,30 @@ const parentMaxDepthLookup = {
   },
 
   [TABS_TYPE]: {
-    [TAB_TYPE]: depthTwo,
+    [TAB_TYPE]: depthThree,
   },
 
   [TAB_TYPE]: {
-    [CHART_TYPE]: depthTwo,
-    [MARKDOWN_TYPE]: depthTwo,
-    [COLUMN_TYPE]: depthTwo,
-    [DIVIDER_TYPE]: depthTwo,
-    [HEADER_TYPE]: depthTwo,
-    [ROW_TYPE]: depthTwo,
-    [TABS_TYPE]: depthTwo,
+    [CHART_TYPE]: depthFive,
+    [MARKDOWN_TYPE]: depthFive,
+    [IKI_TABLE_TYPE]: depthFive,
+    [IKI_PROCESS_BUILDER_TYPE]: depthFive,
+    [COLUMN_TYPE]: depthThree,
+    [DIVIDER_TYPE]: depthFive,
+    [HEADER_TYPE]: depthFive,
+    [ROW_TYPE]: depthThree,
+    [TABS_TYPE]: depthThree,
   },
 
   [COLUMN_TYPE]: {
     [CHART_TYPE]: depthFive,
     [HEADER_TYPE]: depthFive,
     [MARKDOWN_TYPE]: depthFive,
+    [IKI_TABLE_TYPE]: depthFive,
+    [IKI_PROCESS_BUILDER_TYPE]: depthFive,
     [ROW_TYPE]: depthThree,
     [DIVIDER_TYPE]: depthThree,
+    [TABS_TYPE]: depthThree,
   },
 
   // these have no valid children
@@ -103,6 +112,8 @@ const parentMaxDepthLookup = {
   [DIVIDER_TYPE]: {},
   [HEADER_TYPE]: {},
   [MARKDOWN_TYPE]: {},
+  [IKI_TABLE_TYPE]: {},
+  [IKI_PROCESS_BUILDER_TYPE]: {},
 };
 
 interface IsValidChildProps {

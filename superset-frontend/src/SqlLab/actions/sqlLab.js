@@ -23,15 +23,15 @@ import invert from 'lodash/invert';
 import mapKeys from 'lodash/mapKeys';
 import { isFeatureEnabled, FeatureFlag } from 'src/featureFlags';
 
-import { now } from '../../modules/dates';
+import { now } from 'src/modules/dates';
 import {
   addDangerToast as addDangerToastAction,
   addInfoToast as addInfoToastAction,
   addSuccessToast as addSuccessToastAction,
   addWarningToast as addWarningToastAction,
-} from '../../messageToasts/actions/index';
-import { getClientErrorObject } from '../../utils/getClientErrorObject';
-import COMMON_ERR_MESSAGES from '../../utils/errorMessages';
+} from 'src/components/MessageToasts/actions';
+import { getClientErrorObject } from 'src/utils/getClientErrorObject';
+import COMMON_ERR_MESSAGES from 'src/utils/errorMessages';
 
 export const RESET_STATE = 'RESET_STATE';
 export const ADD_QUERY_EDITOR = 'ADD_QUERY_EDITOR';
@@ -898,6 +898,11 @@ export function updateSavedQuery(query) {
 
 export function queryEditorSetSql(queryEditor, sql) {
   return function (dispatch) {
+<<<<<<< HEAD
+=======
+    // saved query and set tab state use this action
+    dispatch({ type: QUERY_EDITOR_SET_SQL, queryEditor, sql });
+>>>>>>> ikigailabs-dev
     if (isFeatureEnabled(FeatureFlag.SQLLAB_BACKEND_PERSISTENCE)) {
       return SupersetClient.put({
         endpoint: encodeURI(`/tabstateview/${queryEditor.id}`),
@@ -914,7 +919,11 @@ export function queryEditorSetSql(queryEditor, sql) {
         ),
       );
     }
+<<<<<<< HEAD
     return dispatch({ type: QUERY_EDITOR_SET_SQL, queryEditor, sql });
+=======
+    return Promise.resolve();
+>>>>>>> ikigailabs-dev
   };
 }
 

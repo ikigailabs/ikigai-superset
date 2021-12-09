@@ -15,71 +15,241 @@
 # specific language governing permissions and limitations
 # under the License.
 
-import copy
-from typing import Any, Dict
+import pandas as pd
 
+<<<<<<< HEAD
 import pandas as pd
 
 from superset.charts.post_processing import apply_post_process, pivot_df
 from superset.utils.core import GenericDataType, QueryStatus
+=======
+from superset.charts.post_processing import pivot_df
+>>>>>>> ikigailabs-dev
 
-RESULT: Dict[str, Any] = {
-    "query_context": None,
-    "queries": [
+
+def test_pivot_df_no_cols_no_rows_single_metric():
+    """
+    Pivot table when no cols/rows and 1 metric are selected.
+    """
+    # when no cols/rows are selected there are no groupbys in the query,
+    # and the data has only the metric(s)
+    df = pd.DataFrame.from_dict({"SUM(num)": {0: 80679663}})
+    assert (
+        df.to_markdown()
+        == """
+|    |    SUM(num) |
+|---:|------------:|
+|  0 | 8.06797e+07 |
+    """.strip()
+    )
+
+    pivoted = pivot_df(
+        df,
+        rows=[],
+        columns=[],
+        metrics=["SUM(num)"],
+        aggfunc="Sum",
+        transpose_pivot=False,
+        combine_metrics=False,
+        show_rows_total=False,
+        show_columns_total=False,
+        apply_metrics_on_rows=False,
+    )
+    assert (
+        pivoted.to_markdown()
+        == """
+|                  |   ('SUM(num)',) |
+|:-----------------|----------------:|
+| ('Total (Sum)',) |     8.06797e+07 |
+    """.strip()
+    )
+
+    # tranpose_pivot and combine_metrics do nothing in this case
+    pivoted = pivot_df(
+        df,
+        rows=[],
+        columns=[],
+        metrics=["SUM(num)"],
+        aggfunc="Sum",
+        transpose_pivot=True,
+        combine_metrics=True,
+        show_rows_total=False,
+        show_columns_total=False,
+        apply_metrics_on_rows=False,
+    )
+    assert (
+        pivoted.to_markdown()
+        == """
+|                  |   ('SUM(num)',) |
+|:-----------------|----------------:|
+| ('Total (Sum)',) |     8.06797e+07 |
+    """.strip()
+    )
+
+    # apply_metrics_on_rows will pivot the table, moving the metrics
+    # to rows
+    pivoted = pivot_df(
+        df,
+        rows=[],
+        columns=[],
+        metrics=["SUM(num)"],
+        aggfunc="Sum",
+        transpose_pivot=True,
+        combine_metrics=True,
+        show_rows_total=False,
+        show_columns_total=False,
+        apply_metrics_on_rows=True,
+    )
+    assert (
+        pivoted.to_markdown()
+        == """
+|               |   ('Total (Sum)',) |
+|:--------------|-------------------:|
+| ('SUM(num)',) |        8.06797e+07 |
+    """.strip()
+    )
+
+    # showing totals
+    pivoted = pivot_df(
+        df,
+        rows=[],
+        columns=[],
+        metrics=["SUM(num)"],
+        aggfunc="Sum",
+        transpose_pivot=True,
+        combine_metrics=True,
+        show_rows_total=True,
+        show_columns_total=True,
+        apply_metrics_on_rows=False,
+    )
+    assert (
+        pivoted.to_markdown()
+        == """
+|                  |   ('SUM(num)',) |   ('Total (Sum)',) |
+|:-----------------|----------------:|-------------------:|
+| ('Total (Sum)',) |     8.06797e+07 |        8.06797e+07 |
+    """.strip()
+    )
+
+
+def test_pivot_df_no_cols_no_rows_two_metrics():
+    """
+    Pivot table when no cols/rows and 2 metrics are selected.
+    """
+    # when no cols/rows are selected there are no groupbys in the query,
+    # and the data has only the metrics
+    df = pd.DataFrame.from_dict({"SUM(num)": {0: 80679663}, "MAX(num)": {0: 37296}})
+    assert (
+        df.to_markdown()
+        == """
+|    |    SUM(num) |   MAX(num) |
+|---:|------------:|-----------:|
+|  0 | 8.06797e+07 |      37296 |
+    """.strip()
+    )
+
+    pivoted = pivot_df(
+        df,
+        rows=[],
+        columns=[],
+        metrics=["SUM(num)", "MAX(num)"],
+        aggfunc="Sum",
+        transpose_pivot=False,
+        combine_metrics=False,
+        show_rows_total=False,
+        show_columns_total=False,
+        apply_metrics_on_rows=False,
+    )
+    assert (
+        pivoted.to_markdown()
+        == """
+|                  |   ('SUM(num)',) |   ('MAX(num)',) |
+|:-----------------|----------------:|----------------:|
+| ('Total (Sum)',) |     8.06797e+07 |           37296 |
+    """.strip()
+    )
+
+    # tranpose_pivot and combine_metrics do nothing in this case
+    pivoted = pivot_df(
+        df,
+        rows=[],
+        columns=[],
+        metrics=["SUM(num)", "MAX(num)"],
+        aggfunc="Sum",
+        transpose_pivot=True,
+        combine_metrics=True,
+        show_rows_total=False,
+        show_columns_total=False,
+        apply_metrics_on_rows=False,
+    )
+    assert (
+        pivoted.to_markdown()
+        == """
+|                  |   ('SUM(num)',) |   ('MAX(num)',) |
+|:-----------------|----------------:|----------------:|
+| ('Total (Sum)',) |     8.06797e+07 |           37296 |
+    """.strip()
+    )
+
+    # apply_metrics_on_rows will pivot the table, moving the metrics
+    # to rows
+    pivoted = pivot_df(
+        df,
+        rows=[],
+        columns=[],
+        metrics=["SUM(num)", "MAX(num)"],
+        aggfunc="Sum",
+        transpose_pivot=True,
+        combine_metrics=True,
+        show_rows_total=False,
+        show_columns_total=False,
+        apply_metrics_on_rows=True,
+    )
+    assert (
+        pivoted.to_markdown()
+        == """
+|               |   ('Total (Sum)',) |
+|:--------------|-------------------:|
+| ('SUM(num)',) |        8.06797e+07 |
+| ('MAX(num)',) |    37296           |
+    """.strip()
+    )
+
+    # when showing totals we only add a column, since adding a row
+    # would be redundant
+    pivoted = pivot_df(
+        df,
+        rows=[],
+        columns=[],
+        metrics=["SUM(num)", "MAX(num)"],
+        aggfunc="Sum",
+        transpose_pivot=True,
+        combine_metrics=True,
+        show_rows_total=True,
+        show_columns_total=True,
+        apply_metrics_on_rows=False,
+    )
+    assert (
+        pivoted.to_markdown()
+        == """
+|                  |   ('SUM(num)',) |   ('MAX(num)',) |   ('Total (Sum)',) |
+|:-----------------|----------------:|----------------:|-------------------:|
+| ('Total (Sum)',) |     8.06797e+07 |           37296 |         8.0717e+07 |
+    """.strip()
+    )
+
+
+def test_pivot_df_single_row_two_metrics():
+    """
+    Pivot table when a single column and 2 metrics are selected.
+    """
+    df = pd.DataFrame.from_dict(
         {
-            "cache_key": "1bd3ab8c01e98a0e349fb61bc76d9b90",
-            "cached_dttm": None,
-            "cache_timeout": 86400,
-            "annotation_data": {},
-            "error": None,
-            "is_cached": None,
-            "query": """SELECT state AS state,
-       gender AS gender,
-       sum(num) AS \"Births\"
-FROM birth_names
-WHERE ds >= TO_TIMESTAMP('1921-07-28 00:00:00.000000', 'YYYY-MM-DD HH24:MI:SS.US')
-  AND ds < TO_TIMESTAMP('2021-07-28 10:39:44.000000', 'YYYY-MM-DD HH24:MI:SS.US')
-GROUP BY state,
-         gender
-LIMIT 50000;
-
-""",
-            "status": QueryStatus.SUCCESS,
-            "stacktrace": None,
-            "rowcount": 22,
-            "colnames": ["state", "gender", "Births"],
-            "coltypes": [
-                GenericDataType.STRING,
-                GenericDataType.STRING,
-                GenericDataType.NUMERIC,
-            ],
-            "data": """state,gender,Births
-OH,boy,2376385
-TX,girl,2313186
-MA,boy,1285126
-MA,girl,842146
-PA,boy,2390275
-NY,boy,3543961
-FL,boy,1968060
-TX,boy,3311985
-NJ,boy,1486126
-CA,girl,3567754
-CA,boy,5430796
-IL,girl,1614427
-FL,girl,1312593
-NY,girl,2280733
-NJ,girl,992702
-MI,girl,1326229
-other,girl,15058341
-other,boy,22044909
-MI,boy,1938321
-IL,boy,2357411
-PA,girl,1615383
-OH,girl,1622814
-            """,
-            "applied_filters": [],
-            "rejected_filters": [],
+            "gender": {0: "girl", 1: "boy"},
+            "SUM(num)": {0: 118065, 1: 47123},
+            "MAX(num)": {0: 2588, 1: 1280},
         }
+<<<<<<< HEAD
     ],
 }
 
@@ -498,6 +668,8 @@ def test_pivot_df_single_row_two_metrics():
             "SUM(num)": {0: 118065, 1: 47123},
             "MAX(num)": {0: 2588, 1: 1280},
         }
+=======
+>>>>>>> ikigailabs-dev
     )
     assert (
         df.to_markdown()
@@ -524,10 +696,17 @@ def test_pivot_df_single_row_two_metrics():
     assert (
         pivoted.to_markdown()
         == """
+<<<<<<< HEAD
 | gender   |   SUM(num) |   MAX(num) |
 |:---------|-----------:|-----------:|
 | boy      |      47123 |       1280 |
 | girl     |     118065 |       2588 |
+=======
+|           |   ('SUM(num)',) |   ('MAX(num)',) |
+|:----------|----------------:|----------------:|
+| ('boy',)  |           47123 |            1280 |
+| ('girl',) |          118065 |            2588 |
+>>>>>>> ikigailabs-dev
     """.strip()
     )
 
@@ -547,9 +726,15 @@ def test_pivot_df_single_row_two_metrics():
     assert (
         pivoted.to_markdown()
         == """
+<<<<<<< HEAD
 | metric      |   ('SUM(num)', 'boy') |   ('SUM(num)', 'girl') |   ('MAX(num)', 'boy') |   ('MAX(num)', 'girl') |
 |:------------|----------------------:|-----------------------:|----------------------:|-----------------------:|
 | Total (Sum) |                 47123 |                 118065 |                  1280 |                   2588 |
+=======
+|                  |   ('SUM(num)', 'boy') |   ('SUM(num)', 'girl') |   ('MAX(num)', 'boy') |   ('MAX(num)', 'girl') |
+|:-----------------|----------------------:|-----------------------:|----------------------:|-----------------------:|
+| ('Total (Sum)',) |                 47123 |                 118065 |                  1280 |                   2588 |
+>>>>>>> ikigailabs-dev
     """.strip()
     )
 
@@ -569,10 +754,17 @@ def test_pivot_df_single_row_two_metrics():
     assert (
         pivoted.to_markdown()
         == """
+<<<<<<< HEAD
 | gender   |   SUM(num) |   MAX(num) |
 |:---------|-----------:|-----------:|
 | boy      |      47123 |       1280 |
 | girl     |     118065 |       2588 |
+=======
+|           |   ('SUM(num)',) |   ('MAX(num)',) |
+|:----------|----------------:|----------------:|
+| ('boy',)  |           47123 |            1280 |
+| ('girl',) |          118065 |            2588 |
+>>>>>>> ikigailabs-dev
     """.strip()
     )
 
@@ -616,6 +808,7 @@ def test_pivot_df_single_row_two_metrics():
     assert (
         pivoted.to_markdown()
         == """
+<<<<<<< HEAD
 |                          |   Total (Sum) |
 |:-------------------------|--------------:|
 | ('SUM(num)', 'boy')      |         47123 |
@@ -625,6 +818,17 @@ def test_pivot_df_single_row_two_metrics():
 | ('MAX(num)', 'girl')     |          2588 |
 | ('MAX(num)', 'Subtotal') |          3868 |
 | ('Total (Sum)', '')      |        169056 |
+=======
+|                          |   ('Total (Sum)',) |
+|:-------------------------|-------------------:|
+| ('SUM(num)', 'boy')      |              47123 |
+| ('SUM(num)', 'girl')     |             118065 |
+| ('SUM(num)', 'Subtotal') |             165188 |
+| ('MAX(num)', 'boy')      |               1280 |
+| ('MAX(num)', 'girl')     |               2588 |
+| ('MAX(num)', 'Subtotal') |               3868 |
+| ('Total (Sum)', '')      |             169056 |
+>>>>>>> ikigailabs-dev
     """.strip()
     )
 
@@ -644,6 +848,7 @@ def test_pivot_df_single_row_two_metrics():
     assert (
         pivoted.to_markdown()
         == """
+<<<<<<< HEAD
 |                      |   Total (Sum) |
 |:---------------------|--------------:|
 | ('boy', 'SUM(num)')  |         47123 |
@@ -653,6 +858,17 @@ def test_pivot_df_single_row_two_metrics():
 | ('girl', 'MAX(num)') |          2588 |
 | ('girl', 'Subtotal') |        120653 |
 | ('Total (Sum)', '')  |        169056 |
+=======
+|                      |   ('Total (Sum)',) |
+|:---------------------|-------------------:|
+| ('boy', 'SUM(num)')  |              47123 |
+| ('boy', 'MAX(num)')  |               1280 |
+| ('boy', 'Subtotal')  |              48403 |
+| ('girl', 'SUM(num)') |             118065 |
+| ('girl', 'MAX(num)') |               2588 |
+| ('girl', 'Subtotal') |             120653 |
+| ('Total (Sum)', '')  |             169056 |
+>>>>>>> ikigailabs-dev
     """.strip()
     )
 
@@ -797,10 +1013,17 @@ def test_pivot_df_complex():
     assert (
         pivoted.to_markdown()
         == """
+<<<<<<< HEAD
 | state   |   ('SUM(num)', 'boy', 'Edward') |   ('SUM(num)', 'boy', 'Tony') |   ('SUM(num)', 'girl', 'Amy') |   ('SUM(num)', 'girl', 'Cindy') |   ('SUM(num)', 'girl', 'Dawn') |   ('SUM(num)', 'girl', 'Sophia') |   ('MAX(num)', 'boy', 'Edward') |   ('MAX(num)', 'boy', 'Tony') |   ('MAX(num)', 'girl', 'Amy') |   ('MAX(num)', 'girl', 'Cindy') |   ('MAX(num)', 'girl', 'Dawn') |   ('MAX(num)', 'girl', 'Sophia') |
 |:--------|--------------------------------:|------------------------------:|------------------------------:|--------------------------------:|-------------------------------:|---------------------------------:|--------------------------------:|------------------------------:|------------------------------:|--------------------------------:|-------------------------------:|---------------------------------:|
 | CA      |                           31290 |                          3765 |                         45426 |                           14149 |                          11403 |                            18859 |                            1280 |                           598 |                          2227 |                             842 |                           1157 |                             2588 |
 | FL      |                            9395 |                          2673 |                         14740 |                            1218 |                           5089 |                             7181 |                             389 |                           247 |                           854 |                             217 |                            461 |                             1187 |
+=======
+|         |   ('SUM(num)', 'boy', 'Edward') |   ('SUM(num)', 'boy', 'Tony') |   ('SUM(num)', 'girl', 'Amy') |   ('SUM(num)', 'girl', 'Cindy') |   ('SUM(num)', 'girl', 'Dawn') |   ('SUM(num)', 'girl', 'Sophia') |   ('MAX(num)', 'boy', 'Edward') |   ('MAX(num)', 'boy', 'Tony') |   ('MAX(num)', 'girl', 'Amy') |   ('MAX(num)', 'girl', 'Cindy') |   ('MAX(num)', 'girl', 'Dawn') |   ('MAX(num)', 'girl', 'Sophia') |
+|:--------|--------------------------------:|------------------------------:|------------------------------:|--------------------------------:|-------------------------------:|---------------------------------:|--------------------------------:|------------------------------:|------------------------------:|--------------------------------:|-------------------------------:|---------------------------------:|
+| ('CA',) |                           31290 |                          3765 |                         45426 |                           14149 |                          11403 |                            18859 |                            1280 |                           598 |                          2227 |                             842 |                           1157 |                             2588 |
+| ('FL',) |                            9395 |                          2673 |                         14740 |                            1218 |                           5089 |                             7181 |                             389 |                           247 |                           854 |                             217 |                            461 |                             1187 |
+>>>>>>> ikigailabs-dev
     """.strip()
     )
 
@@ -877,6 +1100,7 @@ def test_pivot_df_complex():
     assert (
         pivoted.to_markdown()
         == """
+<<<<<<< HEAD
 |                                |    CA |    FL |
 |:-------------------------------|------:|------:|
 | ('SUM(num)', 'boy', 'Edward')  | 31290 |  9395 |
@@ -891,6 +1115,22 @@ def test_pivot_df_complex():
 | ('MAX(num)', 'girl', 'Cindy')  |   842 |   217 |
 | ('MAX(num)', 'girl', 'Dawn')   |  1157 |   461 |
 | ('MAX(num)', 'girl', 'Sophia') |  2588 |  1187 |
+=======
+|                                |   ('CA',) |   ('FL',) |
+|:-------------------------------|----------:|----------:|
+| ('SUM(num)', 'boy', 'Edward')  |     31290 |      9395 |
+| ('SUM(num)', 'boy', 'Tony')    |      3765 |      2673 |
+| ('SUM(num)', 'girl', 'Amy')    |     45426 |     14740 |
+| ('SUM(num)', 'girl', 'Cindy')  |     14149 |      1218 |
+| ('SUM(num)', 'girl', 'Dawn')   |     11403 |      5089 |
+| ('SUM(num)', 'girl', 'Sophia') |     18859 |      7181 |
+| ('MAX(num)', 'boy', 'Edward')  |      1280 |       389 |
+| ('MAX(num)', 'boy', 'Tony')    |       598 |       247 |
+| ('MAX(num)', 'girl', 'Amy')    |      2227 |       854 |
+| ('MAX(num)', 'girl', 'Cindy')  |       842 |       217 |
+| ('MAX(num)', 'girl', 'Dawn')   |      1157 |       461 |
+| ('MAX(num)', 'girl', 'Sophia') |      2588 |      1187 |
+>>>>>>> ikigailabs-dev
     """.strip()
     )
 
@@ -910,6 +1150,7 @@ def test_pivot_df_complex():
     assert (
         pivoted.to_markdown()
         == """
+<<<<<<< HEAD
 |                                |    CA |    FL |
 |:-------------------------------|------:|------:|
 | ('boy', 'Edward', 'SUM(num)')  | 31290 |  9395 |
@@ -924,6 +1165,22 @@ def test_pivot_df_complex():
 | ('girl', 'Dawn', 'MAX(num)')   |  1157 |   461 |
 | ('girl', 'Sophia', 'SUM(num)') | 18859 |  7181 |
 | ('girl', 'Sophia', 'MAX(num)') |  2588 |  1187 |
+=======
+|                                |   ('CA',) |   ('FL',) |
+|:-------------------------------|----------:|----------:|
+| ('boy', 'Edward', 'SUM(num)')  |     31290 |      9395 |
+| ('boy', 'Edward', 'MAX(num)')  |      1280 |       389 |
+| ('boy', 'Tony', 'SUM(num)')    |      3765 |      2673 |
+| ('boy', 'Tony', 'MAX(num)')    |       598 |       247 |
+| ('girl', 'Amy', 'SUM(num)')    |     45426 |     14740 |
+| ('girl', 'Amy', 'MAX(num)')    |      2227 |       854 |
+| ('girl', 'Cindy', 'SUM(num)')  |     14149 |      1218 |
+| ('girl', 'Cindy', 'MAX(num)')  |       842 |       217 |
+| ('girl', 'Dawn', 'SUM(num)')   |     11403 |      5089 |
+| ('girl', 'Dawn', 'MAX(num)')   |      1157 |       461 |
+| ('girl', 'Sophia', 'SUM(num)') |     18859 |      7181 |
+| ('girl', 'Sophia', 'MAX(num)') |      2588 |      1187 |
+>>>>>>> ikigailabs-dev
     """.strip()
     )
 
@@ -940,6 +1197,10 @@ def test_pivot_df_complex():
         show_columns_total=True,
         apply_metrics_on_rows=True,
     )
+<<<<<<< HEAD
+=======
+    print(pivoted.to_markdown())
+>>>>>>> ikigailabs-dev
     assert (
         pivoted.to_markdown()
         == """

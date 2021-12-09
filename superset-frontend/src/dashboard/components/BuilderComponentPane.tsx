@@ -31,6 +31,8 @@ import NewRow from './gridComponents/new/NewRow';
 import NewTabs from './gridComponents/new/NewTabs';
 import NewMarkdown from './gridComponents/new/NewMarkdown';
 import SliceAdder from '../containers/SliceAdder';
+import NewIkiTable from './gridComponents/new/NewIkiTable';
+import NewIkiProcessBuilder from './gridComponents/new/NewIkiProcessBuilder';
 
 export interface BCPProps {
   topOffset: number;
@@ -71,6 +73,8 @@ const BuilderComponentPane: React.FC<BCPProps> = ({ topOffset = 0 }) => (
                     <NewHeader />
                     <NewMarkdown />
                     <NewDivider />
+                    <NewIkiTable />
+                    <NewIkiProcessBuilder />
                   </Tabs.TabPane>
                   <Tabs.TabPane
                     key={2}

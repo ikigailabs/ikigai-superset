@@ -29,6 +29,8 @@ import {
   ROW_TYPE as ROW,
   TABS_TYPE as TABS,
   TAB_TYPE as TAB,
+  IKI_TABLE_TYPE as IKI_TABLE,
+  IKI_PROCESS_BUILDER_TYPE as IKI_PROCESS_BUILDER,
 } from 'src/dashboard/util/componentTypes';
 
 const getIndentation = (depth: number) =>
@@ -47,42 +49,78 @@ describe('isValidChild', () => {
     const validExamples = [
       [ROOT, GRID, CHART], // chart is valid because it is wrapped in a row
       [ROOT, GRID, MARKDOWN], // markdown is valid because it is wrapped in a row
+      [ROOT, GRID, IKI_TABLE], // iki table is valid because it is wrapped in a row
+      [ROOT, GRID, IKI_PROCESS_BUILDER], // iki process builder is valid because it is wrapped in a row
       [ROOT, GRID, COLUMN], // column is valid because it is wrapped in a row
       [ROOT, GRID, HEADER],
       [ROOT, GRID, ROW, MARKDOWN],
+      [ROOT, GRID, ROW, IKI_TABLE],
+      [ROOT, GRID, ROW, IKI_PROCESS_BUILDER],
       [ROOT, GRID, ROW, CHART],
 
       [ROOT, GRID, ROW, COLUMN, HEADER],
       [ROOT, GRID, ROW, COLUMN, DIVIDER],
       [ROOT, GRID, ROW, COLUMN, CHART],
       [ROOT, GRID, ROW, COLUMN, MARKDOWN],
+      [ROOT, GRID, ROW, COLUMN, IKI_TABLE],
+      [ROOT, GRID, ROW, COLUMN, IKI_PROCESS_BUILDER],
 
       [ROOT, GRID, ROW, COLUMN, ROW, CHART],
       [ROOT, GRID, ROW, COLUMN, ROW, MARKDOWN],
+      [ROOT, GRID, ROW, COLUMN, ROW, IKI_TABLE],
+      [ROOT, GRID, ROW, COLUMN, ROW, IKI_PROCESS_BUILDER],
 
       [ROOT, GRID, ROW, COLUMN, ROW, COLUMN, CHART],
       [ROOT, GRID, ROW, COLUMN, ROW, COLUMN, MARKDOWN],
+      [ROOT, GRID, ROW, COLUMN, ROW, COLUMN, IKI_TABLE],
+      [ROOT, GRID, ROW, COLUMN, ROW, COLUMN, IKI_PROCESS_BUILDER],
       [ROOT, GRID, TABS, TAB, ROW, COLUMN, ROW, COLUMN, MARKDOWN],
+      [ROOT, GRID, TABS, TAB, ROW, COLUMN, ROW, COLUMN, IKI_TABLE],
+      [ROOT, GRID, TABS, TAB, ROW, COLUMN, ROW, COLUMN, IKI_PROCESS_BUILDER],
 
       // tab equivalents
       [ROOT, TABS, TAB, CHART],
       [ROOT, TABS, TAB, MARKDOWN],
+      [ROOT, TABS, TAB, IKI_TABLE],
+      [ROOT, TABS, TAB, IKI_PROCESS_BUILDER],
       [ROOT, TABS, TAB, COLUMN],
       [ROOT, TABS, TAB, HEADER],
       [ROOT, TABS, TAB, ROW, MARKDOWN],
+      [ROOT, TABS, TAB, ROW, IKI_TABLE],
+      [ROOT, TABS, TAB, ROW, IKI_PROCESS_BUILDER],
       [ROOT, TABS, TAB, ROW, CHART],
 
       [ROOT, TABS, TAB, ROW, COLUMN, HEADER],
       [ROOT, TABS, TAB, ROW, COLUMN, DIVIDER],
       [ROOT, TABS, TAB, ROW, COLUMN, CHART],
       [ROOT, TABS, TAB, ROW, COLUMN, MARKDOWN],
+      [ROOT, TABS, TAB, ROW, COLUMN, IKI_TABLE],
+      [ROOT, TABS, TAB, ROW, COLUMN, IKI_PROCESS_BUILDER],
 
       [ROOT, TABS, TAB, ROW, COLUMN, ROW, CHART],
       [ROOT, TABS, TAB, ROW, COLUMN, ROW, MARKDOWN],
+      [ROOT, TABS, TAB, ROW, COLUMN, ROW, IKI_TABLE],
+      [ROOT, TABS, TAB, ROW, COLUMN, ROW, IKI_PROCESS_BUILDER],
 
       [ROOT, TABS, TAB, ROW, COLUMN, ROW, COLUMN, CHART],
       [ROOT, TABS, TAB, ROW, COLUMN, ROW, COLUMN, MARKDOWN],
+      [ROOT, TABS, TAB, ROW, COLUMN, ROW, COLUMN, IKI_TABLE],
+      [ROOT, TABS, TAB, ROW, COLUMN, ROW, COLUMN, IKI_PROCESS_BUILDER],
       [ROOT, TABS, TAB, TABS, TAB, ROW, COLUMN, ROW, COLUMN, MARKDOWN],
+      [ROOT, TABS, TAB, TABS, TAB, ROW, COLUMN, ROW, COLUMN, IKI_TABLE],
+      [
+        ROOT,
+        TABS,
+        TAB,
+        TABS,
+        TAB,
+        ROW,
+        COLUMN,
+        ROW,
+        COLUMN,
+        IKI_PROCESS_BUILDER,
+      ],
+      [ROOT, GRID, ROW, COLUMN, TABS],
     ];
 
     validExamples.forEach((example, exampleIdx) => {
@@ -121,13 +159,13 @@ describe('isValidChild', () => {
       [ROOT, [DIVIDER]],
       [ROOT, [CHART]],
       [ROOT, [MARKDOWN]],
+      [ROOT, [IKI_TABLE]],
       [ROOT, GRID, [TAB]],
       [ROOT, GRID, TABS, [ROW]],
       // [ROOT, GRID, TABS, TAB, [TABS]], // @TODO this needs to be fixed
       [ROOT, GRID, ROW, [TABS]],
       [ROOT, GRID, ROW, [TAB]],
       [ROOT, GRID, ROW, [DIVIDER]],
-      [ROOT, GRID, ROW, COLUMN, [TABS]],
       [ROOT, GRID, ROW, COLUMN, [TAB]],
       [ROOT, GRID, ROW, COLUMN, ROW, [DIVIDER]],
       [ROOT, GRID, ROW, COLUMN, ROW, COLUMN, [ROW]], // too nested

@@ -20,7 +20,14 @@
 import { t, SupersetClient } from '@superset-ui/core';
 import rison from 'rison';
 import { getClientErrorObject } from 'src/utils/getClientErrorObject';
+<<<<<<< HEAD
 import { addDangerToast, addSuccessToast } from '../../messageToasts/actions';
+=======
+import {
+  addDangerToast,
+  addSuccessToast,
+} from 'src/components/MessageToasts/actions';
+>>>>>>> ikigailabs-dev
 
 export const SET_REPORT = 'SET_REPORT';
 export function setReport(report) {
@@ -98,7 +105,7 @@ const structureFetchAction = (dispatch, getState) => {
 
 export const ADD_REPORT = 'ADD_REPORT';
 
-export const addReport = report => dispatch => {
+export const addReport = report => dispatch =>
   SupersetClient.post({
     endpoint: `/api/v1/report/`,
     jsonPayload: report,
@@ -111,14 +118,21 @@ export const addReport = report => dispatch => {
       const parsedError = await getClientErrorObject(e);
       const errorMessage = parsedError.message;
       const errorArr = Object.keys(errorMessage);
+<<<<<<< HEAD
       const error = errorMessage[errorArr[0]][0];
+=======
+      const error = errorMessage[errorArr[0]];
+>>>>>>> ikigailabs-dev
       dispatch(
         addDangerToast(
           t('An error occurred while editing this report: %s', error),
         ),
       );
     });
+<<<<<<< HEAD
 };
+=======
+>>>>>>> ikigailabs-dev
 
 export const EDIT_REPORT = 'EDIT_REPORT';
 

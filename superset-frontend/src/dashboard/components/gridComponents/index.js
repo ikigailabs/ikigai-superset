@@ -25,6 +25,8 @@ import {
   ROW_TYPE,
   TAB_TYPE,
   TABS_TYPE,
+  IKI_TABLE_TYPE,
+  IKI_PROCESS_BUILDER_TYPE,
 } from '../../util/componentTypes';
 
 import ChartHolder from './ChartHolder';
@@ -35,6 +37,8 @@ import Header from './Header';
 import Row from './Row';
 import Tab from './Tab';
 import TabsConnected from './Tabs';
+import IkiTable from './IkiTable';
+import IkiProcessBuilder from './IkiProcessBuilder';
 
 export { default as ChartHolder } from './ChartHolder';
 export { default as Markdown } from './Markdown';
@@ -44,6 +48,8 @@ export { default as Header } from './Header';
 export { default as Row } from './Row';
 export { default as Tab } from './Tab';
 export { default as Tabs } from './Tabs';
+export { default as IkiTable } from './IkiTable';
+export { default as IkiProcessBuilder } from './IkiProcessBuilder';
 
 export const componentLookup = {
   [CHART_TYPE]: ChartHolder,
@@ -54,4 +60,6 @@ export const componentLookup = {
   [ROW_TYPE]: Row,
   [TAB_TYPE]: Tab,
   [TABS_TYPE]: TabsConnected,
+  [IKI_TABLE_TYPE]: IkiTable,
+  [IKI_PROCESS_BUILDER_TYPE]: IkiProcessBuilder,
 };

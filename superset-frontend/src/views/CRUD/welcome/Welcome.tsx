@@ -26,7 +26,11 @@ import {
   setInLocalStorage,
 } from 'src/utils/localStorageHelpers';
 import ListViewCard from 'src/components/ListViewCard';
+<<<<<<< HEAD
 import withToasts from 'src/messageToasts/enhancers/withToasts';
+=======
+import withToasts from 'src/components/MessageToasts/withToasts';
+>>>>>>> ikigailabs-dev
 import {
   createErrorHandler,
   getRecentAcitivtyObjs,

@@ -14,12 +14,13 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+# pylint: disable=too-many-lines
 import dataclasses
 import json
 import logging
 import re
-from collections import defaultdict, OrderedDict
-from dataclasses import dataclass, field  # pylint: disable=wrong-import-order
+from collections import defaultdict
+from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from typing import (
     Any,
@@ -34,6 +35,7 @@ from typing import (
     Union,
 )
 
+import dateutil.parser
 import pandas as pd
 import sqlalchemy as sa
 import sqlparse
@@ -68,6 +70,7 @@ from sqlalchemy.sql.expression import Label, Select, TextAsFrom, TextClause
 from sqlalchemy.sql.selectable import Alias, TableClause
 
 from superset import app, db, is_feature_enabled, security_manager
+from superset.common.db_query_status import QueryStatus
 from superset.connectors.base.models import BaseColumn, BaseDatasource, BaseMetric
 from superset.connectors.sqla.utils import (
     get_physical_table_metadata,
@@ -82,7 +85,7 @@ from superset.jinja_context import (
 )
 from superset.models.annotations import Annotation
 from superset.models.core import Database
-from superset.models.helpers import AuditMixinNullable, QueryResult
+from superset.models.helpers import AuditMixinNullable, CertificationMixin, QueryResult
 from superset.sql_parse import ParsedQuery
 from superset.typing import AdhocMetric, Metric, OrderBy, QueryObjectDict
 from superset.utils import core as utils
@@ -149,12 +152,12 @@ class AnnotationDatasource(BaseDatasource):
             qry = qry.filter(Annotation.start_dttm >= query_obj["from_dttm"])
         if query_obj["to_dttm"]:
             qry = qry.filter(Annotation.end_dttm <= query_obj["to_dttm"])
-        status = utils.QueryStatus.SUCCESS
+        status = QueryStatus.SUCCESS
         try:
             df = pd.read_sql_query(qry.statement, db.engine)
         except Exception as ex:  # pylint: disable=broad-except
             df = pd.DataFrame()
-            status = utils.QueryStatus.FAILED
+            status = QueryStatus.FAILED
             logger.exception(ex)
             error_message = utils.error_msg_from_exception(ex)
         return QueryResult(
@@ -172,7 +175,7 @@ class AnnotationDatasource(BaseDatasource):
         raise NotImplementedError()
 
 
-class TableColumn(Model, BaseColumn):
+class TableColumn(Model, BaseColumn, CertificationMixin):
 
     """ORM object for table columns, each table can have multiple columns"""
 
@@ -187,6 +190,7 @@ class TableColumn(Model, BaseColumn):
     is_dttm = Column(Boolean, default=False)
     expression = Column(Text)
     python_date_format = Column(String(255))
+    extra = Column(Text)
 
     export_fields = [
         "table_id",
@@ -200,6 +204,7 @@ class TableColumn(Model, BaseColumn):
         "expression",
         "description",
         "python_date_format",
+        "extra",
     ]
 
     update_from_object_fields = [s for s in export_fields if s not in ("table_id",)]
@@ -374,11 +379,20 @@ class TableColumn(Model, BaseColumn):
             "type",
             "type_generic",
             "python_date_format",
+            "is_certified",
+            "certified_by",
+            "certification_details",
+            "warning_markdown",
         )
-        return {s: getattr(self, s) for s in attrs if hasattr(self, s)}
+
+        attr_dict = {s: getattr(self, s) for s in attrs if hasattr(self, s)}
+
+        attr_dict.update(super().data)
+
+        return attr_dict
 
 
-class SqlMetric(Model, BaseMetric):
+class SqlMetric(Model, BaseMetric, CertificationMixin):
 
     """ORM object for metrics, each table can have multiple metrics"""
 
@@ -404,9 +418,7 @@ class SqlMetric(Model, BaseMetric):
         "extra",
         "warning_text",
     ]
-    update_from_object_fields = list(
-        [s for s in export_fields if s not in ("table_id",)]
-    )
+    update_from_object_fields = list(s for s in export_fields if s != "table_id")
     export_parent = "table"
 
     def get_sqla_col(self, label: Optional[str] = None) -> Column:
@@ -427,28 +439,6 @@ class SqlMetric(Model, BaseMetric):
 
     def get_perm(self) -> Optional[str]:
         return self.perm
-
-    def get_extra_dict(self) -> Dict[str, Any]:
-        try:
-            return json.loads(self.extra)
-        except (TypeError, json.JSONDecodeError):
-            return {}
-
-    @property
-    def is_certified(self) -> bool:
-        return bool(self.get_extra_dict().get("certification"))
-
-    @property
-    def certified_by(self) -> Optional[str]:
-        return self.get_extra_dict().get("certification", {}).get("certified_by")
-
-    @property
-    def certification_details(self) -> Optional[str]:
-        return self.get_extra_dict().get("certification", {}).get("details")
-
-    @property
-    def warning_markdown(self) -> Optional[str]:
-        return self.get_extra_dict().get("warning_markdown")
 
     @property
     def data(self) -> Dict[str, Any]:
@@ -473,10 +463,7 @@ sqlatable_user = Table(
 )
 
 
-class SqlaTable(  # pylint: disable=too-many-public-methods,too-many-instance-attributes
-    Model, BaseDatasource
-):
-
+class SqlaTable(Model, BaseDatasource):  # pylint: disable=too-many-public-methods
     """An ORM object for SqlAlchemy table references"""
 
     type = "table"
@@ -721,7 +708,7 @@ class SqlaTable(  # pylint: disable=too-many-public-methods,too-many-instance-at
                     "Error in jinja expression in fetch values predicate: %(msg)s",
                     msg=ex.message,
                 )
-            )
+            ) from ex
 
     def values_for_column(self, column_name: str, limit: int = 10000) -> List[Any]:
         """Runs query against sqla to retrieve some
@@ -820,7 +807,7 @@ class SqlaTable(  # pylint: disable=too-many-public-methods,too-many-instance-at
                         "Error while rendering virtual dataset query: %(msg)s",
                         msg=ex.message,
                     )
-                )
+                ) from ex
         sql = sqlparse.format(sql.strip("\t\r\n; "), strip_comments=True)
         if not sql:
             raise QueryObjectValidationError(_("Virtual dataset query cannot be empty"))
@@ -845,7 +832,8 @@ class SqlaTable(  # pylint: disable=too-many-public-methods,too-many-instance-at
         label = utils.get_metric_name(metric)
 
         if expression_type == utils.AdhocMetricExpressionType.SIMPLE:
-            column_name = cast(str, metric["column"].get("column_name"))
+            metric_column = metric.get("column") or {}
+            column_name = cast(str, metric_column.get("column_name"))
             table_column: Optional[TableColumn] = columns_by_name.get(column_name)
             if table_column:
                 sqla_column = table_column.get_sqla_col()
@@ -930,43 +918,60 @@ class SqlaTable(  # pylint: disable=too-many-public-methods,too-many-instance-at
         except TemplateError as ex:
             raise QueryObjectValidationError(
                 _("Error in jinja expression in RLS filters: %(msg)s", msg=ex.message,)
-            )
+            ) from ex
 
     def get_sqla_query(  # pylint: disable=too-many-arguments,too-many-locals,too-many-branches,too-many-statements
         self,
-        metrics: Optional[List[Metric]] = None,
-        granularity: Optional[str] = None,
-        from_dttm: Optional[datetime] = None,
-        to_dttm: Optional[datetime] = None,
+        apply_fetch_values_predicate: bool = False,
         columns: Optional[List[str]] = None,
-        groupby: Optional[List[str]] = None,
+        extras: Optional[Dict[str, Any]] = None,
         filter: Optional[  # pylint: disable=redefined-builtin
             List[QueryObjectFilterClause]
         ] = None,
-        is_timeseries: bool = True,
-        timeseries_limit: int = 15,
-        timeseries_limit_metric: Optional[Metric] = None,
-        row_limit: Optional[int] = None,
-        row_offset: Optional[int] = None,
+        from_dttm: Optional[datetime] = None,
+        granularity: Optional[str] = None,
+        groupby: Optional[List[str]] = None,
         inner_from_dttm: Optional[datetime] = None,
         inner_to_dttm: Optional[datetime] = None,
-        orderby: Optional[List[OrderBy]] = None,
-        extras: Optional[Dict[str, Any]] = None,
-        order_desc: bool = True,
         is_rowcount: bool = False,
-        apply_fetch_values_predicate: bool = False,
+        is_timeseries: bool = True,
+        metrics: Optional[List[Metric]] = None,
+        orderby: Optional[List[OrderBy]] = None,
+        order_desc: bool = True,
+        to_dttm: Optional[datetime] = None,
+        series_columns: Optional[List[str]] = None,
+        series_limit: Optional[int] = None,
+        series_limit_metric: Optional[Metric] = None,
+        row_limit: Optional[int] = None,
+        row_offset: Optional[int] = None,
+        timeseries_limit: Optional[int] = None,
+        timeseries_limit_metric: Optional[Metric] = None,
     ) -> SqlaQuery:
         """Querying any sqla table from this common interface"""
+        if granularity not in self.dttm_cols and granularity is not None:
+            granularity = self.main_dttm_col
+
+        extras = extras or {}
+        time_grain = extras.get("time_grain_sqla")
+
         template_kwargs = {
+            "columns": columns,
             "from_dttm": from_dttm.isoformat() if from_dttm else None,
             "groupby": groupby,
             "metrics": metrics,
             "row_limit": row_limit,
             "row_offset": row_offset,
+            "time_column": granularity,
+            "time_grain": time_grain,
             "to_dttm": to_dttm.isoformat() if to_dttm else None,
+            "table_columns": [col.column_name for col in self.columns],
             "filter": filter,
-            "columns": [col.column_name for col in self.columns],
         }
+        series_columns = series_columns or []
+        # deprecated, to be removed in 2.0
+        if is_timeseries and timeseries_limit:
+            series_limit = timeseries_limit
+        series_limit_metric = series_limit_metric or timeseries_limit_metric
         template_kwargs.update(self.template_params_dict)
         extra_cache_keys: List[Any] = []
         template_kwargs["extra_cache_keys"] = extra_cache_keys
@@ -976,16 +981,12 @@ class SqlaTable(  # pylint: disable=too-many-public-methods,too-many-instance-at
         db_engine_spec = self.db_engine_spec
         prequeries: List[str] = []
         orderby = orderby or []
-        extras = extras or {}
         need_groupby = bool(metrics is not None or groupby)
         metrics = metrics or []
 
         # For backward compatibility
         if granularity not in self.dttm_cols and granularity is not None:
             granularity = self.main_dttm_col
-
-        # Database spec supports join-free timeslot grouping
-        time_groupby_inline = db_engine_spec.time_groupby_inline
 
         columns_by_name: Dict[str, TableColumn] = {
             col.column_name: col for col in self.columns
@@ -1057,12 +1058,16 @@ class SqlaTable(  # pylint: disable=too-many-public-methods,too-many-instance-at
                 )
 
         select_exprs: List[Union[Column, Label]] = []
-        groupby_exprs_sans_timestamp = OrderedDict()
+        groupby_all_columns = {}
+        groupby_series_columns = {}
 
         # filter out the pseudo column  __timestamp from columns
         columns = columns or []
         columns = [col for col in columns if col != utils.DTTM_ALIAS]
+<<<<<<< HEAD
         time_grain = extras.get("time_grain_sqla")
+=======
+>>>>>>> ikigailabs-dev
         dttm_col = columns_by_name.get(granularity) if granularity else None
 
         if need_groupby:
@@ -1070,16 +1075,24 @@ class SqlaTable(  # pylint: disable=too-many-public-methods,too-many-instance-at
             columns = groupby or columns
             for selected in columns:
                 # if groupby field/expr equals granularity field/expr
+<<<<<<< HEAD
                 if selected == granularity:
                     sqla_col = columns_by_name[selected]
                     outer = sqla_col.get_timestamp_expression(time_grain, selected)
+=======
+                table_col = columns_by_name.get(selected)
+                if table_col and table_col.type_generic == GenericDataType.TEMPORAL:
+                    outer = table_col.get_timestamp_expression(time_grain, selected)
+>>>>>>> ikigailabs-dev
                 # if groupby field equals a selected column
-                elif selected in columns_by_name:
-                    outer = columns_by_name[selected].get_sqla_col()
+                elif table_col:
+                    outer = table_col.get_sqla_col()
                 else:
                     outer = literal_column(f"({selected})")
                     outer = self.make_sqla_column_compatible(outer, selected)
-                groupby_exprs_sans_timestamp[outer.name] = outer
+                groupby_all_columns[outer.name] = outer
+                if not series_columns or outer.name in series_columns:
+                    groupby_series_columns[outer.name] = outer
                 select_exprs.append(outer)
         elif columns:
             for selected in columns:
@@ -1091,7 +1104,6 @@ class SqlaTable(  # pylint: disable=too-many-public-methods,too-many-instance-at
             metrics_exprs = []
 
         time_range_endpoints = extras.get("time_range_endpoints")
-        groupby_exprs_with_timestamp = OrderedDict(groupby_exprs_sans_timestamp.items())
 
         if granularity:
             if granularity not in columns_by_name or not dttm_col:
@@ -1107,7 +1119,7 @@ class SqlaTable(  # pylint: disable=too-many-public-methods,too-many-instance-at
                 timestamp = dttm_col.get_timestamp_expression(time_grain)
                 # always put timestamp as the first column
                 select_exprs.insert(0, timestamp)
-                groupby_exprs_with_timestamp[timestamp.name] = timestamp
+                groupby_all_columns[timestamp.name] = timestamp
 
             # Use main dttm column to support index with secondary dttm columns.
             if (
@@ -1143,14 +1155,14 @@ class SqlaTable(  # pylint: disable=too-many-public-methods,too-many-instance-at
 
         tbl = self.get_from_clause(template_processor)
 
-        if groupby_exprs_with_timestamp:
-            qry = qry.group_by(*groupby_exprs_with_timestamp.values())
+        if groupby_all_columns:
+            qry = qry.group_by(*groupby_all_columns.values())
 
         where_clause_and = []
         having_clause_and = []
 
         for flt in filter:  # type: ignore
-            if not all([flt.get(s) for s in ["col", "op"]]):
+            if not all(flt.get(s) for s in ["col", "op"]):
                 continue
             col = flt["col"]
             val = flt.get("val")
@@ -1253,7 +1265,7 @@ class SqlaTable(  # pylint: disable=too-many-public-methods,too-many-instance-at
                             "Error in jinja expression in WHERE clause: %(msg)s",
                             msg=ex.message,
                         )
-                    )
+                    ) from ex
                 where_clause_and += [sa.text("({})".format(where))]
             having = extras.get("having")
             if having:
@@ -1265,7 +1277,7 @@ class SqlaTable(  # pylint: disable=too-many-public-methods,too-many-instance-at
                             "Error in jinja expression in HAVING clause: %(msg)s",
                             msg=ex.message,
                         )
-                    )
+                    ) from ex
                 having_clause_and += [sa.text("({})".format(having))]
         if apply_fetch_values_predicate and self.fetch_values_predicate:
             qry = qry.where(self.get_fetch_values_predicate())
@@ -1290,6 +1302,7 @@ class SqlaTable(  # pylint: disable=too-many-public-methods,too-many-instance-at
         if row_offset:
             qry = qry.offset(row_offset)
 
+<<<<<<< HEAD
         if (
             is_timeseries  # pylint: disable=too-many-boolean-expressions
             and timeseries_limit
@@ -1298,6 +1311,10 @@ class SqlaTable(  # pylint: disable=too-many-public-methods,too-many-instance-at
             and dttm_col
         ):
             if db_engine_spec.allows_joins:
+=======
+        if series_limit and groupby_series_columns:
+            if db_engine_spec.allows_joins and db_engine_spec.allows_subqueries:
+>>>>>>> ikigailabs-dev
                 # some sql dialects require for order by expressions
                 # to also be in the select clause -- others, e.g. vertica,
                 # require a unique inner alias
@@ -1306,32 +1323,37 @@ class SqlaTable(  # pylint: disable=too-many-public-methods,too-many-instance-at
                 )
                 inner_groupby_exprs = []
                 inner_select_exprs = []
-                for gby_name, gby_obj in groupby_exprs_sans_timestamp.items():
+                for gby_name, gby_obj in groupby_series_columns.items():
                     inner = self.make_sqla_column_compatible(gby_obj, gby_name + "__")
                     inner_groupby_exprs.append(inner)
                     inner_select_exprs.append(inner)
 
                 inner_select_exprs += [inner_main_metric_expr]
                 subq = select(inner_select_exprs).select_from(tbl)
-                inner_time_filter = dttm_col.get_time_filter(
-                    inner_from_dttm or from_dttm,
-                    inner_to_dttm or to_dttm,
-                    time_range_endpoints,
-                )
-                subq = subq.where(and_(*(where_clause_and + [inner_time_filter])))
+                inner_time_filter = []
+
+                if dttm_col and not db_engine_spec.time_groupby_inline:
+                    inner_time_filter = [
+                        dttm_col.get_time_filter(
+                            inner_from_dttm or from_dttm,
+                            inner_to_dttm or to_dttm,
+                            time_range_endpoints,
+                        )
+                    ]
+                subq = subq.where(and_(*(where_clause_and + inner_time_filter)))
                 subq = subq.group_by(*inner_groupby_exprs)
 
                 ob = inner_main_metric_expr
-                if timeseries_limit_metric:
-                    ob = self._get_timeseries_orderby(
-                        timeseries_limit_metric, metrics_by_name, columns_by_name
+                if series_limit_metric:
+                    ob = self._get_series_orderby(
+                        series_limit_metric, metrics_by_name, columns_by_name
                     )
                 direction = desc if order_desc else asc
                 subq = subq.order_by(direction(ob))
-                subq = subq.limit(timeseries_limit)
+                subq = subq.limit(series_limit)
 
                 on_clause = []
-                for gby_name, gby_obj in groupby_exprs_sans_timestamp.items():
+                for gby_name, gby_obj in groupby_series_columns.items():
                     # in this case the column name, not the alias, needs to be
                     # conditionally mutated, as it refers to the column alias in
                     # the inner query
@@ -1340,13 +1362,11 @@ class SqlaTable(  # pylint: disable=too-many-public-methods,too-many-instance-at
 
                 tbl = tbl.join(subq.alias(), and_(*on_clause))
             else:
-                if timeseries_limit_metric:
+                if series_limit_metric:
                     orderby = [
                         (
-                            self._get_timeseries_orderby(
-                                timeseries_limit_metric,
-                                metrics_by_name,
-                                columns_by_name,
+                            self._get_series_orderby(
+                                series_limit_metric, metrics_by_name, columns_by_name,
                             ),
                             False,
                         )
@@ -1355,7 +1375,7 @@ class SqlaTable(  # pylint: disable=too-many-public-methods,too-many-instance-at
                 # run prequery to get top groups
                 prequery_obj = {
                     "is_timeseries": False,
-                    "row_limit": timeseries_limit,
+                    "row_limit": series_limit,
                     "metrics": metrics,
                     "granularity": granularity,
                     "groupby": groupby,
@@ -1373,10 +1393,10 @@ class SqlaTable(  # pylint: disable=too-many-public-methods,too-many-instance-at
                 dimensions = [
                     c
                     for c in result.df.columns
-                    if c not in metrics and c in groupby_exprs_sans_timestamp
+                    if c not in metrics and c in groupby_series_columns
                 ]
                 top_groups = self._get_top_groups(
-                    result.df, dimensions, groupby_exprs_sans_timestamp
+                    result.df, dimensions, groupby_series_columns
                 )
                 qry = qry.where(top_groups)
 
@@ -1399,37 +1419,45 @@ class SqlaTable(  # pylint: disable=too-many-public-methods,too-many-instance-at
             prequeries=prequeries,
         )
 
-    def _get_timeseries_orderby(
+    def _get_series_orderby(
         self,
-        timeseries_limit_metric: Metric,
+        series_limit_metric: Metric,
         metrics_by_name: Dict[str, SqlMetric],
         columns_by_name: Dict[str, TableColumn],
     ) -> Column:
-        if utils.is_adhoc_metric(timeseries_limit_metric):
-            assert isinstance(timeseries_limit_metric, dict)
-            ob = self.adhoc_metric_to_sqla(timeseries_limit_metric, columns_by_name)
+        if utils.is_adhoc_metric(series_limit_metric):
+            assert isinstance(series_limit_metric, dict)
+            ob = self.adhoc_metric_to_sqla(series_limit_metric, columns_by_name)
         elif (
-            isinstance(timeseries_limit_metric, str)
-            and timeseries_limit_metric in metrics_by_name
+            isinstance(series_limit_metric, str)
+            and series_limit_metric in metrics_by_name
         ):
-            ob = metrics_by_name[timeseries_limit_metric].get_sqla_col()
+            ob = metrics_by_name[series_limit_metric].get_sqla_col()
         else:
             raise QueryObjectValidationError(
-                _("Metric '%(metric)s' does not exist", metric=timeseries_limit_metric)
+                _("Metric '%(metric)s' does not exist", metric=series_limit_metric)
             )
         return ob
 
-    def _get_top_groups(  # pylint: disable=no-self-use
-        self,
-        df: pd.DataFrame,
-        dimensions: List[str],
-        groupby_exprs: "OrderedDict[str, Any]",
+    def _get_top_groups(
+        self, df: pd.DataFrame, dimensions: List[str], groupby_exprs: Dict[str, Any],
     ) -> ColumnElement:
+        column_map = {column.column_name: column for column in self.columns}
         groups = []
         for _unused, row in df.iterrows():
             group = []
             for dimension in dimensions:
-                group.append(groupby_exprs[dimension] == row[dimension])
+                value = row[dimension]
+
+                # Some databases like Druid will return timestamps as strings, but
+                # do not perform automatic casting when comparing these strings to
+                # a timestamp. For cases like this we convert the value from a
+                # string into a timestamp.
+                if column_map[dimension].is_temporal and isinstance(value, str):
+                    dttm = dateutil.parser.parse(value)
+                    value = text(self.db_engine_spec.convert_dttm("TIMESTAMP", dttm))
+
+                group.append(groupby_exprs[dimension] == value)
             groups.append(and_(*group))
 
         return or_(*groups)
@@ -1438,7 +1466,7 @@ class SqlaTable(  # pylint: disable=too-many-public-methods,too-many-instance-at
         qry_start_dttm = datetime.now()
         query_str_ext = self.get_query_str_extended(query_obj)
         sql = query_str_ext.sql
-        status = utils.QueryStatus.SUCCESS
+        status = QueryStatus.SUCCESS
         errors = None
         error_message = None
 
@@ -1471,7 +1499,7 @@ class SqlaTable(  # pylint: disable=too-many-public-methods,too-many-instance-at
             df = self.database.get_df(sql, self.schema, mutator=assign_column_label)
         except Exception as ex:  # pylint: disable=broad-except
             df = pd.DataFrame()
-            status = utils.QueryStatus.FAILED
+            status = QueryStatus.FAILED
             logger.warning(
                 "Query %s on schema %s failed", sql, self.schema, exc_info=True
             )
@@ -1649,6 +1677,7 @@ class SqlaTable(  # pylint: disable=too-many-public-methods,too-many-instance-at
         :raises Exception: If the target table is not unique
         """
 
+        # pylint: disable=import-outside-toplevel
         from superset.datasets.commands.exceptions import get_dataset_exist_error_msg
         from superset.datasets.dao import DatasetDAO
 
