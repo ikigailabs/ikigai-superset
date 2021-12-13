@@ -1,0 +1,22 @@
+.dashboard-component-ikitable {
+  width: 100%;
+  padding: 8px 0; /* this is padding not margin to enable a larger mouse target */
+  background-color: transparent;
+
+  .ikitable-iframe {
+    width: 100%;
+    min-height: 600px;
+  }
+}
+
+.dashboard-component-divider:after {
+  content: '';
+  height: 1px;
+  width: 100%;
+  background-color: @gray-light;
+  display: block;
+}
+
+.dragdroppable .dashboard-component-ikitable {
+  cursor: move;
+}
