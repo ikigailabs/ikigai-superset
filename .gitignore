@@ -67,6 +67,7 @@ superset/app/
 node_modules
 npm-debug.log*
 superset/static/version_info.json
+superset/static/assets
 yarn-error.log
 
 # IntelliJ
