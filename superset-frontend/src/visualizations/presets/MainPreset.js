@@ -80,6 +80,7 @@ import {
   GroupByFilterPlugin,
 } from 'src/filters/components/';
 import { PivotTableChartPlugin as PivotTableChartPluginV2 } from '@superset-ui/plugin-chart-pivot-table';
+import { EchartsScatterChartPlugin } from '@w11k/plugin-chart-scatter';
 import FilterBoxChartPlugin from '../FilterBox/FilterBoxChartPlugin';
 import TimeTableChartPlugin from '../TimeTable/TimeTableChartPlugin';
 
@@ -169,5 +170,6 @@ export default class MainPreset extends Preset {
         ...experimentalplugins,
       ],
     });
+    new EchartsScatterChartPlugin().configure({ key: 'scatter' }).register();
   }
 }
