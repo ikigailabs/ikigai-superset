@@ -1097,6 +1097,12 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
         if cls.arraysize:
             cursor.arraysize = cls.arraysize
         try:
+            sql_statement = query
+            if "metadata" in sql_statement[sql_statement.index('SELECT')+6:sql_statement.index('FROM')].lower():
+                sub_statement = sql_statement[sql_statement.index('SELECT')+6:sql_statement.index('FROM')].lower()
+                sub_statement = sub_statement.replace("metadata","\"metadata\"")
+                sql_statement = sql_statement[0:sql_statement.index('SELECT')+6]+sub_statement+sql_statement[sql_statement.index('FROM'):]
+                query = sql_statement
             cursor.execute(query)
         except Exception as ex:
             raise cls.get_dbapi_mapped_exception(ex)
