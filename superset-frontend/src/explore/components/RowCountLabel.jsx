@@ -21,7 +21,7 @@ import PropTypes from 'prop-types';
 import { getNumberFormatter, t } from '@superset-ui/core';
 
 import Label from 'src/components/Label';
-import { Tooltip } from 'src/components/Tooltip';
+// import { Tooltip } from 'src/components/Tooltip';
 
 const propTypes = {
   rowcount: PropTypes.number,
@@ -40,18 +40,18 @@ export default function RowCountLabel({ rowcount, limit, suffix, loading }) {
   const type =
     limitReached || (rowcount === 0 && !loading) ? 'danger' : 'default';
   const formattedRowCount = getNumberFormatter()(rowcount);
-  const tooltip = (
-    <span>
-      {limitReached && <div>{t('Limit reached')}</div>}
-      {loading ? 'Loading' : rowcount}
-    </span>
-  );
+  // const tooltip = (
+  //   <span>
+  //     {limitReached && <div>{t('Limit reached')}</div>}
+  //     {loading ? 'Loading' : rowcount}
+  //   </span>
+  // );
   return (
-    <Tooltip id="tt-rowcount-tooltip" title={tooltip}>
+    // <Tooltip id="tt-rowcount-tooltip" title={tooltip}>
       <Label type={type} data-test="row-count-label">
         {loading ? 'Loading...' : `${formattedRowCount} ${suffix}`}
       </Label>
-    </Tooltip>
+    // </Tooltip>
   );
 }
 

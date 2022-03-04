@@ -228,7 +228,7 @@ export class ExploreChartHeader extends React.PureComponent {
             onSaveTitle={this.props.actions.updateChartTitle}
           />
 
-          {this.props.slice && (
+          {/* {this.props.slice && (
             <StyledButtons>
               {user.userId && (
                 <FaveStar
@@ -266,7 +266,7 @@ export class ExploreChartHeader extends React.PureComponent {
                 />
               )}
             </StyledButtons>
-          )}
+          )} */}
         </div>
         <div className="right-button-panel">
           {chartFinished && queryResponse && (

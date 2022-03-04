@@ -232,7 +232,7 @@ class SaveModal extends React.Component<SaveModalProps, SaveModalState> {
             >
               {t('Save (Overwrite)')}
             </Radio>
-            <Radio
+            {/* <Radio
               id="saveas-radio"
               data-test="saveas-radio"
               checked={this.state.action === 'saveas'}
@@ -240,7 +240,7 @@ class SaveModal extends React.Component<SaveModalProps, SaveModalState> {
             >
               {' '}
               {t('Save as ...')} &nbsp;
-            </Radio>
+            </Radio> */}
           </FormItem>
           <hr />
           <FormItem label={t('Chart name')} required>
