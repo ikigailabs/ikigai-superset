@@ -32,6 +32,7 @@ import {
   TAB_TYPE,
   IKI_TABLE_TYPE,
   IKI_PROCESS_BUILDER_TYPE,
+  IKI_RUN_PIPELINE_TYPE,
 } from 'src/dashboard/util/componentTypes';
 
 const types = [
@@ -48,6 +49,7 @@ const types = [
   TAB_TYPE,
   IKI_TABLE_TYPE,
   IKI_PROCESS_BUILDER_TYPE,
+  IKI_RUN_PIPELINE_TYPE,
 ];
 
 describe('newEntityFactory', () => {

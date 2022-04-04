@@ -30,6 +30,7 @@ export const TABS_TYPE = 'TABS';
 export const TAB_TYPE = 'TAB';
 export const IKI_TABLE_TYPE = 'IKI_TABLE';
 export const IKI_PROCESS_BUILDER_TYPE = 'IKI_PROCESS_BUILDER';
+export const IKI_RUN_PIPELINE_TYPE = 'IKI_RUN_PIPELINE';
 
 export default {
   CHART_TYPE,
@@ -46,4 +47,5 @@ export default {
   TAB_TYPE,
   IKI_TABLE_TYPE,
   IKI_PROCESS_BUILDER_TYPE,
+  IKI_RUN_PIPELINE_TYPE,
 };
