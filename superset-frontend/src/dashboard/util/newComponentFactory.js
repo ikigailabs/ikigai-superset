@@ -30,6 +30,7 @@ import {
   TAB_TYPE,
   IKI_TABLE_TYPE,
   IKI_PROCESS_BUILDER_TYPE,
+  IKI_RUN_PIPELINE_TYPE
 } from './componentTypes';
 
 import {
@@ -60,6 +61,7 @@ const typeToDefaultMetaData = {
   },
   [IKI_TABLE_TYPE]: { width: GRID_DEFAULT_CHART_WIDTH, height: 50 },
   [IKI_PROCESS_BUILDER_TYPE]: { width: GRID_DEFAULT_CHART_WIDTH, height: 50 },
+  [IKI_RUN_PIPELINE_TYPE]: { width: GRID_DEFAULT_CHART_WIDTH, height: 50 },
 };
 
 function uuid(type) {

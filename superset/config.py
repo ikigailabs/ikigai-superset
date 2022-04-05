@@ -126,7 +126,7 @@ BUILD_NUMBER = None
 # default viz used in chart explorer
 DEFAULT_VIZ_TYPE = "table"
 
-ROW_LIMIT = 50000
+ROW_LIMIT = 1000000
 VIZ_ROW_LIMIT = 10000
 # max rows retreieved when requesting samples from datasource in explore view
 SAMPLES_ROW_LIMIT = 1000
