@@ -45,7 +45,7 @@ import {
   TAB_TYPE,
   IKI_TABLE_TYPE,
   IKI_PROCESS_BUILDER_TYPE,
-  IKI_RUN_PIPELINE_TYPE
+  IKI_RUN_PIPELINE_TYPE,
 } from './componentTypes';
 
 import { DASHBOARD_ROOT_DEPTH as rootDepth } from './constants';

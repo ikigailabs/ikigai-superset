@@ -131,6 +131,7 @@ describe('isValidChild', () => {
         ROW,
         COLUMN,
         IKI_PROCESS_BUILDER,
+        IKI_RUN_PIPELINE,
       ],
       [ROOT, TABS, TAB, TABS, TAB, ROW, COLUMN, ROW, COLUMN, IKI_RUN_PIPELINE],
       [ROOT, GRID, ROW, COLUMN, TABS],
