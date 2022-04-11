@@ -265,7 +265,7 @@ class IkiRunPipeline extends React.PureComponent {
                     src="${widgetUrl}"
                     title="IkiRunPipeline Component"
                     className="ikirunpipeline-widget"
-                    style="height:100%;"
+                    style="min-height: 300px;"
                   />`;
                   this.handleIkiRunPipelineChange(tempIframe);
                   if (

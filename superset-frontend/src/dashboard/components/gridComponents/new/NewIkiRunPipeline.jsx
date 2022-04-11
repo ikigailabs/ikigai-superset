@@ -29,7 +29,7 @@ export default function DraggableNewDivider() {
       id={NEW_IKI_RUN_PIPELINE_ID}
       type={IKI_RUN_PIPELINE_TYPE}
       label={t('Run Pipeline')}
-      className="fa fa-play"
+      className="fa fa-bolt"
     />
   );
 }
