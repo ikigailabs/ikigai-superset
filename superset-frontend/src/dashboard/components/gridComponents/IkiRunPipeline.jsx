@@ -300,6 +300,7 @@ class IkiRunPipeline extends React.PureComponent {
                 'submit_button_label',
                 messageData.buttonLabel,
               );
+              widgetUrlQuery.set('pipeline_log_type', messageData.logLevel);
               widgetUrlQuery.set('edit_variables', messageData.variable);
               widgetUrl.search = widgetUrlQuery.toString();
             } else {
