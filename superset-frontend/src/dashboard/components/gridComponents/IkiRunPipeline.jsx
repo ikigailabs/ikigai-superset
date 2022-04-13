@@ -218,7 +218,7 @@ class IkiRunPipeline extends React.PureComponent {
     const { projectId } = this.state;
     window.addEventListener('message', event => {
       if (event.origin === dashURL) {
-        console.log('ikirunpipeline received 1: ', event.data);
+        // console.log('ikirunpipeline received 1: ', event.data);
         const messageObject = JSON.parse(event.data);
         if (
           messageObject.info &&
@@ -265,7 +265,7 @@ class IkiRunPipeline extends React.PureComponent {
                     src="${widgetUrl}"
                     title="IkiRunPipeline Component"
                     className="ikirunpipeline-widget"
-                    style="min-height: 300px;"
+                    style="min-height: 650px"
                   />`;
                   this.handleIkiRunPipelineChange(tempIframe);
                   if (
@@ -281,7 +281,7 @@ class IkiRunPipeline extends React.PureComponent {
               );
             }
           } else if (
-            messageObject.info === 'widget-to-superset/sending-pipeline-ids'
+            messageObject.info === 'widget-to-superset/sending-pipeline-data'
           ) {
             if (
               document.getElementById(
@@ -294,8 +294,13 @@ class IkiRunPipeline extends React.PureComponent {
                 ).src,
               );
               const widgetUrlQuery = new URLSearchParams(widgetUrl);
-              widgetUrlQuery.set('pipeline_id', messageData.id);
-              widgetUrlQuery.set('pipeline_name', messageData.name);
+              widgetUrlQuery.set('pipeline_id', messageData.pipeline.id);
+              widgetUrlQuery.set('pipeline_name', messageData.pipeline.name);
+              widgetUrlQuery.set(
+                'submit_button_label',
+                messageData.buttonLabel,
+              );
+              widgetUrlQuery.set('edit_variables', messageData.variable);
               widgetUrl.search = widgetUrlQuery.toString();
             } else {
               widgetUrl = iframeEmptyURL;
@@ -311,7 +316,7 @@ class IkiRunPipeline extends React.PureComponent {
                     src="${widgetUrl}"
                     title="IkiRunPipeline Component"
                     className="ikirunpipeline-widget"
-                    style="height:100%;"
+                    style="min-height: 300px;"
                   />`;
                 this.handleIkiRunPipelineChange(tempIframe);
                 if (
