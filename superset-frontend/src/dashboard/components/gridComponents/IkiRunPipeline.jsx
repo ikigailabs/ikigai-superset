@@ -265,7 +265,7 @@ class IkiRunPipeline extends React.PureComponent {
                     src="${widgetUrl}"
                     title="IkiRunPipeline Component"
                     className="ikirunpipeline-widget"
-                    style="min-height: 650px"
+                    style="min-height: 100%"
                   />`;
                   this.handleIkiRunPipelineChange(tempIframe);
                   if (
@@ -317,7 +317,7 @@ class IkiRunPipeline extends React.PureComponent {
                     src="${widgetUrl}"
                     title="IkiRunPipeline Component"
                     className="ikirunpipeline-widget"
-                    style="min-height: 300px;"
+                    style="min-height: 100%;"
                   />`;
                 this.handleIkiRunPipelineChange(tempIframe);
                 if (
@@ -447,7 +447,7 @@ class IkiRunPipeline extends React.PureComponent {
                   src="${dashURL}/widget/pipeline/run"
                   title="IkiRunPipeline Component"
                   className="ikirunpipeline-widget"
-                  style="height:100%;"
+                  style="height: 100%;"
                 />`;
     }
     return <SafeMarkdown source={hasError ? MARKDOWN_ERROR_MESSAGE : iframe} />;
