@@ -551,7 +551,6 @@ class IkiRunPipeline extends React.PureComponent {
                   ref={dragSourceRef}
                   className="dashboard-component-inner"
                   data-test="dashboard-component-chart-holder"
-                  style={{ height: '100%' }}
                 >
                   {
                     // editMode && isEditing
