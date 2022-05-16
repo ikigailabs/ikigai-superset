@@ -41,7 +41,8 @@ import {
 // const dashURL = 'https://dev-ui.ikigailabs.io';
 // const dashURL = 'http://localhost:3000';
 const dashURL = document.referrer.substring(0, document.referrer.length - 1);
-const iframeEmptyURL = `${dashURL}/widget/pipeline/run`;
+const timestamp = new Date().getTime().toString();
+const iframeEmptyURL = `${dashURL}/widget/pipeline/run?v=1&run_flow_times=${timestamp}`;
 
 const propTypes = {
   id: PropTypes.string.isRequired,
@@ -262,6 +263,7 @@ class IkiRunPipeline extends React.PureComponent {
                 () => {
                   const tempIframe = `<iframe
                     id="ikirunpipeline-widget-${this.props.component.id}"
+                    name="run-flow-${timestamp}"
                     src="${widgetUrl}"
                     title="IkiRunPipeline Component"
                     className="ikirunpipeline-widget"
@@ -315,6 +317,7 @@ class IkiRunPipeline extends React.PureComponent {
               () => {
                 const tempIframe = `<iframe
                     id="ikirunpipeline-widget-${this.props.component.id}"
+                    name="run-flow-${timestamp}"
                     src="${widgetUrl}"
                     title="IkiRunPipeline Component"
                     className="ikirunpipeline-widget"
@@ -445,7 +448,8 @@ class IkiRunPipeline extends React.PureComponent {
     } else {
       iframe = `<iframe
                   id="ikirunpipeline-widget-${this.props.component.id}"
-                  src="${dashURL}/widget/pipeline/run"
+                  name="run-flow-${timestamp}"
+                  src="${dashURL}/widget/pipeline/run?v=1&run_flow_times=${timestamp}"
                   title="IkiRunPipeline Component"
                   className="ikirunpipeline-widget"
                   style="height: 100%;"
@@ -462,7 +466,8 @@ class IkiRunPipeline extends React.PureComponent {
     } else {
       iframe = `<iframe
                   id="ikirunpipeline-widget-${this.props.component.id}"
-                  src="${dashURL}/widget/pipeline/run"
+                  name="run-flow-${timestamp}"
+                  src="${dashURL}/widget/pipeline/run?v=1&run_flow_times=${timestamp}"
                   title="IkiRunPipeline Component"
                   className="ikirunpipeline-widget"
                   style="height:100%;"

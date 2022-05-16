@@ -41,7 +41,8 @@ import {
 // const dashURL = 'https://dev-ui.ikigailabs.io';
 // const dashURL = 'http://localhost:3000';
 const dashURL = document.referrer.substring(0, document.referrer.length - 1);
-const iframeEmptyURL = `${dashURL}/widget/dataset/table?mode=edit`;
+const timestamp = new Date().getTime().toString();
+const iframeEmptyURL = `${dashURL}/widget/dataset/table?v=1&editable_dataset_times=${timestamp}&mode=edit`;
 
 const propTypes = {
   id: PropTypes.string.isRequired,
@@ -264,6 +265,7 @@ class IkiTable extends React.PureComponent {
                 () => {
                   const tempIframe = `<iframe
                     id="ikitable-widget-${this.props.component.id}"
+                    name="editable-dataset-${timestamp}"
                     src="${widgetUrl}"
                     title="IkiTable Component"
                     className="ikitable-widget"
@@ -285,8 +287,6 @@ class IkiTable extends React.PureComponent {
           } else if (
             messageObject.info === 'widget-to-superset/sending-datasets-ids'
           ) {
-            console.log('widget-to-superset/sending-datasets-ids');
-            console.log('messageObject', messageObject);
             if (
               document.getElementById(
                 `ikitable-widget-${this.props.component.id}`,
@@ -297,23 +297,15 @@ class IkiTable extends React.PureComponent {
                   `ikitable-widget-${this.props.component.id}`,
                 ).src,
               );
-              console.log('widgetUrl', widgetUrl);
               // const widgetUrlQuery = new URLSearchParams(widgetUrl);
               const widgetUrlQueryTblType = widgetUrl.searchParams.get(
                 'table_type',
               );
-              const widgetUrlQueryTblMode = widgetUrl.searchParams.get('mode');
+              // const widgetUrlQueryTblMode = widgetUrl.searchParams.get('mode');
               const widgetUrlQueryProjectId = widgetUrl.searchParams.get(
                 'project_id',
               );
-              console.log(
-                'widgetUrlQueryTblType',
-                widgetUrlQueryTblType,
-                'widgetUrlQueryTblMode',
-                widgetUrlQueryTblMode,
-              );
               if (!widgetUrlQueryTblType) {
-                console.log('table type not set!');
                 widgetUrl.searchParams.set('mode', 'preview');
                 const tableType = messageData.tableType
                   ? messageData.tableType
@@ -341,7 +333,6 @@ class IkiTable extends React.PureComponent {
                   );
                 }
                 // widgetUrl.search = widgetUrlQuery.toString();
-                console.log('last step - widgetUrl', widgetUrl);
                 this.setState(
                   {
                     iframeUrl: widgetUrl,
@@ -350,6 +341,7 @@ class IkiTable extends React.PureComponent {
                     // console.log('widgetUrl...', widgetUrl);
                     const tempIframe = `<iframe
                         id="ikitable-widget-${this.props.component.id}"
+                        name="editable-dataset-${timestamp}"
                         src="${widgetUrl}"
                         title="IkiTable Component"
                         className="ikitable-widget"
@@ -476,7 +468,8 @@ class IkiTable extends React.PureComponent {
     } else {
       iframe = `<iframe
                   id="ikitable-widget-${this.props.component.id}"
-                  src="${dashURL}/widget/dataset/table?mode=edit"
+                  name="editable-dataset-${timestamp}"
+                  src="${dashURL}/widget/dataset/table?v=1&editable_dataset_times=${timestamp}&mode=edit"
                   title="IkiTable Component"
                   className="ikitable-widget"
                   style="height:100%;"
@@ -493,7 +486,8 @@ class IkiTable extends React.PureComponent {
     } else {
       iframe = `<iframe
                   id="ikitable-widget-${this.props.component.id}"
-                  src="${dashURL}/widget/dataset/table?mode=edit"
+                  name="editable-dataset-${timestamp}"
+                  src="${dashURL}/widget/dataset/table?v=1&editable_dataset_times=${timestamp}&mode=edit"
                   title="IkiTable Component"
                   className="ikitable-widget"
                   style="height:100%;"
