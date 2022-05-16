@@ -28,7 +28,7 @@ export default function DraggableNewDivider() {
     <DraggableNewComponent
       id={NEW_IKI_RUN_PIPELINE_ID}
       type={IKI_RUN_PIPELINE_TYPE}
-      label={t('Run Pipeline')}
+      label={t('Run Flow')}
       className="fa fa-bolt"
     />
   );
