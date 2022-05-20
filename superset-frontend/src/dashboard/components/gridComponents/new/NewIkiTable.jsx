@@ -28,7 +28,7 @@ export default function DraggableNewDivider() {
     <DraggableNewComponent
       id={NEW_IKI_TABLE_ID}
       type={IKI_TABLE_TYPE}
-      label={t('Table')}
+      label={t('Editable Dataset')}
       className="fa fa-table"
     />
   );

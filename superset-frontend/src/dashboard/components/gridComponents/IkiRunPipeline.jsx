@@ -39,9 +39,11 @@ import {
 } from 'src/dashboard/util/constants';
 
 // const dashURL = 'https://dev-ui.ikigailabs.io';
+// const dashURL = 'https://app.ikigailabs.io';
 // const dashURL = 'http://localhost:3000';
 const dashURL = document.referrer.substring(0, document.referrer.length - 1);
-const iframeEmptyURL = `${dashURL}/widget/pipeline/run`;
+const timestamp = new Date().getTime().toString();
+const iframeEmptyURL = `${dashURL}/widget/pipeline/run?mode=edit&v=1&run_flow_times=${timestamp}`;
 
 const propTypes = {
   id: PropTypes.string.isRequired,
@@ -215,10 +217,8 @@ class IkiRunPipeline extends React.PureComponent {
 
   // eslint-disable-next-line class-methods-use-this
   handleIncomingWindowMsg() {
-    const { projectId } = this.state;
     window.addEventListener('message', event => {
       if (event.origin === dashURL) {
-        // console.log('ikirunpipeline received 1: ', event.data);
         const messageObject = JSON.parse(event.data);
         if (
           messageObject.info &&
@@ -228,45 +228,57 @@ class IkiRunPipeline extends React.PureComponent {
           const { dataType } = messageObject;
           let messageData;
           let widgetUrl;
+          let widgetUrlQuery;
+          let widgetUrlQueryMode;
           if (dataType === 'object') {
             messageData = JSON.parse(messageObject.data);
           } else {
             messageData = messageObject.data;
           }
           if (
-            messageObject.info === 'top-window-to-superset/sending-project-id'
+            messageObject.info === 'widget-to-superset/sending-pipeline-data'
           ) {
-            const tempMarkdownSouce = this.state.markdownSource;
-            if ((!projectId || projectId === '') && !tempMarkdownSouce) {
-              if (
+            if (
+              document.getElementById(
+                `ikirunpipeline-widget-${this.props.component.id}`,
+              )
+            ) {
+              widgetUrl = new URL(
                 document.getElementById(
                   `ikirunpipeline-widget-${this.props.component.id}`,
-                )
-              ) {
-                widgetUrl = new URL(
-                  document.getElementById(
-                    `ikirunpipeline-widget-${this.props.component.id}`,
-                  ).src,
-                );
-                const widgetUrlQuery = new URLSearchParams(widgetUrl);
-                widgetUrlQuery.set('project_id', messageData);
-                widgetUrl.search = widgetUrlQuery.toString();
-              } else {
-                widgetUrl = iframeEmptyURL;
-              }
+                ).src,
+              );
+              widgetUrlQueryMode = widgetUrl.searchParams.get('mode');
+            } else {
+              widgetUrl = iframeEmptyURL;
+            }
+            if (widgetUrlQueryMode === 'edit') {
+              widgetUrlQuery = new URLSearchParams(widgetUrl);
+              widgetUrlQuery.set('mode', 'preview');
+              widgetUrlQuery.set('pipeline_id', messageData.pipeline.id);
+              widgetUrlQuery.set('pipeline_name', messageData.pipeline.name);
+              widgetUrlQuery.set('project_name', messageData.projectName);
+              widgetUrlQuery.set(
+                'submit_button_label',
+                messageData.buttonLabel,
+              );
+              widgetUrlQuery.set('pipeline_log_type', messageData.logLevel);
+              widgetUrlQuery.set('edit_variables', messageData.variable);
+              widgetUrl.search = widgetUrlQuery.toString();
               this.setState(
                 {
                   iframeUrl: widgetUrl,
-                  projectId: messageData,
+                  projectId: messageData.pipeline.project_id,
                 },
                 () => {
                   const tempIframe = `<iframe
-                    id="ikirunpipeline-widget-${this.props.component.id}"
-                    src="${widgetUrl}"
-                    title="IkiRunPipeline Component"
-                    className="ikirunpipeline-widget"
-                    style="min-height: 100%"
-                  />`;
+                      id="ikirunpipeline-widget-${this.props.component.id}"
+                      name="run-flow-${timestamp}"
+                      src="${widgetUrl}"
+                      title="IkiRunPipeline Component"
+                      className="ikirunpipeline-widget"
+                      style="min-height: 100%;"
+                    />`;
                   this.handleIkiRunPipelineChange(tempIframe);
                   if (
                     document.getElementById(
@@ -280,58 +292,6 @@ class IkiRunPipeline extends React.PureComponent {
                 },
               );
             }
-          } else if (
-            messageObject.info === 'widget-to-superset/sending-pipeline-data'
-          ) {
-            if (
-              document.getElementById(
-                `ikirunpipeline-widget-${this.props.component.id}`,
-              )
-            ) {
-              widgetUrl = new URL(
-                document.getElementById(
-                  `ikirunpipeline-widget-${this.props.component.id}`,
-                ).src,
-              );
-              const widgetUrlQuery = new URLSearchParams(widgetUrl);
-              widgetUrlQuery.set('pipeline_id', messageData.pipeline.id);
-              widgetUrlQuery.set('pipeline_name', messageData.pipeline.name);
-              widgetUrlQuery.set('project_name', messageData.projectName);
-              widgetUrlQuery.set(
-                'submit_button_label',
-                messageData.buttonLabel,
-              );
-              widgetUrlQuery.set('pipeline_log_type', messageData.logLevel);
-              widgetUrlQuery.set('edit_variables', messageData.variable);
-              widgetUrl.search = widgetUrlQuery.toString();
-            } else {
-              widgetUrl = iframeEmptyURL;
-            }
-            this.setState(
-              {
-                iframeUrl: widgetUrl,
-                projectId: messageData,
-              },
-              () => {
-                const tempIframe = `<iframe
-                    id="ikirunpipeline-widget-${this.props.component.id}"
-                    src="${widgetUrl}"
-                    title="IkiRunPipeline Component"
-                    className="ikirunpipeline-widget"
-                    style="min-height: 100%;"
-                  />`;
-                this.handleIkiRunPipelineChange(tempIframe);
-                if (
-                  document.getElementById(
-                    `ikirunpipeline-widget-${this.props.component.id}`,
-                  )
-                ) {
-                  document.getElementById(
-                    `ikirunpipeline-widget-${this.props.component.id}`,
-                  ).src = widgetUrl;
-                }
-              },
-            );
           }
         }
       }
@@ -367,11 +327,6 @@ class IkiRunPipeline extends React.PureComponent {
 
   updateMarkdownContent() {
     const { updateComponents, component } = this.props;
-    /* console.log(
-      'updateMarkdownContent',
-      component.meta.code,
-      this.state.markdownSource,
-    ); */
     if (component.meta.code !== this.state.markdownSource) {
       updateComponents({
         [component.id]: {
@@ -386,14 +341,12 @@ class IkiRunPipeline extends React.PureComponent {
   }
 
   handleMarkdownChange(nextValue) {
-    // console.log('handleMarkdownChange', nextValue);
     this.setState({
       markdownSource: nextValue,
     });
   }
 
   handleIkiRunPipelineChange(nextValue) {
-    // console.log('handleIkiRunPipelineChange', nextValue);
     this.setState(
       {
         markdownSource: nextValue,
@@ -404,11 +357,6 @@ class IkiRunPipeline extends React.PureComponent {
       },
     );
     const { updateComponents, component } = this.props;
-    /* console.log(
-      'updateMarkdownContent',
-      component.meta.code,
-      this.state.markdownSource,
-    ); */
     if (component.meta.code !== nextValue) {
       updateComponents({
         [component.id]: {
@@ -445,7 +393,8 @@ class IkiRunPipeline extends React.PureComponent {
     } else {
       iframe = `<iframe
                   id="ikirunpipeline-widget-${this.props.component.id}"
-                  src="${dashURL}/widget/pipeline/run"
+                  name="run-flow-${timestamp}"
+                  src="${dashURL}/widget/pipeline/run?mode=edit&v=1&run_flow_times=${timestamp}"
                   title="IkiRunPipeline Component"
                   className="ikirunpipeline-widget"
                   style="height: 100%;"
@@ -462,7 +411,8 @@ class IkiRunPipeline extends React.PureComponent {
     } else {
       iframe = `<iframe
                   id="ikirunpipeline-widget-${this.props.component.id}"
-                  src="${dashURL}/widget/pipeline/run"
+                  name="run-flow-${timestamp}"
+                  src="${dashURL}/widget/pipeline/run?mode=edit&v=1&run_flow_times=${timestamp}"
                   title="IkiRunPipeline Component"
                   className="ikirunpipeline-widget"
                   style="height:100%;"
@@ -496,8 +446,6 @@ class IkiRunPipeline extends React.PureComponent {
 
     const isEditing = editorMode === 'edit';
     // const isEditing = false;
-
-    // console.log('editMode', editMode, isEditing, markdownSource);
 
     return (
       <DragDroppable

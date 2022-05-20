@@ -46,7 +46,8 @@ const widgetReferrerURL = document.referrer.substring(
   document.referrer.length - 1,
 );
 // const widgetReferrerURL = 'http://localhost:3000';
-const iframeEmptyURL = `${widgetReferrerURL}/widget/diagram/builder`;
+const timestamp = new Date().getTime().toString();
+const iframeEmptyURL = `${widgetReferrerURL}/widget/diagram/builder?v=1&process_diagram_times=${timestamp}`;
 
 const propTypes = {
   id: PropTypes.string.isRequired,
@@ -137,6 +138,7 @@ class IkiProcessBuilder extends React.PureComponent {
       ).src = widgetUrl;
       const tempIframe = `<iframe
                         id="ikiprocessdiagram-widget-${this.props.component.id}"
+                        name="process-diagram-${timestamp}"
                         src="${widgetUrl}"
                         title="IkiProcessDiagram Component"
                         className="ikiprocessdiagram-widget"
@@ -229,6 +231,7 @@ class IkiProcessBuilder extends React.PureComponent {
         ).src = widgetUrl;
         const tempIframe = `<iframe
                             id="ikiprocessdiagram-widget-${this.props.component.id}"
+                            name="process-diagram-${timestamp}"
                             src="${widgetUrl}"
                             title="IkiProcessDiagram Component"
                             className="ikiprocessdiagram-widget"
@@ -258,6 +261,7 @@ class IkiProcessBuilder extends React.PureComponent {
         ).src = widgetUrl;
         const tempIframe = `<iframe
                             id="ikiprocessdiagram-widget-${this.props.component.id}"
+                            name="process-diagram-${timestamp}"
                             src="${widgetUrl}"
                             title="IkiProcessDiagram Component"
                             className="ikiprocessdiagram-widget"
@@ -327,6 +331,7 @@ class IkiProcessBuilder extends React.PureComponent {
                 // widgetUrl.searchParams.set('data', infoStringCompresed);
                 const tempIframe = `<iframe
                           id="ikiprocessdiagram-widget-${this.props.component.id}"
+                          name="process-diagram-${timestamp}"
                           src="${widgetUrl}"
                           title="IkiProcessDiagram Component"
                           className="ikiprocessdiagram-widget"
@@ -461,7 +466,7 @@ class IkiProcessBuilder extends React.PureComponent {
     if (markdownSource) {
       html = markdownSource;
     } else {
-      html = `<iframe id="ikiprocessdiagram-widget-${this.props.component.id}" src="${iframeEmptyURL}?mode=edit&scid=${this.props.component.id}" title="IkiProcessDiagram Component" class="ikiprocessdiagram-iframe"></iframe>`;
+      html = `<iframe id="ikiprocessdiagram-widget-${this.props.component.id}" name="process-diagram-${timestamp}" src="${iframeEmptyURL}?mode=edit&scid=${this.props.component.id}" title="IkiProcessDiagram Component" class="ikiprocessdiagram-iframe"></iframe>`;
     }
     return <SafeMarkdown source={hasError ? MARKDOWN_ERROR_MESSAGE : html} />;
   }
@@ -472,7 +477,7 @@ class IkiProcessBuilder extends React.PureComponent {
     if (markdownSource) {
       html = markdownSource;
     } else {
-      html = `<iframe id="ikiprocessdiagram-widget-${this.props.component.id}" src="${iframeEmptyURL}?mode=edit&scid=${this.props.component.id}" title="IkiProcessDiagram Component" class="ikiprocessdiagram-iframe"></iframe>`;
+      html = `<iframe id="ikiprocessdiagram-widget-${this.props.component.id}" name="process-diagram-${timestamp}" src="${iframeEmptyURL}?mode=edit&scid=${this.props.component.id}" title="IkiProcessDiagram Component" class="ikiprocessdiagram-iframe"></iframe>`;
     }
     return <SafeMarkdown source={hasError ? MARKDOWN_ERROR_MESSAGE : html} />;
   }
