@@ -184,19 +184,19 @@ class DatasourceControl extends React.PureComponent {
 
     const isSqlSupported = datasource.type === 'table';
 
-    const datasourceMenu = (
-      <Menu onClick={this.handleMenuItemClick}>
-        {this.props.isEditable && (
-          <Menu.Item key={EDIT_DATASET} data-test="edit-dataset">
-            {t('Edit dataset')}
-          </Menu.Item>
-        )}
-        <Menu.Item key={CHANGE_DATASET}>{t('Change dataset')}</Menu.Item>
-        {isSqlSupported && (
-          <Menu.Item key={VIEW_IN_SQL_LAB}>{t('View in SQL Lab')}</Menu.Item>
-        )}
-      </Menu>
-    );
+    // const datasourceMenu = (
+    //   <Menu onClick={this.handleMenuItemClick}>
+    //     {this.props.isEditable && (
+    //       <Menu.Item key={EDIT_DATASET} data-test="edit-dataset">
+    //         {t('Edit dataset')}
+    //       </Menu.Item>
+    //     )}
+    //     <Menu.Item key={CHANGE_DATASET}>{t('Change dataset')}</Menu.Item>
+    //     {isSqlSupported && (
+    //       <Menu.Item key={VIEW_IN_SQL_LAB}>{t('View in SQL Lab')}</Menu.Item>
+    //     )}
+    //   </Menu>
+    // );
 
     const { health_check_message: healthCheckMessage } = datasource;
 
@@ -232,7 +232,7 @@ class DatasourceControl extends React.PureComponent {
               size={30}
             />
           )}
-          <Dropdown
+          {/* <Dropdown
             overlay={datasourceMenu}
             trigger={['click']}
             data-test="datasource-menu"
@@ -243,7 +243,7 @@ class DatasourceControl extends React.PureComponent {
                 data-test="datasource-menu-trigger"
               />
             </Tooltip>
-          </Dropdown>
+          </Dropdown> */}
         </div>
         {/* missing dataset */}
         {isMissingDatasource && (
