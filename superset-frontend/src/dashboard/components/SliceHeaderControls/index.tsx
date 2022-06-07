@@ -320,7 +320,7 @@ class SliceHeaderControls extends React.PureComponent<
 
         <Menu.Item key={MENU_KEYS.RESIZE_LABEL}>{resizeLabel}</Menu.Item>
 
-        <Menu.Item key={MENU_KEYS.DOWNLOAD_AS_IMAGE}>
+        {/* <Menu.Item key={MENU_KEYS.DOWNLOAD_AS_IMAGE}>
           {t('Download as image')}
         </Menu.Item>
 
@@ -336,7 +336,7 @@ class SliceHeaderControls extends React.PureComponent<
             <Menu.Item key={MENU_KEYS.EXPORT_FULL_CSV}>
               {t('Export full CSV')}
             </Menu.Item>
-          )}
+          )} */}
 
         {isFeatureEnabled(FeatureFlag.DASHBOARD_CROSS_FILTERS) &&
           isCrossFilter && (
