@@ -222,7 +222,7 @@ class SliceHeaderControls extends React.PureComponent<
       isCached = [],
     } = this.props;
     const crossFilterItems = getChartMetadataRegistry().items;
-    const isTable = slice.viz_type === 'table';
+    // const isTable = slice.viz_type === 'table';
     const isCrossFilter = Object.entries(crossFilterItems)
       // @ts-ignore
       .filter(([, { value }]) =>
