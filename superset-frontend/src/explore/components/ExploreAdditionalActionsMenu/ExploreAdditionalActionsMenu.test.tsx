@@ -21,7 +21,7 @@ import React from 'react';
 import { render, screen, waitFor } from 'spec/helpers/testing-library';
 import userEvent from '@testing-library/user-event';
 import * as chartAction from 'src/chart/chartAction';
-import * as downloadAsImage from 'src/utils/downloadAsImage';
+// import * as downloadAsImage from 'src/utils/downloadAsImage';
 import fetchMock from 'fetch-mock';
 import ExploreAdditionalActionsMenu from '.';
 
@@ -117,9 +117,9 @@ test('Should open a menu', () => {
   expect(
     screen.getByRole('menuitem', { name: 'Run in SQL Lab' }),
   ).toBeInTheDocument();
-  expect(
-    screen.getByRole('menuitem', { name: 'Download as image' }),
-  ).toBeInTheDocument();
+  // expect(
+  //   screen.getByRole('menuitem', { name: 'Download as image' }),
+  // ).toBeInTheDocument();
 });
 
 test('Should call onOpenPropertiesModal when click on "Edit properties"', () => {
@@ -164,18 +164,18 @@ test('Should call onOpenInEditor when click on "Run in SQL Lab"', () => {
   expect(props.onOpenInEditor).toBeCalledTimes(1);
 });
 
-test('Should call downloadAsImage when click on "Download as image"', () => {
-  const props = createProps();
-  const spy = jest.spyOn(downloadAsImage, 'default');
-  render(<ExploreAdditionalActionsMenu {...props} />, {
-    useRedux: true,
-  });
+// test('Should call downloadAsImage when click on "Download as image"', () => {
+//   const props = createProps();
+//   const spy = jest.spyOn(downloadAsImage, 'default');
+//   render(<ExploreAdditionalActionsMenu {...props} />, {
+//     useRedux: true,
+//   });
 
-  expect(spy).toBeCalledTimes(0);
-  userEvent.click(screen.getByRole('button'));
-  expect(spy).toBeCalledTimes(0);
+//   expect(spy).toBeCalledTimes(0);
+//   userEvent.click(screen.getByRole('button'));
+//   expect(spy).toBeCalledTimes(0);
 
-  userEvent.click(screen.getByRole('menuitem', { name: 'Download as image' }));
+//   userEvent.click(screen.getByRole('menuitem', { name: 'Download as image' }));
 
-  expect(spy).toBeCalledTimes(1);
-});
+//   expect(spy).toBeCalledTimes(1);
+// });

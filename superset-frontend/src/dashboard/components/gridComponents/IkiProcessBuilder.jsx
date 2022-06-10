@@ -95,6 +95,7 @@ class IkiProcessBuilder extends React.PureComponent {
       editorMode: 'preview',
       undoLength: props.undoLength,
       redoLength: props.redoLength,
+      clusterId: '',
     };
     this.renderStartTime = Logger.getTimestamp();
 
@@ -149,6 +150,10 @@ class IkiProcessBuilder extends React.PureComponent {
       ).src = widgetUrl;
       this.handleIkiProcessBuilderChange(tempIframe);
       this.handleIncomingWindowMsg();
+      window.parent.postMessage(
+        'superset-to-parent/get-cluster-id',
+        widgetReferrerURL,
+      );
     }
   }
 
@@ -288,12 +293,7 @@ class IkiProcessBuilder extends React.PureComponent {
       if (event.origin === widgetReferrerURL) {
         // console.log('process diagram received 1: ', event.data);
         const messageObject = JSON.parse(event.data);
-        if (
-          messageObject.info &&
-          messageObject.data &&
-          messageObject.dataType &&
-          messageObject.scId
-        ) {
+        if (messageObject.info && messageObject.dataType) {
           const { dataType, scId } = messageObject;
           let messageData;
           if (dataType === 'object') {
@@ -301,7 +301,13 @@ class IkiProcessBuilder extends React.PureComponent {
           } else {
             messageData = messageObject.data;
           }
-          if (messageObject.info === 'widget-to-superset/edit') {
+          if (
+            messageObject.info === 'top-window-to-superset/sending-cluster-id'
+          ) {
+            this.setState({
+              clusterId: messageData,
+            });
+          } else if (messageObject.info === 'widget-to-superset/edit') {
             // console.log('message info === edit ', messageData);
             if (
               document.getElementById(
@@ -461,10 +467,26 @@ class IkiProcessBuilder extends React.PureComponent {
   }
 
   renderEditMode() {
-    const { markdownSource, hasError } = this.state;
+    const { markdownSource, hasError, clusterId } = this.state;
     let html = '';
     if (markdownSource) {
-      html = markdownSource;
+      // iframe = markdownSource;
+      const iframeWrapper = document.createElement('div');
+      iframeWrapper.innerHTML = markdownSource;
+      const iframeHtml = iframeWrapper.firstChild;
+      const iframeSrcUrl = new URL(iframeHtml.src);
+      iframeSrcUrl.hostname = clusterId
+        ? `${clusterId}-${iframeSrcUrl.hostname}`
+        : iframeSrcUrl.hostname;
+      /* console.log(
+        'iframeSrcUrl',
+        iframeSrcUrl.hostname,
+        clusterId,
+        iframeHtml.outerHTML,
+      ); */
+      iframeHtml.src = iframeSrcUrl.href.toString();
+      html = iframeHtml.outerHTML;
+      // console.log('iframe', iframeSrcUrl, iframeHtml);
     } else {
       html = `<iframe id="ikiprocessdiagram-widget-${this.props.component.id}" name="process-diagram-${timestamp}" src="${iframeEmptyURL}?mode=edit&scid=${this.props.component.id}" title="IkiProcessDiagram Component" class="ikiprocessdiagram-iframe"></iframe>`;
     }
@@ -472,10 +494,26 @@ class IkiProcessBuilder extends React.PureComponent {
   }
 
   renderPreviewMode() {
-    const { markdownSource, hasError } = this.state;
+    const { markdownSource, hasError, clusterId } = this.state;
     let html = '';
     if (markdownSource) {
-      html = markdownSource;
+      // iframe = markdownSource;
+      const iframeWrapper = document.createElement('div');
+      iframeWrapper.innerHTML = markdownSource;
+      const iframeHtml = iframeWrapper.firstChild;
+      const iframeSrcUrl = new URL(iframeHtml.src);
+      iframeSrcUrl.hostname = clusterId
+        ? `${clusterId}-${iframeSrcUrl.hostname}`
+        : iframeSrcUrl.hostname;
+      /* console.log(
+        'iframeSrcUrl',
+        iframeSrcUrl.hostname,
+        clusterId,
+        iframeHtml.outerHTML,
+      ); */
+      iframeHtml.src = iframeSrcUrl.href.toString();
+      html = iframeHtml.outerHTML;
+      // console.log('iframe', iframeSrcUrl, iframeHtml);
     } else {
       html = `<iframe id="ikiprocessdiagram-widget-${this.props.component.id}" name="process-diagram-${timestamp}" src="${iframeEmptyURL}?mode=edit&scid=${this.props.component.id}" title="IkiProcessDiagram Component" class="ikiprocessdiagram-iframe"></iframe>`;
     }

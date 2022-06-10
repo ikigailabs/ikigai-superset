@@ -20,7 +20,7 @@
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { render, screen } from 'spec/helpers/testing-library';
-import { FeatureFlag } from 'src/featureFlags';
+// import { FeatureFlag } from 'src/featureFlags';
 import SliceHeaderControls from '.';
 
 jest.mock('src/common/components', () => {
@@ -112,7 +112,7 @@ test('Should render default props', () => {
   // @ts-ignore
   delete props.exploreChart;
   // @ts-ignore
-  delete props.exportCSV;
+  // delete props.exportCSV;
   // @ts-ignore
   delete props.cachedDttm;
   // @ts-ignore
@@ -133,7 +133,7 @@ test('Should render default props', () => {
   userEvent.click(
     screen.getByRole('menuitem', { name: 'View chart in Explore' }),
   );
-  userEvent.click(screen.getByRole('menuitem', { name: 'Export CSV' }));
+  // userEvent.click(screen.getByRole('menuitem', { name: 'Export CSV' }));
   userEvent.click(screen.getByRole('menuitem', { name: /Force refresh/ }));
 
   expect(
@@ -142,7 +142,7 @@ test('Should render default props', () => {
   expect(screen.getByTestId('NoAnimationDropdown')).toBeInTheDocument();
 });
 
-test('Should "export to CSV"', () => {
+/*test('Should "export to CSV"', () => {
   const props = createProps();
   render(<SliceHeaderControls {...props} />, { useRedux: true });
 
@@ -208,7 +208,7 @@ test('Should not show export full CSV if slice is filter box', () => {
   expect(screen.queryByRole('menuitem', { name: 'Export full CSV' })).toBe(
     null,
   );
-});
+});*/
 
 test('Should "Toggle chart description"', () => {
   const props = createProps();
