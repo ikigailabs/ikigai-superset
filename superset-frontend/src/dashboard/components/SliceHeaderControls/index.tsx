@@ -25,10 +25,10 @@ import {
   t,
 } from '@superset-ui/core';
 import { Menu, NoAnimationDropdown } from 'src/common/components';
-import ShareMenuItems from 'src/dashboard/components/menu/ShareMenuItems';
+// import ShareMenuItems from 'src/dashboard/components/menu/ShareMenuItems';
 import downloadAsImage from 'src/utils/downloadAsImage';
-import getDashboardUrl from 'src/dashboard/util/getDashboardUrl';
-import { getActiveFilters } from 'src/dashboard/util/activeDashboardFilters';
+// import getDashboardUrl from 'src/dashboard/util/getDashboardUrl';
+// import { getActiveFilters } from 'src/dashboard/util/activeDashboardFilters';
 import { FeatureFlag, isFeatureEnabled } from 'src/featureFlags';
 import CrossFilterScopingModal from 'src/dashboard/components/CrossFilterScopingModal/CrossFilterScopingModal';
 import Icons from 'src/components/Icons';
@@ -213,12 +213,12 @@ class SliceHeaderControls extends React.PureComponent<
     const {
       slice,
       isFullSize,
-      componentId,
+      // componentId,
       cachedDttm = [],
       updatedDttm = null,
-      addSuccessToast = () => {},
-      addDangerToast = () => {},
-      supersetCanShare = false,
+      // addSuccessToast = () => {},
+      // addDangerToast = () => {},
+      // supersetCanShare = false,
       isCached = [],
     } = this.props;
     const crossFilterItems = getChartMetadataRegistry().items;
@@ -302,7 +302,7 @@ class SliceHeaderControls extends React.PureComponent<
           </Menu.Item>
         )}
 
-        {supersetCanShare && (
+        {/* {supersetCanShare && (
           <ShareMenuItems
             url={getDashboardUrl({
               pathname: window.location.pathname,
@@ -316,7 +316,7 @@ class SliceHeaderControls extends React.PureComponent<
             addSuccessToast={addSuccessToast}
             addDangerToast={addDangerToast}
           />
-        )}
+        )} */}
 
         <Menu.Item key={MENU_KEYS.RESIZE_LABEL}>{resizeLabel}</Menu.Item>
 
