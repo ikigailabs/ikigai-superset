@@ -32,8 +32,8 @@ import downloadAsImage from 'src/utils/downloadAsImage';
 import { FeatureFlag, isFeatureEnabled } from 'src/featureFlags';
 import CrossFilterScopingModal from 'src/dashboard/components/CrossFilterScopingModal/CrossFilterScopingModal';
 import Icons from 'src/components/Icons';
-import ModalTrigger from 'src/components/ModalTrigger';
-import ViewQueryModal from 'src/explore/components/controls/ViewQueryModal';
+// import ModalTrigger from 'src/components/ModalTrigger';
+// import ViewQueryModal from 'src/explore/components/controls/ViewQueryModal';
 
 const MENU_KEYS = {
   CROSS_FILTER_SCOPING: 'cross_filter_scoping',
@@ -252,7 +252,7 @@ class SliceHeaderControls extends React.PureComponent<
           : item}
       </div>
     ));
-    const resizeLabel = isFullSize ? t('Minimize chart') : t('Maximize chart');
+    // const resizeLabel = isFullSize ? t('Minimize chart') : t('Maximize chart');
     const menu = (
       <Menu
         onClick={this.handleMenuClick}
@@ -273,12 +273,12 @@ class SliceHeaderControls extends React.PureComponent<
 
         <Menu.Divider />
 
-        {slice.description && (
+        {/* {slice.description && (
           <Menu.Item key={MENU_KEYS.TOGGLE_CHART_DESCRIPTION}>
             {t('Toggle chart description')}
           </Menu.Item>
-        )}
-
+        )} 
+        
         {this.props.supersetCanExplore && (
           <Menu.Item key={MENU_KEYS.EXPLORE_CHART}>
             <a href={this.props.exploreUrl} rel="noopener noreferrer">
@@ -300,9 +300,9 @@ class SliceHeaderControls extends React.PureComponent<
               responsive
             />
           </Menu.Item>
-        )}
-
-        {/* {supersetCanShare && (
+        )} 
+        
+        {supersetCanShare && (
           <ShareMenuItems
             url={getDashboardUrl({
               pathname: window.location.pathname,
@@ -316,11 +316,11 @@ class SliceHeaderControls extends React.PureComponent<
             addSuccessToast={addSuccessToast}
             addDangerToast={addDangerToast}
           />
-        )} */}
+        )} 
 
         <Menu.Item key={MENU_KEYS.RESIZE_LABEL}>{resizeLabel}</Menu.Item>
 
-        {/* <Menu.Item key={MENU_KEYS.DOWNLOAD_AS_IMAGE}>
+         <Menu.Item key={MENU_KEYS.DOWNLOAD_AS_IMAGE}>
           {t('Download as image')}
         </Menu.Item>
 
