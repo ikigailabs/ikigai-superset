@@ -25,15 +25,15 @@ import {
   t,
 } from '@superset-ui/core';
 import { Menu, NoAnimationDropdown } from 'src/common/components';
-import ShareMenuItems from 'src/dashboard/components/menu/ShareMenuItems';
+// import ShareMenuItems from 'src/dashboard/components/menu/ShareMenuItems';
 import downloadAsImage from 'src/utils/downloadAsImage';
-import getDashboardUrl from 'src/dashboard/util/getDashboardUrl';
-import { getActiveFilters } from 'src/dashboard/util/activeDashboardFilters';
+// import getDashboardUrl from 'src/dashboard/util/getDashboardUrl';
+// import { getActiveFilters } from 'src/dashboard/util/activeDashboardFilters';
 import { FeatureFlag, isFeatureEnabled } from 'src/featureFlags';
 import CrossFilterScopingModal from 'src/dashboard/components/CrossFilterScopingModal/CrossFilterScopingModal';
 import Icons from 'src/components/Icons';
-import ModalTrigger from 'src/components/ModalTrigger';
-import ViewQueryModal from 'src/explore/components/controls/ViewQueryModal';
+// import ModalTrigger from 'src/components/ModalTrigger';
+// import ViewQueryModal from 'src/explore/components/controls/ViewQueryModal';
 
 const MENU_KEYS = {
   CROSS_FILTER_SCOPING: 'cross_filter_scoping',
@@ -213,12 +213,12 @@ class SliceHeaderControls extends React.PureComponent<
     const {
       slice,
       isFullSize,
-      componentId,
+      // componentId,
       cachedDttm = [],
       updatedDttm = null,
-      addSuccessToast = () => {},
-      addDangerToast = () => {},
-      supersetCanShare = false,
+      // addSuccessToast = () => {},
+      // addDangerToast = () => {},
+      // supersetCanShare = false,
       isCached = [],
     } = this.props;
     const crossFilterItems = getChartMetadataRegistry().items;
@@ -252,7 +252,7 @@ class SliceHeaderControls extends React.PureComponent<
           : item}
       </div>
     ));
-    const resizeLabel = isFullSize ? t('Minimize chart') : t('Maximize chart');
+    // const resizeLabel = isFullSize ? t('Minimize chart') : t('Maximize chart');
     const menu = (
       <Menu
         onClick={this.handleMenuClick}
@@ -273,12 +273,12 @@ class SliceHeaderControls extends React.PureComponent<
 
         <Menu.Divider />
 
-        {slice.description && (
+        {/* {slice.description && (
           <Menu.Item key={MENU_KEYS.TOGGLE_CHART_DESCRIPTION}>
             {t('Toggle chart description')}
           </Menu.Item>
-        )}
-
+        )} 
+        
         {this.props.supersetCanExplore && (
           <Menu.Item key={MENU_KEYS.EXPLORE_CHART}>
             <a href={this.props.exploreUrl} rel="noopener noreferrer">
@@ -300,8 +300,8 @@ class SliceHeaderControls extends React.PureComponent<
               responsive
             />
           </Menu.Item>
-        )}
-
+        )} 
+        
         {supersetCanShare && (
           <ShareMenuItems
             url={getDashboardUrl({
@@ -316,11 +316,11 @@ class SliceHeaderControls extends React.PureComponent<
             addSuccessToast={addSuccessToast}
             addDangerToast={addDangerToast}
           />
-        )}
+        )} 
 
         <Menu.Item key={MENU_KEYS.RESIZE_LABEL}>{resizeLabel}</Menu.Item>
 
-        {/* <Menu.Item key={MENU_KEYS.DOWNLOAD_AS_IMAGE}>
+         <Menu.Item key={MENU_KEYS.DOWNLOAD_AS_IMAGE}>
           {t('Download as image')}
         </Menu.Item>
 

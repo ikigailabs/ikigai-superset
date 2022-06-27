@@ -91,7 +91,7 @@ const ExploreActionButtons = (props: ExploreActionButtonsProps) => {
     chartStatus,
     latestQueryFormData,
     slice,
-    addDangerToast,
+    // addDangerToast,
   } = props;
 
   const copyTooltipText = t('Copy chart URL to clipboard');
@@ -110,16 +110,16 @@ const ExploreActionButtons = (props: ExploreActionButtonsProps) => {
     }
   };
 
-  const doShareEmail = async () => {
-    try {
-      const subject = t('Superset Chart');
-      const shortUrl = await getShortUrl();
-      const body = t('%s%s', 'Check out this chart: ', shortUrl);
-      window.location.href = `mailto:?Subject=${subject}%20&Body=${body}`;
-    } catch (error) {
-      addDangerToast(t('Sorry, something went wrong. Try again later.'));
-    }
-  };
+  // const doShareEmail = async () => {
+  //   try {
+  //     const subject = t('Superset Chart');
+  //     const shortUrl = await getShortUrl();
+  //     const body = t('%s%s', 'Check out this chart: ', shortUrl);
+  //     window.location.href = `mailto:?Subject=${subject}%20&Body=${body}`;
+  //   } catch (error) {
+  //     addDangerToast(t('Sorry, something went wrong. Try again later.'));
+  //   }
+  // };
 
   const doExportCSV = canDownloadCSV
     ? exportChart.bind(this, {
@@ -157,11 +157,11 @@ const ExploreActionButtons = (props: ExploreActionButtonsProps) => {
               !value && setTimeout(() => setCopyTooltip(copyTooltipText), 200)
             }
           />
-          <ActionButton
+          {/* <ActionButton
             icon={<Icons.Email iconSize="l" />}
             tooltip={t('Share chart by email')}
             onClick={doShareEmail}
-          />
+          /> */}
           <EmbedCodeButton latestQueryFormData={latestQueryFormData} />
           <ActionButton
             icon={<Icons.FileTextOutlined iconSize="m" />}

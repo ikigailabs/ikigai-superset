@@ -125,14 +125,14 @@ test('Should render default props', () => {
   delete props.sliceCanEdit;
 
   render(<SliceHeaderControls {...props} />, { useRedux: true });
-  userEvent.click(screen.getByRole('menuitem', { name: 'Maximize chart' }));
-  userEvent.click(screen.getByRole('menuitem', { name: /Force refresh/ }));
-  userEvent.click(
-    screen.getByRole('menuitem', { name: 'Toggle chart description' }),
-  );
-  userEvent.click(
-    screen.getByRole('menuitem', { name: 'View chart in Explore' }),
-  );
+  // userEvent.click(screen.getByRole('menuitem', { name: 'Maximize chart' }));
+  // userEvent.click(screen.getByRole('menuitem', { name: /Force refresh/ }));
+  // userEvent.click(
+  //   screen.getByRole('menuitem', { name: 'Toggle chart description' }),
+  // );
+  // userEvent.click(
+  //   screen.getByRole('menuitem', { name: 'View chart in Explore' }),
+  // );
   // userEvent.click(screen.getByRole('menuitem', { name: 'Export CSV' }));
   userEvent.click(screen.getByRole('menuitem', { name: /Force refresh/ }));
 
