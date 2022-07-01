@@ -111,7 +111,7 @@ test('should render the menu items', async () => {
   expect(screen.getAllByRole('menuitem')).toHaveLength(4);
   expect(screen.getByText('Refresh dashboard')).toBeInTheDocument();
   expect(screen.getByText('Set auto-refresh interval')).toBeInTheDocument();
-  // expect(screen.getByText('Download as image')).toBeInTheDocument();
+  expect(screen.getByText('Download as image')).toBeInTheDocument();
   expect(screen.getByText('Enter fullscreen')).toBeInTheDocument();
 });
 
