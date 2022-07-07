@@ -148,6 +148,7 @@ class IkiRunPipeline extends React.PureComponent {
           iframeUrl: widgetUrlString,
         },
         () => {
+          console.log('2:', dashURL);
           this.handleIncomingWindowMsg();
           window.parent.postMessage(
             'superset-to-parent/get-cluster-id',
@@ -244,9 +245,10 @@ class IkiRunPipeline extends React.PureComponent {
           if (
             messageObject.info === 'top-window-to-superset/sending-cluster-id'
           ) {
+            console.log('4: ', messageObject);
             this.setState({
-              clusterId: messageData,
-            });
+            clusterId: messageData,
+            }, () => console.log('4.B: ', this.state.clusterId));
           } else if (
             messageObject.info === 'widget-to-superset/sending-pipeline-data'
           ) {
@@ -409,12 +411,12 @@ class IkiRunPipeline extends React.PureComponent {
       iframeSrcUrl.hostname = clusterId
         ? `${clusterId}-${iframeSrcUrl.hostname}`
         : iframeSrcUrl.hostname;
-      /* console.log(
-        'iframeSrcUrl',
+      console.log(
+        '5 - editMode: ',
         iframeSrcUrl.hostname,
         clusterId,
         iframeHtml.outerHTML,
-      ); */
+      );
       iframeHtml.src = iframeSrcUrl.href.toString();
       iframe = iframeHtml.outerHTML;
       // console.log('iframe', iframeSrcUrl, iframeHtml);
@@ -443,16 +445,18 @@ class IkiRunPipeline extends React.PureComponent {
       iframeSrcUrl.hostname = clusterId
         ? `${clusterId}-${iframeSrcUrl.hostname}`
         : iframeSrcUrl.hostname;
-      /* console.log(
-        'iframeSrcUrl',
+      iframeHtml.src = iframeSrcUrl.href.toString();
+      iframe = iframeHtml.outerHTML;
+      console.log(
+        '5: ',
         iframeSrcUrl.hostname,
         clusterId,
         iframeHtml.outerHTML,
-      ); */
-      iframeHtml.src = iframeSrcUrl.href.toString();
-      iframe = iframeHtml.outerHTML;
+        iframe,
+      );
       // console.log('iframe', iframeSrcUrl, iframeHtml);
     } else {
+      console.log('5.B');
       iframe = `<iframe
                   id="ikirunpipeline-widget-${this.props.component.id}"
                   name="run-flow-${timestamp}"
