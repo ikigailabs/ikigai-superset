@@ -246,8 +246,10 @@ class IkiRunPipeline extends React.PureComponent {
             messageObject.info === 'top-window-to-superset/sending-cluster-id'
           ) {
             console.log('4: ', messageObject);
-            this.setState({
-            clusterId: messageData,
+            this.setState(
+              {
+                clusterId: messageData,
+                // eslint-disable-next-line prettier/prettier
             }, () => console.log('4.B: ', this.state.clusterId));
           } else if (
             messageObject.info === 'widget-to-superset/sending-pipeline-data'
