@@ -519,7 +519,6 @@ class IkiTable extends React.PureComponent {
       iframeHtml.src = `${
         iframeSrcUrl.origin
       }/redirect?componentUrl=${iframeSrcUrl.href.toString()}`;
-      iframeHtml.src = iframeSrcUrl.href.toString();
       iframe = iframeHtml.outerHTML;
     } else {
       iframe = `<iframe
@@ -546,7 +545,6 @@ class IkiTable extends React.PureComponent {
       iframeHtml.src = `${
         iframeSrcUrl.origin
       }/redirect?componentUrl=${iframeSrcUrl.href.toString()}`;
-      iframeHtml.src = iframeSrcUrl.href.toString();
       iframe = iframeHtml.outerHTML;
     } else {
       iframe = `<iframe
