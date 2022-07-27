@@ -42,7 +42,7 @@ import {
 // const dashURL = 'http://localhost:3000';
 const dashURL = document.referrer.substring(0, document.referrer.length - 1);
 const timestamp = new Date().getTime().toString();
-const iframeEmptyURL = `${dashURL}/widget/dataset/table?v=1&editable_dataset_times=${timestamp}&mode=edit`;
+const iframeEmptyURL = `${dashURL}/redirect?componentUrl=${dashURL}/widget/dataset/table?v=1&editable_dataset_times=${timestamp}&mode=edit`;
 
 const propTypes = {
   id: PropTypes.string.isRequired,
@@ -97,7 +97,6 @@ class IkiTable extends React.PureComponent {
       iframeUrl: iframeEmptyURL,
       referrerUrl: '',
       projectId: '',
-      clusterId: '',
     };
     this.renderStartTime = Logger.getTimestamp();
 
@@ -136,9 +135,9 @@ class IkiTable extends React.PureComponent {
       if (
         document.getElementById(`ikitable-widget-${this.props.component.id}`)
       ) {
-        widgetUrlString = document.getElementById(
-          `ikitable-widget-${this.props.component.id}`,
-        ).src;
+        widgetUrlString = document
+          .getElementById(`ikitable-widget-${this.props.component.id}`)
+          .src.split('componentUrl=')[1];
       } else {
         widgetUrlString = iframeEmptyURL;
       }
@@ -148,10 +147,6 @@ class IkiTable extends React.PureComponent {
         },
         () => {
           this.handleIncomingWindowMsg();
-          window.parent.postMessage(
-            'superset-to-parent/get-cluster-id',
-            dashURL,
-          );
         },
       );
     }
@@ -241,12 +236,6 @@ class IkiTable extends React.PureComponent {
             messageData = messageObject.data;
           }
           if (
-            messageObject.info === 'top-window-to-superset/sending-cluster-id'
-          ) {
-            this.setState({
-              clusterId: messageData,
-            });
-          } else if (
             messageObject.info === 'top-window-to-superset/sending-project-id'
           ) {
             const tempMarkdownSouce = this.state.markdownSource;
@@ -257,9 +246,11 @@ class IkiTable extends React.PureComponent {
                 )
               ) {
                 widgetUrl = new URL(
-                  document.getElementById(
-                    `ikitable-widget-${this.props.component.id}`,
-                  ).src,
+                  document
+                    .getElementById(
+                      `ikitable-widget-${this.props.component.id}`,
+                    )
+                    .src.split('componentUrl=')[1],
                 );
                 const widgetUrlQuery = new URLSearchParams(widgetUrl);
                 widgetUrlQuery.set('mode', 'edit');
@@ -305,9 +296,9 @@ class IkiTable extends React.PureComponent {
               )
             ) {
               const widgetUrl = new URL(
-                document.getElementById(
-                  `ikitable-widget-${this.props.component.id}`,
-                ).src,
+                document
+                  .getElementById(`ikitable-widget-${this.props.component.id}`)
+                  .src.split('componentUrl=')[1],
               );
               // const widgetUrlQuery = new URLSearchParams(widgetUrl);
               const widgetUrlQueryTblType = widgetUrl.searchParams.get(
@@ -473,7 +464,7 @@ class IkiTable extends React.PureComponent {
   }
 
   renderEditMode() {
-    const { markdownSource, hasError, clusterId } = this.state;
+    const { markdownSource, hasError } = this.state;
     let iframe = '';
     if (markdownSource) {
       // iframe = markdownSource;
@@ -481,23 +472,15 @@ class IkiTable extends React.PureComponent {
       iframeWrapper.innerHTML = markdownSource;
       const iframeHtml = iframeWrapper.firstChild;
       const iframeSrcUrl = new URL(iframeHtml.src);
-      iframeSrcUrl.hostname = clusterId
-        ? `${clusterId}-${iframeSrcUrl.hostname}`
-        : iframeSrcUrl.hostname;
-      /* console.log(
-        'iframeSrcUrl',
-        iframeSrcUrl.hostname,
-        clusterId,
-        iframeHtml.outerHTML,
-      ); */
-      iframeHtml.src = iframeSrcUrl.href.toString();
+      iframeHtml.src = `${
+        iframeSrcUrl.origin
+      }/redirect?componentUrl=${iframeSrcUrl.href.toString()}`;
       iframe = iframeHtml.outerHTML;
-      // console.log('iframe', iframeSrcUrl, iframeHtml);
     } else {
       iframe = `<iframe
                   id="ikitable-widget-${this.props.component.id}"
                   name="editable-dataset-${timestamp}"
-                  src="${dashURL}/widget/dataset/table?v=1&editable_dataset_times=${timestamp}&mode=edit"
+                  src="${dashURL}/redirect?componentUrl=${dashURL}/widget/dataset/table?v=1&editable_dataset_times=${timestamp}&mode=edit"
                   title="IkiTable Component"
                   className="ikitable-widget"
                   style="height:100%;"
@@ -507,7 +490,7 @@ class IkiTable extends React.PureComponent {
   }
 
   renderPreviewMode() {
-    const { markdownSource, hasError, clusterId } = this.state;
+    const { markdownSource, hasError } = this.state;
     let iframe = '';
     if (markdownSource) {
       // iframe = markdownSource;
@@ -515,23 +498,15 @@ class IkiTable extends React.PureComponent {
       iframeWrapper.innerHTML = markdownSource;
       const iframeHtml = iframeWrapper.firstChild;
       const iframeSrcUrl = new URL(iframeHtml.src);
-      iframeSrcUrl.hostname = clusterId
-        ? `${clusterId}-${iframeSrcUrl.hostname}`
-        : iframeSrcUrl.hostname;
-      /* console.log(
-        'iframeSrcUrl',
-        iframeSrcUrl.hostname,
-        clusterId,
-        iframeHtml.outerHTML,
-      ); */
-      iframeHtml.src = iframeSrcUrl.href.toString();
+      iframeHtml.src = `${
+        iframeSrcUrl.origin
+      }/redirect?componentUrl=${iframeSrcUrl.href.toString()}`;
       iframe = iframeHtml.outerHTML;
-      // console.log('iframe', iframeSrcUrl, iframeHtml);
     } else {
       iframe = `<iframe
                   id="ikitable-widget-${this.props.component.id}"
                   name="editable-dataset-${timestamp}"
-                  src="${dashURL}/widget/dataset/table?v=1&editable_dataset_times=${timestamp}&mode=edit"
+                  src="${dashURL}/redirect?componentUrl=${dashURL}/widget/dataset/table?v=1&editable_dataset_times=${timestamp}&mode=edit"
                   title="IkiTable Component"
                   className="ikitable-widget"
                   style="height:100%;"

@@ -47,7 +47,7 @@ const widgetReferrerURL = document.referrer.substring(
 );
 // const widgetReferrerURL = 'http://localhost:3000';
 const timestamp = new Date().getTime().toString();
-const iframeEmptyURL = `${widgetReferrerURL}/widget/diagram/builder?v=1&process_diagram_times=${timestamp}`;
+const iframeEmptyURL = `${widgetReferrerURL}/redirect?componentUrl=${widgetReferrerURL}/widget/diagram/builder?v=1&process_diagram_times=${timestamp}`;
 
 const propTypes = {
   id: PropTypes.string.isRequired,
@@ -95,7 +95,6 @@ class IkiProcessBuilder extends React.PureComponent {
       editorMode: 'preview',
       undoLength: props.undoLength,
       redoLength: props.redoLength,
-      clusterId: '',
     };
     this.renderStartTime = Logger.getTimestamp();
 
@@ -119,9 +118,9 @@ class IkiProcessBuilder extends React.PureComponent {
       this.handleIncomingWindowMsg();
     } else {
       const widgetUrl = new URL(
-        document.getElementById(
-          `ikiprocessdiagram-widget-${this.props.component.id}`,
-        ).src,
+        document
+          .getElementById(`ikiprocessdiagram-widget-${this.props.component.id}`)
+          .src.split('componentUrl=')[1],
       );
       // const widgetUrlParams = new URLSearchParams(widgetUrl.search);
       const definitionData = document.getElementById(
@@ -134,9 +133,6 @@ class IkiProcessBuilder extends React.PureComponent {
       widgetUrlParams.set('data', definitionData);
       widgetUrlParams.set('scid', this.props.component.id);
       widgetUrl.search = widgetUrlParams.toString(); */
-      document.getElementById(
-        `ikiprocessdiagram-widget-${this.props.component.id}`,
-      ).src = widgetUrl;
       const tempIframe = `<iframe
                         id="ikiprocessdiagram-widget-${this.props.component.id}"
                         name="process-diagram-${timestamp}"
@@ -150,10 +146,6 @@ class IkiProcessBuilder extends React.PureComponent {
       ).src = widgetUrl;
       this.handleIkiProcessBuilderChange(tempIframe);
       this.handleIncomingWindowMsg();
-      window.parent.postMessage(
-        'superset-to-parent/get-cluster-id',
-        widgetReferrerURL,
-      );
     }
   }
 
@@ -222,9 +214,11 @@ class IkiProcessBuilder extends React.PureComponent {
         )
       ) {
         const widgetUrl = new URL(
-          document.getElementById(
-            `ikiprocessdiagram-widget-${this.props.component.id}`,
-          ).src,
+          document
+            .getElementById(
+              `ikiprocessdiagram-widget-${this.props.component.id}`,
+            )
+            .src.split('componentUrl=')[1],
         );
         const definitionData = document.getElementById(
           `ikiprocessdiagram-widget-${this.props.component.id}`,
@@ -252,9 +246,11 @@ class IkiProcessBuilder extends React.PureComponent {
         )
       ) {
         const widgetUrl = new URL(
-          document.getElementById(
-            `ikiprocessdiagram-widget-${this.props.component.id}`,
-          ).src,
+          document
+            .getElementById(
+              `ikiprocessdiagram-widget-${this.props.component.id}`,
+            )
+            .src.split('componentUrl=')[1],
         );
         const definitionData = document.getElementById(
           `ikiprocessdiagram-widget-${this.props.component.id}`,
@@ -301,13 +297,7 @@ class IkiProcessBuilder extends React.PureComponent {
           } else {
             messageData = messageObject.data;
           }
-          if (
-            messageObject.info === 'top-window-to-superset/sending-cluster-id'
-          ) {
-            this.setState({
-              clusterId: messageData,
-            });
-          } else if (messageObject.info === 'widget-to-superset/edit') {
+          if (messageObject.info === 'widget-to-superset/edit') {
             // console.log('message info === edit ', messageData);
             if (
               document.getElementById(
@@ -315,9 +305,11 @@ class IkiProcessBuilder extends React.PureComponent {
               )
             ) {
               const widgetUrl = new URL(
-                document.getElementById(
-                  `ikiprocessdiagram-widget-${this.props.component.id}`,
-                ).src,
+                document
+                  .getElementById(
+                    `ikiprocessdiagram-widget-${this.props.component.id}`,
+                  )
+                  .src.split('componentUrl=')[1],
               );
               const widgetUrlMode = widgetUrl.searchParams.get('mode');
               const widgetSCId = widgetUrl.searchParams.get('scid');
@@ -467,7 +459,7 @@ class IkiProcessBuilder extends React.PureComponent {
   }
 
   renderEditMode() {
-    const { markdownSource, hasError, clusterId } = this.state;
+    const { markdownSource, hasError } = this.state;
     let html = '';
     if (markdownSource) {
       // iframe = markdownSource;
@@ -475,18 +467,10 @@ class IkiProcessBuilder extends React.PureComponent {
       iframeWrapper.innerHTML = markdownSource;
       const iframeHtml = iframeWrapper.firstChild;
       const iframeSrcUrl = new URL(iframeHtml.src);
-      iframeSrcUrl.hostname = clusterId
-        ? `${clusterId}-${iframeSrcUrl.hostname}`
-        : iframeSrcUrl.hostname;
-      /* console.log(
-        'iframeSrcUrl',
-        iframeSrcUrl.hostname,
-        clusterId,
-        iframeHtml.outerHTML,
-      ); */
-      iframeHtml.src = iframeSrcUrl.href.toString();
+      iframeHtml.src = `${
+        iframeSrcUrl.origin
+      }/redirect?componentUrl=${iframeSrcUrl.href.toString()}`;
       html = iframeHtml.outerHTML;
-      // console.log('iframe', iframeSrcUrl, iframeHtml);
     } else {
       html = `<iframe id="ikiprocessdiagram-widget-${this.props.component.id}" name="process-diagram-${timestamp}" src="${iframeEmptyURL}&mode=edit&scid=${this.props.component.id}" title="IkiProcessDiagram Component" class="ikiprocessdiagram-iframe"></iframe>`;
     }
@@ -494,7 +478,7 @@ class IkiProcessBuilder extends React.PureComponent {
   }
 
   renderPreviewMode() {
-    const { markdownSource, hasError, clusterId } = this.state;
+    const { markdownSource, hasError } = this.state;
     let html = '';
     if (markdownSource) {
       // iframe = markdownSource;
@@ -502,18 +486,10 @@ class IkiProcessBuilder extends React.PureComponent {
       iframeWrapper.innerHTML = markdownSource;
       const iframeHtml = iframeWrapper.firstChild;
       const iframeSrcUrl = new URL(iframeHtml.src);
-      iframeSrcUrl.hostname = clusterId
-        ? `${clusterId}-${iframeSrcUrl.hostname}`
-        : iframeSrcUrl.hostname;
-      /* console.log(
-        'iframeSrcUrl',
-        iframeSrcUrl.hostname,
-        clusterId,
-        iframeHtml.outerHTML,
-      ); */
-      iframeHtml.src = iframeSrcUrl.href.toString();
+      iframeHtml.src = `${
+        iframeSrcUrl.origin
+      }/redirect?componentUrl=${iframeSrcUrl.href.toString()}`;
       html = iframeHtml.outerHTML;
-      // console.log('iframe', iframeSrcUrl, iframeHtml);
     } else {
       html = `<iframe id="ikiprocessdiagram-widget-${this.props.component.id}" name="process-diagram-${timestamp}" src="${iframeEmptyURL}&mode=preview&scid=${this.props.component.id}" title="IkiProcessDiagram Component" class="ikiprocessdiagram-iframe"></iframe>`;
     }
