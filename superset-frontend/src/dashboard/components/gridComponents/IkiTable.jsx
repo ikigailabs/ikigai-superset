@@ -358,6 +358,50 @@ class IkiTable extends React.PureComponent {
                 );
               }
             }
+          } else if (
+            messageObject.info === 'widget-to-superset/sending-lookup-columns'
+          ) {
+            if (
+              document.getElementById(
+                `ikitable-widget-${this.props.component.id}`,
+              )
+            ) {
+              const widgetUrl = new URL(
+                document
+                  .getElementById(`ikitable-widget-${this.props.component.id}`)
+                  .src.split('componentUrl=')[1],
+              );
+              const lookupColumn = messageData.lookup ? messageData.lookup : '';
+              const dropdownColumn = messageData.dropdown
+                ? messageData.dropdown
+                : '';
+              if (lookupColumn && dropdownColumn) {
+                widgetUrl.searchParams.set('dropdown_column', dropdownColumn);
+                widgetUrl.searchParams.set('lookup_column', lookupColumn);
+              }
+
+              // widgetUrl.search = widgetUrlQuery.toString();
+              this.setState(
+                {
+                  iframeUrl: widgetUrl,
+                },
+                () => {
+                  // console.log('widgetUrl...', widgetUrl);
+                  const tempIframe = `<iframe
+                        id="ikitable-widget-${this.props.component.id}"
+                        name="editable-dataset-${timestamp}"
+                        src="${widgetUrl}"
+                        title="IkiTable Component"
+                        className="ikitable-widget"
+                        style="height:100%;"
+                      />`;
+                  this.handleIkiTableChange(tempIframe);
+                  document.getElementById(
+                    `ikitable-widget-${this.props.component.id}`,
+                  ).src = widgetUrl;
+                },
+              );
+            }
           }
         }
       }
