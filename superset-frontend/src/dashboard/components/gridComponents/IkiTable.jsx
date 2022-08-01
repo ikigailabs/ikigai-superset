@@ -42,7 +42,8 @@ import {
 // const dashURL = 'http://localhost:3000';
 const dashURL = document.referrer.substring(0, document.referrer.length - 1);
 const timestamp = new Date().getTime().toString();
-const iframeEmptyURL = `${dashURL}/redirect?componentUrl=${dashURL}/widget/dataset/table?v=1&editable_dataset_times=${timestamp}&mode=edit`;
+// const iframeEmptyURL = `${dashURL}/redirect?componentUrl=${dashURL}/widget/dataset/table?v=1&editable_dataset_times=${timestamp}&mode=edit`;
+const iframeEmptyURL = `${dashURL}/widget/dataset/table?v=1&editable_dataset_times=${timestamp}&mode=edit`;
 
 const propTypes = {
   id: PropTypes.string.isRequired,
@@ -135,9 +136,10 @@ class IkiTable extends React.PureComponent {
       if (
         document.getElementById(`ikitable-widget-${this.props.component.id}`)
       ) {
-        widgetUrlString = document
-          .getElementById(`ikitable-widget-${this.props.component.id}`)
-          .src.split('componentUrl=')[1];
+        widgetUrlString = document.getElementById(
+          `ikitable-widget-${this.props.component.id}`,
+        ).src;
+        // .src.split('componentUrl=')[1];
       } else {
         widgetUrlString = iframeEmptyURL;
       }
@@ -246,11 +248,10 @@ class IkiTable extends React.PureComponent {
                 )
               ) {
                 widgetUrl = new URL(
-                  document
-                    .getElementById(
-                      `ikitable-widget-${this.props.component.id}`,
-                    )
-                    .src.split('componentUrl=')[1],
+                  document.getElementById(
+                    `ikitable-widget-${this.props.component.id}`,
+                  ).src,
+                  // .split('componentUrl=')[1],
                 );
                 const widgetUrlQuery = new URLSearchParams(widgetUrl);
                 widgetUrlQuery.set('mode', 'edit');
@@ -296,9 +297,10 @@ class IkiTable extends React.PureComponent {
               )
             ) {
               const widgetUrl = new URL(
-                document
-                  .getElementById(`ikitable-widget-${this.props.component.id}`)
-                  .src.split('componentUrl=')[1],
+                document.getElementById(
+                  `ikitable-widget-${this.props.component.id}`,
+                ).src,
+                // .src.split('componentUrl=')[1],
               );
               // const widgetUrlQuery = new URLSearchParams(widgetUrl);
               const widgetUrlQueryTblType = widgetUrl.searchParams.get(
@@ -516,19 +518,28 @@ class IkiTable extends React.PureComponent {
       iframeWrapper.innerHTML = markdownSource;
       const iframeHtml = iframeWrapper.firstChild;
       const iframeSrcUrl = new URL(iframeHtml.src);
-      iframeHtml.src = `${
-        iframeSrcUrl.origin
-      }/redirect?componentUrl=${iframeSrcUrl.href.toString()}`;
+      iframeHtml.src = iframeSrcUrl.href.toString();
+      // iframeHtml.src = `${
+      //   iframeSrcUrl.origin
+      // }/redirect?componentUrl=${iframeSrcUrl.href.toString()}`;
       iframe = iframeHtml.outerHTML;
     } else {
       iframe = `<iframe
                   id="ikitable-widget-${this.props.component.id}"
                   name="editable-dataset-${timestamp}"
-                  src="${dashURL}/redirect?componentUrl=${dashURL}/widget/dataset/table?v=1&editable_dataset_times=${timestamp}&mode=edit"
+                  src="${dashURL}/widget/dataset/table?v=1&editable_dataset_times=${timestamp}&mode=edit"
                   title="IkiTable Component"
                   className="ikitable-widget"
                   style="height:100%;"
                 />`;
+      // iframe = `<iframe
+      //             id="ikitable-widget-${this.props.component.id}"
+      //             name="editable-dataset-${timestamp}"
+      //             src="${dashURL}/redirect?componentUrl=${dashURL}/widget/dataset/table?v=1&editable_dataset_times=${timestamp}&mode=edit"
+      //             title="IkiTable Component"
+      //             className="ikitable-widget"
+      //             style="height:100%;"
+      //           />`;
     }
     return <SafeMarkdown source={hasError ? MARKDOWN_ERROR_MESSAGE : iframe} />;
   }
@@ -542,19 +553,28 @@ class IkiTable extends React.PureComponent {
       iframeWrapper.innerHTML = markdownSource;
       const iframeHtml = iframeWrapper.firstChild;
       const iframeSrcUrl = new URL(iframeHtml.src);
-      iframeHtml.src = `${
-        iframeSrcUrl.origin
-      }/redirect?componentUrl=${iframeSrcUrl.href.toString()}`;
+      iframeHtml.src = iframeSrcUrl.href.toString();
+      // iframeHtml.src = `${
+      //   iframeSrcUrl.origin
+      // }/redirect?componentUrl=${iframeSrcUrl.href.toString()}`;
       iframe = iframeHtml.outerHTML;
     } else {
       iframe = `<iframe
                   id="ikitable-widget-${this.props.component.id}"
                   name="editable-dataset-${timestamp}"
-                  src="${dashURL}/redirect?componentUrl=${dashURL}/widget/dataset/table?v=1&editable_dataset_times=${timestamp}&mode=edit"
+                  src="${dashURL}/widget/dataset/table?v=1&editable_dataset_times=${timestamp}&mode=edit"
                   title="IkiTable Component"
                   className="ikitable-widget"
                   style="height:100%;"
                 />`;
+      // iframe = `<iframe
+      //             id="ikitable-widget-${this.props.component.id}"
+      //             name="editable-dataset-${timestamp}"
+      //             src="${dashURL}/redirect?componentUrl=${dashURL}/widget/dataset/table?v=1&editable_dataset_times=${timestamp}&mode=edit"
+      //             title="IkiTable Component"
+      //             className="ikitable-widget"
+      //             style="height:100%;"
+      //           />`;
     }
     return <SafeMarkdown source={hasError ? MARKDOWN_ERROR_MESSAGE : iframe} />;
   }
