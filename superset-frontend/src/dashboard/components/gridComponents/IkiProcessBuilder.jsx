@@ -472,7 +472,7 @@ class IkiProcessBuilder extends React.PureComponent {
       // }/redirect?componentUrl=${iframeSrcUrl.href.toString()}`;
       html = iframeHtml.outerHTML;
     } else {
-      html = `<iframe id="ikiprocessdiagram-widget-${this.props.component.id}" name="process-diagram-${timestamp}" src="${iframeEmptyURL}?mode=edit&scid=${this.props.component.id}" title="IkiProcessDiagram Component" class="ikiprocessdiagram-iframe"></iframe>`;
+      html = `<iframe id="ikiprocessdiagram-widget-${this.props.component.id}" name="process-diagram-${timestamp}" src="${iframeEmptyURL}&mode=edit&scid=${this.props.component.id}" title="IkiProcessDiagram Component" class="ikiprocessdiagram-iframe"></iframe>`;
     }
     return <SafeMarkdown source={hasError ? MARKDOWN_ERROR_MESSAGE : html} />;
   }
@@ -492,7 +492,7 @@ class IkiProcessBuilder extends React.PureComponent {
       // }/redirect?componentUrl=${iframeSrcUrl.href.toString()}`;
       html = iframeHtml.outerHTML;
     } else {
-      html = `<iframe id="ikiprocessdiagram-widget-${this.props.component.id}" name="process-diagram-${timestamp}" src="${iframeEmptyURL}?mode=edit&scid=${this.props.component.id}" title="IkiProcessDiagram Component" class="ikiprocessdiagram-iframe"></iframe>`;
+      html = `<iframe id="ikiprocessdiagram-widget-${this.props.component.id}" name="process-diagram-${timestamp}" src="${iframeEmptyURL}&mode=preview&scid=${this.props.component.id}" title="IkiProcessDiagram Component" class="ikiprocessdiagram-iframe"></iframe>`;
     }
     return <SafeMarkdown source={hasError ? MARKDOWN_ERROR_MESSAGE : html} />;
   }
