@@ -47,7 +47,8 @@ const widgetReferrerURL = document.referrer.substring(
 );
 // const widgetReferrerURL = 'http://localhost:3000';
 const timestamp = new Date().getTime().toString();
-const iframeEmptyURL = `${widgetReferrerURL}/redirect?componentUrl=${widgetReferrerURL}/widget/diagram/builder?v=1&process_diagram_times=${timestamp}`;
+const iframeEmptyURL = `${widgetReferrerURL}/widget/diagram/builder?v=1&process_diagram_times=${timestamp}`;
+// const iframeEmptyURL = `${widgetReferrerURL}/redirect?componentUrl=${widgetReferrerURL}/widget/diagram/builder?v=1&process_diagram_times=${timestamp}`;
 
 const propTypes = {
   id: PropTypes.string.isRequired,
@@ -118,9 +119,10 @@ class IkiProcessBuilder extends React.PureComponent {
       this.handleIncomingWindowMsg();
     } else {
       const widgetUrl = new URL(
-        document
-          .getElementById(`ikiprocessdiagram-widget-${this.props.component.id}`)
-          .src.split('componentUrl=')[1],
+        document.getElementById(
+          `ikiprocessdiagram-widget-${this.props.component.id}`,
+        ).src,
+        // .split('componentUrl=')[1],
       );
       // const widgetUrlParams = new URLSearchParams(widgetUrl.search);
       const definitionData = document.getElementById(
@@ -214,11 +216,10 @@ class IkiProcessBuilder extends React.PureComponent {
         )
       ) {
         const widgetUrl = new URL(
-          document
-            .getElementById(
-              `ikiprocessdiagram-widget-${this.props.component.id}`,
-            )
-            .src.split('componentUrl=')[1],
+          document.getElementById(
+            `ikiprocessdiagram-widget-${this.props.component.id}`,
+          ).src,
+          // .split('componentUrl=')[1],
         );
         const definitionData = document.getElementById(
           `ikiprocessdiagram-widget-${this.props.component.id}`,
@@ -246,11 +247,10 @@ class IkiProcessBuilder extends React.PureComponent {
         )
       ) {
         const widgetUrl = new URL(
-          document
-            .getElementById(
-              `ikiprocessdiagram-widget-${this.props.component.id}`,
-            )
-            .src.split('componentUrl=')[1],
+          document.getElementById(
+            `ikiprocessdiagram-widget-${this.props.component.id}`,
+          ).src,
+          // .src.split('componentUrl=')[1],
         );
         const definitionData = document.getElementById(
           `ikiprocessdiagram-widget-${this.props.component.id}`,
@@ -305,11 +305,10 @@ class IkiProcessBuilder extends React.PureComponent {
               )
             ) {
               const widgetUrl = new URL(
-                document
-                  .getElementById(
-                    `ikiprocessdiagram-widget-${this.props.component.id}`,
-                  )
-                  .src.split('componentUrl=')[1],
+                document.getElementById(
+                  `ikiprocessdiagram-widget-${this.props.component.id}`,
+                ).src,
+                // .src.split('componentUrl=')[1],
               );
               const widgetUrlMode = widgetUrl.searchParams.get('mode');
               const widgetSCId = widgetUrl.searchParams.get('scid');
@@ -467,9 +466,10 @@ class IkiProcessBuilder extends React.PureComponent {
       iframeWrapper.innerHTML = markdownSource;
       const iframeHtml = iframeWrapper.firstChild;
       const iframeSrcUrl = new URL(iframeHtml.src);
-      iframeHtml.src = `${
-        iframeSrcUrl.origin
-      }/redirect?componentUrl=${iframeSrcUrl.href.toString()}`;
+      iframeHtml.src = iframeSrcUrl.href.toString();
+      // iframeHtml.src = `${
+      //   iframeSrcUrl.origin
+      // }/redirect?componentUrl=${iframeSrcUrl.href.toString()}`;
       html = iframeHtml.outerHTML;
     } else {
       html = `<iframe id="ikiprocessdiagram-widget-${this.props.component.id}" name="process-diagram-${timestamp}" src="${iframeEmptyURL}&mode=edit&scid=${this.props.component.id}" title="IkiProcessDiagram Component" class="ikiprocessdiagram-iframe"></iframe>`;
@@ -486,9 +486,10 @@ class IkiProcessBuilder extends React.PureComponent {
       iframeWrapper.innerHTML = markdownSource;
       const iframeHtml = iframeWrapper.firstChild;
       const iframeSrcUrl = new URL(iframeHtml.src);
-      iframeHtml.src = `${
-        iframeSrcUrl.origin
-      }/redirect?componentUrl=${iframeSrcUrl.href.toString()}`;
+      iframeHtml.src = iframeSrcUrl.href.toString();
+      // iframeHtml.src = `${
+      //   iframeSrcUrl.origin
+      // }/redirect?componentUrl=${iframeSrcUrl.href.toString()}`;
       html = iframeHtml.outerHTML;
     } else {
       html = `<iframe id="ikiprocessdiagram-widget-${this.props.component.id}" name="process-diagram-${timestamp}" src="${iframeEmptyURL}&mode=preview&scid=${this.props.component.id}" title="IkiProcessDiagram Component" class="ikiprocessdiagram-iframe"></iframe>`;
