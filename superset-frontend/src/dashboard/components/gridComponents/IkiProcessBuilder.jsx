@@ -466,7 +466,15 @@ class IkiProcessBuilder extends React.PureComponent {
       iframeWrapper.innerHTML = markdownSource;
       const iframeHtml = iframeWrapper.firstChild;
       const iframeSrcUrl = new URL(iframeHtml.src);
-      iframeHtml.src = iframeSrcUrl.href.toString();
+      const hostname = iframeSrcUrl.href.toString().split('ikigailabs.io')[0];
+      if (hostname.includes('localhost') || hostname.includes('dev')) {
+        iframeHtml.src = iframeSrcUrl.href.toString();
+      } else {
+        const srcUrl = `${widgetReferrerURL}${
+          iframeSrcUrl.href.toString().split('app.ikigailabs.io')[1]
+        }`;
+        iframeHtml.src = srcUrl;
+      }
       // iframeHtml.src = `${
       //   iframeSrcUrl.origin
       // }/redirect?componentUrl=${iframeSrcUrl.href.toString()}`;
@@ -486,7 +494,15 @@ class IkiProcessBuilder extends React.PureComponent {
       iframeWrapper.innerHTML = markdownSource;
       const iframeHtml = iframeWrapper.firstChild;
       const iframeSrcUrl = new URL(iframeHtml.src);
-      iframeHtml.src = iframeSrcUrl.href.toString();
+      const hostname = iframeSrcUrl.href.toString().split('ikigailabs.io')[0];
+      if (hostname.includes('localhost') || hostname.includes('dev')) {
+        iframeHtml.src = iframeSrcUrl.href.toString();
+      } else {
+        const srcUrl = `${widgetReferrerURL}${
+          iframeSrcUrl.href.toString().split('app.ikigailabs.io')[1]
+        }`;
+        iframeHtml.src = srcUrl;
+      }
       // iframeHtml.src = `${
       //   iframeSrcUrl.origin
       // }/redirect?componentUrl=${iframeSrcUrl.href.toString()}`;
