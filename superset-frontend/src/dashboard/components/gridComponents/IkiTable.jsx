@@ -523,7 +523,7 @@ class IkiTable extends React.PureComponent {
         iframeHtml.src = iframeSrcUrl.href.toString();
       } else {
         const srcUrl = `${dashURL}${
-          iframeSrcUrl.href.toString().split('app.ikigailabs.io')[1]
+          iframeSrcUrl.href.toString().split('.ikigailabs.io')[1]
         }`;
         iframeHtml.src = srcUrl;
       }
@@ -566,7 +566,7 @@ class IkiTable extends React.PureComponent {
         iframeHtml.src = iframeSrcUrl.href.toString();
       } else {
         const srcUrl = `${dashURL}${
-          iframeSrcUrl.href.toString().split('app.ikigailabs.io')[1]
+          iframeSrcUrl.href.toString().split('.ikigailabs.io')[1]
         }`;
         iframeHtml.src = srcUrl;
       }
