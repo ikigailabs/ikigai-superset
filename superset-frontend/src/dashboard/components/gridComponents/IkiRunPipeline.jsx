@@ -50,17 +50,6 @@ import {
   GRID_BASE_UNIT,
 } from 'src/dashboard/util/constants';
 
-// const dashURL = 'https://dev-ui.ikigailabs.io';
-// const dashURL = 'https://first-app.ikigailabs.io/widget/pipeline/run';
-// const dashURL = 'http://localhost:3000';
-const supersetUrl = new URL(window.location.href);
-const supersetHostname = supersetUrl.hostname;
-const clusterId = supersetHostname.split('-superset.ikigailabs.io')[0];
-const dashURL = `https://${clusterId}-app.ikigailabs.io`;
-console.log('supersetUrl', supersetUrl, supersetHostname, clusterId, dashURL);
-const timestamp = new Date().getTime().toString();
-const iframeEmptyURL = `${dashURL}/widget/pipeline/run?mode=edit&v=1&run_flow_times=${timestamp}`;
-
 const propTypes = {
   id: PropTypes.string.isRequired,
   parentId: PropTypes.string.isRequired,
@@ -69,6 +58,7 @@ const propTypes = {
   index: PropTypes.number.isRequired,
   depth: PropTypes.number.isRequired,
   editMode: PropTypes.bool.isRequired,
+  ikigaiOrigin: PropTypes.string,
 
   // from redux
   logEvent: PropTypes.func.isRequired,
@@ -88,6 +78,8 @@ const propTypes = {
   handleComponentDrop: PropTypes.func.isRequired,
   updateComponents: PropTypes.func.isRequired,
 };
+
+const timestamp = new Date().getTime().toString();
 
 const defaultProps = {};
 
@@ -121,12 +113,7 @@ class IkiRunPipeline extends React.PureComponent {
       ts: new Date().getTime(),
       duration: Logger.getTimestamp() - this.renderStartTime,
     });
-    if (!this.props.component.meta.code) {
-      this.handleIncomingWindowMsg();
-      window.parent.postMessage('superset-to-parent/get-project-id', dashURL);
-    } else {
-      this.handleIncomingWindowMsg();
-    }
+    this.handleIncomingWindowMsg();
   }
 
   static getDerivedStateFromProps(nextProps, state) {
@@ -194,7 +181,8 @@ class IkiRunPipeline extends React.PureComponent {
   // eslint-disable-next-line class-methods-use-this
   handleIncomingWindowMsg() {
     window.addEventListener('message', event => {
-      if (event.origin === dashURL) {
+      // console.log('event.origin', event.origin, this.props.ikigaiOrigin);
+      if (event.origin === this.props.ikigaiOrigin) {
         const messageObject = JSON.parse(event.data);
         if (messageObject.info && messageObject.dataType) {
           const { dataType } = messageObject;
@@ -222,7 +210,7 @@ class IkiRunPipeline extends React.PureComponent {
               );
               widgetUrlQueryMode = widgetUrl.searchParams.get('mode');
             } else {
-              widgetUrl = iframeEmptyURL;
+              widgetUrl = `${this.props.ikigaiOrigin}/widget/pipeline/run?mode=edit&v=1&run_flow_times=${timestamp}`;
             }
             if (widgetUrlQueryMode === 'edit') {
               widgetUrlQuery = new URLSearchParams(widgetUrl);
@@ -237,22 +225,13 @@ class IkiRunPipeline extends React.PureComponent {
               widgetUrl.search = widgetUrlQuery.toString();
               const tempIframe = `<iframe
                       id="ikirunpipeline-widget-${this.props.component.id}"
-                      name="run-flow-${timestamp}"
+                      name="run-flow-component"
                       src="${widgetUrl}"
                       title="IkiRunPipeline Component"
                       className="ikirunpipeline-widget"
                       style="min-height: 100%;"
                     />`;
               this.handleIkiRunPipelineChange(tempIframe);
-              if (
-                document.getElementById(
-                  `ikirunpipeline-widget-${this.props.component.id}`,
-                )
-              ) {
-                document.getElementById(
-                  `ikirunpipeline-widget-${this.props.component.id}`,
-                ).src = widgetUrl;
-              }
             }
           }
         }
@@ -349,63 +328,59 @@ class IkiRunPipeline extends React.PureComponent {
 
   renderIframe() {
     const { markdownSource, hasError } = this.state;
+    const { ikigaiOrigin } = this.props;
     let iframe = '';
     let iframeSrc = '';
-    if (markdownSource) {
-      // iframe = markdownSource;
-      const iframeWrapper = document.createElement('div');
-      iframeWrapper.innerHTML = markdownSource;
-      const iframeHtml = iframeWrapper.firstChild;
-      const iframeSrcUrl = new URL(iframeHtml.src);
-      const paramMode = iframeSrcUrl.searchParams.get('mode')
-        ? iframeSrcUrl.searchParams.get('mode')
-        : '';
-      const paramTimestamp = iframeSrcUrl.searchParams.get('run_flow_times')
-        ? iframeSrcUrl.searchParams.get('run_flow_times')
-        : timestamp;
-      const paramPipelineId = iframeSrcUrl.searchParams.get('pipeline_id')
-        ? iframeSrcUrl.searchParams.get('pipeline_id')
-        : '';
-      const paramSubmitButtonLabel = iframeSrcUrl.searchParams.get(
-        'submit_button_label',
-      )
-        ? iframeSrcUrl.searchParams.get('submit_button_label')
-        : '';
-      const paramPipelineLogType = iframeSrcUrl.searchParams.get(
-        'pipeline_log_type',
-      )
-        ? iframeSrcUrl.searchParams.get('pipeline_log_type')
-        : '';
-      const paramEditVariables = iframeSrcUrl.searchParams.get('edit_variables')
-        ? iframeSrcUrl.searchParams.get('edit_variables')
-        : '';
-      const newIframeSrc = `${iframeSrcUrl.origin}${iframeSrcUrl.pathname}?mode=${paramMode}&v=1&run_flow_times=${paramTimestamp}&pipeline_id=${paramPipelineId}&submit_button_label=${paramSubmitButtonLabel}&pipeline_log_type=${paramPipelineLogType}&edit_variables=${paramEditVariables}`;
-      const newIframeSrcUrl = new URL(newIframeSrc);
-      const hostname = newIframeSrcUrl.href
-        .toString()
-        .split('ikigailabs.io')[0];
-      if (hostname.includes('localhost') || hostname.includes('dev')) {
-        // iframeHtml.src = newIframeSrcUrl.href.toString();
-        iframeSrc = newIframeSrcUrl.href.toString();
+    console.log('ikigaiOrigin', ikigaiOrigin, 'markdownSource', markdownSource);
+    if (ikigaiOrigin) {
+      if (markdownSource) {
+        // iframe = markdownSource;
+        const iframeWrapper = document.createElement('div');
+        iframeWrapper.innerHTML = markdownSource;
+        const iframeHtml = iframeWrapper.firstChild;
+        const iframeSrcUrl = new URL(iframeHtml.src);
+        const paramMode = iframeSrcUrl.searchParams.get('mode')
+          ? iframeSrcUrl.searchParams.get('mode')
+          : '';
+        const paramTimestamp = iframeSrcUrl.searchParams.get('run_flow_times')
+          ? iframeSrcUrl.searchParams.get('run_flow_times')
+          : timestamp;
+        const paramPipelineId = iframeSrcUrl.searchParams.get('pipeline_id')
+          ? iframeSrcUrl.searchParams.get('pipeline_id')
+          : '';
+        const paramSubmitButtonLabel = iframeSrcUrl.searchParams.get(
+          'submit_button_label',
+        )
+          ? iframeSrcUrl.searchParams.get('submit_button_label')
+          : '';
+        const paramPipelineLogType = iframeSrcUrl.searchParams.get(
+          'pipeline_log_type',
+        )
+          ? iframeSrcUrl.searchParams.get('pipeline_log_type')
+          : '';
+        const paramEditVariables = iframeSrcUrl.searchParams.get(
+          'edit_variables',
+        )
+          ? iframeSrcUrl.searchParams.get('edit_variables')
+          : '';
+        const newIframeSrc = `${ikigaiOrigin}/widget/pipeline/run?mode=${paramMode}&v=1&run_flow_times=${paramTimestamp}&pipeline_id=${paramPipelineId}&submit_button_label=${paramSubmitButtonLabel}&pipeline_log_type=${paramPipelineLogType}&edit_variables=${paramEditVariables}`;
+        // console.log('iframe', newIframeSrcUrl, iframeHtml);
+        iframeSrc = newIframeSrc;
       } else {
-        const srcUrl = `${dashURL}${
-          newIframeSrcUrl.href.toString().split('.ikigailabs.io')[1]
-        }`;
-        // iframeHtml.src = srcUrl;
-        iframeSrc = srcUrl;
+        iframeSrc = `${ikigaiOrigin}/widget/pipeline/run?mode=edit&v=1&run_flow_times=${timestamp}`;
       }
-      // console.log('iframe', newIframeSrcUrl, iframeHtml);
+      // console.log('iframeSrc', iframeSrc, markdownSource);
+      iframe = `<iframe
+                    id="ikirunpipeline-widget-${this.props.component.id}"
+                    name="run-flow-component-${timestamp}"
+                    src="${iframeSrc}"
+                    title="IkiRunPipeline Component"
+                    className="ikirunpipeline-widget"
+                    style="height: 100%;"
+                  />`;
     } else {
-      iframeSrc = iframeEmptyURL;
+      iframe = '';
     }
-    iframe = `<iframe
-                  id="ikirunpipeline-widget-${this.props.component.id}"
-                  name="run-flow-${timestamp}"
-                  src="${iframeSrc}"
-                  title="IkiRunPipeline Component"
-                  className="ikirunpipeline-widget"
-                  style="height: 100%;"
-                />`;
     return <SafeMarkdown source={hasError ? MARKDOWN_ERROR_MESSAGE : iframe} />;
   }
 
