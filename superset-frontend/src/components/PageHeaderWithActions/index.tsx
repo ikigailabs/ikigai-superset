@@ -72,15 +72,17 @@ const headerStyles = (theme: SupersetTheme) => css`
     align-items: center;
     min-width: 0;
     margin-right: auto;
-  }
+    order: 1;
 
-  .title-panel div:nth-child(2) {
-    display: none;
+    & > div:nth-child(2) {
+      display: none;
+    }
   }
 
   .right-button-panel {
     display: flex;
     align-items: center;
+    order: 2;
   }
 `;
 
