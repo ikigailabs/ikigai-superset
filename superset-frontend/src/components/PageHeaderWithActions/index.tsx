@@ -23,8 +23,9 @@ import {
   DynamicEditableTitle,
   DynamicEditableTitleProps,
 } from '../DynamicEditableTitle';
-import CertifiedBadge, { CertifiedBadgeProps } from '../CertifiedBadge';
-import FaveStar, { FaveStarProps } from '../FaveStar';
+import { CertifiedBadgeProps } from '../CertifiedBadge';
+import { FaveStarProps } from '../FaveStar';
+import IkiLogo from '../../assets/images/ikigai.png';
 
 export const menuTriggerStyles = (theme: SupersetTheme) => css`
   width: ${theme.gridUnit * 8}px;
@@ -69,14 +70,11 @@ const headerStyles = (theme: SupersetTheme) => css`
   }
 
   .title-panel {
+    display: flex;
     align-items: center;
     min-width: 0;
     margin-right: auto;
     order: 1;
-
-    & > div:nth-child(2) {
-      display: none;
-    }
   }
 
   .right-button-panel {
@@ -84,9 +82,15 @@ const headerStyles = (theme: SupersetTheme) => css`
     align-items: center;
     order: 2;
   }
+
+  .iki-logo {
+    width: 32px;
+    heigh: auto;
+    margin-right: 10px;
+  }
 `;
 
-const buttonsStyles = (theme: SupersetTheme) => css`
+/* const buttonsStyles = (theme: SupersetTheme) => css`
   display: flex;
   align-items: center;
   padding-left: ${theme.gridUnit * 2}px;
@@ -98,7 +102,7 @@ const buttonsStyles = (theme: SupersetTheme) => css`
       padding-left: 0;
     }
   }
-`;
+`; */
 
 // const additionalActionsContainerStyles = (theme: SupersetTheme) => css`
 //   margin-left: ${theme.gridUnit * 2}px;
@@ -118,19 +122,20 @@ export type PageHeaderWithActionsProps = {
 
 export const PageHeaderWithActions = ({
   editableTitleProps,
-  showTitlePanelItems,
-  certificatiedBadgeProps,
-  showFaveStar,
-  faveStarProps,
-  titlePanelAdditionalItems,
+  // showTitlePanelItems,
+  // certificatiedBadgeProps,
+  // showFaveStar,
+  // faveStarProps,
+  // titlePanelAdditionalItems,
+  // additionalActionsMenu,
+  // menuDropdownProps,
   rightPanelAdditionalItems,
-  additionalActionsMenu,
-  menuDropdownProps,
 }: PageHeaderWithActionsProps) => (
   <div css={headerStyles} className="header-with-actions">
     <div className="title-panel">
+      <img className="iki-logo" src={IkiLogo} alt="Ikigai Logo" />
       <DynamicEditableTitle {...editableTitleProps} />
-      {showTitlePanelItems && (
+      {/* showTitlePanelItems && (
         <div css={buttonsStyles}>
           {certificatiedBadgeProps?.certifiedBy && (
             <CertifiedBadge {...certificatiedBadgeProps} />
@@ -138,7 +143,7 @@ export const PageHeaderWithActions = ({
           {showFaveStar && <FaveStar {...faveStarProps} />}
           {titlePanelAdditionalItems}
         </div>
-      )}
+          ) */}
     </div>
     <div className="right-button-panel">{rightPanelAdditionalItems}</div>
   </div>

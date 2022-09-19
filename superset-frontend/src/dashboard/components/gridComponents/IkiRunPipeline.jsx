@@ -216,6 +216,7 @@ class IkiRunPipeline extends React.PureComponent {
               widgetUrlQuery = new URLSearchParams(widgetUrl);
               widgetUrlQuery.set('mode', 'preview');
               widgetUrlQuery.set('pipeline_id', messageData.pipeline.id);
+              widgetUrlQuery.set('alias_id', messageData.aliasPipelineId);
               widgetUrlQuery.set(
                 'submit_button_label',
                 messageData.buttonLabel,
@@ -348,6 +349,9 @@ class IkiRunPipeline extends React.PureComponent {
         const paramPipelineId = iframeSrcUrl.searchParams.get('pipeline_id')
           ? iframeSrcUrl.searchParams.get('pipeline_id')
           : '';
+        const paramAliasId = iframeSrcUrl.searchParams.get('alias_id')
+          ? iframeSrcUrl.searchParams.get('alias_id')
+          : '';
         const paramSubmitButtonLabel = iframeSrcUrl.searchParams.get(
           'submit_button_label',
         )
@@ -363,7 +367,7 @@ class IkiRunPipeline extends React.PureComponent {
         )
           ? iframeSrcUrl.searchParams.get('edit_variables')
           : '';
-        const newIframeSrc = `${ikigaiOrigin}/widget/pipeline/run?mode=${paramMode}&v=1&run_flow_times=${paramTimestamp}&pipeline_id=${paramPipelineId}&submit_button_label=${paramSubmitButtonLabel}&pipeline_log_type=${paramPipelineLogType}&edit_variables=${paramEditVariables}`;
+        const newIframeSrc = `${ikigaiOrigin}/widget/pipeline/run?mode=${paramMode}&v=1&run_flow_times=${paramTimestamp}&pipeline_id=${paramPipelineId}&alias_id=${paramAliasId}&submit_button_label=${paramSubmitButtonLabel}&pipeline_log_type=${paramPipelineLogType}&edit_variables=${paramEditVariables}`;
         // console.log('iframe', newIframeSrcUrl, iframeHtml);
         iframeSrc = newIframeSrc;
       } else {
