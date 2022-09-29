@@ -202,12 +202,15 @@ class IkiTable extends React.PureComponent {
               // const widgetUrlQueryTblMode = widgetUrl.searchParams.get('mode');
               const widgetUrlQueryProjectId =
                 widgetUrl.searchParams.get('project_id');
+              const widgetUrlQueryAliasDatasetId =
+                widgetUrl.searchParams.get('aliasDatasetId');
               if (!widgetUrlQueryTblType) {
                 widgetUrl.searchParams.set('mode', 'preview');
                 const tableType = messageData.tableType
                   ? messageData.tableType
                   : '';
                 let tempProjectId = '';
+                let tempAliasDatasetId = '';
                 if (messageData.projectId) {
                   tempProjectId = messageData.projectId
                     ? messageData.projectId
@@ -215,8 +218,19 @@ class IkiTable extends React.PureComponent {
                 } else {
                   tempProjectId = widgetUrlQueryProjectId;
                 }
-                if (tempProjectId || tempProjectId !== '') {
+                if (messageData.aliasDatasetId) {
+                  tempAliasDatasetId = messageData.aliasDatasetId
+                    ? messageData.aliasDatasetId
+                    : '';
+                } else {
+                  tempAliasDatasetId = widgetUrlQueryAliasDatasetId;
+                }
+                if (
+                  (tempProjectId || tempProjectId !== '') &&
+                  (tempAliasDatasetId || tempAliasDatasetId !== '')
+                ) {
                   widgetUrl.searchParams.set('project_id', tempProjectId);
+                  widgetUrl.searchParams.set('alias_id', tempAliasDatasetId);
                 }
                 widgetUrl.searchParams.set('table_type', tableType);
                 if (messageData.datasets) {
