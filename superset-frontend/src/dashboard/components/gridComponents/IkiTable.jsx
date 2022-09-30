@@ -230,7 +230,10 @@ class IkiTable extends React.PureComponent {
                   (tempAliasDatasetId || tempAliasDatasetId !== '')
                 ) {
                   widgetUrl.searchParams.set('project_id', tempProjectId);
-                  widgetUrl.searchParams.set('alias_id', tempAliasDatasetId);
+                  widgetUrl.searchParams.set(
+                    'aliasDatasetId',
+                    tempAliasDatasetId,
+                  );
                 }
                 widgetUrl.searchParams.set('table_type', tableType);
                 if (messageData.datasets) {
@@ -405,7 +408,8 @@ class IkiTable extends React.PureComponent {
     const { ikigaiOrigin } = this.props;
     let iframe = '';
     let iframeSrc = '';
-    console.log('ikigaiOrigin', ikigaiOrigin, 'markdownSource', markdownSource);
+    // console.log('ikigaiOrigin', ikigaiOrigin, 'markdownSource', markdownSource);
+
     if (ikigaiOrigin) {
       if (markdownSource) {
         // iframe = markdownSource;
