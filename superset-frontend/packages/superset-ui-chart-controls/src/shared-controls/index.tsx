@@ -325,7 +325,7 @@ const granularity_sqla: SharedControlConfig<'SelectControl', ColumnMeta> = {
 const time_grain_sqla: SharedControlConfig<'SelectControl'> = {
   type: 'SelectControl',
   label: TIME_FILTER_LABELS.time_grain_sqla,
-  default: 'P1D',
+  default: 'null',
   description: t(
     'The time granularity for the visualization. This ' +
       'applies a date transformation to alter ' +
@@ -333,6 +333,7 @@ const time_grain_sqla: SharedControlConfig<'SelectControl'> = {
       'The options here are defined on a per database ' +
       'engine basis in the Superset source code.',
   ),
+  visibility: ({ controls }) => Boolean(false),
   mapStateToProps: ({ datasource }) => ({
     choices: (datasource as Dataset)?.time_grain_sqla || null,
   }),
