@@ -330,7 +330,7 @@ export const controls = {
         'The options here are defined on a per database ' +
         'engine basis in the Superset source code.',
     ),
-    visibility: false,
+    visibility: () => Boolean(false),
     mapStateToProps: state => ({
       choices: state.datasource ? state.datasource.time_grain_sqla : null,
     }),
