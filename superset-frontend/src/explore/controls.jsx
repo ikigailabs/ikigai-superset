@@ -322,7 +322,7 @@ export const controls = {
   time_grain_sqla: {
     type: 'SelectControl',
     label: TIME_FILTER_LABELS.time_grain_sqla,
-    default: 'P1D',
+    default: 'null',
     description: t(
       'The time granularity for the visualization. This ' +
         'applies a date transformation to alter ' +
@@ -330,6 +330,7 @@ export const controls = {
         'The options here are defined on a per database ' +
         'engine basis in the Superset source code.',
     ),
+    visibility: ({ controls }) => Boolean(false),
     mapStateToProps: state => ({
       choices: state.datasource ? state.datasource.time_grain_sqla : null,
     }),
