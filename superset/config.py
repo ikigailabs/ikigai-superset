@@ -705,7 +705,7 @@ BACKUP_COUNT = 30
 #     pass
 # QUERY_LOGGER = None
 
-def log_sql_statements(database, query, schema, user, client, security_manager, log_params): 
+def log_sql_statements(database, query, schema, user, client, security_manager): 
     logger.info("query is:" + str(query)) 
 
 QUERY_LOGGER = log_sql_statements
