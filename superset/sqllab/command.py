@@ -91,6 +91,10 @@ class ExecuteSqlCommand(BaseCommand):
         """Runs arbitrary sql and returns data as json"""
         try:
             query = self._try_get_existing_query()
+            logger.error(
+                "ANMOL LOGGING -> Query: %s",
+                str(query),
+            )
             if self.is_query_handled(query):
                 self._execution_context.set_query(query)  # type: ignore
                 status = SqlJsonExecutionStatus.QUERY_ALREADY_CREATED
