@@ -303,7 +303,7 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
 
     # Whether ORDER BY clause can use aliases created in SELECT
     # that are the same as a source column
-    allows_alias_to_source_column = True
+    allows_alias_to_source_column = False
 
     # Whether ORDER BY clause must appear in SELECT
     # if TRUE, then it doesn't have to.
