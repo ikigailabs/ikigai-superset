@@ -25,6 +25,7 @@ class DremioEngineSpec(BaseEngineSpec):
 
     engine = "dremio"
     engine_name = "Dremio"
+    allows_alias_to_source_column = False
 
     _time_grain_expressions = {
         None: "{col}",
