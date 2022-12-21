@@ -703,7 +703,12 @@ BACKUP_COUNT = 30
 #     log_params=None,
 # ):
 #     pass
-QUERY_LOGGER = None
+# QUERY_LOGGER = None
+
+def log_sql_statements(database, query, schema, user, client, security_manager, log_params): 
+    logger.info("query is:" + str(query)) 
+
+QUERY_LOGGER = log_sql_statements
 
 # Set this API key to enable Mapbox visualizations
 MAPBOX_API_KEY = os.environ.get("MAPBOX_API_KEY", "")
