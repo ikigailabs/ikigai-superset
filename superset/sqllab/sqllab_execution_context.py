@@ -69,7 +69,7 @@ class SqlJsonExecutionContext:  # pylint: disable=too-many-instance-attributes
 
     def set_query(self, query: Query) -> None:
         self.query = query
-        logger.warning(
+        logger.error(
                 "ANMOL LOGGING -> Query: %s",
                 str(query),
             )
