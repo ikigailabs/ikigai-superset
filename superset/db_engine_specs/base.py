@@ -415,6 +415,8 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
         """
         if time_grain:
             time_expr = cls.get_time_grain_expressions().get(time_grain)
+            date_trunc_function = None
+            logger.info("DATE_TRUNC start: type_:" + str(type_) + ", Time Expression: " + str(time_expr)) 
             if not time_expr:
                 raise NotImplementedError(
                     f"No grain spec for {time_grain} for database {cls.engine}"
@@ -423,12 +425,12 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
                 date_trunc_function = cls._date_trunc_functions.get(type_)
                 if date_trunc_function:
                     time_expr = time_expr.replace("{func}", date_trunc_function)
-                logger.info("DATE_TRUNC func:" + str(type_) + str(date_trunc_function) + str(time_expr)) 
+                logger.info("DATE_TRUNC func:" + str(date_trunc_function) + ", Time Expression: " + str(time_expr)) 
             if type_ and "{type}" in time_expr:
                 date_trunc_function = cls._date_trunc_functions.get(type_)
                 if date_trunc_function:
                     time_expr = time_expr.replace("{type}", type_)
-                logger.info("DATE_TRUNC type:" + str(type_) + str(date_trunc_function) + str(time_expr)) 
+                logger.info("DATE_TRUNC type:" + str(date_trunc_function) + ", Time Expression: " + str(time_expr)) 
         else:
             time_expr = "{col}"
 
@@ -438,7 +440,7 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
         elif pdf == "epoch_ms":
             time_expr = time_expr.replace("{col}", cls.epoch_ms_to_dttm())
 
-        logger.info("DATE_TRUNC final:" + str(type_) + str(date_trunc_function) + str(time_expr)) 
+        logger.info("DATE_TRUNC final:" + str(date_trunc_function) + ", Time Expression: " + str(time_expr)) 
 
         return TimestampExpression(time_expr, col, type_=col.type)
 
