@@ -354,8 +354,7 @@ class TableColumn(Model, BaseColumn, CertificationMixin):
         :param template_processor: template processor
         :return: A TimeExpression object wrapped in a Label if supported by db
         """
-        label = label or utils.DTTM_ALIAS
-        logger.info("Ikigai label: " + str(label))
+        label = label + " " if label else utils.DTTM_ALIAS
 
         pdf = self.python_date_format
         is_epoch = pdf in ("epoch_s", "epoch_ms")
