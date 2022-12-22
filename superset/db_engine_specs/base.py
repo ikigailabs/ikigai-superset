@@ -303,7 +303,7 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
 
     # Whether ORDER BY clause can use aliases created in SELECT
     # that are the same as a source column
-    allows_alias_to_source_column = False
+    allows_alias_to_source_column = True
 
     # Whether ORDER BY clause must appear in SELECT
     # if TRUE, then it doesn't have to.
@@ -423,10 +423,12 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
                 date_trunc_function = cls._date_trunc_functions.get(type_)
                 if date_trunc_function:
                     time_expr = time_expr.replace("{func}", date_trunc_function)
+                logger.info("DATE_TRUNC func:" + str(type_) + str(date_trunc_function) + str(time_expr)) 
             if type_ and "{type}" in time_expr:
                 date_trunc_function = cls._date_trunc_functions.get(type_)
                 if date_trunc_function:
                     time_expr = time_expr.replace("{type}", type_)
+                logger.info("DATE_TRUNC type:" + str(type_) + str(date_trunc_function) + str(time_expr)) 
         else:
             time_expr = "{col}"
 
@@ -435,6 +437,8 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
             time_expr = time_expr.replace("{col}", cls.epoch_to_dttm())
         elif pdf == "epoch_ms":
             time_expr = time_expr.replace("{col}", cls.epoch_ms_to_dttm())
+
+        logger.info("DATE_TRUNC final:" + str(type_) + str(date_trunc_function) + str(time_expr)) 
 
         return TimestampExpression(time_expr, col, type_=col.type)
 
