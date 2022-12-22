@@ -706,7 +706,7 @@ BACKUP_COUNT = 30
 # QUERY_LOGGER = None
 
 def log_sql_statements(database, query, schema, user, client, security_manager): 
-    logger.info("query is:" + str(query)) 
+    logger.info("Ikigai SQL Query :" + str(query)) 
 
 QUERY_LOGGER = log_sql_statements
 
