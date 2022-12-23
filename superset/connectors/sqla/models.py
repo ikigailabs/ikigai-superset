@@ -1911,9 +1911,7 @@ class SqlaTable(Model, BaseDatasource):  # pylint: disable=too-many-public-metho
                 df.columns = labels_expected
             
             logger.info("assign_column_label before" + str(labels_expected) + ", " + str(df) + ", " + str(df.columns) + ", " + str(type(df)))
-            if IKIGAI_CUSTOM_LABEL is not None:
-                df.rename(columns={IKIGAI_CUSTOM_LABEL: IKIGAI_CUSTOM_LABEL[:-1]}, inplace=True)
-            logger.info("assign_column_label after" + str(df) + ", " + str(df.columns))
+
             return df
 
         try:
@@ -1930,7 +1928,12 @@ class SqlaTable(Model, BaseDatasource):  # pylint: disable=too-many-public-metho
             ]
             error_message = utils.error_msg_from_exception(ex)
 
-        logger.info("query 1" + str(df))
+        logger.info("query 1 before" + str(df) + ", " + str(df.columns))
+
+        if IKIGAI_CUSTOM_LABEL is not None:
+                df.rename(columns={IKIGAI_CUSTOM_LABEL: IKIGAI_CUSTOM_LABEL[:-1]}, inplace=True)
+
+        logger.info("query 2 after" + str(df) + ", " + str(df.columns))
 
         return QueryResult(
             applied_template_filters=query_str_ext.applied_template_filters,
