@@ -1931,7 +1931,7 @@ class SqlaTable(Model, BaseDatasource):  # pylint: disable=too-many-public-metho
         logger.info("query 1 before" + str(df) + ", " + str(df.columns))
 
         if IKIGAI_CUSTOM_LABEL is not None:
-                df.rename(columns={IKIGAI_CUSTOM_LABEL: IKIGAI_CUSTOM_LABEL[:-1]}, inplace=True)
+                df = df.rename(columns={IKIGAI_CUSTOM_LABEL: IKIGAI_CUSTOM_LABEL[:-1]}, inplace=True)
 
         logger.info("query 2 after" + str(df) + ", " + str(df.columns))
 
