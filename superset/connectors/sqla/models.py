@@ -987,6 +987,9 @@ class SqlaTable(Model, BaseDatasource):  # pylint: disable=too-many-public-metho
         sql = self._apply_cte(sql, sqlaq.cte)
         sql = sqlparse.format(sql, reindent=True)
         sql = self.mutate_query_from_config(sql)
+
+        logger.info("get_query_str_extended 1: " + str(sqlaq) + ", " + str(sql))
+
         return QueryStringExtended(
             applied_template_filters=sqlaq.applied_template_filters,
             labels_expected=sqlaq.labels_expected,
@@ -1903,6 +1906,8 @@ class SqlaTable(Model, BaseDatasource):  # pylint: disable=too-many-public-metho
                 if len(df.columns) > len(labels_expected):
                     df = df.iloc[:, 0 : len(labels_expected)]
                 df.columns = labels_expected
+            
+            logger.info("assign_column_label 1" + str(labels_expected) + ", " + str(df) + ", " + str(df.columns))
             return df
 
         try:
@@ -1919,6 +1924,8 @@ class SqlaTable(Model, BaseDatasource):  # pylint: disable=too-many-public-metho
             ]
             error_message = utils.error_msg_from_exception(ex)
 
+        logger.info("query 1" + str(df))
+        
         return QueryResult(
             applied_template_filters=query_str_ext.applied_template_filters,
             status=status,
