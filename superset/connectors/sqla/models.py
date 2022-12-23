@@ -1775,7 +1775,10 @@ class SqlaTable(Model, BaseDatasource):  # pylint: disable=too-many-public-metho
                 )
                 qry = qry.where(top_groups)
 
+                logger.info('NEW IKI RESULT 1' + str(result) + ', ' + str(qry))
+
         qry = qry.select_from(tbl)
+        logger.info('NEW IKI RESULT 2' + str(result) + ', ' + str(qry))
 
         if is_rowcount:
             if not db_engine_spec.allows_subqueries:
@@ -1925,7 +1928,7 @@ class SqlaTable(Model, BaseDatasource):  # pylint: disable=too-many-public-metho
             error_message = utils.error_msg_from_exception(ex)
 
         logger.info("query 1" + str(df))
-        
+
         return QueryResult(
             applied_template_filters=query_str_ext.applied_template_filters,
             status=status,
