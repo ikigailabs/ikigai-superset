@@ -1473,13 +1473,13 @@ class SqlaTable(Model, BaseDatasource):  # pylint: disable=too-many-public-metho
         # Expected output columns
         labels_expected = [c.key for c in select_exprs] #TODO
 
-        logger.info("labels_expected before :" + str(labels_expected))   
-        if IKIGAI_CUSTOM_LABEL is not None:
-            iki_original_label = IKIGAI_CUSTOM_LABEL[:-1]
-            if iki_original_label in labels_expected:
-                labels_expected[labels_expected.index(iki_original_label)] = IKIGAI_CUSTOM_LABEL
+        # logger.info("labels_expected before :" + str(labels_expected))   
+        # if IKIGAI_CUSTOM_LABEL is not None:
+        #     iki_original_label = IKIGAI_CUSTOM_LABEL[:-1]
+        #     if iki_original_label in labels_expected:
+        #         labels_expected[labels_expected.index(iki_original_label)] = IKIGAI_CUSTOM_LABEL
 
-        logger.info("labels_expected after :" + str(labels_expected)) 
+        # logger.info("labels_expected after :" + str(labels_expected)) 
         # Order by columns are "hidden" columns, some databases require them
         # always be present in SELECT if an aggregation function is used
         if not db_engine_spec.allows_hidden_ordeby_agg:
@@ -1910,7 +1910,9 @@ class SqlaTable(Model, BaseDatasource):  # pylint: disable=too-many-public-metho
                     df = df.iloc[:, 0 : len(labels_expected)]
                 df.columns = labels_expected
             
-            logger.info("assign_column_label 1" + str(labels_expected) + ", " + str(df) + ", " + str(df.columns) + ", " + str(type(df)))
+            logger.info("assign_column_label before" + str(labels_expected) + ", " + str(df) + ", " + str(df.columns) + ", " + str(type(df)))
+            df.rename(columns={IKIGAI_CUSTOM_LABEL: IKIGAI_CUSTOM_LABEL[:-1]}, inplace=True)
+            logger.info("assign_column_label after" + str(df) + ", " + str(df.columns))
             return df
 
         try:
