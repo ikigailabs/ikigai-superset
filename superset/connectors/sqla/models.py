@@ -1911,7 +1911,8 @@ class SqlaTable(Model, BaseDatasource):  # pylint: disable=too-many-public-metho
                 df.columns = labels_expected
             
             logger.info("assign_column_label before" + str(labels_expected) + ", " + str(df) + ", " + str(df.columns) + ", " + str(type(df)))
-            df.rename(columns={IKIGAI_CUSTOM_LABEL: IKIGAI_CUSTOM_LABEL[:-1]}, inplace=True)
+            if IKIGAI_CUSTOM_LABEL is not None:
+                df.rename(columns={IKIGAI_CUSTOM_LABEL: IKIGAI_CUSTOM_LABEL[:-1]}, inplace=True)
             logger.info("assign_column_label after" + str(df) + ", " + str(df.columns))
             return df
 
