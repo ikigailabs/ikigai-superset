@@ -1910,7 +1910,7 @@ class SqlaTable(Model, BaseDatasource):  # pylint: disable=too-many-public-metho
                     df = df.iloc[:, 0 : len(labels_expected)]
                 df.columns = labels_expected
             
-            logger.info("assign_column_label 1" + str(labels_expected) + ", " + str(df) + ", " + str(df.columns))
+            logger.info("assign_column_label 1" + str(labels_expected) + ", " + str(df) + ", " + str(df.columns) + ", " + str(type(df)))
             return df
 
         try:
