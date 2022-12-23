@@ -1778,7 +1778,7 @@ class SqlaTable(Model, BaseDatasource):  # pylint: disable=too-many-public-metho
                 logger.info('NEW IKI RESULT 1' + str(result) + ', ' + str(qry))
 
         qry = qry.select_from(tbl)
-        logger.info('NEW IKI RESULT 2' + str(result) + ', ' + str(qry))
+        logger.info('NEW IKI RESULT 2' + str(qry))
 
         if is_rowcount:
             if not db_engine_spec.allows_subqueries:
