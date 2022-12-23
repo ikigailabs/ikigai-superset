@@ -138,6 +138,8 @@ logger = logging.getLogger(__name__)
 ADVANCED_DATA_TYPES = config["ADVANCED_DATA_TYPES"]
 VIRTUAL_TABLE_ALIAS = "virtual_table"
 
+IKIGAI_CUSTOM_LABEL = None
+
 # a non-exhaustive set of additive metrics
 ADDITIVE_METRIC_TYPES = {
     "count",
@@ -354,7 +356,11 @@ class TableColumn(Model, BaseColumn, CertificationMixin):
         :param template_processor: template processor
         :return: A TimeExpression object wrapped in a Label if supported by db
         """
-        label = label or utils.DTTM_ALIAS
+        if label:
+            label = label + " "
+            IKIGAI_CUSTOM_LABEL = label
+        else:
+            label = utils.DTTM_ALIAS
 
         pdf = self.python_date_format
         is_epoch = pdf in ("epoch_s", "epoch_ms")
@@ -1463,7 +1469,14 @@ class SqlaTable(Model, BaseDatasource):  # pylint: disable=too-many-public-metho
 
         # Expected output columns
         labels_expected = [c.key for c in select_exprs] #TODO
-        logger.info("labels_expected 1 :" + str(labels_expected)) 
+
+        logger.info("labels_expected before :" + str(labels_expected))   
+        if IKIGAI_CUSTOM_LABEL is not None:
+            iki_original_label = IKIGAI_CUSTOM_LABEL[:-1]
+            if iki_original_label in labels_expected:
+                labels_expected[labels_expected.index(iki_original_label)] = IKIGAI_CUSTOM_LABEL
+
+        logger.info("labels_expected after :" + str(labels_expected)) 
         # Order by columns are "hidden" columns, some databases require them
         # always be present in SELECT if an aggregation function is used
         if not db_engine_spec.allows_hidden_ordeby_agg:
@@ -1770,7 +1783,7 @@ class SqlaTable(Model, BaseDatasource):  # pylint: disable=too-many-public-metho
             col = self.make_sqla_column_compatible(literal_column("COUNT(*)"), label)
             qry = select([col]).select_from(qry.alias("rowcount_qry"))
             labels_expected = [label]
-        logger.info("labels_expected 2 :" + str(labels_expected)) 
+        logger.info("labels_expected final :" + str(labels_expected)) 
         return SqlaQuery(
             applied_template_filters=applied_template_filters,
             cte=cte,
