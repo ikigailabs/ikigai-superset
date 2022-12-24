@@ -1900,6 +1900,8 @@ class SqlaTable(Model, BaseDatasource):  # pylint: disable=too-many-public-metho
             :param df: Original DataFrame returned by the engine
             :return: Mutated DataFrame
             """
+            logger.info("query 1 before" + str(df) + ", " + str(df.columns))
+
             labels_expected = query_str_ext.labels_expected
             if df is not None and not df.empty:
                 if len(df.columns) < len(labels_expected):
@@ -1909,8 +1911,11 @@ class SqlaTable(Model, BaseDatasource):  # pylint: disable=too-many-public-metho
                 if len(df.columns) > len(labels_expected):
                     df = df.iloc[:, 0 : len(labels_expected)]
                 df.columns = labels_expected
+
+                if labels_expected[0] != df.columns[0]:
+                    df = df.rename(columns={df.columns[0]: labels_expected[0]}, axis=1)
             
-            logger.info("assign_column_label before" + str(labels_expected) + ", " + str(df) + ", " + str(df.columns) + ", " + str(type(df)))
+            logger.info("query 2 after" + str(df) + ", " + str(df.columns))
 
             return df
 
@@ -1927,14 +1932,6 @@ class SqlaTable(Model, BaseDatasource):  # pylint: disable=too-many-public-metho
                 dataclasses.asdict(error) for error in db_engine_spec.extract_errors(ex)
             ]
             error_message = utils.error_msg_from_exception(ex)
-
-        logger.info("query 1 before" + str(df) + ", " + str(df.columns))
-        logger.info("IKIGAI_CUSTOM_LABEL" + str(IKIGAI_CUSTOM_LABEL))
-
-        if IKIGAI_CUSTOM_LABEL is not None:
-                df = df.rename(columns={IKIGAI_CUSTOM_LABEL: IKIGAI_CUSTOM_LABEL[:-1]}, axis=1)
-
-        logger.info("query 2 after" + str(df) + ", " + str(df.columns))
 
         return QueryResult(
             applied_template_filters=query_str_ext.applied_template_filters,
