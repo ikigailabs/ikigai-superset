@@ -1912,13 +1912,11 @@ class SqlaTable(Model, BaseDatasource):  # pylint: disable=too-many-public-metho
                     df = df.iloc[:, 0 : len(labels_expected)]
                 df.columns = labels_expected
 
-                logger.info("df.columns[0]: " + str(df.columns[0]))
-                logger.info("labels_expected[0]: " + str(labels_expected[0]))
+                logger.info("df.columns[0]: '" + str(df.columns[0]) + "'")
+                logger.info("labels_expected[0]: '" + str(labels_expected[0]) + "'")
 
                 if labels_expected[0] != df.columns[0]:
                     logger.info("Inside if IKIGAI")
-                    logger.info("df.columns[0]: " + str(df.columns[0]))
-                    logger.info("labels_expected[0]: " + str(labels_expected[0]))
                     df = df.rename(columns={df.columns[0]: labels_expected[0]})
             
             logger.info("query 2 after" + str(df) + ", " + str(df.columns))
