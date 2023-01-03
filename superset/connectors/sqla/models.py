@@ -986,7 +986,6 @@ class SqlaTable(Model, BaseDatasource):  # pylint: disable=too-many-public-metho
         sql = self._apply_cte(sql, sqlaq.cte)
         sql = sqlparse.format(sql, reindent=True)
         sql = self.mutate_query_from_config(sql)
-
         return QueryStringExtended(
             applied_template_filters=sqlaq.applied_template_filters,
             labels_expected=sqlaq.labels_expected,
@@ -1468,7 +1467,7 @@ class SqlaTable(Model, BaseDatasource):  # pylint: disable=too-many-public-metho
         )
 
         # Expected output columns
-        labels_expected = [c.key for c in select_exprs] #TODO
+        labels_expected = [c.key for c in select_exprs]
 
         # Order by columns are "hidden" columns, some databases require them
         # always be present in SELECT if an aggregation function is used
@@ -1886,7 +1885,6 @@ class SqlaTable(Model, BaseDatasource):  # pylint: disable=too-many-public-metho
             :param df: Original DataFrame returned by the engine
             :return: Mutated DataFrame
             """
-
             labels_expected = query_str_ext.labels_expected
             if df is not None and not df.empty:
                 if len(df.columns) < len(labels_expected):
@@ -1900,7 +1898,7 @@ class SqlaTable(Model, BaseDatasource):  # pylint: disable=too-many-public-metho
                 for i in range(len(df.columns)):
                     if CUSTOM_ADDITION_TO_COLNAME in df.columns[i]:
                         df = df.rename(columns={df.columns[i]: df.columns[i].replace(CUSTOM_ADDITION_TO_COLNAME, "")})
-                        
+
             return df
 
         try:
