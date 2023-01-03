@@ -138,7 +138,7 @@ logger = logging.getLogger(__name__)
 ADVANCED_DATA_TYPES = config["ADVANCED_DATA_TYPES"]
 VIRTUAL_TABLE_ALIAS = "virtual_table"
 
-IKIGAI_CUSTOM_LABEL = None
+CUSTOM_ADDITION_TO_COLNAME = "_IKIGAI65as4d68c"
 
 # a non-exhaustive set of additive metrics
 ADDITIVE_METRIC_TYPES = {
@@ -357,8 +357,7 @@ class TableColumn(Model, BaseColumn, CertificationMixin):
         :return: A TimeExpression object wrapped in a Label if supported by db
         """
         if label:
-            label = label + " "
-            IKIGAI_CUSTOM_LABEL = label
+            label = label + CUSTOM_ADDITION_TO_COLNAME
         else:
             label = utils.DTTM_ALIAS
 
@@ -1910,7 +1909,7 @@ class SqlaTable(Model, BaseDatasource):  # pylint: disable=too-many-public-metho
                     )
                 if len(df.columns) > len(labels_expected):
                     df = df.iloc[:, 0 : len(labels_expected)]
-                df.columns = labels_expected
+                # df.columns = labels_expected
 
                 logger.info("df.columns[0]: '" + str(df.columns[0]) + "'")
                 logger.info("labels_expected[0]: '" + str(labels_expected[0]) + "'")
