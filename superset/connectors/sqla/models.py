@@ -1775,6 +1775,7 @@ class SqlaTable(Model, BaseDatasource):  # pylint: disable=too-many-public-metho
             col = self.make_sqla_column_compatible(literal_column("COUNT(*)"), label)
             qry = select([col]).select_from(qry.alias("rowcount_qry"))
             labels_expected = [label]
+            
         return SqlaQuery(
             applied_template_filters=applied_template_filters,
             cte=cte,
