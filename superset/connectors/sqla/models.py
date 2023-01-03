@@ -987,8 +987,6 @@ class SqlaTable(Model, BaseDatasource):  # pylint: disable=too-many-public-metho
         sql = sqlparse.format(sql, reindent=True)
         sql = self.mutate_query_from_config(sql)
 
-        logger.info("get_query_str_extended 1: " + str(sqlaq) + ", " + str(sql))
-
         return QueryStringExtended(
             applied_template_filters=sqlaq.applied_template_filters,
             labels_expected=sqlaq.labels_expected,
@@ -1472,13 +1470,6 @@ class SqlaTable(Model, BaseDatasource):  # pylint: disable=too-many-public-metho
         # Expected output columns
         labels_expected = [c.key for c in select_exprs] #TODO
 
-        # logger.info("labels_expected before :" + str(labels_expected))   
-        # if IKIGAI_CUSTOM_LABEL is not None:
-        #     iki_original_label = IKIGAI_CUSTOM_LABEL[:-1]
-        #     if iki_original_label in labels_expected:
-        #         labels_expected[labels_expected.index(iki_original_label)] = IKIGAI_CUSTOM_LABEL
-
-        # logger.info("labels_expected after :" + str(labels_expected)) 
         # Order by columns are "hidden" columns, some databases require them
         # always be present in SELECT if an aggregation function is used
         if not db_engine_spec.allows_hidden_ordeby_agg:
@@ -1774,10 +1765,7 @@ class SqlaTable(Model, BaseDatasource):  # pylint: disable=too-many-public-metho
                 )
                 qry = qry.where(top_groups)
 
-                logger.info('NEW IKI RESULT 1' + str(result) + ', ' + str(qry))
-
         qry = qry.select_from(tbl)
-        logger.info('NEW IKI RESULT 2' + str(qry))
 
         if is_rowcount:
             if not db_engine_spec.allows_subqueries:
@@ -1788,7 +1776,6 @@ class SqlaTable(Model, BaseDatasource):  # pylint: disable=too-many-public-metho
             col = self.make_sqla_column_compatible(literal_column("COUNT(*)"), label)
             qry = select([col]).select_from(qry.alias("rowcount_qry"))
             labels_expected = [label]
-        logger.info("labels_expected final :" + str(labels_expected)) 
         return SqlaQuery(
             applied_template_filters=applied_template_filters,
             cte=cte,
@@ -1899,7 +1886,6 @@ class SqlaTable(Model, BaseDatasource):  # pylint: disable=too-many-public-metho
             :param df: Original DataFrame returned by the engine
             :return: Mutated DataFrame
             """
-            logger.info("query 1 before" + str(df) + ", " + str(df.columns))
 
             labels_expected = query_str_ext.labels_expected
             if df is not None and not df.empty:
@@ -1911,16 +1897,10 @@ class SqlaTable(Model, BaseDatasource):  # pylint: disable=too-many-public-metho
                     df = df.iloc[:, 0 : len(labels_expected)]
                 df.columns = labels_expected
 
-                logger.info("df.columns[0]: '" + str(df.columns[0]) + "'")
-                logger.info("labels_expected[0]: '" + str(labels_expected[0]) + "'")
-
                 for i in range(len(df.columns)):
                     if CUSTOM_ADDITION_TO_COLNAME in df.columns[i]:
-                        logger.info("Inside if IKIGAI")
                         df = df.rename(columns={df.columns[i]: df.columns[i].replace(CUSTOM_ADDITION_TO_COLNAME, "")})
-            
-            logger.info("query 2 after" + str(df) + ", " + str(df.columns))
-
+                        
             return df
 
         try:
