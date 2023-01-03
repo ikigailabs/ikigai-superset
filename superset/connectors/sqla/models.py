@@ -1909,14 +1909,15 @@ class SqlaTable(Model, BaseDatasource):  # pylint: disable=too-many-public-metho
                     )
                 if len(df.columns) > len(labels_expected):
                     df = df.iloc[:, 0 : len(labels_expected)]
-                # df.columns = labels_expected
+                df.columns = labels_expected
 
                 logger.info("df.columns[0]: '" + str(df.columns[0]) + "'")
                 logger.info("labels_expected[0]: '" + str(labels_expected[0]) + "'")
 
-                if labels_expected[0] != df.columns[0]:
-                    logger.info("Inside if IKIGAI")
-                    df = df.rename(columns={df.columns[0]: labels_expected[0]})
+                for i in range(len(df.columns)):
+                    if CUSTOM_ADDITION_TO_COLNAME in df.columns[i]:
+                        logger.info("Inside if IKIGAI")
+                        df = df.rename(columns={df.columns[i]: df.columns[i].replace(CUSTOM_ADDITION_TO_COLNAME, "")})
             
             logger.info("query 2 after" + str(df) + ", " + str(df.columns))
 
