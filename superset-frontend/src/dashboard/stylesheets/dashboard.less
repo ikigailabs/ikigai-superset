@@ -14,7 +14,7 @@
 /*@import url('https://fonts.googleapis.com/css?family=Open+Sans:400,600,700&display=swap');*/
 
 @font-face {
-  font-family: 'Axiforma';
+  font-family: 'Axiforma-Regular';
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -26,7 +26,7 @@
 }
 
 body {
-  font-family: 'Axiforma', sans-serif !important;
+  font-family: 'Axiforma-Regular' !important;
 }
 
 /*!
@@ -1167,9 +1167,12 @@ i.warning {
 }
 .drop-indicator {
   display: block;
-  background-color: #20a7c9;
+  background-color: #814ef085 !important;
   position: absolute;
   z-index: 10;
+  height: 18px !important;
+  border-radius: 7px;
+  transition: .2s;
 }
 .drop-indicator--top {
   top: 0;
@@ -1192,14 +1195,14 @@ i.warning {
   top: 0;
   left: 100%;
   height: 100%;
-  width: 4px;
+  width: 16px;
   min-height: 16px;
 }
 .drop-indicator--left {
   top: 0;
   left: 0;
   height: 100%;
-  width: 4px;
+  width: 16px;
   min-height: 16px;
 }
 .drag-handle {
@@ -1305,7 +1308,7 @@ i.warning {
 .filters-scope-selector .react-checkbox-tree .rct-icon.rct-icon-expand-all {
   font-size: 14px;
   font-family: Inter, Helvetica, Arial;
-  color: #20a7c9;
+  color: #824ef0;
 }
 .filters-scope-selector
   .react-checkbox-tree
@@ -1468,7 +1471,7 @@ i.warning {
   outline: none;
 }
 .filters-scope-selector .scope-search:focus {
-  border: 1px solid #20a7c9;
+  border: 1px solid #824ef0;
 }
 .grid-container > div:first-child {
   height: inherit !important;
@@ -1495,7 +1498,7 @@ i.warning {
   left: 0;
   bottom: 2;
   height: 2;
-  background-color: #20a7c9;
+  background-color: #824ef0;
   z-index: 10;
 }
 .hover-menu {
@@ -1575,7 +1578,7 @@ div:hover > .hover-menu {
   left: 0;
   width: 100%;
   height: 100%;
-  border: 2px solid #20a7c9;
+  border: 2px solid #824ef0;
   pointer-events: none;
 }
 .popover-menu {
@@ -1685,10 +1688,10 @@ div:hover > .hover-menu {
   left: 0;
   width: 100%;
   height: 100%;
-  box-shadow: inset 0 0 0 2px #20a7c9;
+  box-shadow: inset 0 0 0 2px #824ef0;
 }
 .resizable-container--resizing > span .resize-handle {
-  border-color: #20a7c9;
+  border-color: #824ef0;
 }
 .resize-handle {
   opacity: 0;
@@ -1763,7 +1766,7 @@ div:hover > .hover-menu {
 }
 .dashboard-component-chart-holder.fade-in {
   border-radius: 4px;
-  box-shadow: inset 0 0 0 2px #20a7c9, 0 0 0 3px rgba(32, 167, 201, 0.1);
+  box-shadow: inset 0 0 0 2px #824ef0, 0 0 0 3px rgba(32, 167, 201, 0.1);
   transition: box-shadow 1s ease-in-out;
 }
 .dashboard-component-chart-holder.fade-out {
@@ -1791,7 +1794,7 @@ div:hover > .hover-menu {
   border: 1px solid transparent;
 }
 .dashboard--editing .dashboard-component-chart-holder:hover:after {
-  border: 1px dashed #20a7c9;
+  border: 1px dashed #824ef0;
   z-index: 2;
 }
 .dashboard--editing
@@ -1800,7 +1803,7 @@ div:hover > .hover-menu {
 .dashboard--editing
   .resizable-container:hover
   > .dashboard-component-chart-holder:after {
-  border: 1px dashed #20a7c9;
+  border: 1px dashed #824ef0;
 }
 .dashboard--editing
   .resizable-container
@@ -1871,7 +1874,7 @@ a[role='menuitem'] .dot {
 .dashboard--editing
   .resizable-container.resizable-container--resizing:hover
   > .grid-column:after {
-  border: 1px dashed #20a7c9;
+  border: 1px dashed #824ef0;
   z-index: 2;
 }
 .grid-column--empty {
@@ -1928,7 +1931,7 @@ a[role='menuitem'] .dot {
   pointer-events: none;
 }
 .dashboard--editing .dashboard-grid .dashboard-component-header:hover:after {
-  border: 1px dashed #20a7c9;
+  border: 1px dashed #824ef0;
   z-index: 2;
 }
 .dashboard--editing .dragdroppable-row .dashboard-component-header {
@@ -2021,7 +2024,7 @@ a[role='menuitem'] .dot {
 .dashboard--editing
   .resizable-container.resizable-container--resizing:hover
   > .grid-row:after {
-  border: 1px dashed #20a7c9;
+  border: 1px dashed #824ef0;
   z-index: 2;
 }
 .dashboard--editing .dashboard-component-tabs > .hover-menu + div:after,
@@ -2084,7 +2087,7 @@ a[role='menuitem'] .dot {
 /* Variables */
 
 :root {
-  --primaryColor: #6560e9;
+  --primaryColor: #824ef0;
   --secondaryColor: #f2f3ff;
   --txtColor: #353538;
   --txtColor2: #989eaa;
@@ -2132,7 +2135,7 @@ a[role='menuitem'] .dot {
 .dashboard {
   background-color: var(--backgroundColor);
   color: var(--txtColor);
-  font-family: 'Axiforma', sans-serif !important;
+  font-family: 'Axiforma-Regular', sans-serif !important;
 }
 
 .dashboard > div > div {
@@ -2458,6 +2461,7 @@ a:hover {
 /* Component */
 
 .dashboard-component {
+  border-radius: 7px !important;
 }
 
 .dashboard-component.dashboard-component-chart-holder {
@@ -2501,6 +2505,7 @@ a:hover {
 }
 
 .ant-tabs {
+  font-family: 'Axiforma-Regular' !important;
 }
 
 .ant-tabs-nav::before {
@@ -2680,7 +2685,7 @@ a:hover {
   content: 'Iki';
   color: #6560e9 !important;
   font-weight: 600;
-  font-family: 'Axiforma', sans-serif !important;
+  font-family: 'Axiforma-Regular' !important;
   font-size: 22px;
   padding-right: 16px;
 }
