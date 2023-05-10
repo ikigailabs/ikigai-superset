@@ -856,6 +856,7 @@ td.rdtYear:hover {
 }
 .background--white {
   background-color: #fff;
+  box-shadow: 0px 2px 8px rgba(115, 115, 115, 0.09) !important;
 }
 .dashboard-builder-sidepane {
   flex: 0 0 374px;
@@ -1050,6 +1051,7 @@ body h6 {
   letter-spacing: 0.2px;
   margin-top: 8px;
   margin-bottom: 4px;
+  font-family: 'Axiforma', sans-serif;
 }
 body p {
   margin: 0 0 8px;
@@ -1172,7 +1174,7 @@ i.warning {
   z-index: 10;
   height: 18px !important;
   border-radius: 7px;
-  transition: .2s;
+  transition: 0.2s;
 }
 .drop-indicator--top {
   top: 0;
@@ -1751,6 +1753,7 @@ div:hover > .hover-menu {
   overflow-y: visible;
   transition: opacity 0.2s, border-color 0.2s, box-shadow 0.2s;
   border: 2px solid transparent;
+  box-shadow: 0px 2px 8px rgba(115, 115, 115, 0.09) !important;
 }
 .dashboard-component-chart-holder .missing-chart-container {
   display: flex;
@@ -1899,7 +1902,7 @@ a[role='menuitem'] .dot {
 }
 .dashboard-component-divider:after {
   content: '';
-  height: 1px;
+  height: 2px !important;
   width: 100%;
   background-color: #e0e0e0;
   display: block;
@@ -1912,6 +1915,7 @@ a[role='menuitem'] .dot {
 }
 .dragdroppable .dashboard-component-divider {
   cursor: move;
+  box-shadow: none !important;
 }
 .dashboard-component-header {
   width: 100%;
@@ -1944,6 +1948,7 @@ a[role='menuitem'] .dot {
 .dashboard-header .dashboard-component-header {
   font-weight: 200;
   width: auto;
+  box-shadow: none !important;
 }
 .dashboard--editing .header-small {
   font-size: 16px;
@@ -1960,6 +1965,9 @@ a[role='menuitem'] .dot {
 .dashboard-component-tabs .dashboard-component-header {
   padding-left: 16px;
   padding-right: 16px;
+}
+.background--transparent .dashboard-component-header {
+  box-shadow: none !important;
 }
 .grid-column > :not(:only-child):not(:last-child) .dashboard-component-header {
   margin-bottom: -16px;
@@ -2052,6 +2060,7 @@ a[role='menuitem'] .dot {
 }
 .dashboard-markdown {
   overflow: hidden;
+  box-shadow: 0px 2px 8px rgba(115, 115, 115, 0.09) !important;
 }
 .dashboard-markdown h4,
 .dashboard-markdown h5 {
@@ -2462,13 +2471,13 @@ a:hover {
 
 .dashboard-component {
   border-radius: 10px !important;
-  box-shadow: 0px 2px 8px rgba(115, 115, 115, 0.09) !important;
 }
 
 .dashboard-component.dashboard-component-chart-holder {
   padding: 24px;
   border: 1px solid var(--borderColor) !important;
   border-radius: 5px;
+  box-shadow: 0px 2px 8px rgba(115, 115, 115, 0.09) !important;
 }
 
 .dashboard-component-chart-holder.fade-in {
@@ -2499,6 +2508,7 @@ a:hover {
   .dashboard-grid
   .dashboard-component.dashboard-component-tabs {
   background-color: transparent !important;
+  box-shadow: none !important;
 }
 
 .ant-tabs .ant-tabs-content-holder {
