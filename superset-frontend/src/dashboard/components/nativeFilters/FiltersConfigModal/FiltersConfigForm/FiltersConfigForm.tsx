@@ -284,7 +284,7 @@ export interface FiltersConfigFormProps {
   filterId: string;
   filterToEdit?: Filter;
   removedFilters: Record<string, FilterRemoval>;
-  userId: string;
+  userId?: string;
   restoreFilter: (filterId: string) => void;
   form: FormInstance<NativeFiltersForm>;
   getAvailableFilters: (filterId: string) => { label: string; value: string }[];

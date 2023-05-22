@@ -27,7 +27,7 @@ import { getFilterBarTestId } from '..';
 export interface FCBProps {
   createNewOnOpen?: boolean;
   dashboardId?: number;
-  userId: string;
+  userId?: string;
 }
 
 const HeaderButton = styled(Button)`

@@ -38,7 +38,7 @@ const cachedSupersetGet = cacheWrapper(
 interface DatasetSelectProps {
   onChange: (value: { label: string; value: number }) => void;
   value?: { label: string; value: number };
-  userId: string;
+  userId?: string;
 }
 
 const DatasetSelect = ({ onChange, value, userId }: DatasetSelectProps) => {

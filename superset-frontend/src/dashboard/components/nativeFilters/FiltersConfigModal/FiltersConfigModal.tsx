@@ -86,7 +86,7 @@ export interface FiltersConfigModalProps {
   isOpen: boolean;
   initialFilterId?: string;
   createNewOnOpen?: boolean;
-  userId: string;
+  userId?: string;
   onSave: (filterConfig: FilterConfiguration) => Promise<void>;
   onCancel: () => void;
 }
