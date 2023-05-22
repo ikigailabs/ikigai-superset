@@ -106,7 +106,9 @@ const Header: FC<HeaderProps> = ({ toggleFiltersBar }) => {
   const dashboardId = useSelector<RootState, number>(
     ({ dashboardInfo }) => dashboardInfo.id,
   );
-
+  const userId = useSelector<RootState, any>(
+    ({ dashboardInfo }) => dashboardInfo.userId,
+  );
   return (
     <Wrapper>
       <HeaderButton
@@ -125,6 +127,7 @@ const Header: FC<HeaderProps> = ({ toggleFiltersBar }) => {
           <FilterConfigurationLink
             dashboardId={dashboardId}
             createNewOnOpen={filterValues.length === 0}
+            userId={userId}
           >
             <Icons.PlusSmall /> {t('Add/Edit Filters')}
           </FilterConfigurationLink>

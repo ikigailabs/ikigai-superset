@@ -38,9 +38,10 @@ const cachedSupersetGet = cacheWrapper(
 interface DatasetSelectProps {
   onChange: (value: { label: string; value: number }) => void;
   value?: { label: string; value: number };
+  userId: string;
 }
 
-const DatasetSelect = ({ onChange, value }: DatasetSelectProps) => {
+const DatasetSelect = ({ onChange, value, userId }: DatasetSelectProps) => {
   const getErrorMessage = useCallback(
     ({ error, message }: ClientErrorObject) => {
       let errorText = message || error || t('An error has occurred');
@@ -59,7 +60,10 @@ const DatasetSelect = ({ onChange, value }: DatasetSelectProps) => {
   ) => {
     const searchColumn = 'table_name';
     const query = rison.encode({
-      filters: [{ col: searchColumn, opr: 'ct', value: search }],
+      filters: [
+        { col: searchColumn, opr: 'ct', value: search },
+        { col: 'owners', opr: 'rel_m_m', value: userId },
+      ],
       page,
       page_size: pageSize,
       order_column: searchColumn,

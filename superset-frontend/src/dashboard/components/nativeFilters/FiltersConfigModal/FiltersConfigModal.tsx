@@ -86,6 +86,7 @@ export interface FiltersConfigModalProps {
   isOpen: boolean;
   initialFilterId?: string;
   createNewOnOpen?: boolean;
+  userId: string;
   onSave: (filterConfig: FilterConfiguration) => Promise<void>;
   onCancel: () => void;
 }
@@ -103,6 +104,7 @@ export function FiltersConfigModal({
   isOpen,
   initialFilterId,
   createNewOnOpen,
+  userId,
   onSave,
   onCancel,
 }: FiltersConfigModalProps) {
@@ -484,6 +486,7 @@ export function FiltersConfigModal({
         getAvailableFilters={getAvailableFilters}
         key={id}
         activeFilterPanelKeys={activeFilterPanelKey}
+        userId={userId}
         handleActiveFilterPanelChange={key => setActiveFilterPanelKey(key)}
         isActive={currentFilterId === id}
         setErroredFilters={setErroredFilters}

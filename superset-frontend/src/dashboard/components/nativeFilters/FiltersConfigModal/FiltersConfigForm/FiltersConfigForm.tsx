@@ -284,6 +284,7 @@ export interface FiltersConfigFormProps {
   filterId: string;
   filterToEdit?: Filter;
   removedFilters: Record<string, FilterRemoval>;
+  userId: string;
   restoreFilter: (filterId: string) => void;
   form: FormInstance<NativeFiltersForm>;
   getAvailableFilters: (filterId: string) => { label: string; value: string }[];
@@ -325,6 +326,7 @@ const FiltersConfigForm = (
     filterToEdit,
     removedFilters,
     form,
+    userId,
     getAvailableFilters,
     activeFilterPanelKeys,
     restoreFilter,
@@ -825,6 +827,7 @@ const FiltersConfigForm = (
                     }
                     forceUpdate();
                   }}
+                  userId={userId}
                 />
               </StyledFormItem>
             ) : (

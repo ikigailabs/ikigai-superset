@@ -27,6 +27,7 @@ import { getFilterBarTestId } from '..';
 export interface FCBProps {
   createNewOnOpen?: boolean;
   dashboardId?: number;
+  userId: string;
 }
 
 const HeaderButton = styled(Button)`
@@ -36,6 +37,7 @@ const HeaderButton = styled(Button)`
 export const FilterConfigurationLink: React.FC<FCBProps> = ({
   createNewOnOpen,
   dashboardId,
+  userId,
   children,
 }) => {
   const dispatch = useDispatch();
@@ -67,6 +69,7 @@ export const FilterConfigurationLink: React.FC<FCBProps> = ({
         onCancel={close}
         createNewOnOpen={createNewOnOpen}
         key={`filters-for-${dashboardId}`}
+        userId={userId}
       />
     </>
   );
