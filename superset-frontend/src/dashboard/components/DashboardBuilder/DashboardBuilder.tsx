@@ -29,7 +29,7 @@ import React, {
 import { JsonObject, styled, css, t } from '@superset-ui/core';
 import { Global } from '@emotion/react';
 import { useDispatch, useSelector } from 'react-redux';
-import ErrorBoundary from 'src/components/ErrorBoundary';
+// import ErrorBoundary from 'src/components/ErrorBoundary';
 import BuilderComponentPane from 'src/dashboard/components/BuilderComponentPane';
 import DashboardHeader from 'src/dashboard/containers/DashboardHeader';
 import Icons from 'src/components/Icons';
@@ -46,8 +46,8 @@ import {
   setEditMode,
   setSupersetUrl,
 } from 'src/dashboard/actions/dashboardState';
-import { useElementOnScreen } from 'src/hooks/useElementOnScreen';
-import { FeatureFlag, isFeatureEnabled } from 'src/featureFlags';
+// import { useElementOnScreen } from 'src/hooks/useElementOnScreen';
+// import { FeatureFlag, isFeatureEnabled } from 'src/featureFlags';
 import {
   deleteTopLevelTabs,
   handleComponentDrop,
@@ -58,17 +58,17 @@ import {
   DASHBOARD_ROOT_DEPTH,
   DashboardStandaloneMode,
 } from 'src/dashboard/util/constants';
-import FilterBar from 'src/dashboard/components/nativeFilters/FilterBar';
+// import FilterBar from 'src/dashboard/components/nativeFilters/FilterBar';
 import Loading from 'src/components/Loading';
 import { EmptyStateBig } from 'src/components/EmptyState';
 import { useUiConfig } from 'src/components/UiConfigContext';
 import {
   BUILDER_SIDEPANEL_WIDTH,
-  CLOSED_FILTER_BAR_WIDTH,
-  FILTER_BAR_HEADER_HEIGHT,
-  FILTER_BAR_TABS_HEIGHT,
-  MAIN_HEADER_HEIGHT,
-  OPEN_FILTER_BAR_WIDTH,
+  // CLOSED_FILTER_BAR_WIDTH,
+  // FILTER_BAR_HEADER_HEIGHT,
+  // FILTER_BAR_TABS_HEIGHT,
+  // MAIN_HEADER_HEIGHT,
+  // OPEN_FILTER_BAR_WIDTH,
 } from 'src/dashboard/constants';
 import { shouldFocusTabs, getRootLevelTabsComponent } from './utils';
 import DashboardContainer from './DashboardContainer';
@@ -126,18 +126,18 @@ const StyledDiv = styled.div`
 `;
 
 // @z-index-above-dashboard-charts + 1 = 11
-const FiltersPanel = styled.div`
-  grid-column: 1;
-  grid-row: 1 / span 2;
-  z-index: 11;
-`;
+// const FiltersPanel = styled.div`
+//   grid-column: 1;
+//   grid-row: 1 / span 2;
+//   z-index: 11;
+// `;
 
-const StickyPanel = styled.div<{ width: number }>`
-  position: sticky;
-  top: -1px;
-  width: ${({ width }) => width}px;
-  flex: 0 0 ${({ width }) => width}px;
-`;
+// const StickyPanel = styled.div<{ width: number }>`
+//   position: sticky;
+//   top: -1px;
+//   width: ${({ width }) => width}px;
+//   flex: 0 0 ${({ width }) => width}px;
+// `;
 
 // @z-index-above-dashboard-popovers (99) + 1 = 100
 const StyledHeader = styled.div`
@@ -178,6 +178,7 @@ const StyledDashboardContent = styled.div<{
     width: 0;
     flex: 1;
     position: relative;
+    padding-top: 24px;
     margin-top: ${({ theme }) => theme.gridUnit * 6}px;
     margin-right: ${({ theme }) => theme.gridUnit * 8}px;
     margin-bottom: ${({ theme }) => theme.gridUnit * 6}px;
@@ -229,9 +230,9 @@ const DashboardBuilder: FC<DashboardBuilderProps> = () => {
   const canEdit = useSelector<RootState, boolean>(
     ({ dashboardInfo }) => dashboardInfo.dash_edit_perm,
   );
-  const directPathToChild = useSelector<RootState, string[]>(
-    state => state.dashboardState.directPathToChild,
-  );
+  // const directPathToChild = useSelector<RootState, string[]>(
+  //   state => state.dashboardState.directPathToChild,
+  // );
   const fullSizeChartId = useSelector<RootState, number | null>(
     state => state.dashboardState.fullSizeChartId,
   );
@@ -301,29 +302,29 @@ const DashboardBuilder: FC<DashboardBuilderProps> = () => {
   const {
     showDashboard,
     dashboardFiltersOpen,
-    toggleDashboardFiltersOpen,
+    // toggleDashboardFiltersOpen,
     nativeFiltersEnabled,
   } = useNativeFilters();
 
-  const filterBarWidth = dashboardFiltersOpen
-    ? OPEN_FILTER_BAR_WIDTH
-    : CLOSED_FILTER_BAR_WIDTH;
+  // const filterBarWidth = dashboardFiltersOpen
+  //   ? OPEN_FILTER_BAR_WIDTH
+  //   : CLOSED_FILTER_BAR_WIDTH;
 
-  const [containerRef, isSticky] = useElementOnScreen<HTMLDivElement>({
-    threshold: [1],
-  });
+  // const [containerRef, isSticky] = useElementOnScreen<HTMLDivElement>({
+  //   threshold: [1],
+  // });
 
-  const filterSetEnabled = isFeatureEnabled(
-    FeatureFlag.DASHBOARD_NATIVE_FILTERS_SET,
-  );
+  // const filterSetEnabled = isFeatureEnabled(
+  //   FeatureFlag.DASHBOARD_NATIVE_FILTERS_SET,
+  // );
 
-  const offset =
-    FILTER_BAR_HEADER_HEIGHT +
-    (isSticky || standaloneMode ? 0 : MAIN_HEADER_HEIGHT) +
-    (filterSetEnabled ? FILTER_BAR_TABS_HEIGHT : 0);
+  // const offset =
+  //   FILTER_BAR_HEADER_HEIGHT +
+  //   (isSticky || standaloneMode ? 0 : MAIN_HEADER_HEIGHT) +
+  //   (filterSetEnabled ? FILTER_BAR_TABS_HEIGHT : 0);
 
-  const filterBarHeight = `calc(100vh - ${offset}px)`;
-  const filterBarOffset = dashboardFiltersOpen ? 0 : barTopOffset + 20;
+  // const filterBarHeight = `calc(100vh - ${offset}px)`;
+  // const filterBarOffset = dashboardFiltersOpen ? 0 : barTopOffset + 20;
 
   const draggableStyle = useMemo(
     () => ({
@@ -398,7 +399,7 @@ const DashboardBuilder: FC<DashboardBuilderProps> = () => {
 
   return (
     <StyledDiv>
-      {nativeFiltersEnabled && !editMode && (
+      {/* {!editMode && (
         <FiltersPanel>
           <StickyPanel ref={containerRef} width={filterBarWidth}>
             <ErrorBoundary>
@@ -413,7 +414,7 @@ const DashboardBuilder: FC<DashboardBuilderProps> = () => {
             </ErrorBoundary>
           </StickyPanel>
         </FiltersPanel>
-      )}
+      )} */}
       <StyledHeader ref={headerRef}>
         {/* @ts-ignore */}
         <DragDroppable
@@ -471,6 +472,34 @@ const DashboardBuilder: FC<DashboardBuilderProps> = () => {
             ) : (
               <Loading />
             )}
+            {/* {editMode ? (
+              <BuilderComponentPane
+                isStandalone={!!standaloneMode}
+                topOffset={barTopOffset}
+              />
+            ) : (
+              <FiltersPanel
+                style={{
+                  // eslint-disable-next-line theme-colors/no-literal-colors
+                  borderLeft: '1px solid rgba(0, 0, 0, 0.09)',
+                  // eslint-disable-next-line theme-colors/no-literal-colors
+                  backgroundColor: '#fff',
+                }}
+              >
+                <StickyPanel ref={containerRef} width={filterBarWidth}>
+                  <ErrorBoundary>
+                    <FilterBar
+                      filtersOpen={dashboardFiltersOpen}
+                      toggleFiltersBar={toggleDashboardFiltersOpen}
+                      directPathToChild={directPathToChild}
+                      width={filterBarWidth}
+                      height={filterBarHeight}
+                      offset={filterBarOffset}
+                    />
+                  </ErrorBoundary>
+                </StickyPanel>
+              </FiltersPanel>
+            )} */}
             {editMode && (
               <BuilderComponentPane
                 isStandalone={!!standaloneMode}

@@ -19,8 +19,8 @@
 // import { useSelector } from 'react-redux';
 // import { FeatureFlag, isFeatureEnabled } from 'src/featureFlags';
 import { useCallback, useEffect, useState, useContext } from 'react';
-import { URL_PARAMS } from 'src/constants';
-import { getUrlParam } from 'src/utils/urlUtils';
+// import { URL_PARAMS } from 'src/constants';
+// import { getUrlParam } from 'src/utils/urlUtils';
 // import { RootState } from 'src/dashboard/types';
 import { MigrationContext } from 'src/dashboard/containers/DashboardPage';
 import {
@@ -43,10 +43,9 @@ export const useNativeFilters = () => {
 
   const filters = useFilters();
   const filterValues = Object.values(filters);
-  const expandFilters = getUrlParam(URL_PARAMS.expandFilters);
-  const [dashboardFiltersOpen, setDashboardFiltersOpen] = useState(
-    expandFilters ?? !!filterValues.length,
-  );
+  // const expandFilters = getUrlParam(URL_PARAMS.expandFilters);
+  const expandFilters = false;
+  const [dashboardFiltersOpen, setDashboardFiltersOpen] = useState(false);
 
   // const nativeFiltersEnabled =
   //   showNativeFilters &&
