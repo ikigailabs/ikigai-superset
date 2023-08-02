@@ -30,11 +30,16 @@
  */
 import React from 'react';
 import PropTypes from 'prop-types';
+import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import cx from 'classnames';
 
 import { t, SafeMarkdown } from '@superset-ui/core';
-import { Logger, LOG_ACTIONS_RENDER_CHART } from 'src/logger/LogUtils';
+import {
+  Logger,
+  LOG_ACTIONS_RENDER_CHART,
+  LOG_ACTIONS_FORCE_REFRESH_CHART,
+} from 'src/logger/LogUtils';
 import { MarkdownEditor } from 'src/components/AsyncAceEditor';
 
 import DeleteComponentButton from 'src/dashboard/components/DeleteComponentButton';
@@ -49,6 +54,7 @@ import {
   GRID_MIN_ROW_UNITS,
   GRID_BASE_UNIT,
 } from 'src/dashboard/util/constants';
+import { refreshChart } from 'src/components/Chart/chartAction';
 
 const propTypes = {
   id: PropTypes.string.isRequired,
@@ -104,9 +110,12 @@ class IkiRunPipeline extends React.PureComponent {
     this.handleDeleteComponent = this.handleDeleteComponent.bind(this);
     this.handleResizeStart = this.handleResizeStart.bind(this);
     this.setEditor = this.setEditor.bind(this);
+    this.forceRefresh = this.forceRefresh.bind(this);
   }
 
   componentDidMount() {
+    const allChartElements = document.querySelectorAll('[data-test-chart-id]');
+    console.log('componentDidMount - allChartElements', allChartElements);
     this.props.logEvent(LOG_ACTIONS_RENDER_CHART, {
       viz_type: 'markdown',
       start_offset: this.renderStartTime,
@@ -114,6 +123,9 @@ class IkiRunPipeline extends React.PureComponent {
       duration: Logger.getTimestamp() - this.renderStartTime,
     });
     this.handleIncomingWindowMsg();
+    setTimeout(() => {
+      this.refreshChart(62, 62, 11, false);
+    }, 5000);
   }
 
   static getDerivedStateFromProps(nextProps, state) {
@@ -332,7 +344,7 @@ class IkiRunPipeline extends React.PureComponent {
     const { ikigaiOrigin } = this.props;
     let iframe = '';
     let iframeSrc = '';
-    console.log('ikigaiOrigin', ikigaiOrigin, 'markdownSource', markdownSource);
+    //console.log('ikigaiOrigin', ikigaiOrigin, 'markdownSource', markdownSource);
     if (ikigaiOrigin) {
       if (markdownSource) {
         // iframe = markdownSource;
@@ -394,6 +406,28 @@ class IkiRunPipeline extends React.PureComponent {
 
   renderPreviewMode() {
     return this.renderIframe();
+  }
+
+  forceRefresh() {
+    /*this.props.logEvent(LOG_ACTIONS_FORCE_REFRESH_CHART, {
+      slice_id: this.props.slice.slice_id,
+      is_cached: this.props.isCached,
+    });
+    return this.props.refreshChart(
+      this.props.chart.id,
+      true,
+      this.props.dashboardId,
+    );*/
+  }
+
+  refreshChart(sliceId, chartId, dashboardId, isCached) {
+    console.log('refreshChart', sliceId, chartId, dashboardId, isCached);
+    this.props.logEvent(LOG_ACTIONS_FORCE_REFRESH_CHART, {
+      slice_id: sliceId,
+      is_cached: isCached,
+    });
+    //return this.props.refreshChart(chartId, true, dashboardId);
+    return this.props.refreshChart(chartId, true, dashboardId);
   }
 
   render() {
@@ -502,4 +536,13 @@ function mapStateToProps(state) {
   };
 }
 
-export default connect(mapStateToProps)(IkiRunPipeline);
+function mapDispatchToProps(dispatch) {
+  return bindActionCreators(
+    {
+      refreshChart,
+    },
+    dispatch,
+  );
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(IkiRunPipeline);

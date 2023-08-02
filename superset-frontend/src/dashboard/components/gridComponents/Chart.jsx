@@ -315,6 +315,17 @@ export default class Chart extends React.Component {
   }
 
   forceRefresh() {
+    console.log(
+      'forceRefresh!',
+      'slice_id: ',
+      this.props.slice.slice_id,
+      'is_cached: ',
+      this.props.isCached,
+      'chart id: ',
+      this.props.chart.id,
+      'dashboard id: ',
+      this.props.dashboardId,
+    );
     this.props.logEvent(LOG_ACTIONS_FORCE_REFRESH_CHART, {
       slice_id: this.props.slice.slice_id,
       is_cached: this.props.isCached,
