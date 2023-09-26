@@ -37,6 +37,7 @@ import NewIkiTable from '../gridComponents/new/NewIkiTable';
 import NewIkiProcessBuilder from '../gridComponents/new/NewIkiProcessBuilder';
 import NewIkiRunPipeline from '../gridComponents/new/NewIkiRunPipeline';
 import NewDeepCast from '../gridComponents/new/NewDeepCast';
+import NewHeroSection from '../gridComponents/new/NewHeroSection';
 
 export interface BCPProps {
   isStandalone: boolean;
@@ -116,6 +117,7 @@ const BuilderComponentPane: React.FC<BCPProps> = ({
                       <NewIkiProcessBuilder />
                       <NewIkiRunPipeline />
                       <NewDeepCast />
+                      <NewHeroSection />
                       {dashboardComponents
                         .getAll()
                         .map(({ key: componentKey, metadata }) => (

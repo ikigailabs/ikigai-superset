@@ -30,6 +30,7 @@ import {
   IKI_PROCESS_BUILDER_TYPE,
   IKI_RUN_PIPELINE_TYPE,
   IKI_DEEPCAST_TYPE,
+  IKI_HEROSECTION_TYPE,
 } from '../../util/componentTypes';
 
 import ChartHolder from './ChartHolder';
@@ -45,6 +46,7 @@ import IkiTable from './IkiTable';
 import IkiProcessBuilder from './IkiProcessBuilder';
 import IkiRunPipeline from './IkiRunPipeline';
 import IkiDeepcast from './IkiDeepcast';
+import IkiHeroSection from './IkiHeroSection';
 
 export { default as ChartHolder } from './ChartHolder';
 export { default as Markdown } from './Markdown';
@@ -59,6 +61,7 @@ export { default as IkiTable } from './IkiTable';
 export { default as IkiProcessBuilder } from './IkiProcessBuilder';
 export { default as IkiRunPipeline } from './IkiRunPipeline';
 export { default as IkiDeepcast } from './IkiDeepcast';
+export { default as IkiHeroSection } from './IkiHeroSection';
 
 export const componentLookup = {
   [CHART_TYPE]: ChartHolder,
@@ -74,4 +77,5 @@ export const componentLookup = {
   [IKI_PROCESS_BUILDER_TYPE]: IkiProcessBuilder,
   [IKI_RUN_PIPELINE_TYPE]: IkiRunPipeline,
   [IKI_DEEPCAST_TYPE]: IkiDeepcast,
+  [IKI_HEROSECTION_TYPE]: IkiHeroSection,
 };
