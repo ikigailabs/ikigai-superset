@@ -18,13 +18,15 @@
  */
 /**
  * COMPONENT: HERO SECTION
- * WIDGET FRONTEND URL EXAMPLE: http://localhost:3000/widget/herosection?mode=preview&mode=preview&title=Deepcast Test App&description=App Description written by whoever creates the app...&tags=ai,deepcast,ecommerce,planning,inventory&icon=urlencodedbase64
+ * WIDGET FRONTEND URL EXAMPLE: http://localhost:3000/widget/herosection?mode=preview&mode=preview&title=Deepcast Test App&description=App Description written by whoever creates the app...&tags=ai,deepcast,ecommerce,planning,inventory&icon=urlencodedbase64&bgColor=rgbacolor&textColor=rgbacolor
  * PARAMETERS:
  * mode=preview
  * title=Deepcast Test App
  * description=App Description written by whoever creates the app...
  * tags=ai,deepcast,ecommerce,planning,inventory
  * icon=urlencodedbase64
+ * bgColor=rgba color
+ * textColor=rgba color
  */
 import React from 'react';
 import PropTypes from 'prop-types';
@@ -230,7 +232,8 @@ class IkiHeroSection extends React.PureComponent {
                             widgetUrlQuery.set('description', messageData.description);
                             widgetUrlQuery.set('icon', messageData.icon);
                             widgetUrlQuery.set('tags', messageData.tags);
-                           
+                            widgetUrlQuery.set('bgColor', messageData.bgColor);
+                            widgetUrlQuery.set('textColor', messageData.textColor);
                             //icon
                             widgetUrl.search = widgetUrlQuery.toString();
 
@@ -366,8 +369,13 @@ class IkiHeroSection extends React.PureComponent {
                 const paramIcon = iframeSrcUrl.searchParams.get('icon')
                     ? iframeSrcUrl.searchParams.get('icon')
                     : '';
-                console.log("ParamIconss", paramIcon)
-                const newIframeSrc = `${ikigaiOrigin}/widget/herosection?mode=${paramMode}&icon=${paramIcon}&title=${paramTitle}&description=${paramDescription}&tags=${paramTags}`;
+                const paramBgColor = iframeSrcUrl.searchParams.get('bgColor')
+                    ? iframeSrcUrl.searchParams.get('bgColor')
+                    : '';
+                const paramTextColor = iframeSrcUrl.searchParams.get('textColor')
+                    ? iframeSrcUrl.searchParams.get('textColor')
+                    : '';
+                const newIframeSrc = `${ikigaiOrigin}/widget/herosection?mode=${paramMode}&icon=${paramIcon}&title=${paramTitle}&description=${paramDescription}&tags=${paramTags}&bgColor=${paramBgColor}&textColor=${paramTextColor}`;
                 // console.log('iframe', newIframeSrcUrl, iframeHtml);
                 iframeSrc = newIframeSrc;
             } else {
