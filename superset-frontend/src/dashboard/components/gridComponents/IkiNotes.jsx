@@ -254,6 +254,8 @@ class IkiNotes extends React.PureComponent {
                             widgetUrlQuery.set('mode', "preview");
                             widgetUrlQuery.set('title', messageData.title);
                             widgetUrlQuery.set('items', messageData.items);
+                            widgetUrlQuery.set('bgColor', messageData.bgColor);
+                            widgetUrlQuery.set('textColor', messageData.textColor);
 
                             //icon
                             widgetUrl.search = widgetUrlQuery.toString();
@@ -401,7 +403,13 @@ class IkiNotes extends React.PureComponent {
                 const paramItems = iframeSrcUrl.searchParams.get('items')
                     ? iframeSrcUrl.searchParams.get('items')
                     : '';
-                const newIframeSrc = `${ikigaiOrigin}/widget/notes?mode=${paramMode}&title=${paramTitle}&items=${paramItems}`;
+                const paramBgColor = iframeSrcUrl.searchParams.get('bgColor')
+                    ? iframeSrcUrl.searchParams.get('bgColor')
+                    : '';
+                const paramTextColor = iframeSrcUrl.searchParams.get('textColor')
+                    ? iframeSrcUrl.searchParams.get('textColor')
+                    : '';
+                const newIframeSrc = `${ikigaiOrigin}/widget/notes?mode=${paramMode}&title=${paramTitle}&items=${paramItems}&bgColor=${paramBgColor}&textColor=${paramTextColor}`;
                 // console.log('iframe', newIframeSrcUrl, iframeHtml);
                 iframeSrc = newIframeSrc;
             } else {
