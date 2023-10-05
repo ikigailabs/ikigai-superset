@@ -56,6 +56,7 @@ import {
 } from 'src/dashboard/util/constants';
 import { refreshChart } from 'src/components/Chart/chartAction';
 // import { chart } from 'src/components/Chart/chartReducer';
+const { Buffer } = require('buffer');
 
 const propTypes = {
   id: PropTypes.string.isRequired,
@@ -262,10 +263,9 @@ class IkiRunPipeline extends React.PureComponent {
               );
               widgetUrlQuery.set('pipeline_log_type', messageData.logLevel);
               widgetUrlQuery.set('edit_variables', messageData.variable);
-              widgetUrlQuery.set(
-                'selected_charts',
-                window.btoa(JSON.stringify(messageData.selectedCharts)),
-              );
+              const jsonString = JSON.stringify(messageData.selectedCharts);
+              const base64String = Buffer.from(jsonString).toString('base64');
+              widgetUrlQuery.set('selected_charts', base64String);
               widgetUrl.search = widgetUrlQuery.toString();
               const tempIframe = `<iframe
                       id="ikirunpipeline-widget-${this.props.component.id}"
@@ -330,7 +330,6 @@ class IkiRunPipeline extends React.PureComponent {
       const tempChartName = chartElement.getAttribute('data-test-chart-name');
       chartsList.push({ id: tempChartID, name: tempChartName });
     });
-
     if (
       document.getElementById(
         `ikirunpipeline-widget-${this.props.component.id}`,
@@ -344,10 +343,11 @@ class IkiRunPipeline extends React.PureComponent {
     } else {
       widgetUrl = `${this.props.ikigaiOrigin}/widget/pipeline/run?mode=edit&v=1&run_flow_times=${timestamp}`;
     }
-    console.log('widgetUrl', widgetUrl);
     const widgetUrlQuery = new URLSearchParams(widgetUrl.search);
     widgetUrlQuery.set('mode', mode);
-    widgetUrlQuery.set('charts_list', window.btoa(JSON.stringify(chartsList)));
+    const jsonString2 = JSON.stringify(chartsList);
+    const base64String2 = Buffer.from(jsonString2).toString('base64');
+    widgetUrlQuery.set('charts_list', base64String2);
     widgetUrl.search = widgetUrlQuery.toString();
     const tempIframe = `<iframe
                       id="ikirunpipeline-widget-${this.props.component.id}"
@@ -482,10 +482,9 @@ class IkiRunPipeline extends React.PureComponent {
         const tempChartName = chartElement.getAttribute('data-test-chart-name');
         chartsList.push({ id: tempChartID, name: tempChartName });
       });
-
-      iframeSrc = `${iframeSrc}&charts_list=${window.btoa(
-        JSON.stringify(chartsList),
-      )}`;
+      const jsonString3 = JSON.stringify(chartsList);
+      const base64String3 = Buffer.from(jsonString3).toString('base64');
+      iframeSrc = `${iframeSrc}&charts_list=${base64String3}`;
 
       iframe = `<iframe
                     id="ikirunpipeline-widget-${this.props.component.id}"
