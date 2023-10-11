@@ -237,6 +237,14 @@ const DashboardBuilder: FC<DashboardBuilderProps> = () => {
     state => state.dashboardState.fullSizeChartId,
   );
 
+  const unsavedChanges = useSelector<RootState, boolean>(
+    state => state.dashboardState?.hasUnsavedChanges,
+  );
+
+  const ikigaiOrigin = useSelector<RootState, string>(
+    state => state.dashboardState?.ikigaiOrigin,
+  );
+
   const handleChangeTab = useCallback(
     ({ pathToTabIndex }: { pathToTabIndex: string[] }) => {
       dispatch(setDirectPathToChild(pathToTabIndex));
@@ -273,6 +281,10 @@ const DashboardBuilder: FC<DashboardBuilderProps> = () => {
     standaloneMode === DashboardStandaloneMode.HIDE_NAV_AND_TITLE ||
     isReport;
   const [barTopOffset, setBarTopOffset] = useState(0);
+
+  useEffect(() => {
+    parent.postMessage({unsavedChanges: unsavedChanges}, ikigaiOrigin);
+  }, [unsavedChanges])
 
   useEffect(() => {
     setBarTopOffset(headerRef.current?.getBoundingClientRect()?.height || 0);

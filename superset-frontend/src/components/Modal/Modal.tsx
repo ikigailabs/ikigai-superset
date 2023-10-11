@@ -57,6 +57,7 @@ export interface ModalProps {
   draggableConfig?: DraggableProps;
   destroyOnClose?: boolean;
   maskClosable?: boolean;
+  secondaryText?: string;
 }
 
 interface StyledModalProps {
@@ -244,6 +245,7 @@ const CustomModal = ({
   },
   draggableConfig,
   destroyOnClose,
+  secondaryText = "",
   ...rest
 }: ModalProps) => {
   const draggableRef = useRef<HTMLDivElement>(null);
@@ -252,7 +254,7 @@ const CustomModal = ({
   const modalFooter = isNil(footer)
     ? [
         <Button key="back" onClick={onHide} cta data-test="modal-cancel-button">
-          {t('Cancel')}
+          {secondaryText? t(secondaryText) : t('Cancel')}
         </Button>,
         <Button
           key="submit"
