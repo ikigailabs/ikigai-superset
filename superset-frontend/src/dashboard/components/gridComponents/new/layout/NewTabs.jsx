@@ -19,17 +19,18 @@
 import React from 'react';
 import { t } from '@superset-ui/core';
 
-import { IKI_RUN_PIPELINE_TYPE } from '../../../util/componentTypes';
-import { NEW_IKI_RUN_PIPELINE_ID } from '../../../util/constants';
-import DraggableNewComponent from './DraggableNewComponent';
+import { TABS_TYPE } from '../../../../util/componentTypes';
+import { NEW_TABS_ID } from '../../../../util/constants';
+import DraggableNewComponent from '../DraggableNewComponent';
 
-export default function DraggableNewDivider() {
+export default function DraggableNewTabs() {
   return (
     <DraggableNewComponent
-      id={NEW_IKI_RUN_PIPELINE_ID}
-      type={IKI_RUN_PIPELINE_TYPE}
-      label={t('Run Flow')}
-      className="fa fa-bolt"
+      id={NEW_TABS_ID}
+      type={TABS_TYPE}
+      label={t('Tabs')}
+      description={t('Separate dashboard content')}
+      className="fa fa-window-restore"
     />
   );
 }

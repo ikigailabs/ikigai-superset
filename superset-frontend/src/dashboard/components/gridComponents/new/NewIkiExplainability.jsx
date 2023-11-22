@@ -19,17 +19,19 @@
 import React from 'react';
 import { t } from '@superset-ui/core';
 
-import { DIVIDER_TYPE } from '../../../util/componentTypes';
-import { NEW_DIVIDER_ID } from '../../../util/constants';
+import { IKI_EXPLAINABILITY_TYPE } from '../../../util/componentTypes';
+import { NEW_IKI_EXPLAINABILITY_ID } from '../../../util/constants';
 import DraggableNewComponent from './DraggableNewComponent';
 
-export default function DraggableNewDivider() {
+export default function DraggableNewHeader() {
   return (
     <DraggableNewComponent
-      id={NEW_DIVIDER_ID}
-      type={DIVIDER_TYPE}
-      label={t('Divider')}
-      className="divider-placeholder"
+      id={NEW_IKI_EXPLAINABILITY_ID}
+      type={IKI_EXPLAINABILITY_TYPE}
+      label={t('Explainability')}
+      description={t('View insights into your forecast')}
+      className="fa fa-info-circle"
+      demandApp
     />
   );
 }

@@ -17,19 +17,29 @@
  * under the License.
  */
 import React from 'react';
-import { t } from '@superset-ui/core';
+import { shallow } from 'enzyme';
 
-import { IKI_EITL_ROW_TYPE } from '../../../util/componentTypes';
-import { NEW_IKI_EITL_ROW_ID } from '../../../util/constants';
-import DraggableNewComponent from './DraggableNewComponent';
+import DraggableNewComponent from 'src/dashboard/components/gridComponents/new/DraggableNewComponent';
+import NewColumn from 'src/dashboard/components/gridComponents/new/layout/NewColumn';
 
-export default function DraggableNewDivider() {
-  return (
-    <DraggableNewComponent
-      id={NEW_IKI_EITL_ROW_ID}
-      type={IKI_EITL_ROW_TYPE}
-      label={t('aiMatch Expert in the Loop (Rows)')}
-      className="fa fa-bars"
-    />
-  );
-}
+import { NEW_COLUMN_ID } from 'src/dashboard/util/constants';
+import { COLUMN_TYPE } from 'src/dashboard/util/componentTypes';
+
+describe('NewColumn', () => {
+  function setup() {
+    return shallow(<NewColumn />);
+  }
+
+  it('should render a DraggableNewComponent', () => {
+    const wrapper = setup();
+    expect(wrapper.find(DraggableNewComponent)).toExist();
+  });
+
+  it('should set appropriate type and id', () => {
+    const wrapper = setup();
+    expect(wrapper.find(DraggableNewComponent).props()).toMatchObject({
+      type: COLUMN_TYPE,
+      id: NEW_COLUMN_ID,
+    });
+  });
+});

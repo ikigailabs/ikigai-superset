@@ -19,17 +19,18 @@
 import React from 'react';
 import { t } from '@superset-ui/core';
 
-import { TABS_TYPE } from '../../../util/componentTypes';
-import { NEW_TABS_ID } from '../../../util/constants';
-import DraggableNewComponent from './DraggableNewComponent';
+import { ROW_TYPE } from '../../../../util/componentTypes';
+import { NEW_ROW_ID } from '../../../../util/constants';
+import DraggableNewComponent from '../DraggableNewComponent';
 
-export default function DraggableNewTabs() {
+export default function DraggableNewRow() {
   return (
     <DraggableNewComponent
-      id={NEW_TABS_ID}
-      type={TABS_TYPE}
-      label={t('Tabs')}
-      className="fa fa-window-restore"
+      id={NEW_ROW_ID}
+      type={ROW_TYPE}
+      label={t('Row')}
+      description={t('Horizontal content placeholder')}
+      className="fa fa-ellipsis-h"
     />
   );
 }

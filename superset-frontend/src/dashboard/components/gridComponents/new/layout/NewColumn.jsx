@@ -19,17 +19,18 @@
 import React from 'react';
 import { t } from '@superset-ui/core';
 
-import { IKI_TABLE_TYPE } from '../../../util/componentTypes';
-import { NEW_IKI_TABLE_ID } from '../../../util/constants';
-import DraggableNewComponent from './DraggableNewComponent';
+import { COLUMN_TYPE } from '../../../../util/componentTypes';
+import { NEW_COLUMN_ID } from '../../../../util/constants';
+import DraggableNewComponent from '../DraggableNewComponent';
 
-export default function DraggableNewDivider() {
+export default function DraggableNewColumn() {
   return (
     <DraggableNewComponent
-      id={NEW_IKI_TABLE_ID}
-      type={IKI_TABLE_TYPE}
-      label={t('Editable Dataset')}
-      className="fa fa-table"
+      id={NEW_COLUMN_ID}
+      type={COLUMN_TYPE}
+      label={t('Column')}
+      description={t('Vertical content placeholder')}
+      className="fa fa-ellipsis-v fa-5x"
     />
   );
 }
