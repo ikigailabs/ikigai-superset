@@ -67,6 +67,7 @@ const propTypes = {
   depth: PropTypes.number.isRequired,
   editMode: PropTypes.bool.isRequired,
   ikigaiOrigin: PropTypes.string,
+  dashboardLayout: PropTypes.object,
 
   // from redux
   logEvent: PropTypes.func.isRequired,
@@ -320,9 +321,33 @@ class IkiRunPipeline extends React.PureComponent {
   }
 
   refreshCharts(selectedCharts) {
-    selectedCharts.forEach(selectedChart => {
-      this.refreshChart(selectedChart.id, this.state.dashboardId, false);
-    });
+    const layoutElements = this.props.dashboardLayout?.present
+      ? this.props.dashboardLayout?.present
+      : null;
+    if (selectedCharts) {
+      selectedCharts.forEach(selectedChart => {
+        if (selectedChart?.refresh_id) {
+          this.refreshChart(
+            selectedChart?.refresh_id,
+            this.state.dashboardId,
+            false,
+          );
+        } else {
+          let findChartEle = null;
+          if (layoutElements) {
+            Object.keys(layoutElements).forEach(ele => {
+              if (layoutElements[ele].meta?.sliceName === selectedChart.name) {
+                findChartEle = ele;
+              }
+            });
+          }
+
+          if (findChartEle) {
+            this.refreshChart(findChartEle, this.state.dashboardId, false);
+          }
+        }
+      });
+    }
   }
 
   setEditor(editor) {
@@ -451,7 +476,6 @@ class IkiRunPipeline extends React.PureComponent {
     let iframe = '';
     let iframeSrc = '';
     if (ikigaiOrigin) {
-      console.log('markdownSource Run Pipeline', markdownSource);
       if (markdownSource) {
         // iframe = markdownSource;
         const iframeWrapper = document.createElement('div');
@@ -651,6 +675,7 @@ function mapStateToProps(state) {
   return {
     undoLength: state.dashboardLayout.past.length,
     redoLength: state.dashboardLayout.future.length,
+    dashboardLayout: state.dashboardLayout,
   };
 }
 
