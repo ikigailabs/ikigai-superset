@@ -1,28 +1,17 @@
-/**
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 import React from 'react';
 import PropTypes from 'prop-types';
+import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import cx from 'classnames';
 
 import { t, SafeMarkdown } from '@superset-ui/core';
-import { Logger, LOG_ACTIONS_RENDER_CHART } from 'src/logger/LogUtils';
+import {
+  Logger,
+  LOG_ACTIONS_RENDER_CHART,
+  LOG_ACTIONS_FORCE_REFRESH_CHART,
+} from 'src/logger/LogUtils';
 import { MarkdownEditor } from 'src/components/AsyncAceEditor';
 
 import DeleteComponentButton from 'src/dashboard/components/DeleteComponentButton';
@@ -37,6 +26,7 @@ import {
   GRID_MIN_ROW_UNITS,
   GRID_BASE_UNIT,
 } from 'src/dashboard/util/constants';
+import { refreshChart } from 'src/components/Chart/chartAction';
 
 const propTypes = {
   id: PropTypes.string.isRequired,
@@ -47,6 +37,7 @@ const propTypes = {
   depth: PropTypes.number.isRequired,
   editMode: PropTypes.bool.isRequired,
   ikigaiOrigin: PropTypes.string,
+  dashboardLayout: PropTypes.object,
 
   // from redux
   logEvent: PropTypes.func.isRequired,
@@ -84,6 +75,7 @@ class IkiDynamicMarkdown extends React.PureComponent {
       undoLength: props.undoLength,
       redoLength: props.redoLength,
       projectId: '',
+      dashboardId: null,
     };
     this.renderStartTime = Logger.getTimestamp();
 
@@ -96,6 +88,12 @@ class IkiDynamicMarkdown extends React.PureComponent {
   }
 
   componentDidMount() {
+    this.setState({
+      dashboardId: parseInt(
+        window.location.pathname.split('/dashboard/')[1].split('/')[0],
+        10,
+      ),
+    });
     this.props.logEvent(LOG_ACTIONS_RENDER_CHART, {
       viz_type: 'markdown',
       start_offset: this.renderStartTime,
@@ -166,19 +164,6 @@ class IkiDynamicMarkdown extends React.PureComponent {
       setTimeout(() => {
         this.handleChangeEditorMode('preview');
       }, 500);
-      // setTimeout(() => {
-      //   const iframe = document.getElementById(
-      //     `ikirunpipeline-widget-${this.props.component.id}`,
-      //   );
-      //   if (iframe && iframe !== undefined) {
-      //     iframe.contentWindow.postMessage(
-      //       JSON.stringify({
-      //         data: 'superset-to-widget/confirm-pipeline-selection',
-      //       }),
-      //       this.props.ikigaiOrigin,
-      //     );
-      //   }
-      // }, 500);
     }
   }
 
@@ -226,28 +211,70 @@ class IkiDynamicMarkdown extends React.PureComponent {
           if (
             messageObject.info === 'widget-to-superset/dynamic-markdown-setup'
           ) {
-            widgetUrlQuery = new URLSearchParams(widgetUrl);
-            widgetUrlQuery.set(
-              'mode',
-              this.state.editorMode ? 'edit' : 'preview',
-            );
-            widgetUrlQuery.set('parent', 'superset');
-            widgetUrlQuery.set('project_id', messageData.projectId);
-            widgetUrlQuery.set('component_id', messageData.componentId);
-            widgetUrl.search = widgetUrlQuery.toString();
-            const tempIframe = `<iframe
-                                id="ikiinteractiveforecast-widget-${this.props.component.id}"
-                                name="ikiinteractiveforecast"
-                                src="${widgetUrl}"
-                                title="Hero Section Component"
-                                className="ikirunpipeline-widget"
-                                style="min-height: 100%;"
-                            />`;
-            this.handleIkiRunPipelineChange(tempIframe, true);
+            if (messageData.scid === this.props.component.id) {
+              widgetUrlQuery = new URLSearchParams(widgetUrl);
+              widgetUrlQuery.set('mode', 'preview');
+              widgetUrlQuery.set('parent', 'superset');
+              widgetUrlQuery.set('project_id', messageData.projectId);
+              widgetUrlQuery.set('component_id', messageData.componentId);
+              widgetUrl.search = widgetUrlQuery.toString();
+              const tempIframe = `<iframe
+                                  id="ikiinteractiveforecast-widget-${this.props.component.id}"
+                                  name="ikiinteractiveforecast"
+                                  src="${widgetUrl}"
+                                  title="Hero Section Component"
+                                  style="min-height: 100%;"
+                              />`;
+              this.handleIkiRunPipelineChange(tempIframe, true);
+            }
+          } else if (
+            messageObject.info ===
+            'widget-to-superset/sending-charts-to-refresh'
+          ) {
+            const { matchedChartIds } = messageData;
+            this.refreshCharts(matchedChartIds);
           }
         }
       }
     });
+  }
+
+  refreshCharts(selectedCharts) {
+    let chartIds = [];
+    if (!Array.isArray(selectedCharts)) {
+      chartIds = selectedCharts.split();
+    } else {
+      chartIds = selectedCharts;
+    }
+    if (chartIds) {
+      const layoutElements = this.props.dashboardLayout?.present
+        ? this.props.dashboardLayout?.present
+        : null;
+      if (chartIds) {
+        chartIds.forEach(chartId => {
+          let findChartEle = null;
+          if (layoutElements) {
+            Object.keys(layoutElements).forEach(ele => {
+              const supChartId = layoutElements[ele].meta?.chartId;
+              if (supChartId && supChartId.toString() === chartId) {
+                findChartEle = supChartId;
+              }
+            });
+          }
+          if (findChartEle) {
+            this.refreshChart(findChartEle, this.state.dashboardId, false);
+          }
+        });
+      }
+    }
+  }
+
+  refreshChart(chartId, dashboardId, isCached) {
+    this.props.logEvent(LOG_ACTIONS_FORCE_REFRESH_CHART, {
+      slice_id: chartId,
+      is_cached: isCached,
+    });
+    return this.props.refreshChart(chartId, true, dashboardId);
   }
 
   handleIkiRunPipelineChange(nextValue, saveToDashboard) {
@@ -291,38 +318,17 @@ class IkiDynamicMarkdown extends React.PureComponent {
       ...this.state,
       editorMode: mode,
     };
-    // if (mode === 'preview') {
-    //   this.updateMarkdownContent();
-    //   nextState.hasError = false;
-    // }
 
     this.setState(nextState);
-
     let widgetUrl;
-
-    if (
-      document.getElementById(
-        `ikidynamicmarkdown-widget-${this.props.component.id}`,
-      )
-    ) {
-      widgetUrl = new URL(
-        document.getElementById(
-          `ikidynamicmarkdown-widget-${this.props.component.id}`,
-        ).src,
-      );
-    } else {
-      widgetUrl = `${this.props.ikigaiOrigin}/widget/pipeline/run?mode=edit&v=1&run_flow_times=${timestamp}`;
-    }
-
     const widgetUrlQuery = new URLSearchParams(widgetUrl.search);
-    widgetUrlQuery.set('mode', mode);
+    // widgetUrlQuery.set('mode', mode);
     widgetUrl.search = widgetUrlQuery.toString();
     const tempIframe = `<iframe
                       id="ikidynamicmarkdown-widget-${this.props.component.id}"
                       name="dynamic-markdown-${timestamp}"
                       src="${widgetUrl}"
                       title="Dynamic Markdown Component"
-                      className="ikirunpipeline-widget"
                       style="min-height: 100%;"
                     />`;
     this.handleIkiRunPipelineChange(tempIframe, true);
@@ -376,17 +382,17 @@ class IkiDynamicMarkdown extends React.PureComponent {
         iframeWrapper.innerHTML = markdownSource;
         const iframeHtml = iframeWrapper.firstChild;
         const iframeSrcUrl = new URL(iframeHtml.src);
-        iframeSrcUrl.searchParams.set('mode', editMode ? 'edit' : 'preview');
+        // iframeSrcUrl.searchParams.set('mode', editMode ? 'edit' : 'preview');
+        iframeSrcUrl.searchParams.set('scid', this.props.component.id);
         iframeSrc = ikigaiOrigin + iframeSrcUrl.pathname + iframeSrcUrl.search;
       } else {
-        iframeSrc = `${ikigaiOrigin}/widget/custom?mode=edit&parent=superset`;
+        iframeSrc = `${ikigaiOrigin}/widget/custom?mode=edit&parent=superset&scid=${this.props.component.id}`;
       }
       iframe = `<iframe
                   id="ikidynamicmarkdown-widget-${this.props.component.id}"
                   name="dynamic-markdown-${timestamp}"
                   src="${iframeSrc}"
                   title="Dynamic Markdown Component"
-                  className="ikitable-widget"
                   style="height:100%;"
                 />`;
     } else {
@@ -405,6 +411,8 @@ class IkiDynamicMarkdown extends React.PureComponent {
 
   render() {
     const { isFocused, editorMode } = this.state;
+    const isEditing = editorMode === 'edit';
+
     const {
       component,
       parentComponent,
@@ -424,70 +432,69 @@ class IkiDynamicMarkdown extends React.PureComponent {
         ? parentComponent.meta.width || GRID_MIN_COLUMN_COUNT
         : component.meta.width || GRID_MIN_COLUMN_COUNT;
 
-    const isEditing = editorMode === 'edit';
     return (
-      <div className="demand-app-wrap">
-        <DragDroppable
-          component={component}
-          parentComponent={parentComponent}
-          orientation={parentComponent.type === ROW_TYPE ? 'column' : 'row'}
-          index={index}
-          depth={depth}
-          onDrop={handleComponentDrop}
-          disableDragDrop={isFocused}
-          editMode={editMode}
-        >
-          {({ dropIndicatorProps, dragSourceRef }) => (
-            <WithPopoverMenu
-              onChangeFocus={this.handleChangeFocus}
-              menuItems={[
-                <MarkdownModeDropdown
-                  id={`${component.id}-mode`}
-                  value={this.state.editorMode}
-                  onChange={this.handleChangeEditorMode}
-                />,
-                <DeleteComponentButton onDelete={this.handleDeleteComponent} />,
-              ]}
-              editMode={editMode}
+      <DragDroppable
+        component={component}
+        parentComponent={parentComponent}
+        orientation={parentComponent.type === ROW_TYPE ? 'column' : 'row'}
+        index={index}
+        depth={depth}
+        onDrop={handleComponentDrop}
+        disableDragDrop={isFocused}
+        editMode={editMode}
+      >
+        {({ dropIndicatorProps, dragSourceRef }) => (
+          <WithPopoverMenu
+            onChangeFocus={this.handleChangeFocus}
+            menuItems={[
+              <MarkdownModeDropdown
+                id={`${component.id}-mode`}
+                value={this.state.editorMode}
+                onChange={this.handleChangeEditorMode}
+              />,
+              <DeleteComponentButton onDelete={this.handleDeleteComponent} />,
+            ]}
+            editMode={editMode}
+          >
+            <div
+              data-test="dashboard-markdown-editor"
+              className={cx(
+                this.state.markdownSource === undefined
+                  ? 'dashboard-component-ikirunpipeline'
+                  : 'dashboard-component',
+                isEditing && 'dashboard-component--editing',
+              )}
+              id={component.id}
             >
-              <div
-                data-test="dashboard-markdown-editor"
-                className={cx(
-                  'dynamic-markdown-component',
-                  isEditing && 'dashboard-component-ikitable--editing',
-                )}
+              <ResizableContainer
                 id={component.id}
+                adjustableWidth={parentComponent.type === ROW_TYPE}
+                adjustableHeight
+                widthStep={columnWidth}
+                widthMultiple={widthMultiple}
+                heightStep={GRID_BASE_UNIT}
+                heightMultiple={component.meta.height}
+                minWidthMultiple={GRID_MIN_COLUMN_COUNT}
+                minHeightMultiple={GRID_MIN_ROW_UNITS}
+                maxWidthMultiple={availableColumnCount + widthMultiple}
+                onResizeStart={this.handleResizeStart}
+                onResize={onResize}
+                onResizeStop={onResizeStop}
+                editMode={isFocused ? false : editMode}
               >
-                <ResizableContainer
-                  id={component.id}
-                  adjustableWidth={parentComponent.type === ROW_TYPE}
-                  adjustableHeight
-                  widthStep={columnWidth}
-                  widthMultiple={widthMultiple}
-                  heightStep={GRID_BASE_UNIT}
-                  heightMultiple={component.meta.height}
-                  minWidthMultiple={GRID_MIN_COLUMN_COUNT}
-                  minHeightMultiple={GRID_MIN_ROW_UNITS}
-                  maxWidthMultiple={availableColumnCount + widthMultiple}
-                  onResizeStart={this.handleResizeStart}
-                  onResize={onResize}
-                  onResizeStop={onResizeStop}
-                  editMode={isFocused ? false : editMode}
+                <div
+                  ref={dragSourceRef}
+                  className="dashboard-component-inner"
+                  data-test="dashboard-component-chart-holder"
                 >
-                  <div
-                    ref={dragSourceRef}
-                    className="dashboard-component-inner"
-                    data-test="dashboard-component-chart-holder"
-                  >
-                    {this.renderPreviewMode()}
-                  </div>
-                </ResizableContainer>
-              </div>
-              {dropIndicatorProps && <div {...dropIndicatorProps} />}
-            </WithPopoverMenu>
-          )}
-        </DragDroppable>
-      </div>
+                  {this.renderPreviewMode()}
+                </div>
+              </ResizableContainer>
+            </div>
+            {dropIndicatorProps && <div {...dropIndicatorProps} />}
+          </WithPopoverMenu>
+        )}
+      </DragDroppable>
     );
   }
 }
@@ -499,6 +506,15 @@ function mapStateToProps(state) {
   return {
     undoLength: state.dashboardLayout.past.length,
     redoLength: state.dashboardLayout.future.length,
+    dashboardLayout: state.dashboardLayout,
   };
 }
-export default connect(mapStateToProps)(IkiDynamicMarkdown);
+function mapDispatchToProps(dispatch) {
+  return bindActionCreators(
+    {
+      refreshChart,
+    },
+    dispatch,
+  );
+}
+export default connect(mapStateToProps, mapDispatchToProps)(IkiDynamicMarkdown);
