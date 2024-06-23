@@ -144,6 +144,13 @@ class OwnersNotFoundValidationError(ValidationError):
         super().__init__([_("Owners are invalid")], field_name="owners")
 
 
+class DatasetDataAccessIsNotAllowed(ValidationError):
+    status = 422
+
+    def __init__(self, message: str) -> None:
+        super().__init__([_(message)], field_name="sql")
+
+
 class DatasetNotFoundError(CommandException):
     status = 404
     message = _("Dataset does not exist")
@@ -162,11 +169,7 @@ class DatasetUpdateFailedError(UpdateFailedError):
 
 
 class DatasetDeleteFailedError(DeleteFailedError):
-    message = _("Dataset could not be deleted.")
-
-
-class DatasetBulkDeleteFailedError(DeleteFailedError):
-    message = _("Dataset(s) could not be bulk deleted.")
+    message = _("Datasets could not be deleted.")
 
 
 class DatasetRefreshFailedError(UpdateFailedError):
@@ -187,3 +190,16 @@ class DatasetImportError(ImportFailedError):
 
 class DatasetAccessDeniedError(ForbiddenError):
     message = _("You don't have access to this dataset.")
+
+
+class DatasetDuplicateFailedError(CreateFailedError):
+    message = _("Dataset could not be duplicated.")
+
+
+class DatasetForbiddenDataURI(ImportFailedError):
+    message = _("Data URI is not allowed.")
+
+
+class WarmUpCacheTableNotFoundError(CommandException):
+    status = 404
+    message = _("The provided table was not found in the provided database")

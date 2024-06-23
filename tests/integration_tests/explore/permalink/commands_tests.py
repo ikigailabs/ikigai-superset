@@ -15,7 +15,6 @@
 # specific language governing permissions and limitations
 # under the License.
 
-import json
 from unittest.mock import patch
 
 import pytest
@@ -109,7 +108,7 @@ class TestCreatePermalinkDataCommand(SupersetTestCase):
 
         datasource = f"{dataset.id}__{DatasourceType.TABLE}"
         command = CreateExplorePermalinkCommand(
-            mock_g.user, {"formData": {"datasource": datasource, "slice_id": slice.id}}
+            {"formData": {"datasource": datasource, "slice_id": slice.id}}
         )
 
         assert isinstance(command.run(), str)
@@ -130,10 +129,10 @@ class TestCreatePermalinkDataCommand(SupersetTestCase):
         datasource = f"{dataset.id}__{DatasourceType.TABLE}"
 
         key = CreateExplorePermalinkCommand(
-            mock_g.user, {"formData": {"datasource": datasource, "slice_id": slice.id}}
+            {"formData": {"datasource": datasource, "slice_id": slice.id}}
         ).run()
 
-        get_command = GetExplorePermalinkCommand(mock_g.user, key)
+        get_command = GetExplorePermalinkCommand(key)
         cache_data = get_command.run()
 
         assert cache_data.get("datasource") == datasource
@@ -166,7 +165,7 @@ class TestCreatePermalinkDataCommand(SupersetTestCase):
                 "formData": {"datasource": datasource_string, "slice_id": slice.id}
             },
         }
-        get_command = GetExplorePermalinkCommand(mock_g.user, "thisisallmocked")
+        get_command = GetExplorePermalinkCommand("thisisallmocked")
         cache_data = get_command.run()
 
         assert cache_data.get("datasource") == datasource_string

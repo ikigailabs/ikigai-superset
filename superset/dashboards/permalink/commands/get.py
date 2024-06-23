@@ -17,31 +17,37 @@
 import logging
 from typing import Optional
 
-from flask_appbuilder.security.sqla.models import User
 from sqlalchemy.exc import SQLAlchemyError
 
+from superset.daos.dashboard import DashboardDAO
 from superset.dashboards.commands.exceptions import DashboardNotFoundError
-from superset.dashboards.dao import DashboardDAO
 from superset.dashboards.permalink.commands.base import BaseDashboardPermalinkCommand
 from superset.dashboards.permalink.exceptions import DashboardPermalinkGetFailedError
 from superset.dashboards.permalink.types import DashboardPermalinkValue
 from superset.key_value.commands.get import GetKeyValueCommand
-from superset.key_value.exceptions import KeyValueGetFailedError, KeyValueParseKeyError
+from superset.key_value.exceptions import (
+    KeyValueCodecDecodeException,
+    KeyValueGetFailedError,
+    KeyValueParseKeyError,
+)
 from superset.key_value.utils import decode_permalink_id
 
 logger = logging.getLogger(__name__)
 
 
 class GetDashboardPermalinkCommand(BaseDashboardPermalinkCommand):
-    def __init__(self, actor: User, key: str):
-        self.actor = actor
+    def __init__(self, key: str):
         self.key = key
 
     def run(self) -> Optional[DashboardPermalinkValue]:
         self.validate()
         try:
             key = decode_permalink_id(self.key, salt=self.salt)
-            command = GetKeyValueCommand(resource=self.resource, key=key)
+            command = GetKeyValueCommand(
+                resource=self.resource,
+                key=key,
+                codec=self.codec,
+            )
             value: Optional[DashboardPermalinkValue] = command.run()
             if value:
                 DashboardDAO.get_by_id_or_slug(value["dashboardId"])
@@ -49,6 +55,7 @@ class GetDashboardPermalinkCommand(BaseDashboardPermalinkCommand):
             return None
         except (
             DashboardNotFoundError,
+            KeyValueCodecDecodeException,
             KeyValueGetFailedError,
             KeyValueParseKeyError,
         ) as ex:

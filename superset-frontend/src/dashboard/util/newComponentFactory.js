@@ -59,7 +59,7 @@ const typeToDefaultMetaData = {
   },
   [DIVIDER_TYPE]: null,
   [HEADER_TYPE]: {
-    text: 'New header',
+    text: t('New header'),
     headerSize: MEDIUM_HEADER,
     background: BACKGROUND_TRANSPARENT,
   },

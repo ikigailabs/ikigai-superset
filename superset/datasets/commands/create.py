@@ -15,31 +15,31 @@
 # specific language governing permissions and limitations
 # under the License.
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from flask_appbuilder.models.sqla import Model
-from flask_appbuilder.security.sqla.models import User
 from marshmallow import ValidationError
 from sqlalchemy.exc import SQLAlchemyError
 
 from superset.commands.base import BaseCommand, CreateMixin
-from superset.dao.exceptions import DAOCreateFailedError
+from superset.daos.dataset import DatasetDAO
+from superset.daos.exceptions import DAOCreateFailedError
 from superset.datasets.commands.exceptions import (
     DatabaseNotFoundValidationError,
     DatasetCreateFailedError,
+    DatasetDataAccessIsNotAllowed,
     DatasetExistsValidationError,
     DatasetInvalidError,
     TableNotFoundValidationError,
 )
-from superset.datasets.dao import DatasetDAO
+from superset.exceptions import SupersetSecurityException
 from superset.extensions import db, security_manager
 
 logger = logging.getLogger(__name__)
 
 
 class CreateDatasetCommand(CreateMixin, BaseCommand):
-    def __init__(self, user: User, data: Dict[str, Any]):
-        self._actor = user
+    def __init__(self, data: dict[str, Any]):
         self._properties = data.copy()
 
     def run(self) -> Model:
@@ -47,17 +47,9 @@ class CreateDatasetCommand(CreateMixin, BaseCommand):
         try:
             # Creates SqlaTable (Dataset)
             dataset = DatasetDAO.create(self._properties, commit=False)
-            # Updates columns and metrics from the dataset
+
+            # Updates columns and metrics from the datase
             dataset.fetch_metadata(commit=False)
-            # Add datasource access permission
-            security_manager.add_permission_view_menu(
-                "datasource_access", dataset.get_perm()
-            )
-            # Add schema access permission if exists
-            if dataset.schema:
-                security_manager.add_permission_view_menu(
-                    "schema_access", dataset.schema_perm
-                )
             db.session.commit()
         except (SQLAlchemyError, DAOCreateFailedError) as ex:
             logger.warning(ex, exc_info=True)
@@ -66,11 +58,12 @@ class CreateDatasetCommand(CreateMixin, BaseCommand):
         return dataset
 
     def validate(self) -> None:
-        exceptions: List[ValidationError] = []
+        exceptions: list[ValidationError] = []
         database_id = self._properties["database"]
         table_name = self._properties["table_name"]
         schema = self._properties.get("schema", None)
-        owner_ids: Optional[List[int]] = self._properties.get("owners")
+        sql = self._properties.get("sql", None)
+        owner_ids: Optional[list[int]] = self._properties.get("owners")
 
         # Validate uniqueness
         if not DatasetDAO.validate_uniqueness(database_id, schema, table_name):
@@ -82,18 +75,28 @@ class CreateDatasetCommand(CreateMixin, BaseCommand):
             exceptions.append(DatabaseNotFoundValidationError())
         self._properties["database"] = database
 
-        # Validate table exists on dataset
-        if database and not DatasetDAO.validate_table_exists(
-            database, table_name, schema
+        # Validate table exists on dataset if sql is not provided
+        # This should be validated when the dataset is physical
+        if (
+            database
+            and not sql
+            and not DatasetDAO.validate_table_exists(database, table_name, schema)
         ):
             exceptions.append(TableNotFoundValidationError(table_name))
 
+        if sql:
+            try:
+                security_manager.raise_for_access(
+                    database=database,
+                    sql=sql,
+                    schema=schema,
+                )
+            except SupersetSecurityException as ex:
+                exceptions.append(DatasetDataAccessIsNotAllowed(ex.error.message))
         try:
-            owners = self.populate_owners(self._actor, owner_ids)
+            owners = self.populate_owners(owner_ids)
             self._properties["owners"] = owners
         except ValidationError as ex:
             exceptions.append(ex)
         if exceptions:
-            exception = DatasetInvalidError()
-            exception.add_list(exceptions)
-            raise exception
+            raise DatasetInvalidError(exceptions=exceptions)

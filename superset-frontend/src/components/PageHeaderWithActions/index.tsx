@@ -17,8 +17,10 @@
  * under the License.
  */
 import React, { ReactNode, ReactElement } from 'react';
-import { css, SupersetTheme } from '@superset-ui/core';
-import { AntdDropdownProps } from 'src/components';
+import { css, SupersetTheme, t, useTheme } from '@superset-ui/core';
+// eslint-disable-next-line import/no-unresolved
+import { AntdDropdown, AntdDropdownProps } from 'src/components';
+import { TooltipPlacement } from 'src/components/Tooltip';
 import {
   // DynamicEditableTitle,
   DynamicEditableTitleProps,
@@ -98,7 +100,7 @@ const headerStyles = (theme: SupersetTheme) => css`
   & .fave-unfave-icon {
     padding: 0 ${theme.gridUnit}px;
 
-    &:first-child {
+    &:first-of-type {
       padding-left: 0;
     }
   }
@@ -118,6 +120,10 @@ export type PageHeaderWithActionsProps = {
   rightPanelAdditionalItems: ReactNode;
   additionalActionsMenu: ReactElement;
   menuDropdownProps: Omit<AntdDropdownProps, 'overlay'>;
+  tooltipProps?: {
+    text?: string;
+    placement?: TooltipPlacement;
+  };
 };
 
 export const PageHeaderWithActions = ({
@@ -142,6 +148,47 @@ export const PageHeaderWithActions = ({
           )}
           {showFaveStar && <FaveStar {...faveStarProps} />}
           {titlePanelAdditionalItems}
+  additionalActionsMenu,
+  menuDropdownProps,
+  tooltipProps,
+}: PageHeaderWithActionsProps) => {
+  const theme = useTheme();
+  return (
+    <div css={headerStyles} className="header-with-actions">
+      <div className="title-panel">
+        <DynamicEditableTitle {...editableTitleProps} />
+        {showTitlePanelItems && (
+          <div css={buttonsStyles}>
+            {certificatiedBadgeProps?.certifiedBy && (
+              <CertifiedBadge {...certificatiedBadgeProps} />
+            )}
+            {showFaveStar && <FaveStar {...faveStarProps} />}
+            {titlePanelAdditionalItems}
+          </div>
+        )}
+      </div>
+      <div className="right-button-panel">
+        {rightPanelAdditionalItems}
+        <div css={additionalActionsContainerStyles}>
+          <AntdDropdown
+            trigger={['click']}
+            overlay={additionalActionsMenu}
+            {...menuDropdownProps}
+          >
+            <Button
+              css={menuTriggerStyles}
+              buttonStyle="tertiary"
+              aria-label={t('Menu actions trigger')}
+              tooltip={tooltipProps?.text}
+              placement={tooltipProps?.placement}
+              data-test="actions-trigger"
+            >
+              <Icons.MoreHoriz
+                iconColor={theme.colors.primary.dark2}
+                iconSize="l"
+              />
+            </Button>
+          </AntdDropdown>
         </div>
           ) */}
     </div>

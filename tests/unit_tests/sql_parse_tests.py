@@ -16,8 +16,7 @@
 # under the License.
 # pylint: disable=invalid-name, redefined-outer-name, unused-argument, protected-access, too-many-lines
 
-import unittest
-from typing import Optional, Set
+from typing import Optional
 
 import pytest
 import sqlparse
@@ -40,11 +39,11 @@ from superset.sql_parse import (
 )
 
 
-def extract_tables(query: str) -> Set[Table]:
+def extract_tables(query: str, engine: Optional[str] = None) -> set[Table]:
     """
     Helper function to extract tables referenced in a query.
     """
-    return ParsedQuery(query).tables
+    return ParsedQuery(query, engine=engine).tables
 
 
 def test_table() -> None:
@@ -96,8 +95,13 @@ def test_extract_tables() -> None:
         Table("left_table")
     }
 
-    # reverse select
-    assert extract_tables("FROM t1 SELECT field") == {Table("t1")}
+    assert extract_tables(
+        "SELECT FROM (SELECT FROM forbidden_table) AS forbidden_table;"
+    ) == {Table("forbidden_table")}
+
+    assert extract_tables(
+        "select * from (select * from forbidden_table) forbidden_table"
+    ) == {Table("forbidden_table")}
 
 
 def test_extract_tables_subselect() -> None:
@@ -263,18 +267,16 @@ def test_extract_tables_illdefined() -> None:
     assert extract_tables("SELECT * FROM schemaname.") == set()
     assert extract_tables("SELECT * FROM catalogname.schemaname.") == set()
     assert extract_tables("SELECT * FROM catalogname..") == set()
-    assert extract_tables("SELECT * FROM catalogname..tbname") == set()
+    assert extract_tables("SELECT * FROM catalogname..tbname") == {
+        Table(table="tbname", schema=None, catalog="catalogname")
+    }
 
 
-@unittest.skip("Requires sqlparse>=3.1")
 def test_extract_tables_show_tables_from() -> None:
     """
     Test ``SHOW TABLES FROM``.
-
-    This is currently broken in the pinned version of sqlparse, and fixed in
-    ``sqlparse>=3.1``. However, ``sqlparse==3.1`` breaks some sql formatting.
     """
-    assert extract_tables("SHOW TABLES FROM s1 like '%order%'") == set()
+    assert extract_tables("SHOW TABLES FROM s1 like '%order%'", "mysql") == set()
 
 
 def test_extract_tables_show_columns_from() -> None:
@@ -315,7 +317,7 @@ WHERE regionkey IN (SELECT regionkey FROM t2)
             """
 SELECT name
 FROM t1
-WHERE regionkey EXISTS (SELECT regionkey FROM t2)
+WHERE EXISTS (SELECT 1 FROM t2 WHERE t1.regionkey = t2.regionkey);
 """
         )
         == {Table("t1"), Table("t2")}
@@ -530,6 +532,18 @@ select * from (select key from q1) a
         == {Table("src")}
     )
 
+    # weird query with circular dependency
+    assert (
+        extract_tables(
+            """
+with src as ( select key from q2 where key = '5'),
+q2 as ( select key from src where key = '5')
+select * from (select key from src) a
+"""
+        )
+        == set()
+    )
+
 
 def test_extract_tables_multistatement() -> None:
     """
@@ -669,7 +683,8 @@ def test_extract_tables_nested_select() -> None:
 select (extractvalue(1,concat(0x7e,(select GROUP_CONCAT(TABLE_NAME)
 from INFORMATION_SCHEMA.COLUMNS
 WHERE TABLE_SCHEMA like "%bi%"),0x7e)));
-"""
+""",
+            "mysql",
         )
         == {Table("COLUMNS", "INFORMATION_SCHEMA")}
     )
@@ -679,8 +694,9 @@ WHERE TABLE_SCHEMA like "%bi%"),0x7e)));
             """
 select (extractvalue(1,concat(0x7e,(select GROUP_CONCAT(COLUMN_NAME)
 from INFORMATION_SCHEMA.COLUMNS
-WHERE TABLE_NAME="bi_achivement_daily"),0x7e)));
-"""
+WHERE TABLE_NAME="bi_achievement_daily"),0x7e)));
+""",
+            "mysql",
         )
         == {Table("COLUMNS", "INFORMATION_SCHEMA")}
     )
@@ -1012,20 +1028,123 @@ FROM foo f"""
     assert sql.is_select()
 
 
+def test_cte_is_select_lowercase() -> None:
+    """
+    Some CTEs with lowercase select are not correctly identified as SELECTS.
+    """
+    sql = ParsedQuery(
+        """WITH foo AS(
+select
+  FLOOR(__time TO WEEK) AS "week",
+  name,
+  COUNT(DISTINCT user_id) AS "unique_users"
+FROM "druid"."my_table"
+GROUP BY 1,2
+)
+select
+  f.week,
+  f.name,
+  f.unique_users
+FROM foo f"""
+    )
+    assert sql.is_select()
+
+
+def test_cte_insert_is_not_select() -> None:
+    """
+    Some CTEs with lowercase select are not correctly identified as SELECTS.
+    """
+    sql = ParsedQuery(
+        """WITH foo AS(
+        INSERT INTO foo (id) VALUES (1) RETURNING 1
+        ) select * FROM foo f"""
+    )
+    assert sql.is_select() is False
+
+
+def test_cte_delete_is_not_select() -> None:
+    """
+    Some CTEs with lowercase select are not correctly identified as SELECTS.
+    """
+    sql = ParsedQuery(
+        """WITH foo AS(
+        DELETE FROM foo RETURNING *
+        ) select * FROM foo f"""
+    )
+    assert sql.is_select() is False
+
+
+def test_cte_is_not_select_lowercase() -> None:
+    """
+    Some CTEs with lowercase select are not correctly identified as SELECTS.
+    """
+    sql = ParsedQuery(
+        """WITH foo AS(
+        insert into foo (id) values (1) RETURNING 1
+        ) select * FROM foo f"""
+    )
+    assert sql.is_select() is False
+
+
+def test_cte_with_multiple_selects() -> None:
+    sql = ParsedQuery(
+        "WITH a AS ( select * from foo1 ), b as (select * from foo2) SELECT * FROM a;"
+    )
+    assert sql.is_select()
+
+
+def test_cte_with_multiple_with_non_select() -> None:
+    sql = ParsedQuery(
+        """WITH a AS (
+        select * from foo1
+        ), b as (
+        update foo2 set id=2
+        ) SELECT * FROM a"""
+    )
+    assert sql.is_select() is False
+    sql = ParsedQuery(
+        """WITH a AS (
+         update foo2 set name=2
+         ),
+        b as (
+        select * from foo1
+        ) SELECT * FROM a"""
+    )
+    assert sql.is_select() is False
+    sql = ParsedQuery(
+        """WITH a AS (
+         update foo2 set name=2
+         ),
+        b as (
+        update foo1 set name=2
+        ) SELECT * FROM a"""
+    )
+    assert sql.is_select() is False
+    sql = ParsedQuery(
+        """WITH a AS (
+        INSERT INTO foo (id) VALUES (1)
+        ),
+        b as (
+        select 1
+        ) SELECT * FROM a"""
+    )
+    assert sql.is_select() is False
+
+
 def test_unknown_select() -> None:
     """
     Test that `is_select` works when sqlparse fails to identify the type.
     """
     sql = "WITH foo AS(SELECT 1) SELECT 1"
-    assert sqlparse.parse(sql)[0].get_type() == "UNKNOWN"
+    assert sqlparse.parse(sql)[0].get_type() == "SELECT"
     assert ParsedQuery(sql).is_select()
 
     sql = "WITH foo AS(SELECT 1) INSERT INTO my_table (a) VALUES (1)"
-    assert sqlparse.parse(sql)[0].get_type() == "UNKNOWN"
+    assert sqlparse.parse(sql)[0].get_type() == "INSERT"
     assert not ParsedQuery(sql).is_select()
 
     sql = "WITH foo AS(SELECT 1) DELETE FROM my_table"
-    assert sqlparse.parse(sql)[0].get_type() == "UNKNOWN"
+    assert sqlparse.parse(sql)[0].get_type() == "DELETE"
     assert not ParsedQuery(sql).is_select()
 
 
@@ -1108,15 +1227,6 @@ SELECT * FROM birth_names LIMIT 1
 def test_sqlparse_formatting():
     """
     Test that ``from_unixtime`` is formatted correctly.
-
-    ``sqlparse==0.3.1`` has a bug and removes space between ``from`` and
-    ``from_unixtime``, resulting in::
-
-        SELECT extract(HOUR
-        fromfrom_unixtime(hour_ts)
-        AT TIME ZONE 'America/Los_Angeles')
-        from table
-
     """
     assert sqlparse.format(
         "SELECT extract(HOUR from from_unixtime(hour_ts) "
@@ -1208,6 +1318,22 @@ def test_sqlparse_issue_652():
         ("extract(HOUR from from_unixtime(hour_ts)", False),
         ("(SELECT * FROM table)", True),
         ("(SELECT COUNT(DISTINCT name) from birth_names)", True),
+        (
+            "(SELECT table_name FROM information_schema.tables WHERE table_name LIKE '%user%' LIMIT 1)",
+            True,
+        ),
+        (
+            "(SELECT table_name FROM /**/ information_schema.tables WHERE table_name LIKE '%user%' LIMIT 1)",
+            True,
+        ),
+        (
+            "SELECT FROM (SELECT FROM forbidden_table) AS forbidden_table;",
+            True,
+        ),
+        (
+            "SELECT * FROM (SELECT * FROM forbidden_table) forbidden_table",
+            True,
+        ),
     ],
 )
 def test_has_table_query(sql: str, expected: bool) -> None:
@@ -1409,7 +1535,6 @@ def test_insert_rls(
         candidate: Token,
         database_id: int,
         default_schema: str,
-        username: Optional[str] = None,
     ) -> Optional[TokenList]:
         """
         Return the RLS ``condition`` if ``candidate`` matches ``table``.
@@ -1446,7 +1571,7 @@ def test_add_table_name(rls: str, table: str, expected: str) -> None:
     assert str(condition) == expected
 
 
-def test_get_rls_for_table(mocker: MockerFixture, app_context: None) -> None:
+def test_get_rls_for_table(mocker: MockerFixture) -> None:
     """
     Tests for ``get_rls_for_table``.
     """
@@ -1511,12 +1636,33 @@ def test_extract_table_references(mocker: MockerFixture) -> None:
     assert extract_table_references(
         sql,
         "trino",
-    ) == {Table(table="other_table", schema=None, catalog=None)}
+    ) == {
+        Table(table="table", schema=None, catalog=None),
+        Table(table="other_table", schema=None, catalog=None),
+    }
     logger.warning.assert_called_once()
 
     logger = mocker.patch("superset.migrations.shared.utils.logger")
     sql = "SELECT * FROM table UNION ALL SELECT * FROM other_table"
     assert extract_table_references(sql, "trino", show_warning=False) == {
-        Table(table="other_table", schema=None, catalog=None)
+        Table(table="table", schema=None, catalog=None),
+        Table(table="other_table", schema=None, catalog=None),
     }
     logger.warning.assert_not_called()
+
+
+def test_is_select() -> None:
+    """
+    Test `is_select`.
+    """
+    assert not ParsedQuery("SELECT 1; DROP DATABASE superset").is_select()
+    assert ParsedQuery(
+        "with base as(select id from table1 union all select id from table2) select * from base"
+    ).is_select()
+    assert ParsedQuery(
+        """
+WITH t AS (
+    SELECT 1 UNION ALL SELECT 2
+)
+SELECT * FROM t"""
+    ).is_select()

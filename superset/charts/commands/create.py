@@ -16,36 +16,37 @@
 # under the License.
 import logging
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
+from flask import g
 from flask_appbuilder.models.sqla import Model
-from flask_appbuilder.security.sqla.models import User
 from marshmallow import ValidationError
 
+from superset import security_manager
 from superset.charts.commands.exceptions import (
     ChartCreateFailedError,
     ChartInvalidError,
+    DashboardsForbiddenError,
     DashboardsNotFoundValidationError,
 )
-from superset.charts.dao import ChartDAO
 from superset.commands.base import BaseCommand, CreateMixin
 from superset.commands.utils import get_datasource_by_id
-from superset.dao.exceptions import DAOCreateFailedError
-from superset.dashboards.dao import DashboardDAO
+from superset.daos.chart import ChartDAO
+from superset.daos.dashboard import DashboardDAO
+from superset.daos.exceptions import DAOCreateFailedError
 
 logger = logging.getLogger(__name__)
 
 
 class CreateChartCommand(CreateMixin, BaseCommand):
-    def __init__(self, user: User, data: Dict[str, Any]):
-        self._actor = user
+    def __init__(self, data: dict[str, Any]):
         self._properties = data.copy()
 
     def run(self) -> Model:
         self.validate()
         try:
             self._properties["last_saved_at"] = datetime.now()
-            self._properties["last_saved_by"] = self._actor
+            self._properties["last_saved_by"] = g.user
             chart = ChartDAO.create(self._properties)
         except DAOCreateFailedError as ex:
             logger.exception(ex.exception)
@@ -57,7 +58,7 @@ class CreateChartCommand(CreateMixin, BaseCommand):
         datasource_type = self._properties["datasource_type"]
         datasource_id = self._properties["datasource_id"]
         dashboard_ids = self._properties.get("dashboards", [])
-        owner_ids: Optional[List[int]] = self._properties.get("owners")
+        owner_ids: Optional[list[int]] = self._properties.get("owners")
 
         # Validate/Populate datasource
         try:
@@ -70,14 +71,15 @@ class CreateChartCommand(CreateMixin, BaseCommand):
         dashboards = DashboardDAO.find_by_ids(dashboard_ids)
         if len(dashboards) != len(dashboard_ids):
             exceptions.append(DashboardsNotFoundValidationError())
+        for dash in dashboards:
+            if not security_manager.is_owner(dash):
+                raise DashboardsForbiddenError()
         self._properties["dashboards"] = dashboards
 
         try:
-            owners = self.populate_owners(self._actor, owner_ids)
+            owners = self.populate_owners(owner_ids)
             self._properties["owners"] = owners
         except ValidationError as ex:
             exceptions.append(ex)
         if exceptions:
-            exception = ChartInvalidError()
-            exception.add_list(exceptions)
-            raise exception
+            raise ChartInvalidError(exceptions=exceptions)

@@ -55,15 +55,14 @@ def test_execute_sql_statement(mocker: MockerFixture, app: None) -> None:
     )
 
     database.apply_limit_to_sql.assert_called_with("SELECT 42 AS answer", 2, force=True)
-    db_engine_spec.execute.assert_called_with(
-        cursor, "SELECT 42 AS answer LIMIT 2", async_=True
+    db_engine_spec.execute_with_cursor.assert_called_with(
+        cursor, "SELECT 42 AS answer LIMIT 2", query, session
     )
     SupersetResultSet.assert_called_with([(42,)], cursor.description, db_engine_spec)
 
 
 def test_execute_sql_statement_with_rls(
     mocker: MockerFixture,
-    app_context: None,
 ) -> None:
     """
     Test for `execute_sql_statement` when an RLS rule is in place.
@@ -107,10 +106,8 @@ def test_execute_sql_statement_with_rls(
         101,
         force=True,
     )
-    db_engine_spec.execute.assert_called_with(
-        cursor,
-        "SELECT * FROM sales WHERE organization_id=42 LIMIT 101",
-        async_=True,
+    db_engine_spec.execute_with_cursor.assert_called_with(
+        cursor, "SELECT * FROM sales WHERE organization_id=42 LIMIT 101", query, session
     )
     SupersetResultSet.assert_called_with([(42,)], cursor.description, db_engine_spec)
 
@@ -118,7 +115,6 @@ def test_execute_sql_statement_with_rls(
 def test_sql_lab_insert_rls(
     mocker: MockerFixture,
     session: Session,
-    app_context: None,
 ) -> None:
     """
     Integration test for `insert_rls`.
@@ -186,6 +182,7 @@ def test_sql_lab_insert_rls(
 
     # now with RLS
     rls = RowLevelSecurityFilter(
+        name="sqllab_rls1",
         filter_type=RowLevelSecurityFilterType.REGULAR,
         tables=[SqlaTable(database_id=1, schema=None, table_name="t")],
         roles=[admin.roles[0]],

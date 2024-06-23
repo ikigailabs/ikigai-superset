@@ -16,17 +16,18 @@
 # under the License.
 from __future__ import annotations
 
-import pickle
+import json
 from typing import TYPE_CHECKING
-from uuid import UUID
 
 from flask.ctx import AppContext
 from flask_appbuilder.security.sqla.models import User
 
 from superset.extensions import db
+from superset.utils.core import override_user
 from tests.integration_tests.key_value.commands.fixtures import (
     admin,
     ID_KEY,
+    JSON_CODEC,
     key_value_entry,
     RESOURCE,
     UUID_KEY,
@@ -47,16 +48,17 @@ def test_update_id_entry(
     from superset.key_value.commands.update import UpdateKeyValueCommand
     from superset.key_value.models import KeyValueEntry
 
-    key = UpdateKeyValueCommand(
-        actor=admin,
-        resource=RESOURCE,
-        key=ID_KEY,
-        value=NEW_VALUE,
-    ).run()
+    with override_user(admin):
+        key = UpdateKeyValueCommand(
+            resource=RESOURCE,
+            key=ID_KEY,
+            value=NEW_VALUE,
+            codec=JSON_CODEC,
+        ).run()
     assert key is not None
     assert key.id == ID_KEY
     entry = db.session.query(KeyValueEntry).filter_by(id=ID_KEY).autoflush(False).one()
-    assert pickle.loads(entry.value) == NEW_VALUE
+    assert json.loads(entry.value) == NEW_VALUE
     assert entry.changed_by_fk == admin.id
 
 
@@ -68,28 +70,30 @@ def test_update_uuid_entry(
     from superset.key_value.commands.update import UpdateKeyValueCommand
     from superset.key_value.models import KeyValueEntry
 
-    key = UpdateKeyValueCommand(
-        actor=admin,
-        resource=RESOURCE,
-        key=UUID_KEY,
-        value=NEW_VALUE,
-    ).run()
+    with override_user(admin):
+        key = UpdateKeyValueCommand(
+            resource=RESOURCE,
+            key=UUID_KEY,
+            value=NEW_VALUE,
+            codec=JSON_CODEC,
+        ).run()
     assert key is not None
     assert key.uuid == UUID_KEY
     entry = (
         db.session.query(KeyValueEntry).filter_by(uuid=UUID_KEY).autoflush(False).one()
     )
-    assert pickle.loads(entry.value) == NEW_VALUE
+    assert json.loads(entry.value) == NEW_VALUE
     assert entry.changed_by_fk == admin.id
 
 
 def test_update_missing_entry(app_context: AppContext, admin: User) -> None:
     from superset.key_value.commands.update import UpdateKeyValueCommand
 
-    key = UpdateKeyValueCommand(
-        actor=admin,
-        resource=RESOURCE,
-        key=456,
-        value=NEW_VALUE,
-    ).run()
+    with override_user(admin):
+        key = UpdateKeyValueCommand(
+            resource=RESOURCE,
+            key=456,
+            value=NEW_VALUE,
+            codec=JSON_CODEC,
+        ).run()
     assert key is None

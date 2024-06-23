@@ -18,7 +18,7 @@
 
 import json
 import logging
-from typing import Iterator, Tuple
+from collections.abc import Iterator
 
 import yaml
 from werkzeug.utils import secure_filename
@@ -26,26 +26,30 @@ from werkzeug.utils import secure_filename
 from superset.commands.export.models import ExportModelsCommand
 from superset.models.sql_lab import SavedQuery
 from superset.queries.saved_queries.commands.exceptions import SavedQueryNotFoundError
-from superset.queries.saved_queries.dao import SavedQueryDAO
+from superset.daos.query import SavedQueryDAO
 from superset.utils.dict_import_export import EXPORT_VERSION
 
 logger = logging.getLogger(__name__)
 
 
 class ExportSavedQueriesCommand(ExportModelsCommand):
-
     dao = SavedQueryDAO
     not_found = SavedQueryNotFoundError
 
     @staticmethod
     def _export(
         model: SavedQuery, export_related: bool = True
-    ) -> Iterator[Tuple[str, str]]:
-        # build filename based on database, optional schema, and label
+    ) -> Iterator[tuple[str, str]]:
+        # build filename based on database, optional schema, and label.
+        # we call secure_filename() multiple times and join the directories afterwards,
+        # as secure_filename() replaces "/" with "_".
         database_slug = secure_filename(model.database.database_name)
-        schema_slug = secure_filename(model.schema)
         query_slug = secure_filename(model.label) or str(model.uuid)
-        file_name = f"queries/{database_slug}/{schema_slug}/{query_slug}.yaml"
+        if model.schema is None:
+            file_name = f"queries/{database_slug}/{query_slug}.yaml"
+        else:
+            schema_slug = secure_filename(model.schema)
+            file_name = f"queries/{database_slug}/{schema_slug}/{query_slug}.yaml"
 
         payload = model.export_to_dict(
             recursive=False,

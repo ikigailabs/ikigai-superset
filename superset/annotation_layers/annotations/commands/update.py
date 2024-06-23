@@ -16,10 +16,9 @@
 # under the License.
 import logging
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from flask_appbuilder.models.sqla import Model
-from flask_appbuilder.security.sqla.models import User
 from marshmallow import ValidationError
 
 from superset.annotation_layers.annotations.commands.exceptions import (
@@ -29,25 +28,25 @@ from superset.annotation_layers.annotations.commands.exceptions import (
     AnnotationUniquenessValidationError,
     AnnotationUpdateFailedError,
 )
-from superset.annotation_layers.annotations.dao import AnnotationDAO
 from superset.annotation_layers.commands.exceptions import AnnotationLayerNotFoundError
-from superset.annotation_layers.dao import AnnotationLayerDAO
 from superset.commands.base import BaseCommand
-from superset.dao.exceptions import DAOUpdateFailedError
+from superset.daos.annotation import AnnotationDAO, AnnotationLayerDAO
+from superset.daos.exceptions import DAOUpdateFailedError
 from superset.models.annotations import Annotation
 
 logger = logging.getLogger(__name__)
 
 
 class UpdateAnnotationCommand(BaseCommand):
-    def __init__(self, user: User, model_id: int, data: Dict[str, Any]):
-        self._actor = user
+    def __init__(self, model_id: int, data: dict[str, Any]):
         self._model_id = model_id
         self._properties = data.copy()
         self._model: Optional[Annotation] = None
 
     def run(self) -> Model:
         self.validate()
+        assert self._model
+
         try:
             annotation = AnnotationDAO.update(self._model, self._properties)
         except DAOUpdateFailedError as ex:
@@ -56,7 +55,7 @@ class UpdateAnnotationCommand(BaseCommand):
         return annotation
 
     def validate(self) -> None:
-        exceptions: List[ValidationError] = []
+        exceptions: list[ValidationError] = []
         layer_id: Optional[int] = self._properties.get("layer")
         short_descr: str = self._properties.get("short_descr", "")
 
@@ -89,6 +88,4 @@ class UpdateAnnotationCommand(BaseCommand):
             exceptions.append(AnnotationDatesValidationError())
 
         if exceptions:
-            exception = AnnotationInvalidError()
-            exception.add_list(exceptions)
-            raise exception
+            raise AnnotationInvalidError(exceptions=exceptions)

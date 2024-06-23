@@ -23,6 +23,7 @@ import {
   addDangerToast,
   addSuccessToast,
 } from 'src/components/MessageToasts/actions';
+import { isEmpty } from 'lodash';
 
 export const SET_REPORT = 'SET_REPORT';
 export function setReport(report, resourceId, creationMethod, filterField) {
@@ -76,7 +77,7 @@ export function fetchUISpecificReport({
 const structureFetchAction = (dispatch, getState) => {
   const state = getState();
   const { user, dashboardInfo, charts, explore } = state;
-  if (dashboardInfo) {
+  if (!isEmpty(dashboardInfo)) {
     dispatch(
       fetchUISpecificReport({
         userId: user.userId,
@@ -89,7 +90,7 @@ const structureFetchAction = (dispatch, getState) => {
     const [chartArr] = Object.keys(charts);
     dispatch(
       fetchUISpecificReport({
-        userId: explore.user.userId,
+        userId: explore.user?.userId || user?.userId,
         filterField: 'chart_id',
         creationMethod: 'charts',
         resourceId: charts[chartArr].id,
@@ -142,6 +143,8 @@ export function toggleActive(report, isActive) {
   };
 }
 
+export const DELETE_REPORT = 'DELETE_REPORT';
+
 export function deleteActiveReport(report) {
   return function deleteActiveReportThunk(dispatch) {
     return SupersetClient.delete({
@@ -151,7 +154,7 @@ export function deleteActiveReport(report) {
         dispatch(addDangerToast(t('Your report could not be deleted')));
       })
       .finally(() => {
-        dispatch(structureFetchAction);
+        dispatch({ type: DELETE_REPORT, report });
         dispatch(addSuccessToast(t('Deleted: %s', report.name)));
       });
   };

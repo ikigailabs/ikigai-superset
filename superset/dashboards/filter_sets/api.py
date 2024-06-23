@@ -17,7 +17,7 @@
 import logging
 from typing import Any, cast
 
-from flask import g, request, Response
+from flask import request, Response
 from flask_appbuilder.api import (
     expose,
     get_list_schema,
@@ -30,8 +30,8 @@ from flask_appbuilder.models.sqla.interface import SQLAInterface
 from marshmallow import ValidationError
 
 from superset.commands.exceptions import ObjectNotFoundError
+from superset.daos.dashboard import DashboardDAO
 from superset.dashboards.commands.exceptions import DashboardNotFoundError
-from superset.dashboards.dao import DashboardDAO
 from superset.dashboards.filter_sets.commands.create import CreateFilterSetCommand
 from superset.dashboards.filter_sets.commands.delete import DeleteFilterSetCommand
 from superset.dashboards.filter_sets.commands.exceptions import (
@@ -126,7 +126,7 @@ class FilterSetRestApi(BaseSupersetModelRestApi):
         # pylint: disable=bad-super-call
         super(BaseSupersetModelRestApi, self)._init_properties()
 
-    @expose("/<int:dashboard_id>/filtersets", methods=["GET"])
+    @expose("/<int:dashboard_id>/filtersets", methods=("GET",))
     @protect()
     @safe
     @permission_name("get")
@@ -189,7 +189,7 @@ class FilterSetRestApi(BaseSupersetModelRestApi):
         )
         return self.get_list_headless(**kwargs)
 
-    @expose("/<int:dashboard_id>/filtersets", methods=["POST"])
+    @expose("/<int:dashboard_id>/filtersets", methods=("POST",))
     @protect()
     @safe
     @statsd_metrics
@@ -243,7 +243,7 @@ class FilterSetRestApi(BaseSupersetModelRestApi):
         """
         try:
             item = self.add_model_schema.load(request.json)
-            new_model = CreateFilterSetCommand(g.user, dashboard_id, item).run()
+            new_model = CreateFilterSetCommand(dashboard_id, item).run()
             return self.response(
                 201, **self.show_model_schema.dump(new_model, many=False)
             )
@@ -256,7 +256,7 @@ class FilterSetRestApi(BaseSupersetModelRestApi):
         except DashboardNotFoundError:
             return self.response_404()
 
-    @expose("/<int:dashboard_id>/filtersets/<int:pk>", methods=["PUT"])
+    @expose("/<int:dashboard_id>/filtersets/<int:pk>", methods=("PUT",))
     @protect()
     @safe
     @statsd_metrics
@@ -314,7 +314,7 @@ class FilterSetRestApi(BaseSupersetModelRestApi):
         """
         try:
             item = self.edit_model_schema.load(request.json)
-            changed_model = UpdateFilterSetCommand(g.user, dashboard_id, pk, item).run()
+            changed_model = UpdateFilterSetCommand(dashboard_id, pk, item).run()
             return self.response(
                 200, **self.show_model_schema.dump(changed_model, many=False)
             )
@@ -328,7 +328,7 @@ class FilterSetRestApi(BaseSupersetModelRestApi):
             logger.error(err)
             return self.response(err.status)
 
-    @expose("/<int:dashboard_id>/filtersets/<int:pk>", methods=["DELETE"])
+    @expose("/<int:dashboard_id>/filtersets/<int:pk>", methods=("DELETE",))
     @protect()
     @safe
     @statsd_metrics
@@ -374,8 +374,8 @@ class FilterSetRestApi(BaseSupersetModelRestApi):
               $ref: '#/components/responses/500'
         """
         try:
-            changed_model = DeleteFilterSetCommand(g.user, dashboard_id, pk).run()
-            return self.response(200, id=changed_model.id)
+            DeleteFilterSetCommand(dashboard_id, pk).run()
+            return self.response(200, id=dashboard_id)
         except ValidationError as error:
             return self.response_400(message=error.messages)
         except FilterSetNotFoundError:

@@ -94,17 +94,11 @@ class TestExportDashboardsCommand(SupersetTestCase):
             "slug": "world_health",
             "uuid": str(example_dashboard.uuid),
             "position": {
-                "CHART-36bfc934": {
-                    "children": [],
-                    "id": "CHART-36bfc934",
-                    "meta": {"height": 25, "sliceName": "Region Filter", "width": 2},
-                    "type": "CHART",
-                },
                 "CHART-37982887": {
                     "children": [],
                     "id": "CHART-37982887",
                     "meta": {
-                        "height": 25,
+                        "height": 52,
                         "sliceName": "World's Population",
                         "width": 2,
                     },
@@ -177,7 +171,7 @@ class TestExportDashboardsCommand(SupersetTestCase):
                     "type": "COLUMN",
                 },
                 "COLUMN-fe3914b8": {
-                    "children": ["CHART-36bfc934", "CHART-37982887"],
+                    "children": ["CHART-37982887"],
                     "id": "COLUMN-fe3914b8",
                     "meta": {"background": "BACKGROUND_TRANSPARENT", "width": 2},
                     "type": "COLUMN",
@@ -293,7 +287,9 @@ class TestExportDashboardsCommand(SupersetTestCase):
         mock_suffix.side_effect = (str(i) for i in itertools.count(1))
 
         position = get_default_position("example")
-        chart_1 = db.session.query(Slice).filter_by(slice_name="Region Filter").one()
+        chart_1 = (
+            db.session.query(Slice).filter_by(slice_name="World's Population").one()
+        )
         new_position = append_charts(position, {chart_1})
         assert new_position == {
             "DASHBOARD_VERSION_KEY": "v2",
@@ -322,7 +318,7 @@ class TestExportDashboardsCommand(SupersetTestCase):
                 "meta": {
                     "chartId": chart_1.id,
                     "height": 50,
-                    "sliceName": "Region Filter",
+                    "sliceName": "World's Population",
                     "uuid": str(chart_1.uuid),
                     "width": 4,
                 },
@@ -369,7 +365,7 @@ class TestExportDashboardsCommand(SupersetTestCase):
                 "meta": {
                     "chartId": chart_1.id,
                     "height": 50,
-                    "sliceName": "Region Filter",
+                    "sliceName": "World's Population",
                     "uuid": str(chart_1.uuid),
                     "width": 4,
                 },
@@ -400,7 +396,7 @@ class TestExportDashboardsCommand(SupersetTestCase):
                 "meta": {
                     "chartId": chart_1.id,
                     "height": 50,
-                    "sliceName": "Region Filter",
+                    "sliceName": "World's Population",
                     "uuid": str(chart_1.uuid),
                     "width": 4,
                 },
@@ -484,10 +480,11 @@ class TestImportDashboardsCommand(SupersetTestCase):
         db.session.delete(dataset)
         db.session.commit()
 
-    @patch("superset.dashboards.commands.importers.v1.utils.g")
-    def test_import_v1_dashboard(self, mock_g):
+    @patch("superset.utils.core.g")
+    @patch("superset.security.manager.g")
+    def test_import_v1_dashboard(self, sm_g, utils_g):
         """Test that we can import a dashboard"""
-        mock_g.user = security_manager.find_user("admin")
+        admin = sm_g.user = utils_g.user = security_manager.find_user("admin")
         contents = {
             "metadata.yaml": yaml.safe_dump(dashboard_metadata_config),
             "databases/imported_database.yaml": yaml.safe_dump(database_config),
@@ -564,23 +561,25 @@ class TestImportDashboardsCommand(SupersetTestCase):
         dataset = chart.table
         assert str(dataset.uuid) == dataset_config["uuid"]
 
+        assert chart.query_context is None
+        assert json.loads(chart.params)["datasource"] == dataset.uid
+
         database = dataset.database
         assert str(database.uuid) == database_config["uuid"]
 
-        assert dashboard.owners == [mock_g.user]
+        assert dashboard.owners == [admin]
 
-        dashboard.owners = []
-        chart.owners = []
-        dataset.owners = []
-        database.owners = []
         db.session.delete(dashboard)
         db.session.delete(chart)
         db.session.delete(dataset)
         db.session.delete(database)
         db.session.commit()
 
-    def test_import_v1_dashboard_multiple(self):
+    @patch("superset.security.manager.g")
+    def test_import_v1_dashboard_multiple(self, mock_g):
         """Test that a dashboard can be imported multiple times"""
+        mock_g.user = security_manager.find_user("admin")
+
         num_dashboards = db.session.query(Dashboard).count()
 
         contents = {

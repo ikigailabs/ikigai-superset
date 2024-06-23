@@ -31,29 +31,37 @@ import { Maybe } from '../../types';
 import { PostProcessingRule } from './PostProcessing';
 import { JsonObject } from '../../connection';
 import { TimeGranularity } from '../../time-format';
+import { GenericDataType } from './QueryResponse';
 
-export type QueryObjectFilterClause = {
+export type BaseQueryObjectFilterClause = {
   col: QueryFormColumn;
   grain?: TimeGranularity;
   isExtra?: boolean;
-} & (
-  | {
-      op: BinaryOperator;
-      val: string | number | boolean;
-    }
-  | {
-      op: SetOperator;
-      val: (string | number | boolean)[];
-    }
-  | {
-      op: UnaryOperator;
-    }
-);
+};
+
+export type BinaryQueryObjectFilterClause = BaseQueryObjectFilterClause & {
+  op: BinaryOperator;
+  val: string | number | boolean;
+  formattedVal?: string;
+};
+
+export type SetQueryObjectFilterClause = BaseQueryObjectFilterClause & {
+  op: SetOperator;
+  val: (string | number | boolean)[];
+  formattedVal?: string[];
+};
+
+export type UnaryQueryObjectFilterClause = BaseQueryObjectFilterClause & {
+  op: UnaryOperator;
+  formattedVal?: string;
+};
+
+export type QueryObjectFilterClause =
+  | BinaryQueryObjectFilterClause
+  | SetQueryObjectFilterClause
+  | UnaryQueryObjectFilterClause;
 
 export type QueryObjectExtras = Partial<{
-  /** HAVING condition for Druid */
-  having_druid?: string;
-  druid_time_origin?: string;
   /** HAVING condition for SQLAlchemy */
   having?: string;
   relative_start?: string;
@@ -99,7 +107,7 @@ export interface QueryObject
   /** SIMPLE where filters */
   filters?: QueryObjectFilterClause[];
 
-  /** Time column for SQL, time-grain for Druid (deprecated) */
+  /** Time column for SQL */
   granularity?: string;
 
   /** If set, will group by timestamp */
@@ -110,9 +118,6 @@ export interface QueryObject
 
   /** Free-form HAVING SQL, multiple clauses are concatenated by AND */
   having?: string;
-
-  /** SIMPLE having filters */
-  having_filters?: QueryObjectFilterClause[];
 
   post_processing?: (PostProcessingRule | undefined)[];
 
@@ -127,12 +132,6 @@ export interface QueryObject
 
   /** The size of bucket by which to group timeseries data (forthcoming) */
   time_grain?: string;
-
-  /** Maximum number of timeseries */
-  timeseries_limit?: number;
-
-  /** The metric used to sort the returned result. */
-  timeseries_limit_metric?: Maybe<QueryFormMetric>;
 
   /** Direction to ordered by */
   order_desc?: boolean;
@@ -249,20 +248,42 @@ export const CtasEnum = {
 };
 
 export type QueryColumn = {
-  name: string;
+  name?: string;
+  column_name: string;
   type: string | null;
+  type_generic: GenericDataType;
   is_dttm: boolean;
 };
 
-export type QueryState =
-  | 'stopped'
-  | 'failed'
-  | 'pending'
-  | 'running'
-  | 'scheduled'
-  | 'success'
-  | 'fetching'
-  | 'timed_out';
+// Possible states of a query object for processing on the server
+export enum QueryState {
+  STARTED = 'started',
+  STOPPED = 'stopped',
+  FAILED = 'failed',
+  PENDING = 'pending',
+  RUNNING = 'running',
+  SCHEDULED = 'scheduled',
+  SUCCESS = 'success',
+  FETCHING = 'fetching',
+  TIMED_OUT = 'timed_out',
+}
+
+// Inidcates a Query's state is still processing
+export const runningQueryStateList: QueryState[] = [
+  QueryState.RUNNING,
+  QueryState.STARTED,
+  QueryState.PENDING,
+  QueryState.FETCHING,
+  QueryState.SCHEDULED,
+];
+
+// Indicates a Query's state has completed processing regardless of success / failure
+export const concludedQueryStateList: QueryState[] = [
+  QueryState.STOPPED,
+  QueryState.FAILED,
+  QueryState.SUCCESS,
+  QueryState.TIMED_OUT,
+];
 
 export type Query = {
   cached: boolean;
@@ -273,6 +294,7 @@ export type Query = {
   errorMessage: string | null;
   extra: {
     progress: string | null;
+    errors?: SupersetError[];
   };
   id: string;
   isDataPreview: boolean;
@@ -304,7 +326,7 @@ export type Query = {
   executedSql: string;
   output: string | Record<string, any>;
   actions: Record<string, any>;
-  type: DatasourceType.Query;
+  type: DatasourceType;
   columns: QueryColumn[];
 };
 
@@ -316,11 +338,13 @@ export type QueryResults = {
     expanded_columns: QueryColumn[];
     selected_columns: QueryColumn[];
     query: { limit: number };
+    query_id?: number;
   };
 };
 
 export type QueryResponse = Query & QueryResults;
 
+// todo: move out from typing
 export const testQuery: Query = {
   id: 'clientId2353',
   dbId: 1,
@@ -335,7 +359,7 @@ export const testQuery: Query = {
   isDataPreview: false,
   progress: 0,
   resultsKey: null,
-  state: 'success',
+  state: QueryState.SUCCESS,
   tempSchema: null,
   trackingUrl: null,
   templateParams: null,
@@ -358,21 +382,86 @@ export const testQuery: Query = {
   type: DatasourceType.Query,
   columns: [
     {
-      name: 'Column 1',
-      type: DatasourceType.Query,
+      column_name: 'Column 1',
+      type: 'STRING',
       is_dttm: false,
+      type_generic: GenericDataType.STRING,
     },
     {
-      name: 'Column 3',
-      type: DatasourceType.Query,
+      column_name: 'Column 3',
+      type: 'STRING',
       is_dttm: false,
+      type_generic: GenericDataType.STRING,
     },
     {
-      name: 'Column 2',
-      type: DatasourceType.Query,
+      column_name: 'Column 2',
+      type: 'TIMESTAMP',
       is_dttm: true,
+      type_generic: GenericDataType.TEMPORAL,
     },
   ],
+};
+
+export const testQueryResults = {
+  results: {
+    displayLimitReached: false,
+    columns: [
+      {
+        column_name: 'Column 1',
+        type: 'STRING',
+        type_generic: GenericDataType.STRING,
+        is_dttm: false,
+      },
+      {
+        column_name: 'Column 3',
+        type: 'STRING',
+        type_generic: GenericDataType.STRING,
+        is_dttm: false,
+      },
+      {
+        column_name: 'Column 2',
+        type: 'TIMESTAMP',
+        type_generic: GenericDataType.TEMPORAL,
+        is_dttm: true,
+      },
+    ],
+    data: [
+      { 'Column 1': 'a', 'Column 2': 'b', 'Column 3': '2014-11-11T00:00:00' },
+    ],
+    expanded_columns: [],
+    selected_columns: [
+      {
+        column_name: 'Column 1',
+        type: 'STRING',
+        type_generic: GenericDataType.STRING,
+        is_dttm: false,
+      },
+      {
+        column_name: 'Column 3',
+        type: 'STRING',
+        type_generic: GenericDataType.STRING,
+        is_dttm: false,
+      },
+      {
+        column_name: 'Column 2',
+        type: 'TIMESTAMP',
+        type_generic: GenericDataType.TEMPORAL,
+        is_dttm: true,
+      },
+    ],
+    query: { limit: 6 },
+  },
+};
+
+export const testQueryResponse = { ...testQuery, ...testQueryResults };
+
+export enum ContributionType {
+  Row = 'row',
+  Column = 'column',
+}
+
+export type DatasourceSamplesQuery = {
+  filters?: QueryObjectFilterClause[];
 };
 
 export default {};

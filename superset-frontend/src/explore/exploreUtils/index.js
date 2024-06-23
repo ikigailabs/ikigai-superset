@@ -29,17 +29,18 @@ import {
 } from '@superset-ui/core';
 import { availableDomains } from 'src/utils/hostNamesConfig';
 import { safeStringify } from 'src/utils/safeStringify';
+import { optionLabel } from 'src/utils/common';
 import { URL_PARAMS } from 'src/constants';
 import {
   MULTI_OPERATORS,
   OPERATOR_ENUM_TO_OPERATOR_TYPE,
+  UNSAVED_CHART_ID,
 } from 'src/explore/constants';
 import { DashboardStandaloneMode } from 'src/dashboard/util/constants';
-import { optionLabel } from '../../utils/common';
 
 export function getChartKey(explore) {
-  const { slice } = explore;
-  return slice ? slice.slice_id : 0;
+  const { slice, form_data } = explore;
+  return slice?.slice_id ?? form_data?.slice_id ?? UNSAVED_CHART_ID;
 }
 
 let requestCounter = 0;
@@ -60,18 +61,16 @@ export function getHostName(allowDomainSharding = false) {
   return availableDomains[currentIndex];
 }
 
-export function getAnnotationJsonUrl(slice_id, form_data, isNative, force) {
+export function getAnnotationJsonUrl(slice_id, force) {
   if (slice_id === null || slice_id === undefined) {
     return null;
   }
+
   const uri = URI(window.location.search);
-  const endpoint = isNative ? 'annotation_json' : 'slice_json';
   return uri
-    .pathname(`/superset/${endpoint}/${slice_id}`)
+    .pathname('/api/v1/chart/data')
     .search({
-      form_data: safeStringify(form_data, (key, value) =>
-        value === null ? undefined : value,
-      ),
+      form_data: safeStringify({ slice_id }),
       force,
     })
     .toString();
@@ -86,7 +85,7 @@ export function getURIDirectory(endpointType = 'base') {
   ) {
     return '/superset/explore_json/';
   }
-  return '/superset/explore/';
+  return '/explore/';
 }
 
 export function mountExploreUrl(endpointType, extraSearch = {}, force = false) {
@@ -195,9 +194,12 @@ export function getExploreUrl({
   return uri.search(search).directory(directory).toString();
 }
 
-export const shouldUseLegacyApi = formData => {
+export const getQuerySettings = formData => {
   const vizMetadata = getChartMetadataRegistry().get(formData.viz_type);
-  return vizMetadata ? vizMetadata.useLegacyApi : false;
+  return [
+    vizMetadata?.useLegacyApi ?? false,
+    vizMetadata?.parseMethod ?? 'json-bigint',
+  ];
 };
 
 export const buildV1ChartDataPayload = ({
@@ -244,7 +246,8 @@ export const exportChart = ({
 }) => {
   let url;
   let payload;
-  if (shouldUseLegacyApi(formData)) {
+  const [useLegacyApi, parseMethod] = getQuerySettings(formData);
+  if (useLegacyApi) {
     const endpointType = getLegacyEndpointType({ resultFormat, resultType });
     url = getExploreUrl({
       formData,
@@ -260,17 +263,19 @@ export const exportChart = ({
       resultFormat,
       resultType,
       ownState,
+      parseMethod,
     });
   }
 
   SupersetClient.postForm(url, { form_data: safeStringify(payload) });
 };
 
-export const exploreChart = formData => {
+export const exploreChart = (formData, requestParams) => {
   const url = getExploreUrl({
     formData,
     endpointType: 'base',
     allowDomainSharding: false,
+    requestParams,
   });
   SupersetClient.postForm(url, { form_data: safeStringify(formData) });
 };
@@ -295,7 +300,9 @@ export const getSimpleSQLExpression = (subject, operator, comparator) => {
     [...MULTI_OPERATORS]
       .map(op => OPERATOR_ENUM_TO_OPERATOR_TYPE[op].operation)
       .indexOf(operator) >= 0;
-  let expression = subject ?? '';
+  // If returned value is an object after changing dataset
+  let expression =
+    typeof subject === 'object' ? subject?.column_name ?? '' : subject ?? '';
   if (subject && operator) {
     expression += ` ${operator}`;
     const firstValue =

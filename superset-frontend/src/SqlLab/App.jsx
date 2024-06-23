@@ -17,36 +17,39 @@
  * under the License.
  */
 import React from 'react';
-import { createStore, compose, applyMiddleware } from 'redux';
+import persistState from 'redux-localstorage';
 import { Provider } from 'react-redux';
-import thunkMiddleware from 'redux-thunk';
 import { hot } from 'react-hot-loader/root';
-import { ThemeProvider } from '@superset-ui/core';
-import { GlobalStyles } from 'src/GlobalStyles';
 import {
+  FeatureFlag,
+  ThemeProvider,
   initFeatureFlags,
   isFeatureEnabled,
-  FeatureFlag,
-} from 'src/featureFlags';
+} from '@superset-ui/core';
+import { GlobalStyles } from 'src/GlobalStyles';
+import { setupStore } from 'src/views/store';
+import setupExtensions from 'src/setup/setupExtensions';
+import getBootstrapData from 'src/utils/getBootstrapData';
+import { tableApiUtil } from 'src/hooks/apiResources/tables';
 import getInitialState from './reducers/getInitialState';
-import rootReducer from './reducers/index';
-import { initEnhancer } from '../reduxUtils';
+import { reducers } from './reducers/index';
 import App from './components/App';
 import {
+  emptyTablePersistData,
   emptyQueryResults,
   clearQueryEditors,
 } from './utils/reduxStateToLocalStorageHelper';
 import { BYTES_PER_CHAR, KB_STORAGE } from './constants';
 import setupApp from '../setup/setupApp';
 
-import './main.less';
 import '../assets/stylesheets/reactable-pagination.less';
 import { theme } from '../preamble';
+import { SqlLabGlobalStyles } from './SqlLabGlobalStyles';
 
 setupApp();
+setupExtensions();
 
-const appContainer = document.getElementById('app');
-const bootstrapData = JSON.parse(appContainer.getAttribute('data-bootstrap'));
+const bootstrapData = getBootstrapData();
 
 initFeatureFlags(bootstrapData.common.feature_flags);
 
@@ -65,8 +68,12 @@ const sqlLabPersistStateConfig = {
         if (path === 'sqlLab') {
           subset[path] = {
             ...state[path],
+            tables: emptyTablePersistData(state[path].tables),
             queries: emptyQueryResults(state[path].queries),
             queryEditors: clearQueryEditors(state[path].queryEditors),
+            unsavedQueryEditor: clearQueryEditors([
+              state[path].unsavedQueryEditor,
+            ])[0],
           };
         }
       });
@@ -91,6 +98,12 @@ const sqlLabPersistStateConfig = {
       const result = {
         ...initialState,
         ...persistedState,
+        sqlLab: {
+          ...(persistedState?.sqlLab || {}),
+          // Overwrite initialState over persistedState for sqlLab
+          // since a logic in getInitialState overrides the value from persistedState
+          ...initialState.sqlLab,
+        },
       };
       // Filter out any user data that may have been persisted in an older version.
       // Get user from bootstrap data instead, every time
@@ -100,16 +113,39 @@ const sqlLabPersistStateConfig = {
   },
 };
 
-const store = createStore(
-  rootReducer,
+export const store = setupStore({
   initialState,
-  compose(
-    applyMiddleware(thunkMiddleware),
-    initEnhancer(
-      !isFeatureEnabled(FeatureFlag.SQLLAB_BACKEND_PERSISTENCE),
-      sqlLabPersistStateConfig,
-    ),
-  ),
+  rootReducers: reducers,
+  ...(!isFeatureEnabled(FeatureFlag.SQLLAB_BACKEND_PERSISTENCE) && {
+    enhancers: [
+      persistState(
+        sqlLabPersistStateConfig.paths,
+        sqlLabPersistStateConfig.config,
+      ),
+    ],
+  }),
+});
+
+// Rehydrate server side persisted table metadata
+initialState.sqlLab.tables.forEach(
+  ({ name: table, schema, dbId, persistData }) => {
+    if (dbId && schema && table && persistData?.columns) {
+      store.dispatch(
+        tableApiUtil.upsertQueryData(
+          'tableMetadata',
+          { dbId, schema, table },
+          persistData,
+        ),
+      );
+      store.dispatch(
+        tableApiUtil.upsertQueryData(
+          'tableExtendedMetadata',
+          { dbId, schema, table },
+          {},
+        ),
+      );
+    }
+  },
 );
 
 // Highlight the navbar menu
@@ -128,6 +164,7 @@ const Application = () => (
   <Provider store={store}>
     <ThemeProvider theme={theme}>
       <GlobalStyles />
+      <SqlLabGlobalStyles />
       <App />
     </ThemeProvider>
   </Provider>

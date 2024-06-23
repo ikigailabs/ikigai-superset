@@ -18,13 +18,13 @@
 import logging
 import time
 from contextlib import closing
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from superset import app, security_manager
 from superset.models.core import Database
 from superset.sql_parse import ParsedQuery
 from superset.sql_validators.base import BaseSQLValidator, SQLValidationAnnotation
-from superset.utils.core import get_username, QuerySource
+from superset.utils.core import QuerySource
 
 MAX_ERROR_ROWS = 10
 
@@ -50,15 +50,13 @@ class PrestoDBSQLValidator(BaseSQLValidator):
     ) -> Optional[SQLValidationAnnotation]:
         # pylint: disable=too-many-locals
         db_engine_spec = database.db_engine_spec
-        parsed_query = ParsedQuery(statement)
+        parsed_query = ParsedQuery(statement, engine=db_engine_spec.engine)
         sql = parsed_query.stripped()
 
         # Hook to allow environment-specific mutation (usually comments) to the SQL
-        sql_query_mutator = config["SQL_QUERY_MUTATOR"]
-        if sql_query_mutator:
+        if sql_query_mutator := config["SQL_QUERY_MUTATOR"]:
             sql = sql_query_mutator(
                 sql,
-                user_name=get_username(),  # TODO(john-bodley): Deprecate in 3.0.
                 security_manager=security_manager,
                 database=database,
             )
@@ -111,7 +109,7 @@ class PrestoDBSQLValidator(BaseSQLValidator):
                 raise PrestoSQLValidationError(
                     "The pyhive presto client returned an unhandled " "database error."
                 ) from db_error
-            error_args: Dict[str, Any] = db_error.args[0]
+            error_args: dict[str, Any] = db_error.args[0]
 
             # Confirm the two fields we need to be able to present an annotation
             # are present in the error response -- a message, and a location.
@@ -150,7 +148,7 @@ class PrestoDBSQLValidator(BaseSQLValidator):
     @classmethod
     def validate(
         cls, sql: str, schema: Optional[str], database: Database
-    ) -> List[SQLValidationAnnotation]:
+    ) -> list[SQLValidationAnnotation]:
         """
         Presto supports query-validation queries by running them with a
         prepended explain.
@@ -158,20 +156,24 @@ class PrestoDBSQLValidator(BaseSQLValidator):
         For example, "SELECT 1 FROM default.mytable" becomes "EXPLAIN (TYPE
         VALIDATE) SELECT 1 FROM default.mytable.
         """
-        parsed_query = ParsedQuery(sql)
+        parsed_query = ParsedQuery(sql, engine=database.db_engine_spec.engine)
         statements = parsed_query.get_statements()
 
         logger.info("Validating %i statement(s)", len(statements))
-        engine = database.get_sqla_engine(schema, source=QuerySource.SQL_LAB)
-        # Sharing a single connection and cursor across the
-        # execution of all statements (if many)
-        annotations: List[SQLValidationAnnotation] = []
-        with closing(engine.raw_connection()) as conn:
-            cursor = conn.cursor()
-            for statement in parsed_query.get_statements():
-                annotation = cls.validate_statement(statement, database, cursor)
-                if annotation:
-                    annotations.append(annotation)
-        logger.debug("Validation found %i error(s)", len(annotations))
+        # todo(hughhh): update this to use new database.get_raw_connection()
+        # this function keeps stalling CI
+        with database.get_sqla_engine_with_context(
+            schema, source=QuerySource.SQL_LAB
+        ) as engine:
+            # Sharing a single connection and cursor across the
+            # execution of all statements (if many)
+            annotations: list[SQLValidationAnnotation] = []
+            with closing(engine.raw_connection()) as conn:
+                cursor = conn.cursor()
+                for statement in parsed_query.get_statements():
+                    annotation = cls.validate_statement(statement, database, cursor)
+                    if annotation:
+                        annotations.append(annotation)
+            logger.debug("Validation found %i error(s)", len(annotations))
 
         return annotations

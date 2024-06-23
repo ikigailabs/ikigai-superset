@@ -55,6 +55,7 @@ export const ErrorTypeEnum = {
   DATABASE_SECURITY_ACCESS_ERROR: 'DATABASE_SECURITY_ACCESS_ERROR',
   QUERY_SECURITY_ACCESS_ERROR: 'QUERY_SECURITY_ACCESS_ERROR',
   MISSING_OWNERSHIP_ERROR: 'MISSING_OWNERSHIP_ERROR',
+  DASHBOARD_SECURITY_ACCESS_ERROR: 'DASHBOARD_SECURITY_ACCESS_ERROR',
 
   // Other errors
   BACKEND_TIMEOUT_ERROR: 'BACKEND_TIMEOUT_ERROR',
@@ -87,7 +88,7 @@ export type ErrorType = ValueOf<typeof ErrorTypeEnum>;
 // Keep in sync with superset/views/errors.py
 export type ErrorLevel = 'info' | 'warning' | 'error';
 
-export type ErrorSource = 'dashboard' | 'explore' | 'sqllab';
+export type ErrorSource = 'dashboard' | 'explore' | 'sqllab' | 'crud';
 
 export type SupersetError<ExtraType = Record<string, any> | null> = {
   error_type: ErrorType;

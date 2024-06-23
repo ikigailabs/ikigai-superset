@@ -1,3 +1,4 @@
+/* eslint-disable import/no-unresolved */
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -16,13 +17,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-// import { useSelector } from 'react-redux';
-// import { FeatureFlag, isFeatureEnabled } from 'src/featureFlags';
-import { useCallback, useEffect, useState, useContext } from 'react';
-// import { URL_PARAMS } from 'src/constants';
-// import { getUrlParam } from 'src/utils/urlUtils';
-// import { RootState } from 'src/dashboard/types';
-import { MigrationContext } from 'src/dashboard/containers/DashboardPage';
+import { useSelector } from 'react-redux';
+import { isFeatureEnabled, FeatureFlag } from '@superset-ui/core';
+import { useCallback, useEffect, useState } from 'react';
+import { URL_PARAMS } from 'src/constants';
+import { getUrlParam } from 'src/utils/urlUtils';
+import { RootState } from 'src/dashboard/types';
 import {
   useFilters,
   useNativeFiltersDataMask,
@@ -30,16 +30,10 @@ import {
 
 // eslint-disable-next-line import/prefer-default-export
 export const useNativeFilters = () => {
-  const filterboxMigrationState = useContext(MigrationContext);
   const [isInitialized, setIsInitialized] = useState(false);
-  // const showNativeFilters = useSelector<RootState, boolean>(
-  //   state =>
-  //     (getUrlParam(URL_PARAMS.showFilters) ?? true) &&
-  //     state.dashboardInfo.metadata?.show_native_filters,
-  // );
-  // const canEdit = useSelector<RootState, boolean>(
-  //   ({ dashboardInfo }) => dashboardInfo.dash_edit_perm,
-  // );
+  const canEdit = useSelector<RootState, boolean>(
+    ({ dashboardInfo }) => dashboardInfo.dash_edit_perm,
+  );
 
   const filters = useFilters();
   const filterValues = Object.values(filters);
@@ -47,11 +41,9 @@ export const useNativeFilters = () => {
   const expandFilters = false;
   const [dashboardFiltersOpen, setDashboardFiltersOpen] = useState(false);
 
-  // const nativeFiltersEnabled =
-  //   showNativeFilters &&
-  //   isFeatureEnabled(FeatureFlag.DASHBOARD_NATIVE_FILTERS) &&
-  //   (canEdit || (!canEdit && filterValues.length !== 0));
-  const nativeFiltersEnabled = false;
+  const nativeFiltersEnabled =
+    isFeatureEnabled(FeatureFlag.DASHBOARD_NATIVE_FILTERS) &&
+    (canEdit || (!canEdit && filterValues.length !== 0));
 
   const requiredFirstFilter = filterValues.filter(
     filter => filter.requiredFirst,
@@ -78,15 +70,13 @@ export const useNativeFilters = () => {
   useEffect(() => {
     if (
       expandFilters === false ||
-      (filterValues.length === 0 &&
-        nativeFiltersEnabled &&
-        ['CONVERTED', 'REVIEWING', 'NOOP'].includes(filterboxMigrationState))
+      (filterValues.length === 0 && nativeFiltersEnabled)
     ) {
       toggleDashboardFiltersOpen(false);
     } else {
       toggleDashboardFiltersOpen(true);
     }
-  }, [filterValues.length, filterboxMigrationState]);
+  }, [filterValues.length]);
 
   useEffect(() => {
     if (showDashboard) {
