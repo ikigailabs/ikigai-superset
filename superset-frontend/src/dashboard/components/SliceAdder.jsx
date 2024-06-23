@@ -48,13 +48,13 @@ import AddSliceDragPreview from './dnd/AddSliceDragPreview';
 import DragDroppable from './dnd/DragDroppable';
 
 const propTypes = {
-  fetchSlices: PropTypes.func.isRequired,
-  updateSlices: PropTypes.func.isRequired,
-  isLoading: PropTypes.bool.isRequired,
-  slices: PropTypes.objectOf(slicePropShape).isRequired,
-  lastUpdated: PropTypes.number.isRequired,
+  fetchSlices: PropTypes.func,
+  updateSlices: PropTypes.func,
+  isLoading: PropTypes.bool,
+  slices: PropTypes.objectOf(slicePropShape),
+  lastUpdated: PropTypes.number,
   errorMessage: PropTypes.string,
-  userId: PropTypes.number.isRequired,
+  userId: PropTypes.number,
   selectedSliceIds: PropTypes.arrayOf(PropTypes.number),
   editMode: PropTypes.bool,
   dashboardId: PropTypes.number,

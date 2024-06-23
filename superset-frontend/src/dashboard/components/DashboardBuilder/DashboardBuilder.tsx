@@ -101,12 +101,12 @@ const FiltersPanel = styled.div<{ width: number; hidden: boolean }>`
   ${({ hidden }) => hidden && `display: none;`}
 `;
 
-// const StickyPanel = styled.div<{ width: number }>`
-//   position: sticky;
-//   top: -1px;
-//   width: ${({ width }) => width}px;
-//   flex: 0 0 ${({ width }) => width}px;
-// `;
+const StickyPanel = styled.div<{ width: number }>`
+  position: sticky;
+  top: -1px;
+  width: ${({ width }) => width}px;
+  flex: 0 0 ${({ width }) => width}px;
+`;
 
 // @z-index-above-dashboard-popovers (99) + 1 = 100
 const StyledHeader = styled.div`
@@ -463,7 +463,7 @@ const DashboardBuilder: FC<DashboardBuilderProps> = () => {
   const {
     showDashboard,
     dashboardFiltersOpen,
-    // toggleDashboardFiltersOpen,
+    toggleDashboardFiltersOpen,
     nativeFiltersEnabled,
   } = useNativeFilters();
 
@@ -479,13 +479,13 @@ const DashboardBuilder: FC<DashboardBuilderProps> = () => {
   const showFilterBar =
     (crossFiltersEnabled || nativeFiltersEnabled) && !editMode;
 
-  // const offset =
-  //   FILTER_BAR_HEADER_HEIGHT +
-  //   (isSticky || standaloneMode ? 0 : MAIN_HEADER_HEIGHT) +
-  //   (filterSetEnabled ? FILTER_BAR_TABS_HEIGHT : 0);
+  const offset =
+    FILTER_BAR_HEADER_HEIGHT +
+    (isSticky || standaloneMode ? 0 : MAIN_HEADER_HEIGHT) +
+    (filterSetEnabled ? FILTER_BAR_TABS_HEIGHT : 0);
 
-  // const filterBarHeight = `calc(100vh - ${offset}px)`;
-  // const filterBarOffset = dashboardFiltersOpen ? 0 : barTopOffset + 20;
+  const filterBarHeight = `calc(100vh - ${offset}px)`;
+  const filterBarOffset = dashboardFiltersOpen ? 0 : barTopOffset + 20;
 
   const draggableStyle = useMemo(
     () => ({
