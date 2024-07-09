@@ -50,7 +50,8 @@ export const emotionCache = createCache({
   key: 'superset',
 });
 
-export const styled = emotionStyled;
+// export const styled = emotionStyled;
+export { default as styled } from '@emotion/styled';
 
 const defaultTheme = {
   borderRadius: 4,

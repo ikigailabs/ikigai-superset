@@ -476,6 +476,8 @@ class Header extends React.PureComponent {
       setRefreshFrequency,
       lastModifiedTime,
       logEvent,
+      ikigaiOrigin,
+      supersetUrl,
     } = this.props;
 
     const userCanEdit =
@@ -687,7 +689,7 @@ class Header extends React.PureComponent {
                     refreshLimit={refreshLimit}
                     refreshWarning={refreshWarning}
                     lastModifiedTime={lastModifiedTime}
-                    filterboxMigrationState={filterboxMigrationState}
+                    // filterboxMigrationState={filterboxMigrationState}
                     isDropdownVisible={this.state.isDropdownVisible}
                     setIsDropdownVisible={this.setIsDropdownVisible}
                   />

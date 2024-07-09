@@ -37,6 +37,7 @@ import {
   GRID_MIN_ROW_UNITS,
   GRID_BASE_UNIT,
 } from 'src/dashboard/util/constants';
+import '../../../types/iki-table.less';
 
 const propTypes = {
   id: PropTypes.string.isRequired,
@@ -412,8 +413,6 @@ class IkiTable extends React.PureComponent {
         } */
 
         iframeSrc = ikigaiOrigin + iframeSrcUrl.pathname + iframeSrcUrl.search;
-
-        console.log('iframe', iframeSrcUrl, iframeHtml, iframeSrc);
       } else {
         iframeSrc = `${ikigaiOrigin}/widget/dataset/table?v=1&editable_dataset_times=${timestamp}&mode=edit`;
       }

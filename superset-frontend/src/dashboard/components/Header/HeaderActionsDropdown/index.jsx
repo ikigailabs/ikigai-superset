@@ -22,7 +22,7 @@ import { isEmpty } from 'lodash';
 import {
   isFeatureEnabled,
   FeatureFlag,
-  SupersetClient,
+  // SupersetClient,
   t,
 } from '@superset-ui/core';
 import { Menu } from 'src/components/Menu';
@@ -211,6 +211,7 @@ class HeaderActionsDropdown extends React.PureComponent {
       refreshFrequency,
       shouldPersistRefreshFrequency,
       editMode,
+      isEmbedded,
       customCss,
       colorNamespace,
       colorScheme,
@@ -236,11 +237,11 @@ class HeaderActionsDropdown extends React.PureComponent {
     // const emailSubject = `${emailTitle} ${dashboardTitle}`;
     // const emailBody = t('Check out this dashboard: ');
 
-    const url = getDashboardUrl({
-      pathname: window.location.pathname,
-      filters: getActiveFilters(),
-      hash: window.location.hash,
-    });
+    // const url = getDashboardUrl({
+    //   pathname: window.location.pathname,
+    //   filters: getActiveFilters(),
+    //   hash: window.location.hash,
+    // });
 
     const refreshIntervalOptions =
       dashboardInfo.common?.conf?.DASHBOARD_AUTO_REFRESH_INTERVALS;

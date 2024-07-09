@@ -55,7 +55,7 @@ function SafeMarkdown({
           defaultSchema,
           htmlSchemaOverrides,
         );
-        rehypePlugins.push([rehypeSanitize, schema]);
+        // rehypePlugins.push([rehypeSanitize, schema]);
       }
     }
     return rehypePlugins;

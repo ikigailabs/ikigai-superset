@@ -55,6 +55,7 @@ import {
   GRID_BASE_UNIT,
 } from 'src/dashboard/util/constants';
 import { refreshChart } from 'src/components/Chart/chartAction';
+import '../../../types/iki-run-pipeline.less';
 
 const { Buffer } = require('buffer');
 

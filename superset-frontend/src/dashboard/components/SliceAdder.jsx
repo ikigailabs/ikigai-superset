@@ -43,6 +43,8 @@ import { slicePropShape } from 'src/dashboard/util/propShapes';
 import { debounce, pickBy } from 'lodash';
 import Checkbox from 'src/components/Checkbox';
 import { InfoTooltipWithTrigger } from '@superset-ui/chart-controls';
+// import Button from 'src/components/Button';
+// import Icons from 'src/components/Icons';
 import AddSliceCard from './AddSliceCard';
 import AddSliceDragPreview from './dnd/AddSliceDragPreview';
 import DragDroppable from './dnd/DragDroppable';
@@ -95,27 +97,27 @@ const StyledSelect = styled(Select)`
   min-width: 150px;
 `;
 
-const NewChartButtonContainer = styled.div`
-  ${({ theme }) => css`
-    display: flex;
-    justify-content: flex-end;
-    padding-right: ${theme.gridUnit * 2}px;
-  `}
-`;
+// const NewChartButtonContainer = styled.div`
+//   ${({ theme }) => css`
+//     display: flex;
+//     justify-content: flex-end;
+//     padding-right: ${theme.gridUnit * 2}px;
+//   `}
+// `;
 
-const NewChartButton = styled(Button)`
-  ${({ theme }) => css`
-    height: auto;
-    & > .anticon + span {
-      margin-left: 0;
-    }
-    & > [role='img']:first-of-type {
-      margin-right: ${theme.gridUnit}px;
-      padding-bottom: 1px;
-      line-height: 0;
-    }
-  `}
-`;
+// const NewChartButton = styled(Button)`
+//   ${({ theme }) => css`
+//     height: auto;
+//     & > .anticon + span {
+//       margin-left: 0;
+//     }
+//     & > [role='img']:first-of-type {
+//       margin-right: ${theme.gridUnit}px;
+//       padding-bottom: 1px;
+//       line-height: 0;
+//     }
+//   `}
+// `;
 
 export const ChartList = styled.div`
   flex-grow: 1;
