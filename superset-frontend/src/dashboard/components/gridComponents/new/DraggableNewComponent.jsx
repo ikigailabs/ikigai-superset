@@ -86,8 +86,14 @@ const NewComponentPlaceholder = styled.div`
 
 export default class DraggableNewComponent extends React.PureComponent {
   render() {
-    const { label, id, type, className, meta, description, demandApp } =
-      this.props;
+    const {
+      label,
+      id,
+      type,
+      className,
+      meta,
+      // description, demandApp
+    } = this.props;
     return (
       <DragDroppable
         component={{ type, id, meta }}

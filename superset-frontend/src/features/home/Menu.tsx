@@ -29,7 +29,7 @@ import React from 'react';
 // import { useUiConfig } from 'src/components/UiConfigContext';
 // import { URL_PARAMS } from 'src/constants';
 // import RightMenu from './MenuRight';
-import { Languages } from './LanguagePicker';
+// import { Languages } from './LanguagePicker';
 
 interface MenuProps {
   data: any;

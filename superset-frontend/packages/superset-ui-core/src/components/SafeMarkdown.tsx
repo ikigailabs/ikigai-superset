@@ -18,7 +18,7 @@
  */
 import React, { useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
-import rehypeSanitize, { defaultSchema } from 'rehype-sanitize';
+import { defaultSchema } from 'rehype-sanitize';
 import rehypeRaw from 'rehype-raw';
 import remarkGfm from 'remark-gfm';
 import { mergeWith, isArray } from 'lodash';
@@ -51,10 +51,10 @@ function SafeMarkdown({
     if (!escapeHtml) {
       rehypePlugins.push(rehypeRaw);
       if (htmlSanitization) {
-        const schema = getOverrideHtmlSchema(
-          defaultSchema,
-          htmlSchemaOverrides,
-        );
+        // const schema = getOverrideHtmlSchema(
+        //   defaultSchema,
+        //   htmlSchemaOverrides,
+        // );
         // rehypePlugins.push([rehypeSanitize, schema]);
       }
     }

@@ -17,9 +17,9 @@
  * under the License.
  */
 import React, { ReactNode, ReactElement } from 'react';
-import { css, SupersetTheme, t, useTheme } from '@superset-ui/core';
+import { css, SupersetTheme } from '@superset-ui/core';
 // eslint-disable-next-line import/no-unresolved
-import { AntdDropdown, AntdDropdownProps } from 'src/components';
+import { AntdDropdownProps } from 'src/components';
 import { TooltipPlacement } from 'src/components/Tooltip';
 import {
   // DynamicEditableTitle,
