@@ -16,8 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from // useEffect // useState,
-'react';
+import React from 'react';
 // import { styled, css, useTheme, SupersetTheme } from '@superset-ui/core';
 // import { debounce } from 'lodash';
 // import { Global } from '@emotion/react';
