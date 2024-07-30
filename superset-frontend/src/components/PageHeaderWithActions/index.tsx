@@ -144,47 +144,47 @@ export const PageHeaderWithActions: any = () => {
   // PageHeaderWithActionsProps
   // {
   // const theme = useTheme();
-  return (
-    <></>
-    // <div css={headerStyles} className="header-with-actions">
-    //   <div className="title-panel">
-    //     <DynamicEditableTitle {...editableTitleProps} />
-    //     {showTitlePanelItems && (
-    //       <div css={buttonsStyles}>
-    //         {certificatiedBadgeProps?.certifiedBy && (
-    //           <CertifiedBadge {...certificatiedBadgeProps} />
-    //         )}
-    //         {showFaveStar && <FaveStar {...faveStarProps} />}
-    //         {titlePanelAdditionalItems}
-    //       </div>
-    //     )}
-    //   </div>
-    //   <div className="right-button-panel">
-    //     {rightPanelAdditionalItems}
-    //     <div css={additionalActionsContainerStyles}>
-    //       {showMenuDropdown && (
-    //         <AntdDropdown
-    //           trigger={['click']}
-    //           overlay={additionalActionsMenu}
-    //           {...menuDropdownProps}
-    //         >
-    //           <Button
-    //             css={menuTriggerStyles}
-    //             buttonStyle="tertiary"
-    //             aria-label={t('Menu actions trigger')}
-    //             tooltip={tooltipProps?.text}
-    //             placement={tooltipProps?.placement}
-    //             data-test="actions-trigger"
-    //           >
-    //             <Icons.MoreHoriz
-    //               iconColor={theme.colors.primary.dark2}
-    //               iconSize="l"
-    //             />
-    //           </Button>
-    //         </AntdDropdown>
-    //       )}
-    //     </div>
-    //   </div>
-    // </div>
-  );
+  // return (
+  <></>;
+  // <div css={headerStyles} className="header-with-actions">
+  //   <div className="title-panel">
+  //     <DynamicEditableTitle {...editableTitleProps} />
+  //     {showTitlePanelItems && (
+  //       <div css={buttonsStyles}>
+  //         {certificatiedBadgeProps?.certifiedBy && (
+  //           <CertifiedBadge {...certificatiedBadgeProps} />
+  //         )}
+  //         {showFaveStar && <FaveStar {...faveStarProps} />}
+  //         {titlePanelAdditionalItems}
+  //       </div>
+  //     )}
+  //   </div>
+  //   <div className="right-button-panel">
+  //     {rightPanelAdditionalItems}
+  //     <div css={additionalActionsContainerStyles}>
+  //       {showMenuDropdown && (
+  //         <AntdDropdown
+  //           trigger={['click']}
+  //           overlay={additionalActionsMenu}
+  //           {...menuDropdownProps}
+  //         >
+  //           <Button
+  //             css={menuTriggerStyles}
+  //             buttonStyle="tertiary"
+  //             aria-label={t('Menu actions trigger')}
+  //             tooltip={tooltipProps?.text}
+  //             placement={tooltipProps?.placement}
+  //             data-test="actions-trigger"
+  //           >
+  //             <Icons.MoreHoriz
+  //               iconColor={theme.colors.primary.dark2}
+  //               iconSize="l"
+  //             />
+  //           </Button>
+  //         </AntdDropdown>
+  //       )}
+  //     </div>
+  //   </div>
+  // </div>
+  // );
 };
