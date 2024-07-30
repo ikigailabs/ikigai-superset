@@ -46,7 +46,7 @@ const defaultProps: PageHeaderWithActionsProps = {
 };
 
 test('Renders', async () => {
-  render(<PageHeaderWithActions {...defaultProps} />);
+  render(<PageHeaderWithActions />);
   expect(screen.getByText('Test title')).toBeVisible();
   expect(screen.getByTestId('fave-unfave-icon')).toBeVisible();
   expect(screen.getByText('Title panel button')).toBeVisible();

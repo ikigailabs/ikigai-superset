@@ -22,12 +22,12 @@ import { isEmpty } from 'lodash';
 import { isFeatureEnabled, FeatureFlag, t } from '@superset-ui/core';
 import { Menu } from 'src/components/Menu';
 import { URL_PARAMS } from 'src/constants';
-import ShareMenuItems from 'src/dashboard/components/menu/ShareMenuItems';
-import DownloadMenuItems from 'src/dashboard/components/menu/DownloadMenuItems';
+// import ShareMenuItems from 'src/dashboard/components/menu/ShareMenuItems';
+// import DownloadMenuItems from 'src/dashboard/components/menu/DownloadMenuItems';
 import CssEditor from 'src/dashboard/components/CssEditor';
 import RefreshIntervalModal from 'src/dashboard/components/RefreshIntervalModal';
-import SaveModal from 'src/dashboard/components/SaveModal';
-import HeaderReportDropdown from 'src/features/reports/ReportModal/HeaderReportDropdown';
+// import SaveModal from 'src/dashboard/components/SaveModal';
+// import HeaderReportDropdown from 'src/features/reports/ReportModal/HeaderReportDropdown';
 import injectCustomCss from 'src/dashboard/util/injectCustomCss';
 // import { SAVE_TYPE_NEWDASHBOARD } from 'src/dashboard/util/constants';
 import FilterScopeModal from 'src/dashboard/components/filterscope/FilterScopeModal';
@@ -194,9 +194,9 @@ class HeaderActionsDropdown extends React.PureComponent {
     // const emailSubject = `${emailTitle} ${dashboardTitle}`;
     // const emailBody = t('Check out this dashboard: ');
 
-    /* const url = getDashboardUrl({
     const isEmbedded = !dashboardInfo?.userId;
 
+    /* const url = getDashboardUrl({
     const url = getDashboardUrl({
       pathname: window.location.pathname,
       filters: getActiveFilters(),

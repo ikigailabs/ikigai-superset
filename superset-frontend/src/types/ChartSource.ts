@@ -20,7 +20,6 @@ import '../dashboard/stylesheets/components/demand-app.less';
 import '../dashboard/stylesheets/components/iki-table.less';
 import '../dashboard/stylesheets/components/iki-process-builder.less';
 import '../dashboard/stylesheets/components/iki-run-pipeline.less';
-import '../dashboard/stylesheets/components/demand-app.less';
 
 export enum ChartSource {
   Explore = 'explore',
