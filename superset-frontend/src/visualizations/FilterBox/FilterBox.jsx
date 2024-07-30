@@ -21,8 +21,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { debounce } from 'lodash';
 import { max as d3Max } from 'd3-array';
-import { AsyncCreatableSelect, CreatableSelect } from 'src/components/Select';
-// import Button from 'src/components/Button';
+import {
+  AsyncCreatableSelect,
+  CreatableSelect,
+} from 'src/components/DeprecatedSelect';
+import Button from 'src/components/Button';
 import {
   css,
   styled,
@@ -44,7 +47,7 @@ import ControlRow from 'src/explore/components/ControlRow';
 import Control from 'src/explore/components/Control';
 import { controls } from 'src/explore/controls';
 import { getExploreUrl } from 'src/explore/exploreUtils';
-import OnPasteSelect from 'src/components/Select/OnPasteSelect';
+import OnPasteSelect from 'src/components/DeprecatedSelect/OnPasteSelect';
 import {
   FILTER_CONFIG_ATTRIBUTES,
   FILTER_OPTIONS_LIMIT,
@@ -82,8 +85,6 @@ const propTypes = {
   showDateFilter: PropTypes.bool,
   showSqlaTimeGrain: PropTypes.bool,
   showSqlaTimeColumn: PropTypes.bool,
-  showDruidTimeGrain: PropTypes.bool,
-  showDruidTimeOrigin: PropTypes.bool,
 };
 const defaultProps = {
   origSelectedValues: {},
@@ -93,8 +94,6 @@ const defaultProps = {
   showDateFilter: false,
   showSqlaTimeGrain: false,
   showSqlaTimeColumn: false,
-  showDruidTimeGrain: false,
-  showDruidTimeOrigin: false,
   instantFiltering: false,
 };
 
@@ -124,6 +123,9 @@ const StyledFilterContainer = styled.div`
   `}
 `;
 
+/**
+ * @deprecated in version 3.0.
+ */
 class FilterBox extends React.PureComponent {
   constructor(props) {
     super(props);
@@ -157,7 +159,7 @@ class FilterBox extends React.PureComponent {
   getControlData(controlName) {
     const { selectedValues } = this.state;
     const control = {
-      ...controls[controlName], // TODO: make these controls ('druid_time_origin', 'granularity', 'granularity_sqla', 'time_grain_sqla') accessible from getControlsForVizType.
+      ...controls[controlName], // TODO: make these controls ('granularity_sqla', 'time_grain_sqla') accessible from getControlsForVizType.
       name: controlName,
       key: `control-${controlName}`,
       value: selectedValues[TIME_FILTER_MAP[controlName]],
@@ -321,34 +323,16 @@ class FilterBox extends React.PureComponent {
   }
 
   renderDatasourceFilters() {
-    const {
-      showSqlaTimeGrain,
-      showSqlaTimeColumn,
-      showDruidTimeGrain,
-      showDruidTimeOrigin,
-    } = this.props;
+    const { showSqlaTimeGrain, showSqlaTimeColumn } = this.props;
     const datasourceFilters = [];
     const sqlaFilters = [];
-    const druidFilters = [];
     if (showSqlaTimeGrain) sqlaFilters.push('time_grain_sqla');
     if (showSqlaTimeColumn) sqlaFilters.push('granularity_sqla');
-    if (showDruidTimeGrain) druidFilters.push('granularity');
-    if (showDruidTimeOrigin) druidFilters.push('druid_time_origin');
     if (sqlaFilters.length) {
       datasourceFilters.push(
         <ControlRow
           key="sqla-filters"
           controls={sqlaFilters.map(control => (
-            <Control {...this.getControlData(control)} />
-          ))}
-        />,
-      );
-    }
-    if (druidFilters.length) {
-      datasourceFilters.push(
-        <ControlRow
-          key="druid-filters"
-          controls={druidFilters.map(control => (
             <Control {...this.getControlData(control)} />
           ))}
         />,

@@ -16,93 +16,101 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { ReactNode, ReactElement } from 'react';
-import { css, SupersetTheme } from '@superset-ui/core';
-import { AntdDropdownProps } from 'src/components';
+import {
+  // React,
+  ReactNode,
+  ReactElement,
+} from 'react';
+// import { css, SupersetTheme, t, useTheme } from '@superset-ui/core';
+import {
+  // AntdDropdown,
+  AntdDropdownProps,
+} from 'src/components';
+import { TooltipPlacement } from 'src/components/Tooltip';
 import {
   // DynamicEditableTitle,
   DynamicEditableTitleProps,
 } from '../DynamicEditableTitle';
-import { CertifiedBadgeProps } from '../CertifiedBadge';
-import { FaveStarProps } from '../FaveStar';
-// import IkiLogo from '../../assets/images/ikigai.png';
+import {
+  // CertifiedBadge,
+  CertifiedBadgeProps,
+} from '../CertifiedBadge';
+import {
+  // FaveStar,
+  FaveStarProps,
+} from '../FaveStar';
+// import Icons from '../Icons';
+// import Button from '../Button';
 
-export const menuTriggerStyles = (theme: SupersetTheme) => css`
-  width: ${theme.gridUnit * 8}px;
-  height: ${theme.gridUnit * 8}px;
-  padding: 0;
-  border: 1px solid ${theme.colors.primary.dark2};
+// export const menuTriggerStyles = (theme: SupersetTheme) => css`
+//   width: ${theme.gridUnit * 8}px;
+//   height: ${theme.gridUnit * 8}px;
+//   padding: 0;
+//   border: 1px solid ${theme.colors.primary.dark2};
 
-  &.ant-btn > span.anticon {
-    line-height: 0;
-    transition: inherit;
-  }
+//   &.ant-btn > span.anticon {
+//     line-height: 0;
+//     transition: inherit;
+//   }
 
-  &:hover:not(:focus) > span.anticon {
-    color: ${theme.colors.primary.light1};
-  }
-`;
+//   &:hover:not(:focus) > span.anticon {
+//     color: ${theme.colors.primary.light1};
+//   }
+// `;
 
-const headerStyles = (theme: SupersetTheme) => css`
-  display: flex;
-  align-items: center;
-  flex-wrap: nowrap;
-  justify-content: space-between;
-  background-color: ${theme.colors.grayscale.light5};
-  height: 65px;
-  padding: 0 ${theme.gridUnit * 4}px;
+// const headerStyles = (theme: SupersetTheme) => css`
+//   display: flex;
+//   flex-direction: row;
+//   align-items: center;
+//   flex-wrap: nowrap;
+//   justify-content: space-between;
+//   background-color: ${theme.colors.grayscale.light5};
+//   height: ${theme.gridUnit * 16}px;
+//   padding: 0 ${theme.gridUnit * 4}px;
 
-  .editable-title {
-    overflow: hidden;
+//   .editable-title {
+//     overflow: hidden;
 
-    & > input[type='button'],
-    & > span {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 100%;
-      white-space: nowrap;
-    }
-  }
+//     & > input[type='button'],
+//     & > span {
+//       overflow: hidden;
+//       text-overflow: ellipsis;
+//       max-width: 100%;
+//       white-space: nowrap;
+//     }
+//   }
 
-  span[role='button'] {
-    display: flex;
-    height: 100%;
-  }
+//   span[role='button'] {
+//     display: flex;
+//     height: 100%;
+//   }
 
-  .title-panel {
-    display: flex;
-    align-items: center;
-    min-width: 0;
-    margin-right: auto;
-    order: 1;
-  }
+//   .title-panel {
+//     display: flex;
+//     align-items: center;
+//     min-width: 0;
+//     margin-right: ${theme.gridUnit * 12}px;
+//   }
 
-  .right-button-panel {
-    display: flex;
-    align-items: center;
-    order: 2;
-  }
+//   .right-button-panel {
+//     display: flex;
+//     align-items: center;
+//   }
+// `;
 
-  .iki-logo {
-    width: 32px;
-    heigh: auto;
-    margin-right: 10px;
-  }
-`;
+// const buttonsStyles = (theme: SupersetTheme) => css`
+//   display: flex;
+//   align-items: center;
+//   padding-left: ${theme.gridUnit * 2}px;
 
-/* const buttonsStyles = (theme: SupersetTheme) => css`
-  display: flex;
-  align-items: center;
-  padding-left: ${theme.gridUnit * 2}px;
+//   & .fave-unfave-icon {
+//     padding: 0 ${theme.gridUnit}px;
 
-  & .fave-unfave-icon {
-    padding: 0 ${theme.gridUnit}px;
-
-    &:first-child {
-      padding-left: 0;
-    }
-  }
-`; */
+//     &:first-of-type {
+//       padding-left: 0;
+//     }
+//   }
+// `;
 
 // const additionalActionsContainerStyles = (theme: SupersetTheme) => css`
 //   margin-left: ${theme.gridUnit * 2}px;
@@ -113,38 +121,72 @@ export type PageHeaderWithActionsProps = {
   showTitlePanelItems: boolean;
   certificatiedBadgeProps?: CertifiedBadgeProps;
   showFaveStar: boolean;
+  showMenuDropdown?: boolean;
   faveStarProps: FaveStarProps;
   titlePanelAdditionalItems: ReactNode;
   rightPanelAdditionalItems: ReactNode;
   additionalActionsMenu: ReactElement;
   menuDropdownProps: Omit<AntdDropdownProps, 'overlay'>;
+  tooltipProps?: {
+    text?: string;
+    placement?: TooltipPlacement;
+  };
 };
 
-export const PageHeaderWithActions = ({
-  // editableTitleProps,
-  // showTitlePanelItems,
-  // certificatiedBadgeProps,
-  // showFaveStar,
-  // faveStarProps,
-  // titlePanelAdditionalItems,
-  // additionalActionsMenu,
-  // menuDropdownProps,
-  rightPanelAdditionalItems,
-}: PageHeaderWithActionsProps) => (
-  <div css={headerStyles} className="header-with-actions">
-    <div className="title-panel">
-      {/* <img className="iki-logo" src={IkiLogo} alt="Ikigai Logo" /> */}
-      {/* <DynamicEditableTitle {...editableTitleProps} /> */}
-      {/* showTitlePanelItems && (
-        <div css={buttonsStyles}>
-          {certificatiedBadgeProps?.certifiedBy && (
-            <CertifiedBadge {...certificatiedBadgeProps} />
-          )}
-          {showFaveStar && <FaveStar {...faveStarProps} />}
-          {titlePanelAdditionalItems}
-        </div>
-          ) */}
-    </div>
-    <div className="right-button-panel">{rightPanelAdditionalItems}</div>
-  </div>
-);
+export const PageHeaderWithActions = ({}: // editableTitleProps,
+// showTitlePanelItems,
+// certificatiedBadgeProps,
+// showFaveStar,
+// faveStarProps,
+// titlePanelAdditionalItems,
+// rightPanelAdditionalItems,
+// additionalActionsMenu,
+// menuDropdownProps,
+// showMenuDropdown = true,
+// tooltipProps,
+PageHeaderWithActionsProps) => {
+  // const theme = useTheme();
+  return (
+    <></>
+    // <div css={headerStyles} className="header-with-actions">
+    //   <div className="title-panel">
+    //     <DynamicEditableTitle {...editableTitleProps} />
+    //     {showTitlePanelItems && (
+    //       <div css={buttonsStyles}>
+    //         {certificatiedBadgeProps?.certifiedBy && (
+    //           <CertifiedBadge {...certificatiedBadgeProps} />
+    //         )}
+    //         {showFaveStar && <FaveStar {...faveStarProps} />}
+    //         {titlePanelAdditionalItems}
+    //       </div>
+    //     )}
+    //   </div>
+    //   <div className="right-button-panel">
+    //     {rightPanelAdditionalItems}
+    //     <div css={additionalActionsContainerStyles}>
+    //       {showMenuDropdown && (
+    //         <AntdDropdown
+    //           trigger={['click']}
+    //           overlay={additionalActionsMenu}
+    //           {...menuDropdownProps}
+    //         >
+    //           <Button
+    //             css={menuTriggerStyles}
+    //             buttonStyle="tertiary"
+    //             aria-label={t('Menu actions trigger')}
+    //             tooltip={tooltipProps?.text}
+    //             placement={tooltipProps?.placement}
+    //             data-test="actions-trigger"
+    //           >
+    //             <Icons.MoreHoriz
+    //               iconColor={theme.colors.primary.dark2}
+    //               iconSize="l"
+    //             />
+    //           </Button>
+    //         </AntdDropdown>
+    //       )}
+    //     </div>
+    //   </div>
+    // </div>
+  );
+};

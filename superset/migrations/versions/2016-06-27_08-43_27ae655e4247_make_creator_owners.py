@@ -34,6 +34,7 @@ from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.orm import relationship
 
 from superset import db
+from superset.utils.core import get_user_id
 
 Base = declarative_base()
 
@@ -63,24 +64,17 @@ dashboard_user = Table(
 
 
 class AuditMixin:
-    @classmethod
-    def get_user_id(cls):
-        try:
-            return g.user.id
-        except Exception:
-            return None
-
     @declared_attr
     def created_by_fk(cls):
         return Column(
-            Integer, ForeignKey("ab_user.id"), default=cls.get_user_id, nullable=False
+            Integer, ForeignKey("ab_user.id"), default=get_user_id, nullable=False
         )
 
     @declared_attr
     def created_by(cls):
         return relationship(
             "User",
-            primaryjoin="%s.created_by_fk == User.id" % cls.__name__,
+            primaryjoin=f"{cls.__name__}.created_by_fk == User.id",
             enable_typechecks=False,
         )
 
