@@ -24,6 +24,7 @@ import re
 from datetime import datetime
 from re import Match, Pattern
 from typing import Any, Callable, cast, ContextManager, NamedTuple, TYPE_CHECKING, Union
+import os
 
 import pandas as pd
 import sqlparse
@@ -1085,6 +1086,9 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
         cls, ex: Exception, context: dict[str, Any] | None = None
     ) -> list[SupersetError]:
         raw_message = cls._extract_error_message(ex)
+
+        ERR_DB_NAME = os.environ.get("ERR_DB_NAME")
+        ALTERNATE_DB_NAME = os.environ.get("ALTERNATE_DB_NAME")
 
         context = context or {}
         for regex, (message, error_type, extra) in cls.custom_errors.items():

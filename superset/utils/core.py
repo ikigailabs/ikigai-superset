@@ -630,11 +630,35 @@ def error_msg_from_exception(ex: Exception) -> str:
     """
     msg = ""
     if hasattr(ex, "message"):
-        if isinstance(ex.message, dict):
+        if isinstance(ex.message, dict):  # type: ignore
             msg = ex.message.get("message")  # type: ignore
-        elif ex.message:
-            msg = ex.message
-    return msg or str(ex)
+        elif ex.message:  # type: ignore
+            msg = ex.message  # type: ignore
+    # return msg or str(ex)
+
+    if msg:
+        return msg
+
+    # If error is not from dremio
+    if ERR_DB_NAME not in str(ex):
+        return str(ex)
+
+    # Load error string to be sent
+    payload = {
+        'error_string':str(ex),
+    }
+
+    # Send to API:
+    url = urljoin(BASE_URL, DREMIO_PARSE_ENDPOINT)
+    response = requests.post(
+        url=url, 
+        data=json.dumps(payload))
+
+    # If API does not respond as expected:
+    if response.status_code != 200:
+        return f'[{response.status_code}] Unable to connect to Error Reporting API please contact support for further assistance.'
+
+    return parse_error_components(response)
 
 
 def markdown(raw: str, markup_wrap: bool | None = False) -> str:
