@@ -107,6 +107,7 @@ TALISMAN_ENABLED = False
 ENABLE_CORS = True
 HTTP_HEADERS={"X-Frame-Options":"ALLOWALL"}
 PUBLIC_ROLE_LIKE = "Public" # remove later
+ENABLE_PROXY_FIX=True
 
 #
 # Optionally import superset_config_docker.py (which will have been included on
