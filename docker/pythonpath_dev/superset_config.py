@@ -106,8 +106,7 @@ OVERRIDE_HTTP_HEADERS = {'X-Frame-Options': 'ALLOWALL'}
 TALISMAN_ENABLED = False
 ENABLE_CORS = True
 HTTP_HEADERS={"X-Frame-Options":"ALLOWALL"}
-PUBLIC_ROLE_LIKE = "Gamma" # remove later
-AUTH_USER_REGISTRATION_ROLE = "Public" # remove later
+PUBLIC_ROLE_LIKE = "Public" # remove later
 
 #
 # Optionally import superset_config_docker.py (which will have been included on
