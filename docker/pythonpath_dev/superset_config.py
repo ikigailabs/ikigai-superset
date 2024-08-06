@@ -25,7 +25,6 @@ import os
 
 from celery.schedules import crontab
 from flask_caching.backends.filesystemcache import FileSystemCache
-from custom_sso_security_manager import CustomSsoSecurityManager
 
 logger = logging.getLogger()
 
@@ -98,8 +97,6 @@ ALERT_REPORTS_NOTIFICATION_DRY_RUN = True
 WEBDRIVER_BASEURL = "http://superset:8088/"
 # The base URL for the email report hyperlinks.
 WEBDRIVER_BASEURL_USER_FRIENDLY = WEBDRIVER_BASEURL
-
-CUSTOM_SECURITY_MANAGER = CustomSsoSecurityManager
 
 SQLLAB_CTAS_NO_LIMIT = True
 OVERRIDE_HTTP_HEADERS = {'X-Frame-Options': 'ALLOWALL'}
