@@ -177,8 +177,8 @@ SQLALCHEMY_TRACK_MODIFICATIONS = False
 # or use `SUPERSET_SECRET_KEY` environment variable.
 # Use a strong complex alphanumeric string and use a tool to help you generate
 # a sufficiently random sequence, ex: openssl rand -base64 42"
-SECRET_KEY = os.environ.get("SUPERSET_SECRET_KEY") or CHANGE_ME_SECRET_KEY
-
+# SECRET_KEY = os.environ.get("SUPERSET_SECRET_KEY") or CHANGE_ME_SECRET_KEY
+SECRET_KEY = "\2\1thisismyscretkey\1\2\\e\\y\\y\\h"
 # The SQLAlchemy connection string.
 SQLALCHEMY_DATABASE_URI = (
     f"""sqlite:///{os.path.join(DATA_DIR, "superset.db")}?check_same_thread=false"""

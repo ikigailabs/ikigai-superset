@@ -33,7 +33,7 @@ from typing import (
     TypedDict,
     Union,
 )
-
+import os
 import pandas as pd
 import sqlparse
 from apispec import APISpec
@@ -1125,7 +1125,8 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
                         extra=extra,
                     )
                 ]
-
+        ERR_DB_NAME = os.environ.get("ERR_DB_NAME")
+        ALTERNATE_DB_NAME = os.environ.get("ALTERNATE_DB_NAME")
         return [
             SupersetError(
                 error_type=SupersetErrorType.GENERIC_DB_ENGINE_ERROR,
