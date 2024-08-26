@@ -377,6 +377,8 @@ class Header extends React.PureComponent {
       shouldPersistRefreshFrequency,
       lastModifiedTime,
       slug,
+      ikigaiOrigin,
+      supersetUrl,
     } = this.props;
 
     // check refresh frequency is for current session or persist
@@ -656,7 +658,7 @@ class Header extends React.PureComponent {
                   )}
                 </div>
               )}
-              <Dropdown
+              {/* <Dropdown
                 overlay={
                   <HeaderActionsDropdown
                     addSuccessToast={this.props.addSuccessToast}
@@ -699,7 +701,7 @@ class Header extends React.PureComponent {
                 }
               >
                 <Icons.MoreVert iconColor="red" />
-              </Dropdown>
+              </Dropdown> */}
             </div>
           }
           menuDropdownProps={{

@@ -58,6 +58,7 @@ import {
 import {
   setDirectPathToChild,
   setEditMode,
+  setSupersetUrl,
 } from 'src/dashboard/actions/dashboardState';
 import {
   deleteTopLevelTabs,
@@ -451,7 +452,11 @@ const DashboardBuilder: FC<DashboardBuilderProps> = () => {
 
       observer.observe(headerRef.current);
     }
+    const iframeUrl: any = new URL(window.location.href);
 
+    if (iframeUrl?.search) {
+      dispatch(setSupersetUrl(iframeUrl.toString()));
+    }
     return () => {
       observer?.disconnect();
     };
