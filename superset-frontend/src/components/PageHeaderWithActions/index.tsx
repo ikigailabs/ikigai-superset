@@ -154,7 +154,7 @@ export const PageHeaderWithActions = ({
           </div>
         )}
       </div> */}
-      <div className="title-panel"></div>
+      {/* <div className="title-panel"></div> */}
       <div className="right-button-panel">
         {rightPanelAdditionalItems}
         <div css={additionalActionsContainerStyles}>

@@ -55,7 +55,7 @@ import setPeriodicRunner, {
   stopPeriodicRender,
 } from 'src/dashboard/util/setPeriodicRunner';
 import { PageHeaderWithActions } from 'src/components/PageHeaderWithActions';
-import { Dropdown } from 'src/components/Dropdown';
+// import { Dropdown } from 'src/components/Dropdown';
 import { DashboardEmbedModal } from '../DashboardEmbedControls';
 import OverwriteConfirm from '../OverwriteConfirm';
 
@@ -377,8 +377,8 @@ class Header extends React.PureComponent {
       shouldPersistRefreshFrequency,
       lastModifiedTime,
       slug,
-      ikigaiOrigin,
-      supersetUrl,
+      // ikigaiOrigin,
+      // supersetUrl,
     } = this.props;
 
     // check refresh frequency is for current session or persist
@@ -477,7 +477,7 @@ class Header extends React.PureComponent {
       shouldPersistRefreshFrequency,
       setRefreshFrequency,
       lastModifiedTime,
-      filterboxMigrationState,
+      // filterboxMigrationState,
       ikigaiOrigin,
       supersetUrl,
       logEvent,

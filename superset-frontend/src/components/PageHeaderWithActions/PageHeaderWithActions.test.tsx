@@ -18,9 +18,15 @@
  */
 
 import React from 'react';
-import { render, screen } from 'spec/helpers/testing-library';
+import {
+  // render,
+  screen,
+} from 'spec/helpers/testing-library';
 import userEvent from '@testing-library/user-event';
-import { PageHeaderWithActions, PageHeaderWithActionsProps } from './index';
+import {
+  // PageHeaderWithActions,
+  PageHeaderWithActionsProps,
+} from './index';
 import { Menu } from '../Menu';
 
 const defaultProps: PageHeaderWithActionsProps = {
@@ -46,7 +52,7 @@ const defaultProps: PageHeaderWithActionsProps = {
 };
 
 test('Renders', async () => {
-  render(<PageHeaderWithActions />);
+  // render(<PageHeaderWithActions />);
   expect(screen.getByText('Test title')).toBeVisible();
   expect(screen.getByTestId('fave-unfave-icon')).toBeVisible();
   expect(screen.getByText('Title panel button')).toBeVisible();
