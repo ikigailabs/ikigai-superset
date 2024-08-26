@@ -71,6 +71,8 @@ CACHE_CONFIG = {
 }
 DATA_CACHE_CONFIG = CACHE_CONFIG
 
+from security import CustomSecurityManager
+CUSTOM_SECURITY_MANAGER = CustomSecurityManager
 
 class CeleryConfig:
     broker_url = f"redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_CELERY_DB}"
