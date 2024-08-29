@@ -26,6 +26,8 @@ import { t, styled, css } from '@superset-ui/core';
 import { Input } from 'src/components/Input';
 import { Select } from 'src/components';
 import Loading from 'src/components/Loading';
+import Button from 'src/components/Button';
+import Icons from 'src/components/Icons';
 import {
   LocalStorageKeys,
   getItem,
@@ -43,18 +45,16 @@ import { slicePropShape } from 'src/dashboard/util/propShapes';
 import { debounce, pickBy } from 'lodash';
 import Checkbox from 'src/components/Checkbox';
 import { InfoTooltipWithTrigger } from '@superset-ui/chart-controls';
-// import Button from 'src/components/Button';
-// import Icons from 'src/components/Icons';
 import AddSliceCard from './AddSliceCard';
 import AddSliceDragPreview from './dnd/AddSliceDragPreview';
 import DragDroppable from './dnd/DragDroppable';
 
 const propTypes = {
-  fetchSlices: PropTypes.func,
-  updateSlices: PropTypes.func,
-  isLoading: PropTypes.bool,
-  slices: PropTypes.objectOf(slicePropShape),
-  lastUpdated: PropTypes.number,
+  fetchSlices: PropTypes.func.isRequired,
+  updateSlices: PropTypes.func.isRequired,
+  isLoading: PropTypes.bool.isRequired,
+  slices: PropTypes.objectOf(slicePropShape).isRequired,
+  lastUpdated: PropTypes.number.isRequired,
   errorMessage: PropTypes.string,
   userId: PropTypes.number,
   selectedSliceIds: PropTypes.arrayOf(PropTypes.number),
@@ -97,27 +97,27 @@ const StyledSelect = styled(Select)`
   min-width: 150px;
 `;
 
-// const NewChartButtonContainer = styled.div`
-//   ${({ theme }) => css`
-//     display: flex;
-//     justify-content: flex-end;
-//     padding-right: ${theme.gridUnit * 2}px;
-//   `}
-// `;
+const NewChartButtonContainer = styled.div`
+  ${({ theme }) => css`
+    display: flex;
+    justify-content: flex-end;
+    padding-right: ${theme.gridUnit * 2}px;
+  `}
+`;
 
-// const NewChartButton = styled(Button)`
-//   ${({ theme }) => css`
-//     height: auto;
-//     & > .anticon + span {
-//       margin-left: 0;
-//     }
-//     & > [role='img']:first-of-type {
-//       margin-right: ${theme.gridUnit}px;
-//       padding-bottom: 1px;
-//       line-height: 0;
-//     }
-//   `}
-// `;
+const NewChartButton = styled(Button)`
+  ${({ theme }) => css`
+    height: auto;
+    & > .anticon + span {
+      margin-left: 0;
+    }
+    & > [role='img']:first-of-type {
+      margin-right: ${theme.gridUnit}px;
+      padding-bottom: 1px;
+      line-height: 0;
+    }
+  `}
+`;
 
 export const ChartList = styled.div`
   flex-grow: 1;
@@ -320,8 +320,6 @@ class SliceAdder extends React.Component {
 
   render() {
     return (
-      <div className="slice-adder-container">
-        {/* <NewChartButtonContainer>
       <div
         css={css`
           height: 100%;
@@ -329,7 +327,7 @@ class SliceAdder extends React.Component {
           flex-direction: column;
         `}
       >
-        <NewChartButtonContainer>
+        {/* <NewChartButtonContainer>
           <NewChartButton
             buttonStyle="link"
             buttonSize="xsmall"
