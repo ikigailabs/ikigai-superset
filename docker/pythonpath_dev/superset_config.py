@@ -103,7 +103,7 @@ OVERRIDE_HTTP_HEADERS = {'X-Frame-Options': 'ALLOWALL'}
 TALISMAN_ENABLED = False
 ENABLE_CORS = True
 HTTP_HEADERS={"X-Frame-Options":"ALLOWALL"}
-PUBLIC_ROLE_LIKE = "Public" # remove later
+PUBLIC_ROLE_LIKE = "Public"
 ENABLE_PROXY_FIX=True
 
 #
