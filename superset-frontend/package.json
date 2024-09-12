@@ -1,6 +1,6 @@
 {
   "name": "superset",
-  "version": "3.0.2",
+  "version": "3.0.4",
   "description": "Superset is a data exploration platform designed to be visual, intuitive, and interactive.",
   "keywords": [
     "big",
@@ -85,6 +85,7 @@
     "@emotion/react": "^11.4.1",
     "@emotion/styled": "^11.3.0",
     "@fontsource/inter": "^4.0.0",
+    "@react-spring/web": "^9.7.3",
     "@reduxjs/toolkit": "^1.9.3",
     "@scarf/scarf": "^1.1.1",
     "@superset-ui/chart-controls": "file:./packages/superset-ui-chart-controls",
@@ -133,6 +134,7 @@
     "chrono-node": "^2.2.6",
     "classnames": "^2.2.5",
     "core-js": "^3.6.5",
+    "currencyformatter.js": "^2.2.0",
     "d3-array": "^1.2.4",
     "d3-color": "^3.1.0",
     "d3-scale": "^2.1.2",
@@ -322,7 +324,7 @@
     "less-loader": "^10.2.0",
     "mini-css-extract-plugin": "^2.3.0",
     "mock-socket": "^9.0.3",
-    "node-fetch": "^2.6.1",
+    "node-fetch": "^2.6.7",
     "prettier": "^2.4.1",
     "prettier-plugin-packagejson": "^2.2.15",
     "process": "^0.11.10",

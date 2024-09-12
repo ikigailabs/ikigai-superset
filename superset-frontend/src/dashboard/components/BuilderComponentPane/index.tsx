@@ -1,3 +1,4 @@
+/* eslint-disable import/no-unresolved */
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -23,13 +24,26 @@ import Tabs from 'src/components/Tabs';
 import { t, css, SupersetTheme } from '@superset-ui/core';
 import SliceAdder from 'src/dashboard/containers/SliceAdder';
 import dashboardComponents from 'src/visualizations/presets/dashboardComponents';
-import NewColumn from '../gridComponents/new/NewColumn';
-import NewDivider from '../gridComponents/new/NewDivider';
-import NewHeader from '../gridComponents/new/NewHeader';
-import NewRow from '../gridComponents/new/NewRow';
-import NewTabs from '../gridComponents/new/NewTabs';
-import NewMarkdown from '../gridComponents/new/NewMarkdown';
+import NewColumn from '../gridComponents/new/layout/NewColumn';
+import NewDivider from '../gridComponents/new/layout/NewDivider';
+import NewHeader from '../gridComponents/new/layout/NewHeader';
+import NewRow from '../gridComponents/new/layout/NewRow';
+import NewTabs from '../gridComponents/new/layout/NewTabs';
+import NewMarkdown from '../gridComponents/new/layout/NewMarkdown';
 import NewDynamicComponent from '../gridComponents/new/NewDynamicComponent';
+import NewIkiTable from '../gridComponents/new/components/NewIkiTable';
+import NewIkiProcessBuilder from '../gridComponents/new/components/NewIkiProcessBuilder';
+import NewIkiRunPipeline from '../gridComponents/new/components/NewIkiRunPipeline';
+import NewDeepCast from '../gridComponents/new/components/NewDeepCast';
+import NewIkiEitlRow from '../gridComponents/new/components/NewIkiEitlRow';
+import NewIkiEitlColumn from '../gridComponents/new/components/NewIkiEitlColumn';
+import NewDyanmicMarkdown from '../gridComponents/new/components/NewDynamicMarkdown';
+// import NewIkiExplainability from '../gridComponents/new/NewIkiExplainability';
+import NewIkiModelMetrics from '../gridComponents/new/NewIkiModelMetrics';
+import NewIkiDatasetDownload from '../gridComponents/new/components/NewIkiDatasetDownload';
+import NewExternalDatasets from '../gridComponents/new/components/NewExternalDatasets';
+import NewForecast from '../gridComponents/new/components/NewForecast';
+import NewForecastModule from '../gridComponents/new/components/NewForecastModule';
 
 const BUILDER_PANE_WIDTH = 374;
 
@@ -69,22 +83,29 @@ const BuilderComponentPane = ({ topOffset = 0 }) => (
           }
         `}
       >
-        <Tabs.TabPane
-          key={1}
-          tab={t('Charts')}
-          css={css`
-            height: 100%;
-          `}
-        >
-          <SliceAdder />
-        </Tabs.TabPane>
-        <Tabs.TabPane key={2} tab={t('Layout elements')}>
+        <Tabs.TabPane key={1} tab={t('Layout')}>
           <NewTabs />
           <NewRow />
           <NewColumn />
           <NewHeader />
           <NewMarkdown />
           <NewDivider />
+        </Tabs.TabPane>
+        <Tabs.TabPane key={2} tab={t('Components')}>
+          <NewDyanmicMarkdown />
+          <NewIkiTable />
+          <NewIkiProcessBuilder />
+          <NewIkiRunPipeline />
+          <NewDeepCast />
+          <NewIkiEitlRow />
+          <NewIkiEitlColumn />
+          <NewForecastModule />
+          <NewIkiDatasetDownload />
+          <NewIkiModelMetrics />
+          <NewExternalDatasets />
+          <NewForecast />
+
+          {/* <NewIkiExplainability /> */}
           {dashboardComponents
             .getAll()
             .map(({ key: componentKey, metadata }) => (
@@ -93,6 +114,9 @@ const BuilderComponentPane = ({ topOffset = 0 }) => (
                 componentKey={componentKey}
               />
             ))}
+        </Tabs.TabPane>
+        <Tabs.TabPane key={3} tab={t('Charts')} className="tab-charts">
+          <SliceAdder />
         </Tabs.TabPane>
       </Tabs>
     </div>

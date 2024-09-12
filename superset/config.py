@@ -145,7 +145,7 @@ BUILD_NUMBER = None
 DEFAULT_VIZ_TYPE = "table"
 
 # default row limit when requesting chart data
-ROW_LIMIT = 50000
+ROW_LIMIT = 1000000
 # default row limit when requesting samples from datasource in explore view
 SAMPLES_ROW_LIMIT = 1000
 # default row limit for native filters
@@ -156,15 +156,11 @@ FILTER_SELECT_ROW_LIMIT = 10000
 # values may be "Last day", "Last week", "<ISO date> : now", etc.
 DEFAULT_TIME_FILTER = NO_TIME_RANGE
 
-SUPERSET_WEBSERVER_PROTOCOL = "http"
-SUPERSET_WEBSERVER_ADDRESS = "0.0.0.0"
-SUPERSET_WEBSERVER_PORT = 8088
-
 # This is an important setting, and should be lower than your
 # [load balancer / proxy / envoy / kong / ...] timeout settings.
 # You should also make sure to configure your WSGI server
 # (gunicorn, nginx, apache, ...) timeout setting to be <= to this setting
-SUPERSET_WEBSERVER_TIMEOUT = int(timedelta(minutes=1).total_seconds())
+SUPERSET_WEBSERVER_TIMEOUT = int(timedelta(minutes=2).total_seconds())
 
 # this 2 settings are used by dashboard period force refresh feature
 # When user choose auto force refresh frequency
@@ -174,8 +170,9 @@ SUPERSET_WEBSERVER_TIMEOUT = int(timedelta(minutes=1).total_seconds())
 SUPERSET_DASHBOARD_PERIODICAL_REFRESH_LIMIT = 0
 SUPERSET_DASHBOARD_PERIODICAL_REFRESH_WARNING_MESSAGE = None
 
-SUPERSET_DASHBOARD_POSITION_DATA_LIMIT = 65535
-CUSTOM_SECURITY_MANAGER = None
+SUPERSET_DASHBOARD_POSITION_DATA_LIMIT = 131070
+# CUSTOM_SECURITY_MANAGER = None
+
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 # ---------------------------------------------------------
 
@@ -183,7 +180,8 @@ SQLALCHEMY_TRACK_MODIFICATIONS = False
 # or use `SUPERSET_SECRET_KEY` environment variable.
 # Use a strong complex alphanumeric string and use a tool to help you generate
 # a sufficiently random sequence, ex: openssl rand -base64 42"
-SECRET_KEY = os.environ.get("SUPERSET_SECRET_KEY") or CHANGE_ME_SECRET_KEY
+# SECRET_KEY = os.environ.get("SUPERSET_SECRET_KEY") or CHANGE_ME_SECRET_KEY
+SECRET_KEY = "\2\1thisismyscretkey\1\2\\e\\y\\y\\h"
 
 # The SQLAlchemy connection string.
 SQLALCHEMY_DATABASE_URI = (
@@ -265,7 +263,7 @@ SHOW_STACKTRACE = False
 
 # Use all X-Forwarded headers when ENABLE_PROXY_FIX is True.
 # When proxying to a different port, set "x_port" to 0 to avoid downstream issues.
-ENABLE_PROXY_FIX = False
+ENABLE_PROXY_FIX = True
 PROXY_FIX_CONFIG = {"x_for": 1, "x_proto": 1, "x_host": 1, "x_port": 1, "x_prefix": 1}
 
 # Configuration for scheduling queries from SQL Lab.
@@ -322,7 +320,7 @@ AUTH_TYPE = AUTH_DB
 # AUTH_ROLE_ADMIN = 'Admin'
 
 # Uncomment to setup Public role name, no authentication needed
-# AUTH_ROLE_PUBLIC = 'Public'
+AUTH_ROLE_PUBLIC = 'Public'
 
 # Will allow user self registration
 # AUTH_USER_REGISTRATION = True
@@ -872,6 +870,11 @@ BACKUP_COUNT = 30
 #     pass
 QUERY_LOGGER = None
 
+# Uncomment below to view SQL Query in logs
+# def log_sql_statements(database, query, schema, user, client, security_manager): 
+#     logger.info("Ikigai SQL Query :" + str(query)) 
+# QUERY_LOGGER = log_sql_statements
+
 # Set this API key to enable Mapbox visualizations
 MAPBOX_API_KEY = os.environ.get("MAPBOX_API_KEY", "")
 
@@ -1401,52 +1404,70 @@ PREFERRED_DATABASES: list[str] = [
 TEST_DATABASE_CONNECTION_TIMEOUT = timedelta(seconds=30)
 
 # Enable/disable CSP warning
-CONTENT_SECURITY_POLICY_WARNING = True
+CONTENT_SECURITY_POLICY_WARNING = False
 
 # Do you want Talisman enabled?
-TALISMAN_ENABLED = utils.cast_to_boolean(os.environ.get("TALISMAN_ENABLED", True))
+# TALISMAN_ENABLED = utils.cast_to_boolean(os.environ.get("TALISMAN_ENABLED", True))
+TALISMAN_ENABLED = False
 
 # If you want Talisman, how do you want it configured??
+# TALISMAN_CONFIG = {
+#     "content_security_policy": {
+#         "base-uri": ["'self'"],
+#         "default-src": ["'self'"],
+#         "img-src": ["'self'", "blob:", "data:"],
+#         "worker-src": ["'self'", "blob:"],
+#         "connect-src": [
+#             "'self'",
+#             "https://api.mapbox.com",
+#             "https://events.mapbox.com",
+#         ],
+#         "object-src": "'none'",
+#         "style-src": [
+#             "'self'",
+#             "'unsafe-inline'",
+#         ],
+#         "script-src": ["'self'", "'strict-dynamic'"],
+#     },
+#     "content_security_policy_nonce_in": ["script-src"],
+#     "force_https": False,
+#     "session_cookie_secure": False,
+# }
+
 TALISMAN_CONFIG = {
-    "content_security_policy": {
-        "default-src": ["'self'"],
-        "img-src": ["'self'", "blob:", "data:"],
-        "worker-src": ["'self'", "blob:"],
-        "connect-src": [
-            "'self'",
-            "https://api.mapbox.com",
-            "https://events.mapbox.com",
-        ],
-        "object-src": "'none'",
-        "style-src": [
-            "'self'",
-            "'unsafe-inline'",
-        ],
-        "script-src": ["'self'", "'strict-dynamic'"],
-    },
-    "content_security_policy_nonce_in": ["script-src"],
-    "force_https": False,
+    "content_security_policy": None,
+    "force_https": True,
+    "force_https_permanent": False,
 }
+
 # React requires `eval` to work correctly in dev mode
+# TALISMAN_DEV_CONFIG = {
+#     "content_security_policy": {
+#         "base-uri": ["'self'"],
+#         "default-src": ["'self'"],
+#         "img-src": ["'self'", "blob:", "data:"],
+#         "worker-src": ["'self'", "blob:"],
+#         "connect-src": [
+#             "'self'",
+#             "https://api.mapbox.com",
+#             "https://events.mapbox.com",
+#         ],
+#         "object-src": "'none'",
+#         "style-src": [
+#             "'self'",
+#             "'unsafe-inline'",
+#         ],
+#         "script-src": ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+#     },
+#     "content_security_policy_nonce_in": ["script-src"],
+#     "force_https": False,
+#     "session_cookie_secure": False,
+# }
+
 TALISMAN_DEV_CONFIG = {
-    "content_security_policy": {
-        "default-src": ["'self'"],
-        "img-src": ["'self'", "blob:", "data:"],
-        "worker-src": ["'self'", "blob:"],
-        "connect-src": [
-            "'self'",
-            "https://api.mapbox.com",
-            "https://events.mapbox.com",
-        ],
-        "object-src": "'none'",
-        "style-src": [
-            "'self'",
-            "'unsafe-inline'",
-        ],
-        "script-src": ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
-    },
-    "content_security_policy_nonce_in": ["script-src"],
-    "force_https": False,
+    "content_security_policy": None,
+    "force_https": True,
+    "force_https_permanent": False,
 }
 
 #
@@ -1457,7 +1478,19 @@ TALISMAN_DEV_CONFIG = {
 #
 SESSION_COOKIE_HTTPONLY = True  # Prevent cookie from being read by frontend JS?
 SESSION_COOKIE_SECURE = False  # Prevent cookie from being transmitted over non-tls?
-SESSION_COOKIE_SAMESITE: Literal["None", "Lax", "Strict"] | None = "Lax"
+SESSION_COOKIE_SAMESITE: "None"
+# Whether to use server side sessions from flask-session or Flask secure cookies
+SESSION_SERVER_SIDE = False
+# Example config using Redis as the backend for server side sessions
+# from flask_session import RedisSessionInterface
+#
+# SESSION_SERVER_SIDE = True
+# SESSION_USE_SIGNER = True
+# SESSION_TYPE = "redis"
+# SESSION_REDIS = Redis(host="localhost", port=6379, db=0)
+#
+# Other possible config options and backends:
+# # https://flask-session.readthedocs.io/en/latest/config.html
 
 # Cache static resources.
 SEND_FILE_MAX_AGE_DEFAULT = int(timedelta(days=365).total_seconds())

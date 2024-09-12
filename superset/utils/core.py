@@ -19,6 +19,7 @@
 from __future__ import annotations
 
 import _thread
+import requests
 import collections
 import decimal
 import errno
@@ -51,6 +52,8 @@ from timeit import default_timer
 from types import TracebackType
 from typing import Any, Callable, cast, NamedTuple, TYPE_CHECKING, TypeVar
 from urllib.parse import unquote_plus
+from urllib.parse import urljoin
+
 from zipfile import ZipFile
 
 import markdown as md
@@ -103,6 +106,7 @@ from superset.utils.database import get_example_database
 from superset.utils.date_parser import parse_human_timedelta
 from superset.utils.dates import datetime_to_epoch, EPOCH
 from superset.utils.hashing import md5_sha_from_dict, md5_sha_from_str
+from superset.utils.ikigai_utils import parse_error_components
 
 if TYPE_CHECKING:
     from superset.connectors.base.models import BaseColumn, BaseDatasource
@@ -601,6 +605,16 @@ def json_dumps_w_dates(payload: dict[Any, Any], sort_keys: bool = False) -> str:
 
 
 def error_msg_from_exception(ex: Exception) -> str:
+    """Superset function with minor changes to assist with Dremio Error Reporting.
+    - Captures error message
+    - Checks if error message has "Dremio" in it
+        - If not does not affect supersets pipeline
+        - If yes stores it in "PAYLOAD"
+    - send response to parser
+    - Send parser functions reply to superset error output"""
+    ERR_DB_NAME = os.environ.get("ERR_DB_NAME")
+    BASE_URL = os.environ.get("BASE_URL")
+    DREMIO_PARSE_ENDPOINT = os.environ.get("DREMIO_PARSE_ENDPOINT")
     """Translate exception into error message
 
     Database have different ways to handle exception. This function attempts
@@ -616,11 +630,35 @@ def error_msg_from_exception(ex: Exception) -> str:
     """
     msg = ""
     if hasattr(ex, "message"):
-        if isinstance(ex.message, dict):
+        if isinstance(ex.message, dict):  # type: ignore
             msg = ex.message.get("message")  # type: ignore
-        elif ex.message:
-            msg = ex.message
-    return msg or str(ex)
+        elif ex.message:  # type: ignore
+            msg = ex.message  # type: ignore
+    # return msg or str(ex)
+
+    if msg:
+        return msg
+
+    # If error is not from dremio
+    if ERR_DB_NAME not in str(ex):
+        return str(ex)
+
+    # Load error string to be sent
+    payload = {
+        'error_string':str(ex),
+    }
+
+    # Send to API:
+    url = urljoin(BASE_URL, DREMIO_PARSE_ENDPOINT)
+    response = requests.post(
+        url=url, 
+        data=json.dumps(payload))
+
+    # If API does not respond as expected:
+    if response.status_code != 200:
+        return f'[{response.status_code}] Unable to connect to Error Reporting API please contact support for further assistance.'
+
+    return parse_error_components(response)
 
 
 def markdown(raw: str, markup_wrap: bool | None = False) -> str:
@@ -1413,6 +1451,15 @@ def split_adhoc_filters_into_base_filters(  # pylint: disable=invalid-name
         form_data["where"] = " AND ".join([f"({sql})" for sql in sql_where_filters])
         form_data["having"] = " AND ".join([f"({sql})" for sql in sql_having_filters])
         form_data["filters"] = simple_where_filters
+
+
+def get_user() -> User | None:
+    """
+    Get the current user (if defined).
+
+    :returns: The current user
+    """
+    return g.user if hasattr(g, "user") else None
 
 
 def get_username() -> str | None:

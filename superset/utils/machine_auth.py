@@ -56,17 +56,17 @@ class MachineAuthProvider:
             return self._auth_webdriver_func_override(driver, user)
 
         # Setting cookies requires doing a request first
-        driver.get(headless_url("/login/"))
+        # driver.get(headless_url("/login/"))
 
-        if user:
-            cookies = self.get_auth_cookies(user)
-        elif request.cookies:
-            cookies = request.cookies
-        else:
-            cookies = {}
+        # if user:
+        #     cookies = self.get_auth_cookies(user)
+        # elif request.cookies:
+        #     cookies = request.cookies
+        # else:
+        #     cookies = {}
 
-        for cookie_name, cookie_val in cookies.items():
-            driver.add_cookie(dict(name=cookie_name, value=cookie_val))
+        # for cookie_name, cookie_val in cookies.items():
+        #     driver.add_cookie(dict(name=cookie_name, value=cookie_val))
 
         return driver
 

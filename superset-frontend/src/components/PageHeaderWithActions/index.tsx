@@ -17,17 +17,17 @@
  * under the License.
  */
 import React, { ReactNode, ReactElement } from 'react';
-import { css, SupersetTheme, t, useTheme } from '@superset-ui/core';
-import { AntdDropdown, AntdDropdownProps } from 'src/components';
+import { css, SupersetTheme } from '@superset-ui/core';
+// eslint-disable-next-line import/no-unresolved
+import { AntdDropdownProps } from 'src/components';
 import { TooltipPlacement } from 'src/components/Tooltip';
 import {
-  DynamicEditableTitle,
+  // DynamicEditableTitle,
   DynamicEditableTitleProps,
 } from '../DynamicEditableTitle';
-import CertifiedBadge, { CertifiedBadgeProps } from '../CertifiedBadge';
-import FaveStar, { FaveStarProps } from '../FaveStar';
-import Icons from '../Icons';
-import Button from '../Button';
+import { CertifiedBadgeProps } from '../CertifiedBadge';
+import { FaveStarProps } from '../FaveStar';
+// import IkiLogo from '../../assets/images/ikigai.png';
 
 export const menuTriggerStyles = (theme: SupersetTheme) => css`
   width: ${theme.gridUnit * 8}px;
@@ -47,12 +47,11 @@ export const menuTriggerStyles = (theme: SupersetTheme) => css`
 
 const headerStyles = (theme: SupersetTheme) => css`
   display: flex;
-  flex-direction: row;
   align-items: center;
   flex-wrap: nowrap;
   justify-content: space-between;
   background-color: ${theme.colors.grayscale.light5};
-  height: ${theme.gridUnit * 16}px;
+  height: 65px;
   padding: 0 ${theme.gridUnit * 4}px;
 
   .editable-title {
@@ -76,16 +75,24 @@ const headerStyles = (theme: SupersetTheme) => css`
     display: flex;
     align-items: center;
     min-width: 0;
-    margin-right: ${theme.gridUnit * 12}px;
+    margin-right: auto;
+    order: 1;
   }
 
   .right-button-panel {
     display: flex;
     align-items: center;
+    order: 2;
+  }
+
+  .iki-logo {
+    width: 32px;
+    heigh: auto;
+    margin-right: 10px;
   }
 `;
 
-const buttonsStyles = (theme: SupersetTheme) => css`
+/* const buttonsStyles = (theme: SupersetTheme) => css`
   display: flex;
   align-items: center;
   padding-left: ${theme.gridUnit * 2}px;
@@ -97,11 +104,11 @@ const buttonsStyles = (theme: SupersetTheme) => css`
       padding-left: 0;
     }
   }
-`;
+`; */
 
-const additionalActionsContainerStyles = (theme: SupersetTheme) => css`
-  margin-left: ${theme.gridUnit * 2}px;
-`;
+// const additionalActionsContainerStyles = (theme: SupersetTheme) => css`
+//   margin-left: ${theme.gridUnit * 2}px;
+// `;
 
 export type PageHeaderWithActionsProps = {
   editableTitleProps: DynamicEditableTitleProps;
@@ -120,13 +127,27 @@ export type PageHeaderWithActionsProps = {
 };
 
 export const PageHeaderWithActions = ({
-  editableTitleProps,
-  showTitlePanelItems,
-  certificatiedBadgeProps,
-  showFaveStar,
-  faveStarProps,
-  titlePanelAdditionalItems,
+  // editableTitleProps,
+  // showTitlePanelItems,
+  // certificatiedBadgeProps,
+  // showFaveStar,
+  // faveStarProps,
+  // titlePanelAdditionalItems,
+  // additionalActionsMenu,
+  // menuDropdownProps,
   rightPanelAdditionalItems,
+}: PageHeaderWithActionsProps) => (
+  <div css={headerStyles} className="header-with-actions">
+    <div className="title-panel">
+      {/* <img className="iki-logo" src={IkiLogo} alt="Ikigai Logo" /> */}
+      {/* <DynamicEditableTitle {...editableTitleProps} /> */}
+      {/* showTitlePanelItems && (
+        <div css={buttonsStyles}>
+          {certificatiedBadgeProps?.certifiedBy && (
+            <CertifiedBadge {...certificatiedBadgeProps} />
+          )}
+          {showFaveStar && <FaveStar {...faveStarProps} />}
+          {titlePanelAdditionalItems}
   additionalActionsMenu,
   menuDropdownProps,
   tooltipProps,
@@ -169,7 +190,8 @@ export const PageHeaderWithActions = ({
             </Button>
           </AntdDropdown>
         </div>
-      </div>
+          ) */}
     </div>
-  );
-};
+    <div className="right-button-panel">{rightPanelAdditionalItems}</div>
+  </div>
+);

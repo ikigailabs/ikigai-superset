@@ -1,4 +1,5 @@
 import { DatasourceType, NativeFilterScope } from '@superset-ui/core';
+// eslint-disable-next-line import/no-unresolved
 import { Datasource } from 'src/dashboard/types';
 import { DASHBOARD_ROOT_ID } from './util/constants';
 /**

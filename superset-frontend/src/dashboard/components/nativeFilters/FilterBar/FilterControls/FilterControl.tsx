@@ -1,3 +1,4 @@
+/* eslint-disable import/no-unresolved */
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -49,7 +50,6 @@ const VerticalFilterControlTitle = styled.h4`
 const HorizontalFilterControlTitle = styled(VerticalFilterControlTitle)`
   font-weight: ${({ theme }) => theme.typography.weights.normal};
   color: ${({ theme }) => theme.colors.grayscale.base};
-  max-width: ${({ theme }) => theme.gridUnit * 15}px;
   ${truncationCSS};
 `;
 

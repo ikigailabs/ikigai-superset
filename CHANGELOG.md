@@ -19,9 +19,13 @@ under the License.
 
 ## Change Log
 
+- [3.0.4](#304-mon-feb-12-190913-2024--0800)
+- [3.0.3](#303-tue-jan-9-164807-2023--0300)
 - [3.0.2](#302-mon-nov-20-073838-2023--0500)
 - [3.0.1](#301-tue-oct-13-103221-2023--0700)
 - [3.0.0](#300-thu-aug-24-133627-2023--0600)
+- [2.1.3](#213-fri-dec-8-163651-2023--0700)
+- [2.1.2](#212-wed-oct-18-165930-2023--0700)
 - [2.1.1](#211-sun-apr-23-154421-2023-0100)
 - [2.1.0](#210-thu-mar-16-211305-2023--0700)
 - [2.0.1](#201-fri-nov-4-103402-2022--0400)
@@ -32,6 +36,118 @@ under the License.
 - [1.5.0](#150-fri-apr-22-172330-2022--0400)
 - [1.4.2](#142-sat-mar-19-000806-2022-0200)
 - [1.4.1](#141)
+
+### 3.0.4 (Mon Feb 12 19:09:13 2024 -0800)
+
+**Features**
+
+- [#25795](https://github.com/apache/superset/pull/25795) feat: support server-side sessions (@dpgaspar)
+
+**Fixes**
+
+- [#27096](https://github.com/apache/superset/pull/27096) fix(big_number): white-space: nowrap to prevent wrapping (@mistercrunch)
+- [#27066](https://github.com/apache/superset/pull/27066) fix: Drill by with GLOBAL_ASYNC_QUERIES (@kgabryje)
+- [#27039](https://github.com/apache/superset/pull/27039) fix: bump FAB to 4.3.11 (@dpgaspar)
+- [#26993](https://github.com/apache/superset/pull/26993) fix: chart import validation (@dpgaspar)
+- [#27073](https://github.com/apache/superset/pull/27073) fix(drill): no rows returned (@betodealmeida)
+- [#27069](https://github.com/apache/superset/pull/27069) fix: Filters sidebar stretching dashboard height (@kgabryje)
+- [#27041](https://github.com/apache/superset/pull/27041) fix(plugins): missing currency on small number format in table chart (@justinpark)
+- [#27023](https://github.com/apache/superset/pull/27023) fix(explore): allow free-form d3 format on custom column formatting (@justinpark)
+- [#27019](https://github.com/apache/superset/pull/27019) fix: safer error message in alerts (@betodealmeida)
+- [#27015](https://github.com/apache/superset/pull/27015) fix(security manager): Users should not have access to all draft dashboards (@Vitor-Avila)
+- [#26946](https://github.com/apache/superset/pull/26946) fix: column values with NaN (@betodealmeida)
+- [#26964](https://github.com/apache/superset/pull/26964) fix(plugin-chart-table): Prevent misalignment of totals and headers when scrollbar is visible (@kgabryje)
+- [#22849](https://github.com/apache/superset/pull/22849) fix(cache): remove unused webserver config & handle trailing slashes (@Usiel)
+- [#26889](https://github.com/apache/superset/pull/26889) fix: Allow exporting saved queries without schema information (@sbernauer)
+- [#26887](https://github.com/apache/superset/pull/26887) fix: dashboard import validation (@dpgaspar)
+- [#26911](https://github.com/apache/superset/pull/26911) fix: handle CRLF endings causing sqlglot failure (@mapledan)
+- [#26906](https://github.com/apache/superset/pull/26906) fix(pinot): typo in the name for epoch_ms_to_dttm (@ege-st)
+- [#26817](https://github.com/apache/superset/pull/26817) fix: Bar charts horizontal margin adjustment error (@michael-s-molina)
+- [#26749](https://github.com/apache/superset/pull/26749) fix: prevent guest user from modifying metrics (@betodealmeida)
+- [#25923](https://github.com/apache/superset/pull/25923) fix(deck.gl Multiple Layer Chart): Add Contour and Heatmap Layer as options (@Mattc1221)
+- [#26476](https://github.com/apache/superset/pull/26476) fix(sqlparse): improve table parsing (@betodealmeida)
+- [#26814](https://github.com/apache/superset/pull/26814) fix(time-series table): Can't compare from the beginning of the time range (@michael-s-molina)
+- [#26807](https://github.com/apache/superset/pull/26807) fix: Row limit hardcoded (@michael-s-molina)
+- [#26652](https://github.com/apache/superset/pull/26652) fix(import): only import FORMULA annotations (@mistercrunch)
+- [#26314](https://github.com/apache/superset/pull/26314) fix(logging): Filter out undefined columns (@john-bodley)
+- [#26461](https://github.com/apache/superset/pull/26461) fix(BigQuery): Support special characters in column/metric names used in ORDER BY (@Vitor-Avila)
+- [#26744](https://github.com/apache/superset/pull/26744) fix(db2): Improving support for ibm db2 connections (@Vitor-Avila)
+- [#26705](https://github.com/apache/superset/pull/26705) fix(legacy-charts): Show Time Grain control for legacy charts (@Vitor-Avila)
+- [#26709](https://github.com/apache/superset/pull/26709) fix: do not use lodash/memoize (@rusackas)
+- [#25550](https://github.com/apache/superset/pull/25550) fix: Catch ImportErrors for Google SDKs (@skion)
+- [#26645](https://github.com/apache/superset/pull/26645) fix(translation): correct translation errors for Chinese(zh) (@Waterkin)
+- [#26638](https://github.com/apache/superset/pull/26638) fix: Avoid 500 if end users write bad SQL (@Khrol)
+- [#26644](https://github.com/apache/superset/pull/26644) fix: unnecessary logic on CI ephemeral (@dpgaspar)
+- [#26625](https://github.com/apache/superset/pull/26625) fix: create virtual dataset validation (@dpgaspar)
+- [#26634](https://github.com/apache/superset/pull/26634) fix: RLS modal styling (@geido)
+- [#26469](https://github.com/apache/superset/pull/26469) fix(database): allow filtering by UUID (@betodealmeida)
+- [#26412](https://github.com/apache/superset/pull/26412) fix(embedded): Hide dashboard fullscreen option for embedded context (@Vitor-Avila)
+- [#26355](https://github.com/apache/superset/pull/26355) fix: Trino - handle table not found in SQLLab (@Khrol)
+
+**Others**
+
+- [#26716](https://github.com/apache/superset/pull/26716) build(deps): bump csstype from 2.6.9 to 3.1.3 in /superset-frontend (@dependabot[bot])
+- [#26431](https://github.com/apache/superset/pull/26431) chore: bump prophet to 1.1.5 (@villebro)
+
+### 3.0.3 (Tue Jan 9 16:48:07 2023 -0300)
+
+**Fixes**
+
+- [#26429](https://github.com/apache/superset/pull/26429) fix(post-processing): handle missing values in cumulative operator (@villebro)
+- [#26424](https://github.com/apache/superset/pull/26424) fix(translations): Clear all (@capping)
+- [#26404](https://github.com/apache/superset/pull/26404) fix(plugin-chart-echarts): support forced categorical x-axis (@villebro)
+- [#26415](https://github.com/apache/superset/pull/26415) fix: In chart gallery thumbnail is rendered in case of no example in #16707 (@sivasathyaseeelan)
+- [#26393](https://github.com/apache/superset/pull/26393) fix(chart): Resolve incorrect column customization when switching metrics in table chart (@soniagtm)
+- [#26313](https://github.com/apache/superset/pull/26313) fix(dashboard): narrow empty drop area (@justinpark)
+- [#26410](https://github.com/apache/superset/pull/26410) fix(dashboard): Chart menu disable is fixed on chart-fullscreen in issue #25992 (@sivasathyaseeelan)
+- [#26362](https://github.com/apache/superset/pull/26362) fix: Reactivates native filters E2E tests (@michael-s-molina)
+- [#26353](https://github.com/apache/superset/pull/26353) fix(SelectControl): select zero value (@rekilina)
+- [#26302](https://github.com/apache/superset/pull/26302) fix: Invalid references in the basic template (@michael-s-molina)
+- [#26380](https://github.com/apache/superset/pull/26380) fix: Removes non-existent columns in the 2018 FCC Survey dataset (@michael-s-molina)
+- [#26151](https://github.com/apache/superset/pull/26151) fix(chart): Set max row limit + removed the option to use an empty row limit value (@CorbinBullard)
+- [#26333](https://github.com/apache/superset/pull/26333) fix(logging): Add logging of change_dashboard_filter event for native dashboard filters (@john-bodley)
+- [#26326](https://github.com/apache/superset/pull/26326) fix(accessibility): Enable tabbing on sort header of table chart (@arunthirumani)
+- [#26340](https://github.com/apache/superset/pull/26340) fix(dashboard): Don't switch to first tab when directPathToChild changes (@kgabryje)
+- [#26283](https://github.com/apache/superset/pull/26283) fix(redshift): convert_dttm method for redshift dataset and tests (@gaurav7261)
+- [#26281](https://github.com/apache/superset/pull/26281) fix(sql lab): Use quote_schema instead of quote method to format schema name (@guenp)
+- [#25967](https://github.com/apache/superset/pull/25967) fix(typings): model_id is a multiple option (@gnought)
+- [#26279](https://github.com/apache/superset/pull/26279) fix: Cannot expand initially hidden SQL Lab tab (@michael-s-molina)
+- [#26269](https://github.com/apache/superset/pull/26269) fix(plugin-chart-echarts): use scale for truncating x-axis (@villebro)
+- [#26264](https://github.com/apache/superset/pull/26264) fix: Stacked charts with numerical columns (@michael-s-molina)
+- [#26187](https://github.com/apache/superset/pull/26187) fix: bump pyarrow constraints (CVE-2023-47248) (@cwegener)
+- [#26215](https://github.com/apache/superset/pull/26215) fix(plugin-chart-echarts): support truncated numeric x-axis (@villebro)
+- [#26199](https://github.com/apache/superset/pull/26199) fix(chart-filter): Avoid column denormalization if not enabled (@Vitor-Avila)
+- [#26211](https://github.com/apache/superset/pull/26211) fix: support custom links in markdown (@villebro)
+- [#26189](https://github.com/apache/superset/pull/26189) fix(dashboard): title formatting (@nytai)
+- [#26207](https://github.com/apache/superset/pull/26207) fix: Includes 90° x-axis label rotation (@michael-s-molina)
+- [#26157](https://github.com/apache/superset/pull/26157) fix(init-job): Fix envFrom for init job in helm chart (@sumagoudb)
+- [#25878](https://github.com/apache/superset/pull/25878) fix(embedded): Hide sensitive payload data from guest users (@jfrag1)
+- [#25894](https://github.com/apache/superset/pull/25894) fix(Alerts/Reports): allow use of ";" separator in slack recipient entry (@rtexelm)
+- [#26116](https://github.com/apache/superset/pull/26116) fix(database-import): Support importing a DB connection with a version set (@Vitor-Avila)
+- [#26154](https://github.com/apache/superset/pull/26154) fix: set label on adhoc column should persist (@betodealmeida)
+- [#26140](https://github.com/apache/superset/pull/26140) fix(annotations): time grain column (@betodealmeida)
+- [#23916](https://github.com/apache/superset/pull/23916) fix: remove default secret key from helm (@dpgaspar)
+- [#26120](https://github.com/apache/superset/pull/26120) fix: alias column when fetching values (@betodealmeida)
+- [#26106](https://github.com/apache/superset/pull/26106) fix: flaky test_explore_json_async test v2 (@villebro)
+- [#26091](https://github.com/apache/superset/pull/26091) fix: bump node-fetch to 2.6.7 (@dpgaspar)
+- [#26087](https://github.com/apache/superset/pull/26087) fix(plugin-chart-echarts): support numerical x-axis (@villebro)
+- [#26059](https://github.com/apache/superset/pull/26059) fix: Flaky test_explore_json_async test (@michael-s-molina)
+- [#26023](https://github.com/apache/superset/pull/26023) fix: Prevent cached bootstrap data from leaking between users w/ same first/last name (@jfrag1)
+- [#26060](https://github.com/apache/superset/pull/26060) fix: Optimize fetching samples logic (@john-bodley)
+- [#26010](https://github.com/apache/superset/pull/26010) fix: Remove annotation Fuzzy to get french translation (@aehanno)
+- [#26005](https://github.com/apache/superset/pull/26005) fix(security): restore default value of SESSION_COOKIE_SECURE to False (@sfirke)
+- [#25883](https://github.com/apache/superset/pull/25883) fix(horizontal filter bar filter labels): Increase max-width to 96px (@rtexelm)
+
+**Others**
+
+- [#26312](https://github.com/apache/superset/pull/26312) chore(Embedded): Avoid creating a filter key for guest users (@Vitor-Avila)
+- [#26317](https://github.com/apache/superset/pull/26317) chore: Adds a tooltip for the alert's SQL input (@michael-s-molina)
+- [#26310](https://github.com/apache/superset/pull/26310) chore: Disables minor ticks by default (@michael-s-molina)
+- [#26287](https://github.com/apache/superset/pull/26287) chore: update changelog for 2.1.3 (@eschutho)
+- [#26251](https://github.com/apache/superset/pull/26251) chore: improve CSP add base uri restriction (@dpgaspar)
+- [#26208](https://github.com/apache/superset/pull/26208) chore: Adds note about numerical x-axis (@michael-s-molina)
+- [#26158](https://github.com/apache/superset/pull/26158) chore: Clean up the examples dashboards (@michael-s-molina)
+- [#25931](https://github.com/apache/superset/pull/25931) chore(deps): bump pillow deps (@gnought)
 
 ### 3.0.2 (Mon Nov 20 07:38:38 2023 -0500)
 
@@ -902,6 +1018,47 @@ under the License.
 - [#23144](https://github.com/apache/superset/pull/23144) chore: revert "feat(native_filter_migration): add transition mode (#16992)" (@john-bodley)
 - [#23158](https://github.com/apache/superset/pull/23158) chore: Bump cryptography to 39.0.1 (@EugeneTorap)
 - [#23108](https://github.com/apache/superset/pull/23108) chore: Remove yarn.lock from the root folder (@EugeneTorap)
+
+### 2.1.3 (Fri Dec 8 16:36:51 2023 -0700)
+
+**Database Migrations**
+
+**Features**
+
+**Fixes**
+
+- [#25658](https://github.com/apache/superset/pull/25658) fix: improve upload ZIP file validation (@dpgaspar)
+- [#25779](https://github.com/apache/superset/pull/25779) fix: DB-specific quoting in Jinja macro (@betodealmeida)
+- [#25843](https://github.com/apache/superset/pull/25843) fix: remove `update_charts_owners` (@betodealmeida)
+
+**Others**
+
+- [#23862](https://github.com/apache/superset/pull/23862) chore: Use nh3 lib instead of bleach (@EugeneTorap)
+- [#23965](https://github.com/apache/superset/pull/23965) chore: bump werkzeug and Flask (@dpgaspar)
+- [#24033](https://github.com/apache/superset/pull/24033) chore: Update mypy and fix stubs issue (@EugeneTorap)
+- [#24045](https://github.com/apache/superset/pull/24045) chore: Bump sqlparse to 0.4.4 (@EugeneTorap)
+- [#24324](https://github.com/apache/superset/pull/24324) chore: rate limit requests (@betodealmeida)
+
+### 2.1.2 (Wed Oct 18 16:59:30 2023 -0700)
+
+**Database Migrations**
+
+**Features**
+
+**Fixes**
+
+- [#25150](https://github.com/apache/superset/pull/25150) fix: Chart series limit doesn't work for some databases (@KSPT-taylorjohn)
+- [#25014](https://github.com/apache/superset/pull/25014) fix: CTE queries with non-SELECT statements (@dpgaspar)
+- [#24849](https://github.com/apache/superset/pull/24849) fix: validation errors appearing after ssh tunnel switch (@hughhhh)
+- [#24196](https://github.com/apache/superset/pull/24196) fix: SSH Tunnel creation with dynamic form (@hughhhh)
+- [#24821](https://github.com/apache/superset/pull/24821) fix: Allow chart import to update the dataset an existing chart points to (@jfrag1)
+- [#24317](https://github.com/apache/superset/pull/24317) fix: update order of build for testing a release (@eschutho)
+
+**Others**
+
+- [#24826](https://github.com/apache/superset/pull/24826) chore: remove CssTemplate and Annotation access from gamma role (@lilykuang)
+- [#23680](https://github.com/apache/superset/pull/23680) chore: bump wtforms and add missing flask-limiter (@dpgaspar)
+- [#24758](https://github.com/apache/superset/pull/24758) chore(view_api): return application/json as content-type for api/v1/form_data endpoint (@zephyring)
 
 ### 2.1.1 (Sun Apr 23 15:44:21 2023 +0100)
 

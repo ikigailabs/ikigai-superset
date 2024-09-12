@@ -320,7 +320,11 @@ const VerticalFilterBar: React.FC<VerticalBarProps> = ({
             iconSize="l"
           />
         </CollapsedBar>
-        <Bar className={cx({ open: filtersOpen })} width={width}>
+        <Bar
+          className={cx({ open: filtersOpen })}
+          width={width}
+          style={{ paddingTop: '100px' }}
+        >
           <Header toggleFiltersBar={toggleFiltersBar} />
           {!isInitialized ? (
             <div css={{ height }}>

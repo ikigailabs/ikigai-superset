@@ -32,7 +32,13 @@ import {
 
 import { DEFAULT_FORM_DATA } from './types';
 import { EchartsTimeseriesSeriesType } from '../Timeseries/types';
-import { legendSection, richTooltipSection } from '../controls';
+import {
+  legendSection,
+  minorTicks,
+  richTooltipSection,
+  truncateXAxis,
+  xAxisBounds,
+} from '../controls';
 
 const {
   area,
@@ -311,6 +317,7 @@ const config: ControlPanelConfig = {
             },
           },
         ],
+        [minorTicks],
         ...legendSection,
         [<ControlSubSectionHeader>{t('X Axis')}</ControlSubSectionHeader>],
         ['x_axis_time_format'],
@@ -325,6 +332,7 @@ const config: ControlPanelConfig = {
               choices: [
                 [0, '0°'],
                 [45, '45°'],
+                [90, '90°'],
               ],
               default: xAxisLabelRotation,
               renderTrigger: true,
@@ -349,6 +357,8 @@ const config: ControlPanelConfig = {
             },
           },
         ],
+        [truncateXAxis],
+        [xAxisBounds],
         [
           {
             name: 'truncateYAxis',

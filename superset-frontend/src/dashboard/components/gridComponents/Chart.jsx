@@ -274,7 +274,9 @@ class Chart extends React.Component {
   changeFilter(newSelectedValues = {}) {
     this.props.logEvent(LOG_ACTIONS_CHANGE_DASHBOARD_FILTER, {
       id: this.props.chart.id,
-      columns: Object.keys(newSelectedValues),
+      columns: Object.keys(newSelectedValues).filter(
+        key => newSelectedValues[key] !== null,
+      ),
     });
     this.props.changeFilter(this.props.chart.id, newSelectedValues);
   }
@@ -436,6 +438,7 @@ class Chart extends React.Component {
         data-test-chart-id={id}
         data-test-viz-type={slice.viz_type}
         data-test-chart-name={slice.slice_name}
+        data-slice-container-name={slice.slice_name}
       >
         <SliceHeader
           innerRef={this.setHeaderRef}
@@ -494,6 +497,7 @@ class Chart extends React.Component {
             'dashboard-chart',
             isOverflowable && 'dashboard-chart--overflowable',
           )}
+          data-dashboard-chart={sliceName}
         >
           {isLoading && (
             <ChartOverlay

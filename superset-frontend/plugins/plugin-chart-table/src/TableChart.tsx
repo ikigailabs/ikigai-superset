@@ -71,6 +71,12 @@ interface TableSize {
   height: number;
 }
 
+const ACTION_KEYS = {
+  enter: 'Enter',
+  spacebar: 'Spacebar',
+  space: ' ',
+};
+
 /**
  * Return sortType based on data type
  */
@@ -565,7 +571,9 @@ export default function TableChart<D extends DataRecord = DataRecord>(
                   /* The following classes are added to support custom CSS styling */
                   className={cx(
                     'cell-bar',
-                    value && value < 0 ? 'negative' : 'positive',
+                    typeof value === 'number' && value < 0
+                      ? 'negative'
+                      : 'positive',
                   )}
                   css={cellBarStyles}
                 />
@@ -590,6 +598,13 @@ export default function TableChart<D extends DataRecord = DataRecord>(
             style={{
               ...sharedStyle,
               ...style,
+            }}
+            tabIndex={0}
+            onKeyDown={(e: React.KeyboardEvent<HTMLElement>) => {
+              // programatically sort column on keypress
+              if (Object.values(ACTION_KEYS).includes(e.key)) {
+                col.toggleSortBy();
+              }
             }}
             onClick={onClick}
             data-column-name={col.id}

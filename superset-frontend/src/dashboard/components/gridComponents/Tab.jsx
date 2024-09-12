@@ -18,6 +18,7 @@
  */
 import React from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { styled, t } from '@superset-ui/core';
@@ -157,7 +158,7 @@ class Tab extends React.PureComponent {
       isComponentVisible,
       canEdit,
       setEditMode,
-      dashboardId,
+      // dashboardId,
     } = this.props;
 
     const shouldDisplayEmptyState = tabComponent.children.length === 0;
@@ -173,7 +174,10 @@ class Tab extends React.PureComponent {
             depth={depth}
             onDrop={this.handleTopDropTargetDrop}
             editMode
-            className="empty-droptarget"
+            className={classNames({
+              'empty-droptarget': true,
+              'empty-droptarget--full': tabComponent.children.length === 0,
+            })}
           >
             {renderDraggableContentTop}
           </DragDroppable>
@@ -189,15 +193,16 @@ class Tab extends React.PureComponent {
               canEdit &&
               (editMode ? (
                 <span>
-                  {t('You can')}{' '}
-                  <a
+                  {t(
+                    'You can create a new chart or use existing ones from the panel on the right',
+                  )}{' '}
+                  {/* <a
                     href={`/chart/add?dashboard_id=${dashboardId}`}
                     rel="noopener noreferrer"
                     target="_blank"
                   >
                     {t('create a new chart')}
-                  </a>{' '}
-                  {t('or use existing ones from the panel on the right')}
+                  </a>{' '} */}
                 </span>
               ) : (
                 <span>
@@ -234,7 +239,7 @@ class Tab extends React.PureComponent {
           />
         ))}
         {/* Make bottom of tab droppable */}
-        {editMode && (
+        {editMode && tabComponent.children.length > 0 && (
           <DragDroppable
             component={tabComponent}
             parentComponent={tabParentComponent}

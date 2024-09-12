@@ -1,3 +1,5 @@
+/* eslint-disable import/no-unresolved */
+/* eslint-disable theme-colors/no-literal-colors */
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -82,21 +84,39 @@ type HeaderProps = {
 
 const AddFiltersButtonContainer = styled.div`
   ${({ theme }) => css`
-    margin-top: ${theme.gridUnit * 2}px;
+    margin-left: auto;
+    margin-right: 16px;
 
     & button > [role='img']:first-of-type {
       margin-right: ${theme.gridUnit}px;
       line-height: 0;
     }
 
-    span[role='img'] {
-      padding-bottom: 1px;
+    & > button {
+      background-color: #f2f3ff !important;
+      padding: 14px 18px 14px 10px !important;
+      font-weight: 400 !important;
     }
 
     .ant-btn > .anticon + span {
       margin-left: 0;
     }
   `}
+`;
+
+// eslint-disable-next-line theme-colors/no-literal-colors
+const StyledCollapseIcon = styled(Icons.CaretRight)`
+  color: #fff;
+  height: 24px;
+  width: 24px;
+  background-color: #824fe0;
+  border-radius: 6px;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  left: -30px;
+  position: absolute;
+  top: 68px;
 `;
 
 const Header: FC<HeaderProps> = ({ toggleFiltersBar }) => {
@@ -112,6 +132,14 @@ const Header: FC<HeaderProps> = ({ toggleFiltersBar }) => {
 
   return (
     <Wrapper>
+      <HeaderButton
+        {...getFilterBarTestId('collapse-button')}
+        buttonStyle="link"
+        buttonSize="xsmall"
+        onClick={() => toggleFiltersBar(false)}
+      >
+        <StyledCollapseIcon iconSize="l" />
+      </HeaderButton>
       <TitleArea>
         <span>{t('Filters')}</span>
         <FilterBarSettings />

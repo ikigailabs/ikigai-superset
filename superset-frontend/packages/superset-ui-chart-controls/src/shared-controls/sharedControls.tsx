@@ -47,6 +47,7 @@ import {
   isDefined,
   hasGenericChartAxes,
   NO_TIME_RANGE,
+  validateMaxValue,
 } from '@superset-ui/core';
 
 import {
@@ -58,7 +59,7 @@ import {
   DEFAULT_TIME_FORMAT,
   DEFAULT_NUMBER_FORMAT,
 } from '../utils';
-import { TIME_FILTER_LABELS } from '../constants';
+import { DEFAULT_MAX_ROW, TIME_FILTER_LABELS } from '../constants';
 import {
   SharedControlConfig,
   Dataset,
@@ -208,7 +209,7 @@ const time_grain_sqla: SharedControlConfig<'SelectControl'> = {
     choices: (datasource as Dataset)?.time_grain_sqla || [],
   }),
   visibility: ({ controls }) => {
-    if (!hasGenericChartAxes) {
+    if (!hasGenericChartAxes || !controls?.x_axis) {
       return true;
     }
 
@@ -245,7 +246,12 @@ const row_limit: SharedControlConfig<'SelectControl'> = {
   type: 'SelectControl',
   freeForm: true,
   label: t('Row limit'),
-  validators: [legacyValidateInteger],
+  clearable: false,
+  mapStateToProps: state => ({ maxValue: state?.common?.conf?.SQL_MAX_ROW }),
+  validators: [
+    legacyValidateInteger,
+    (v, state) => validateMaxValue(v, state?.maxValue || DEFAULT_MAX_ROW),
+  ],
   default: 10000,
   choices: formatSelectOptions(ROW_LIMIT_OPTIONS),
   description: t('Limits the number of rows that get displayed.'),

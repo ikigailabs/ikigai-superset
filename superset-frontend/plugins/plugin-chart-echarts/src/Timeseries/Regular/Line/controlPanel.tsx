@@ -35,9 +35,12 @@ import {
 } from '../../constants';
 import {
   legendSection,
+  minorTicks,
   richTooltipSection,
   seriesOrderSection,
   showValueSection,
+  truncateXAxis,
+  xAxisBounds,
 } from '../../../controls';
 
 const {
@@ -167,6 +170,7 @@ const config: ControlPanelConfig = {
             },
           },
         ],
+        [minorTicks],
         ...legendSection,
         [<ControlSubSectionHeader>{t('X Axis')}</ControlSubSectionHeader>],
         [
@@ -190,6 +194,7 @@ const config: ControlPanelConfig = {
               choices: [
                 [0, '0°'],
                 [45, '45°'],
+                [90, '90°'],
               ],
               default: xAxisLabelRotation,
               renderTrigger: true,
@@ -228,6 +233,8 @@ const config: ControlPanelConfig = {
             },
           },
         ],
+        [truncateXAxis],
+        [xAxisBounds],
         [
           {
             name: 'truncateYAxis',

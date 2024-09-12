@@ -24,6 +24,7 @@ import re
 from datetime import datetime
 from re import Match, Pattern
 from typing import Any, Callable, cast, ContextManager, NamedTuple, TYPE_CHECKING, Union
+import os
 
 import pandas as pd
 import sqlparse
@@ -874,7 +875,7 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
             return database.compile_sqla_query(qry)
 
         if cls.limit_method == LimitMethod.FORCE_LIMIT:
-            parsed_query = sql_parse.ParsedQuery(sql)
+            parsed_query = sql_parse.ParsedQuery(sql, engine=cls.engine)
             sql = parsed_query.set_or_update_query_limit(limit, force=force)
 
         return sql
@@ -955,7 +956,7 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
         :param sql: SQL query
         :return: Value of limit clause in query
         """
-        parsed_query = sql_parse.ParsedQuery(sql)
+        parsed_query = sql_parse.ParsedQuery(sql, engine=cls.engine)
         return parsed_query.limit
 
     @classmethod
@@ -967,7 +968,7 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
         :param limit: New limit to insert/replace into query
         :return: Query with new limit
         """
-        parsed_query = sql_parse.ParsedQuery(sql)
+        parsed_query = sql_parse.ParsedQuery(sql, engine=cls.engine)
         return parsed_query.set_or_update_query_limit(limit)
 
     @classmethod
@@ -1086,6 +1087,9 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
     ) -> list[SupersetError]:
         raw_message = cls._extract_error_message(ex)
 
+        ERR_DB_NAME = os.environ.get("ERR_DB_NAME")
+        ALTERNATE_DB_NAME = os.environ.get("ALTERNATE_DB_NAME")
+
         context = context or {}
         for regex, (message, error_type, extra) in cls.custom_errors.items():
             match = regex.search(raw_message)
@@ -1106,7 +1110,7 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
                 error_type=SupersetErrorType.GENERIC_DB_ENGINE_ERROR,
                 message=cls._extract_error_message(ex),
                 level=ErrorLevel.ERROR,
-                extra={"engine_name": cls.engine_name},
+                extra={"engine_name":ALTERNATE_DB_NAME} if cls.engine_name==ERR_DB_NAME else {"engine_name": cls.engine_name},
             )
         ]
 
@@ -1397,8 +1401,9 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
         if show_cols:
             fields = cls._get_fields(cols)
         quote = engine.dialect.identifier_preparer.quote
+        quote_schema = engine.dialect.identifier_preparer.quote_schema
         if schema:
-            full_table_name = quote(schema) + "." + quote(table_name)
+            full_table_name = quote_schema(schema) + "." + quote(table_name)
         else:
             full_table_name = quote(table_name)
 
@@ -1449,7 +1454,7 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
         :param database: Database instance
         :return: Dictionary with different costs
         """
-        parsed_query = ParsedQuery(statement)
+        parsed_query = ParsedQuery(statement, engine=cls.engine)
         sql = parsed_query.stripped()
         sql_query_mutator = current_app.config["SQL_QUERY_MUTATOR"]
         mutate_after_split = current_app.config["MUTATE_AFTER_SPLIT"]
@@ -1482,7 +1487,7 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
         if not cls.get_allow_cost_estimate(extra):
             raise Exception("Database does not support cost estimation")
 
-        parsed_query = sql_parse.ParsedQuery(sql)
+        parsed_query = sql_parse.ParsedQuery(sql, engine=cls.engine)
         statements = parsed_query.get_statements()
 
         costs = []
@@ -1543,11 +1548,17 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
         :return:
         """
         if not cls.allows_sql_comments:
-            query = sql_parse.strip_comments_from_sql(query)
+            query = sql_parse.strip_comments_from_sql(query, engine=cls.engine)
 
         if cls.arraysize:
             cursor.arraysize = cls.arraysize
         try:
+            sql_statement = query
+            if "metadata" in sql_statement[sql_statement.index('SELECT')+6:sql_statement.index('FROM')].lower():
+                sub_statement = sql_statement[sql_statement.index('SELECT')+6:sql_statement.index('FROM')].lower()
+                sub_statement = sub_statement.replace("metadata","\"metadata\"")
+                sql_statement = sql_statement[0:sql_statement.index('SELECT')+6]+sub_statement+sql_statement[sql_statement.index('FROM'):]
+                query = sql_statement
             cursor.execute(query)
         except Exception as ex:
             raise cls.get_dbapi_mapped_exception(ex) from ex

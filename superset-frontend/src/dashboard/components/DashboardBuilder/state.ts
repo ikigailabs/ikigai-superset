@@ -1,3 +1,4 @@
+/* eslint-disable import/no-unresolved */
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -19,8 +20,8 @@
 import { useSelector } from 'react-redux';
 import { isFeatureEnabled, FeatureFlag } from '@superset-ui/core';
 import { useCallback, useEffect, useState } from 'react';
-import { URL_PARAMS } from 'src/constants';
-import { getUrlParam } from 'src/utils/urlUtils';
+// import { URL_PARAMS } from 'src/constants';
+// import { getUrlParam } from 'src/utils/urlUtils';
 import { RootState } from 'src/dashboard/types';
 import {
   useFilters,
@@ -36,10 +37,9 @@ export const useNativeFilters = () => {
 
   const filters = useFilters();
   const filterValues = Object.values(filters);
-  const expandFilters = getUrlParam(URL_PARAMS.expandFilters);
-  const [dashboardFiltersOpen, setDashboardFiltersOpen] = useState(
-    expandFilters ?? !!filterValues.length,
-  );
+  // const expandFilters = getUrlParam(URL_PARAMS.expandFilters);
+  const expandFilters = false;
+  const [dashboardFiltersOpen, setDashboardFiltersOpen] = useState(false);
 
   const nativeFiltersEnabled =
     isFeatureEnabled(FeatureFlag.DASHBOARD_NATIVE_FILTERS) &&

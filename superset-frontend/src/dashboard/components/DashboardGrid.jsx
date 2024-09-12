@@ -18,6 +18,7 @@
  */
 import React from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 import { addAlpha, css, styled, t } from '@superset-ui/core';
 import { EmptyStateBig } from 'src/components/EmptyState';
 import { componentShape } from '../util/propShapes';
@@ -76,10 +77,14 @@ const GridContent = styled.div`
     & > .empty-droptarget:first-child {
       height: ${theme.gridUnit * 12}px;
       margin-top: ${theme.gridUnit * -6}px;
-      margin-bottom: ${theme.gridUnit * -6}px;
     }
 
-    & > .empty-droptarget:only-child {
+    & > .empty-droptarget:last-child {
+      height: ${theme.gridUnit * 12}px;
+      margin-top: ${theme.gridUnit * -6}px;
+    }
+
+    & > .empty-droptarget.empty-droptarget--full:only-child {
       height: 80vh;
     }
   `}
@@ -177,7 +182,7 @@ class DashboardGrid extends React.PureComponent {
       editMode,
       canEdit,
       setEditMode,
-      dashboardId,
+      // dashboardId,
     } = this.props;
     const columnPlusGutterWidth =
       (width + GRID_GUTTER_SIZE) / GRID_COLUMN_COUNT;
@@ -192,22 +197,6 @@ class DashboardGrid extends React.PureComponent {
     const dashboardEmptyState = editMode && (
       <EmptyStateBig
         title={t('Drag and drop components and charts to the dashboard')}
-        description={t(
-          'You can create a new chart or use existing ones from the panel on the right',
-        )}
-        buttonText={
-          <>
-            <i className="fa fa-plus" />
-            {t('Create a new chart')}
-          </>
-        }
-        buttonAction={() => {
-          window.open(
-            `/chart/add?dashboard_id=${dashboardId}`,
-            '_blank',
-            'noopener noreferrer',
-          );
-        }}
         image="chart.svg"
       />
     );
@@ -215,22 +204,6 @@ class DashboardGrid extends React.PureComponent {
     const topLevelTabEmptyState = editMode ? (
       <EmptyStateBig
         title={t('Drag and drop components to this tab')}
-        description={t(
-          `You can create a new chart or use existing ones from the panel on the right`,
-        )}
-        buttonText={
-          <>
-            <i className="fa fa-plus" />
-            {t('Create a new chart')}
-          </>
-        }
-        buttonAction={() => {
-          window.open(
-            `/chart/add?dashboard_id=${dashboardId}`,
-            '_blank',
-            'noopener noreferrer',
-          );
-        }}
         image="chart.svg"
       />
     ) : (
@@ -270,10 +243,14 @@ class DashboardGrid extends React.PureComponent {
                 index={0}
                 orientation="column"
                 onDrop={this.handleTopDropTargetDrop}
-                className="empty-droptarget"
+                className={classNames({
+                  'empty-droptarget': true,
+                  'empty-droptarget--full':
+                    gridComponent?.children?.length === 0,
+                })}
                 editMode
               >
-                {renderDraggableContentBottom}
+                {renderDraggableContentTop}
               </DragDroppable>
             )}
             {gridComponent?.children?.map((id, index) => (
@@ -304,7 +281,7 @@ class DashboardGrid extends React.PureComponent {
                 className="empty-droptarget"
                 editMode
               >
-                {renderDraggableContentTop}
+                {renderDraggableContentBottom}
               </DragDroppable>
             )}
             {isResizing &&

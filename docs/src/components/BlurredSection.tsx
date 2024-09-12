@@ -16,38 +16,38 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { ReactNode } from 'react';
-import styled from '@emotion/styled';
+// import React, { ReactNode } from 'react';
+// import styled from '@emotion/styled';
 import { mq } from '../utils';
 
-const StyledBlurredSection = styled('section')`
-  text-align: center;
-  border-bottom: 1px solid var(--ifm-border-color);
-  overflow: hidden;
-  .blur {
-    max-width: 635px;
-    width: 100%;
-    margin-top: -70px;
-    margin-bottom: -35px;
-    position: relative;
-    z-index: -1;
-    ${mq[1]} {
-      margin-top: -40px;
-    }
-  }
-`;
+// const StyledBlurredSection = styled('section')`
+//   text-align: center;
+//   border-bottom: 1px solid var(--ifm-border-color);
+//   overflow: hidden;
+//   .blur {
+//     max-width: 635px;
+//     width: 100%;
+//     margin-top: -70px;
+//     margin-bottom: -35px;
+//     position: relative;
+//     z-index: -1;
+//     ${mq[1]} {
+//       margin-top: -40px;
+//     }
+//   }
+// `;
 
 interface BlurredSectionProps {
-  children: ReactNode;
+  children: any;
 }
 
 const BlurredSection = ({ children }: BlurredSectionProps) => {
-  return (
-    <StyledBlurredSection>
-      {children}
-      <img className="blur" src="/img/community/blur.png" alt="Blur" />
-    </StyledBlurredSection>
-  );
+  // return (
+  // <StyledBlurredSection>
+  //   {children}
+  //   <img className="blur" src="/img/community/blur.png" alt="Blur" />
+  // </StyledBlurredSection>
+  // );
 };
 
 export default BlurredSection;

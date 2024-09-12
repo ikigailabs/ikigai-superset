@@ -23,10 +23,18 @@ from unittest.mock import Mock, patch
 import pandas as pd
 import pytest
 from pytest_mock import MockerFixture
+from requests.exceptions import ConnectionError as RequestsConnectionError
 from sqlalchemy import types
+from trino.exceptions import TrinoExternalError, TrinoInternalError, TrinoUserError
 
 import superset.config
 from superset.constants import QUERY_CANCEL_KEY, QUERY_EARLY_CANCEL_KEY, USER_AGENT
+from superset.db_engine_specs.exceptions import (
+    SupersetDBAPIConnectionError,
+    SupersetDBAPIDatabaseError,
+    SupersetDBAPIOperationalError,
+    SupersetDBAPIProgrammingError,
+)
 from superset.utils.core import GenericDataType
 from tests.unit_tests.db_engine_specs.utils import (
     assert_column_spec,
@@ -395,3 +403,30 @@ def test_execute_with_cursor_in_parallel(mocker: MockerFixture):
     mock_query.set_extra_json_key.assert_called_once_with(
         key=QUERY_CANCEL_KEY, value=query_id
     )
+
+
+def test_get_indexes_no_table():
+    from sqlalchemy.exc import NoSuchTableError
+
+    from superset.db_engine_specs.trino import TrinoEngineSpec
+
+    db_mock = Mock()
+    inspector_mock = Mock()
+    inspector_mock.get_indexes = Mock(
+        side_effect=NoSuchTableError("The specified table does not exist.")
+    )
+    result = TrinoEngineSpec.get_indexes(
+        db_mock, inspector_mock, "test_table", "test_schema"
+    )
+    assert result == []
+
+
+def test_get_dbapi_exception_mapping():
+    from superset.db_engine_specs.trino import TrinoEngineSpec
+
+    mapping = TrinoEngineSpec.get_dbapi_exception_mapping()
+    assert mapping.get(TrinoUserError) == SupersetDBAPIProgrammingError
+    assert mapping.get(TrinoInternalError) == SupersetDBAPIDatabaseError
+    assert mapping.get(TrinoExternalError) == SupersetDBAPIOperationalError
+    assert mapping.get(RequestsConnectionError) == SupersetDBAPIConnectionError
+    assert mapping.get(Exception) is None

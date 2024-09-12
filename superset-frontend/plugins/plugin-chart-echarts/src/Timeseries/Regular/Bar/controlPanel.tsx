@@ -32,9 +32,12 @@ import {
 } from '@superset-ui/chart-controls';
 import {
   legendSection,
+  minorTicks,
   richTooltipSection,
   seriesOrderSection,
   showValueSection,
+  truncateXAxis,
+  xAxisBounds,
 } from '../../../controls';
 
 import { OrientationType } from '../../types';
@@ -172,6 +175,7 @@ function createAxisControl(axis: 'x' | 'y'): ControlSetRow[] {
           choices: [
             [0, '0°'],
             [45, '45°'],
+            [90, '90°'],
           ],
           default: xAxisLabelRotation,
           renderTrigger: true,
@@ -223,6 +227,8 @@ function createAxisControl(axis: 'x' | 'y'): ControlSetRow[] {
         },
       },
     ],
+    [truncateXAxis],
+    [xAxisBounds],
     [
       {
         name: 'truncateYAxis',
@@ -307,6 +313,7 @@ const config: ControlPanelConfig = {
         ...seriesOrderSection,
         ['color_scheme'],
         ...showValueSection,
+        [minorTicks],
         [
           {
             name: 'zoomable',

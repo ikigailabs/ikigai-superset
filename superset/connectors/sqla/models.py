@@ -118,6 +118,8 @@ logger = logging.getLogger(__name__)
 ADVANCED_DATA_TYPES = config["ADVANCED_DATA_TYPES"]
 VIRTUAL_TABLE_ALIAS = "virtual_table"
 
+IKIGAI_TIMESTAMP_SUFFIX = "__IKIGAITS"
+
 # a non-exhaustive set of additive metrics
 ADDITIVE_METRIC_TYPES = {
     "count",
@@ -343,7 +345,10 @@ class TableColumn(Model, BaseColumn, CertificationMixin):
         :param template_processor: template processor
         :return: A TimeExpression object wrapped in a Label if supported by db
         """
-        label = label or utils.DTTM_ALIAS
+        if label:
+            label = f"{label}{IKIGAI_TIMESTAMP_SUFFIX}"
+        else:
+            label = utils.DTTM_ALIAS
 
         pdf = self.python_date_format
         is_epoch = pdf in ("epoch_s", "epoch_ms")
@@ -848,7 +853,7 @@ class SqlaTable(
             return self.get_sqla_table(), None
 
         from_sql = self.get_rendered_sql(template_processor)
-        parsed_query = ParsedQuery(from_sql)
+        parsed_query = ParsedQuery(from_sql, engine=self.db_engine_spec.engine)
         if not (
             parsed_query.is_unknown()
             or self.db_engine_spec.is_readonly_query(parsed_query)
@@ -1179,6 +1184,11 @@ class SqlaTable(
                 if len(df.columns) > len(labels_expected):
                     df = df.iloc[:, 0 : len(labels_expected)]
                 df.columns = labels_expected
+
+                for column in df.columns:
+                    if column.endswith(IKIGAI_TIMESTAMP_SUFFIX):
+                        df.rename(columns={column: column[:len(column)-len(IKIGAI_TIMESTAMP_SUFFIX)]}, inplace=True)
+
             return df
 
         try:

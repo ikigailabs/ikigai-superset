@@ -30,6 +30,7 @@ const propTypes = {
   type: PropTypes.string.isRequired,
   label: PropTypes.string.isRequired,
   className: PropTypes.string,
+  demandApp: PropTypes.bool,
 };
 
 const defaultProps = {
@@ -85,7 +86,14 @@ const NewComponentPlaceholder = styled.div`
 
 export default class DraggableNewComponent extends React.PureComponent {
   render() {
-    const { label, id, type, className, meta } = this.props;
+    const {
+      label,
+      id,
+      type,
+      className,
+      meta,
+      // description, demandApp
+    } = this.props;
     return (
       <DragDroppable
         component={{ type, id, meta }}

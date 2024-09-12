@@ -58,6 +58,8 @@ const propTypes = {
   directPathLastUpdated: PropTypes.number,
   dashboardId: PropTypes.number.isRequired,
   isComponentVisible: PropTypes.bool,
+  ikigaiOrigin: PropTypes.string,
+  supersetUrl: PropTypes.string,
 };
 
 const defaultProps = {
@@ -76,6 +78,8 @@ function mapStateToProps(
     getComponentById: id => dashboardLayout[id],
     parentComponent: dashboardLayout[parentId],
     editMode: dashboardState.editMode,
+    ikigaiOrigin: dashboardState.ikigaiOrigin,
+    supersetUrl: dashboardState.supersetUrl,
     filters: getActiveFilters(),
     dashboardId: dashboardInfo.id,
     fullSizeChartId: dashboardState.fullSizeChartId,
