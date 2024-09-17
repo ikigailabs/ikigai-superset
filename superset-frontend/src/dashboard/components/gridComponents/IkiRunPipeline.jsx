@@ -297,6 +297,7 @@ class IkiRunPipeline extends React.PureComponent {
               widgetUrlQuery.set('btn_txt_color', messageData.buttonTextColor);
               widgetUrlQuery.set('btn_pos', messageData.buttonPosition);
               widgetUrlQuery.set('show_header', messageData.showHeader);
+              widgetUrlQuery.set('show_combined_status', messageData.showCombinedRunFlowStatus);
               widgetUrl.search = widgetUrlQuery.toString();
               const tempIframe = `<iframe
                           id="ikirunpipeline-widget-${this.props.component.id}"
@@ -316,6 +317,7 @@ class IkiRunPipeline extends React.PureComponent {
             this.refreshCharts(selectedCharts);
           }
         }
+      }
       }
     });
   }
@@ -522,8 +524,9 @@ class IkiRunPipeline extends React.PureComponent {
           iframeSrcUrl.searchParams.get('btn_pos') || '';
         const paramShowHeader =
           iframeSrcUrl.searchParams.get('show_header') || '';
-
-        const newIframeSrc = `${ikigaiOrigin}/widget/pipeline/run?mode=${paramMode}&v=1&run_flow_times=${paramTimestamp}&pipeline_id=${paramPipelineId}&alias_id=${paramAliasId}&submit_button_label=${paramSubmitButtonLabel}&pipeline_log_type=${paramPipelineLogType}&edit_variables=${paramEditVariables}&selected_charts=${paramSelectedCharts}&btn_color=${paramButtonColor}&btn_txt_color=${paramButtonTextColor}&btn_pos=${paramButtonPosition}&show_header=${paramShowHeader}`;
+        const paramShowCombinedRunFlowStatus =
+          iframeSrcUrl.searchParams.get('show_combined_status') || false;
+        const newIframeSrc = `${ikigaiOrigin}/widget/pipeline/run?mode=${paramMode}&v=1&run_flow_times=${paramTimestamp}&pipeline_id=${paramPipelineId}&alias_id=${paramAliasId}&submit_button_label=${paramSubmitButtonLabel}&pipeline_log_type=${paramPipelineLogType}&edit_variables=${paramEditVariables}&selected_charts=${paramSelectedCharts}&btn_color=${paramButtonColor}&btn_txt_color=${paramButtonTextColor}&btn_pos=${paramButtonPosition}&show_header=${paramShowHeader}&show_combined_status=${paramShowCombinedRunFlowStatus}`;
         iframeSrc = newIframeSrc;
       } else {
         iframeSrc = `${ikigaiOrigin}/widget/pipeline/run?mode=edit&v=1&run_flow_times=${timestamp}`;
