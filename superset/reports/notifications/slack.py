@@ -21,6 +21,8 @@ from io import IOBase
 from typing import Union
 
 import backoff
+import pandas as pd
+from flask import g
 from flask_babel import gettext as __
 from slack_sdk import WebClient
 from slack_sdk.errors import (
@@ -130,8 +132,9 @@ Error: %(text)s
         # need to truncate the data
         for i in range(len(df) - 1):
             truncated_df = df[: i + 1].fillna("")
-            truncated_df = truncated_df.append(
-                {k: "..." for k in df.columns}, ignore_index=True
+            truncated_row = pd.Series({k: "..." for k in df.columns})
+            truncated_df = pd.concat(
+                [truncated_df, truncated_row.to_frame().T], ignore_index=True
             )
             tabulated = df.to_markdown()
             table = f"```\n{tabulated}\n```\n\n(table was truncated)"
@@ -139,8 +142,9 @@ Error: %(text)s
             if len(message) > MAXIMUM_MESSAGE_SIZE:
                 # Decrement i and build a message that is under the limit
                 truncated_df = df[:i].fillna("")
-                truncated_df = truncated_df.append(
-                    {k: "..." for k in df.columns}, ignore_index=True
+                truncated_row = pd.Series({k: "..." for k in df.columns})
+                truncated_df = pd.concat(
+                    [truncated_df, truncated_row.to_frame().T], ignore_index=True
                 )
                 tabulated = df.to_markdown()
                 table = (
@@ -172,6 +176,7 @@ Error: %(text)s
         channel = self._get_channel()
         body = self._get_body()
         file_type = "csv" if self._content.csv else "png"
+        global_logs_context = getattr(g, "logs_context", {}) or {}
         try:
             token = app.config["SLACK_API_TOKEN"]
             if callable(token):
@@ -189,7 +194,12 @@ Error: %(text)s
                     )
             else:
                 client.chat_postMessage(channel=channel, text=body)
-            logger.info("Report sent to slack")
+            logger.info(
+                "Report sent to slack",
+                extra={
+                    "execution_id": global_logs_context.get("execution_id"),
+                },
+            )
         except (
             BotUserAccessError,
             SlackRequestError,

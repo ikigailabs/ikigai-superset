@@ -24,7 +24,7 @@ import re
 from typing import Any, Optional
 from unittest.mock import Mock, patch
 
-from superset.databases.commands.exceptions import DatabaseInvalidError
+from superset.commands.database.exceptions import DatabaseInvalidError
 from tests.integration_tests.fixtures.birth_names_dashboard import (
     load_birth_names_dashboard_with_slices,
     load_birth_names_data,
@@ -54,12 +54,11 @@ from superset.utils.core import (
     format_timedelta,
     GenericDataType,
     get_form_data_token,
-    get_iterable,
+    as_list,
     get_email_address_list,
     get_stacktrace,
     json_int_dttm_ser,
     json_iso_dttm_ser,
-    JSONEncodedDict,
     merge_extra_filters,
     merge_extra_form_data,
     merge_request_params,
@@ -583,15 +582,6 @@ class TestUtils(SupersetTestCase):
             "-16 days, 4:03:00",
         )
 
-    def test_json_encoded_obj(self):
-        obj = {"a": 5, "b": ["a", "g", 5]}
-        val = '{"a": 5, "b": ["a", "g", 5]}'
-        jsonObj = JSONEncodedDict()
-        resp = jsonObj.process_bind_param(obj, "dialect")
-        self.assertIn('"a": 5', resp)
-        self.assertIn('"b": ["a", "g", 5]', resp)
-        self.assertEqual(jsonObj.process_result_value(val, "dialect"), obj)
-
     def test_validate_json(self):
         valid = '{"a": 5, "b": [1, 5, ["g", "h"]]}'
         self.assertIsNone(validate_json(valid))
@@ -749,10 +739,10 @@ class TestUtils(SupersetTestCase):
         database = get_or_create_db("test_db", "sqlite:///superset.db")
         assert database.sqlalchemy_uri == "sqlite:///superset.db"
 
-    def test_get_iterable(self):
-        self.assertListEqual(get_iterable(123), [123])
-        self.assertListEqual(get_iterable([123]), [123])
-        self.assertListEqual(get_iterable("foo"), ["foo"])
+    def test_as_list(self):
+        self.assertListEqual(as_list(123), [123])
+        self.assertListEqual(as_list([123]), [123])
+        self.assertListEqual(as_list("foo"), ["foo"])
 
     def test_merge_extra_filters_with_no_extras(self):
         form_data = {
@@ -769,7 +759,7 @@ class TestUtils(SupersetTestCase):
 
     def test_merge_extra_filters_with_unset_legacy_time_range(self):
         """
-        Make sure native filter is applied if filter box time range is unset.
+        Make sure native filter is applied if filter time range is unset.
         """
         form_data = {
             "time_range": "Last 10 days",
@@ -784,28 +774,6 @@ class TestUtils(SupersetTestCase):
             {
                 "time_range": "Last year",
                 "applied_time_extras": {},
-                "adhoc_filters": [],
-            },
-        )
-
-    def test_merge_extra_filters_with_conflicting_time_ranges(self):
-        """
-        Make sure filter box takes precedence if both native filter and filter box
-        time ranges are set.
-        """
-        form_data = {
-            "time_range": "Last 10 days",
-            "extra_filters": [{"col": "__time_range", "op": "==", "val": "Last week"}],
-            "extra_form_data": {
-                "time_range": "Last year",
-            },
-        }
-        merge_extra_filters(form_data)
-        self.assertEqual(
-            form_data,
-            {
-                "time_range": "Last week",
-                "applied_time_extras": {"__time_range": "Last week"},
                 "adhoc_filters": [],
             },
         )
@@ -930,7 +898,7 @@ class TestUtils(SupersetTestCase):
     def test_log_this(self) -> None:
         # TODO: Add additional scenarios.
         self.login(username="admin")
-        slc = self.get_slice("Top 10 Girl Name Share", db.session)
+        slc = self.get_slice("Top 10 Girl Name Share")
         dashboard_id = 1
 
         assert slc.viz is not None
@@ -988,7 +956,7 @@ class TestUtils(SupersetTestCase):
 
     @pytest.mark.usefixtures("load_birth_names_dashboard_with_slices")
     def test_extract_dataframe_dtypes(self):
-        slc = self.get_slice("Girls", db.session)
+        slc = self.get_slice("Girls")
         cols: tuple[tuple[str, GenericDataType, list[Any]], ...] = (
             ("dt", GenericDataType.TEMPORAL, [date(2021, 2, 4), date(2021, 2, 4)]),
             (
@@ -1070,7 +1038,7 @@ class TestUtils(SupersetTestCase):
         df = pd.DataFrame([{"__timestamp": ts.timestamp() * 1000, "a": 1}])
         assert normalize_col(df, "epoch_ms", 0, None)[DTTM_ALIAS][0] == ts
 
-        # test that out of bounds timestamps are coerced to None instead of
-        # erroring out
+        # test that we raise an error when we can't convert
         df = pd.DataFrame([{"__timestamp": "1677-09-21 00:00:00", "a": 1}])
-        assert pd.isnull(normalize_col(df, None, 0, None)[DTTM_ALIAS][0])
+        with pytest.raises(pd.errors.OutOfBoundsDatetime):
+            normalize_col(df, None, 0, None)

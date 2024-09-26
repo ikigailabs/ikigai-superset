@@ -196,7 +196,7 @@ class PostgresBaseEngineSpec(BaseEngineSpec):
         return None
 
 
-class PostgresEngineSpec(PostgresBaseEngineSpec, BasicParametersMixin):
+class PostgresEngineSpec(BasicParametersMixin, PostgresBaseEngineSpec):
     engine = "postgresql"
     engine_aliases = {"postgres"}
     supports_dynamic_schema = True
@@ -260,7 +260,7 @@ class PostgresEngineSpec(PostgresBaseEngineSpec, BasicParametersMixin):
         if search_path := options.get("search_path"):
             schemas = search_path.split(",")
             if len(schemas) > 1:
-                raise Exception(
+                raise Exception(  # pylint: disable=broad-exception-raised
                     "Multiple schemas are configured in the search path, which means "
                     "Superset is unable to determine the schema of unqualified table "
                     "names and enforce permissions."

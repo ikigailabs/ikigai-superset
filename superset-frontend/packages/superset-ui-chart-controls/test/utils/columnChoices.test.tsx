@@ -31,24 +31,24 @@ describe('columnChoices()', () => {
         metrics: [],
         type: DatasourceType.Table,
         main_dttm_col: 'test',
-        time_grain_sqla: 'P1D',
+        time_grain_sqla: [],
         columns: [
           {
             column_name: 'fiz',
             type: 'INT',
-            type_generic: GenericDataType.NUMERIC,
+            type_generic: GenericDataType.Numeric,
           },
           {
             column_name: 'about',
             verbose_name: 'right',
             type: 'VARCHAR',
-            type_generic: GenericDataType.STRING,
+            type_generic: GenericDataType.String,
           },
           {
             column_name: 'foo',
             verbose_name: undefined,
             type: 'TIMESTAMP',
-            type_generic: GenericDataType.TEMPORAL,
+            type_generic: GenericDataType.Temporal,
           },
         ],
         verbose_map: {},

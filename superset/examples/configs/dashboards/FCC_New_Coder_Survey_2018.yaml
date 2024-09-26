@@ -18,6 +18,9 @@ dashboard_title: FCC New Coder Survey 2018
 description: null
 css: ""
 slug: null
+certified_by: ""
+certification_details: ""
+published: true
 uuid: 5b12b583-8204-08e9-392c-422209c29787
 position:
   CHART--0GPGmD-pO:

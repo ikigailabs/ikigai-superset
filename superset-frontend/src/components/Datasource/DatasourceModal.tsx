@@ -130,6 +130,7 @@ const DatasourceModal: FunctionComponent<DatasourceModalProps> = ({
         description: currentDatasource.description,
         main_dttm_col: currentDatasource.main_dttm_col,
         normalize_columns: currentDatasource.normalize_columns,
+        always_filter_main_dttm: currentDatasource.always_filter_main_dttm,
         offset: currentDatasource.offset,
         default_endpoint: currentDatasource.default_endpoint,
         cache_timeout:
@@ -270,7 +271,7 @@ const DatasourceModal: FunctionComponent<DatasourceModalProps> = ({
   };
 
   const showLegacyDatasourceEditor = !isFeatureEnabled(
-    FeatureFlag.DISABLE_LEGACY_DATASOURCE_EDITOR,
+    FeatureFlag.DisableLegacyDatasourceEditor,
   );
 
   return (

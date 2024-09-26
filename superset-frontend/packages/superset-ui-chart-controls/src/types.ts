@@ -73,7 +73,7 @@ export interface Dataset {
   main_dttm_col: string;
   // eg. ['["ds", true]', 'ds [asc]']
   order_by_choices?: [string, string][] | null;
-  time_grain_sqla?: string;
+  time_grain_sqla?: [string, string][];
   granularity_sqla?: string;
   datasource_name: string | null;
   name?: string;
@@ -280,7 +280,6 @@ export type SelectControlType =
   | 'AdhocFilterControl'
   | 'FilterBoxItemControl';
 
-// via react-select/src/filters
 export interface FilterOption<T extends SelectOption> {
   label: string;
   value: string;
@@ -377,6 +376,10 @@ export interface ControlPanelSectionConfig {
   expanded?: boolean;
   tabOverride?: TabOverride;
   controlSetRows: ControlSetRow[];
+  visibility?: (
+    props: ControlPanelsContainerProps,
+    controlData: AnyDict,
+  ) => boolean;
 }
 
 export interface StandardizedControls {
@@ -421,29 +424,29 @@ export type SectionOverrides = {
 
 // Ref:
 //  - superset-frontend/src/explore/components/ConditionalFormattingControl.tsx
-export enum COMPARATOR {
-  NONE = 'None',
-  GREATER_THAN = '>',
-  LESS_THAN = '<',
-  GREATER_OR_EQUAL = '≥',
-  LESS_OR_EQUAL = '≤',
-  EQUAL = '=',
-  NOT_EQUAL = '≠',
-  BETWEEN = '< x <',
-  BETWEEN_OR_EQUAL = '≤ x ≤',
-  BETWEEN_OR_LEFT_EQUAL = '≤ x <',
-  BETWEEN_OR_RIGHT_EQUAL = '< x ≤',
+export enum Comparator {
+  None = 'None',
+  GreaterThan = '>',
+  LessThan = '<',
+  GreaterOrEqual = '≥',
+  LessOrEqual = '≤',
+  Equal = '=',
+  NotEqual = '≠',
+  Between = '< x <',
+  BetweenOrEqual = '≤ x ≤',
+  BetweenOrLeftEqual = '≤ x <',
+  BetweenOrRightEqual = '< x ≤',
 }
 
-export const MULTIPLE_VALUE_COMPARATORS = [
-  COMPARATOR.BETWEEN,
-  COMPARATOR.BETWEEN_OR_EQUAL,
-  COMPARATOR.BETWEEN_OR_LEFT_EQUAL,
-  COMPARATOR.BETWEEN_OR_RIGHT_EQUAL,
+export const MultipleValueComparators = [
+  Comparator.Between,
+  Comparator.BetweenOrEqual,
+  Comparator.BetweenOrLeftEqual,
+  Comparator.BetweenOrRightEqual,
 ];
 
 export type ConditionalFormattingConfig = {
-  operator?: COMPARATOR;
+  operator?: Comparator;
   targetValue?: number;
   targetValueLeft?: number;
   targetValueRight?: number;

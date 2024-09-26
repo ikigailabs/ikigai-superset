@@ -414,9 +414,8 @@ describe('should transform form_data between table and bigNumberTotal', () => {
 
     // change control values on bigNumber
     bntFormData.metric = 'sum(sales)';
-    bntFormData.time_range = '2021 : 2022';
+
     bntControlsState.metric.value = 'sum(sales)';
-    bntControlsState.time_range.value = '2021 : 2022';
 
     // bigNumberTotal -> table
     const sfd2 = new StandardizedFormData(bntFormData);
@@ -437,7 +436,6 @@ describe('should transform form_data between table and bigNumberTotal', () => {
       adhocMetricSQL,
     ]);
     expect(tblFormData.groupby).toEqual(['name', 'gender', adhocColumn]);
-    expect(tblFormData.time_range).toBe('2021 : 2022');
   });
 });
 

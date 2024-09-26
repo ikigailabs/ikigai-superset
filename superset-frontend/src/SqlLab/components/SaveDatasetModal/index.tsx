@@ -42,8 +42,6 @@ import {
   DatasetRadioState,
   EXPLORE_CHART_DEFAULT,
   DatasetOwner,
-  SqlLabExploreRootState,
-  getInitialState,
   SqlLabRootState,
 } from 'src/SqlLab/types';
 import { mountExploreUrl } from 'src/explore/exploreUtils';
@@ -166,7 +164,7 @@ export const SaveDatasetModal = ({
     `${datasource?.name || UNTITLED} ${moment().format('L HH:mm:ss')}`;
   const [datasetName, setDatasetName] = useState(getDefaultDatasetName());
   const [newOrOverwrite, setNewOrOverwrite] = useState(
-    DatasetRadioState.SAVE_NEW,
+    DatasetRadioState.SaveNew,
   );
   const [shouldOverwriteDataset, setShouldOverwriteDataset] = useState(false);
   const [datasetToOverwrite, setDatasetToOverwrite] = useState<
@@ -177,9 +175,7 @@ export const SaveDatasetModal = ({
   >(undefined);
   const [loading, setLoading] = useState<boolean>(false);
 
-  const user = useSelector<SqlLabExploreRootState, User>(user =>
-    getInitialState(user),
-  );
+  const user = useSelector<SqlLabRootState, User>(state => state.user);
   const dispatch = useDispatch<(dispatch: any) => Promise<JsonObject>>();
 
   const createWindow = (url: string) => {
@@ -341,9 +337,9 @@ export const SaveDatasetModal = ({
   };
 
   const disableSaveAndExploreBtn =
-    (newOrOverwrite === DatasetRadioState.SAVE_NEW &&
+    (newOrOverwrite === DatasetRadioState.SaveNew &&
       datasetName.length === 0) ||
-    (newOrOverwrite === DatasetRadioState.OVERWRITE_DATASET &&
+    (newOrOverwrite === DatasetRadioState.OverwriteDataset &&
       isEmpty(selectedDatasetToOverwrite));
 
   const filterAutocompleteOption = (
@@ -358,7 +354,7 @@ export const SaveDatasetModal = ({
       onHide={onHide}
       footer={
         <>
-          {newOrOverwrite === DatasetRadioState.SAVE_NEW && (
+          {newOrOverwrite === DatasetRadioState.SaveNew && (
             <Button
               disabled={disableSaveAndExploreBtn}
               buttonStyle="primary"
@@ -368,7 +364,7 @@ export const SaveDatasetModal = ({
               {buttonTextOnSave}
             </Button>
           )}
-          {newOrOverwrite === DatasetRadioState.OVERWRITE_DATASET && (
+          {newOrOverwrite === DatasetRadioState.OverwriteDataset && (
             <>
               {shouldOverwriteDataset && (
                 <Button onClick={handleOverwriteCancel}>{t('Back')}</Button>

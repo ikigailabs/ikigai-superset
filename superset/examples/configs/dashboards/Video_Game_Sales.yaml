@@ -18,6 +18,9 @@ dashboard_title: Video Game Sales
 description: null
 css: ""
 slug: null
+certified_by: ""
+certification_details: ""
+published: true
 uuid: c7bc10f4-6a2d-7569-caae-bbc91864ee11
 position:
   CHART-7mKdnU7OUJ:

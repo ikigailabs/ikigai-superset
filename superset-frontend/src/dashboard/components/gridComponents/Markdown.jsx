@@ -29,7 +29,7 @@ import { Logger, LOG_ACTIONS_RENDER_CHART } from 'src/logger/LogUtils';
 import { MarkdownEditor } from 'src/components/AsyncAceEditor';
 
 import DeleteComponentButton from 'src/dashboard/components/DeleteComponentButton';
-import DragDroppable from 'src/dashboard/components/dnd/DragDroppable';
+import { Draggable } from 'src/dashboard/components/dnd/DragDroppable';
 import HoverMenu from 'src/dashboard/components/menu/HoverMenu';
 import ResizableContainer from 'src/dashboard/components/resizable/ResizableContainer';
 import MarkdownModeDropdown from 'src/dashboard/components/menu/MarkdownModeDropdown';
@@ -360,7 +360,7 @@ class Markdown extends React.PureComponent {
     const isEditing = editorMode === 'edit';
 
     return (
-      <DragDroppable
+      <Draggable
         component={component}
         parentComponent={parentComponent}
         orientation={parentComponent.type === ROW_TYPE ? 'column' : 'row'}
@@ -370,7 +370,7 @@ class Markdown extends React.PureComponent {
         disableDragDrop={isFocused}
         editMode={editMode}
       >
-        {({ dropIndicatorProps, dragSourceRef }) => (
+        {({ dragSourceRef }) => (
           <WithPopoverMenu
             onChangeFocus={this.handleChangeFocus}
             menuItems={[
@@ -424,10 +424,9 @@ class Markdown extends React.PureComponent {
                 </div>
               </ResizableContainer>
             </MarkdownStyles>
-            {dropIndicatorProps && <div {...dropIndicatorProps} />}
           </WithPopoverMenu>
         )}
-      </DragDroppable>
+      </Draggable>
     );
   }
 }

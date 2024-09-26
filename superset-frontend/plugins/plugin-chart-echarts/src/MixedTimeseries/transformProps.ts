@@ -20,6 +20,7 @@
 import { invert } from 'lodash';
 import {
   AnnotationLayer,
+  AxisType,
   buildCustomFormatters,
   CategoricalColorNamespace,
   CurrencyFormatter,
@@ -79,8 +80,6 @@ import { convertInteger } from '../utils/convertInteger';
 import { defaultGrid, defaultYAxis } from '../defaults';
 import {
   getPadding,
-  getTooltipTimeFormatter,
-  getXAxisFormatter,
   transformEventAnnotation,
   transformFormulaAnnotation,
   transformIntervalAnnotation,
@@ -89,7 +88,11 @@ import {
 } from '../Timeseries/transformers';
 import { TIMEGRAIN_TO_TIMESTAMP, TIMESERIES_CONSTANTS } from '../constants';
 import { getDefaultTooltip } from '../utils/tooltip';
-import { getYAxisFormatter } from '../utils/getYAxisFormatter';
+import {
+  getTooltipTimeFormatter,
+  getXAxisFormatter,
+  getYAxisFormatter,
+} from '../utils/formatters';
 
 const getFormatter = (
   customFormatters: Record<string, ValueFormatter>,
@@ -231,7 +234,10 @@ export default function transformProps(
   const formatter = contributionMode
     ? getNumberFormatter(',.0%')
     : currencyFormat?.symbol
-    ? new CurrencyFormatter({ d3Format: yAxisFormat, currency: currencyFormat })
+    ? new CurrencyFormatter({
+        d3Format: yAxisFormat,
+        currency: currencyFormat,
+      })
     : getNumberFormatter(yAxisFormat);
   const formatterSecondary = contributionMode
     ? getNumberFormatter(',.0%')
@@ -366,7 +372,7 @@ export default function transformProps(
       customFormatters,
       formatter,
       metrics,
-      labelMap[seriesName]?.[0],
+      labelMap?.[seriesName]?.[0],
       !!contributionMode,
     );
 
@@ -382,6 +388,7 @@ export default function transformProps(
         seriesType,
         showValue,
         stack: Boolean(stack),
+        stackIdSuffix: '\na',
         yAxisIndex,
         filterState,
         seriesKey: entry.name,
@@ -404,8 +411,17 @@ export default function transformProps(
 
   rawSeriesB.forEach(entry => {
     const entryName = String(entry.name || '');
-    const seriesName = `${inverted[entryName] || entryName} (1)`;
-    const colorScaleKey = getOriginalSeries(seriesName, array);
+    const seriesEntry = inverted[entryName] || entryName;
+    const seriesName = `${seriesEntry} (1)`;
+    const colorScaleKey = getOriginalSeries(seriesEntry, array);
+
+    const seriesFormatter = getFormatter(
+      customFormattersSecondary,
+      formatterSecondary,
+      metricsB,
+      labelMapB?.[seriesName]?.[0],
+      !!contributionMode,
+    );
 
     const seriesFormatter = getFormatter(
       customFormattersSecondary,
@@ -427,6 +443,7 @@ export default function transformProps(
         seriesType: seriesTypeB,
         showValue: showValueB,
         stack: Boolean(stackB),
+        stackIdSuffix: '\nb',
         yAxisIndex: yAxisIndexB,
         filterState,
         seriesKey: primarySeries.has(entry.name as string)
@@ -458,11 +475,11 @@ export default function transformProps(
   }
 
   const tooltipFormatter =
-    xAxisDataType === GenericDataType.TEMPORAL
+    xAxisDataType === GenericDataType.Temporal
       ? getTooltipTimeFormatter(tooltipTimeFormat)
       : String;
   const xAxisFormatter =
-    xAxisDataType === GenericDataType.TEMPORAL
+    xAxisDataType === GenericDataType.Temporal
       ? getXAxisFormatter(xAxisTimeFormat)
       : String;
 
@@ -501,7 +518,7 @@ export default function transformProps(
       },
       minorTick: { show: minorTicks },
       minInterval:
-        xAxisType === 'time' && timeGrainSqla
+        xAxisType === AxisType.Time && timeGrainSqla
           ? TIMEGRAIN_TO_TIMESTAMP[timeGrainSqla]
           : 0,
       ...getMinAndMaxFromBounds(
@@ -529,6 +546,7 @@ export default function transformProps(
             !!contributionMode,
             customFormatters,
             formatter,
+            yAxisFormat,
           ),
         },
         scale: truncateYAxis,
@@ -551,6 +569,7 @@ export default function transformProps(
             !!contributionMode,
             customFormattersSecondary,
             formatterSecondary,
+            yAxisFormatSecondary,
           ),
         },
         scale: truncateYAxis,

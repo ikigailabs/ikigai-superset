@@ -21,9 +21,7 @@ import { Global } from '@emotion/react';
 import { useHistory } from 'react-router-dom';
 import {
   CategoricalColorNamespace,
-  FeatureFlag,
   getSharedLabelColor,
-  isFeatureEnabled,
   SharedLabelColorSource,
   t,
   useTheme,
@@ -39,12 +37,10 @@ import {
 import { hydrateDashboard } from 'src/dashboard/actions/hydrate';
 import { setDatasources } from 'src/dashboard/actions/datasources';
 import injectCustomCss from 'src/dashboard/util/injectCustomCss';
-import setupPlugins from 'src/setup/setupPlugins';
 
 import { LocalStorageKeys, setItem } from 'src/utils/localStorageHelpers';
 import { URL_PARAMS } from 'src/constants';
 import { getUrlParam } from 'src/utils/urlUtils';
-import { getFilterSets } from 'src/dashboard/actions/nativeFilters';
 import { setDatasetsStatus } from 'src/dashboard/actions/dashboardState';
 import {
   getFilterValue,
@@ -65,7 +61,6 @@ import SyncDashboardState, {
 
 export const DashboardPageIdContext = React.createContext('');
 
-setupPlugins();
 const DashboardBuilder = React.lazy(
   () =>
     import(
@@ -116,7 +111,7 @@ export const DashboardPage: FC<PageProps> = ({ idOrSlug }: PageProps) => {
     // generated next time user opens a dashboard and the old one won't be reused
     const handleTabClose = () => {
       const dashboardsContexts = getDashboardContextLocalStorage();
-      setItem(LocalStorageKeys.dashboard__explore_context, {
+      setItem(LocalStorageKeys.DashboardExploreContext, {
         ...dashboardsContexts,
         [dashboardPageId]: {
           ...dashboardsContexts[dashboardPageId],
@@ -160,10 +155,6 @@ export const DashboardPage: FC<PageProps> = ({ idOrSlug }: PageProps) => {
       if (readyToRender) {
         if (!isDashboardHydrated.current) {
           isDashboardHydrated.current = true;
-          if (filterSetEnabled) {
-            // only initialize filterset once
-            dispatch(getFilterSets(id));
-          }
         }
         dispatch(
           hydrateDashboard({
@@ -201,7 +192,7 @@ export const DashboardPage: FC<PageProps> = ({ idOrSlug }: PageProps) => {
 
   useEffect(() => {
     const sharedLabelColor = getSharedLabelColor();
-    sharedLabelColor.source = SharedLabelColorSource.dashboard;
+    sharedLabelColor.source = SharedLabelColorSource.Dashboard;
     return () => {
       // clean up label color
       const categoricalNamespace = CategoricalColorNamespace.getNamespace(

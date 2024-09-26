@@ -18,6 +18,9 @@ dashboard_title: Sales Dashboard
 description: null
 css: ""
 slug: null
+certified_by: ""
+certification_details: ""
+published: true
 uuid: 04f79081-fb49-7bac-7f14-cc76cd2ad93b
 position:
   CHART-1NOOLm5YPs:

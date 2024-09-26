@@ -32,7 +32,7 @@ import {
   POPOVER_INITIAL_HEIGHT,
   POPOVER_INITIAL_WIDTH,
 } from 'src/explore/constants';
-import { EXPRESSION_TYPES } from '../types';
+import { ExpressionTypes } from '../types';
 
 const propTypes = {
   adhocFilter: PropTypes.instanceOf(AdhocFilter).isRequired,
@@ -73,11 +73,12 @@ const FilterPopoverContentContainer = styled.div`
 
   .filter-edit-clause-info {
     font-size: ${({ theme }) => theme.typography.sizes.xs}px;
-    padding-left: ${({ theme }) => theme.gridUnit}px;
   }
 
   .filter-edit-clause-section {
-    display: inline-flex;
+    display: flex;
+    flex-direction: row;
+    gap: ${({ theme }) => theme.gridUnit * 5}px;
   }
 
   .adhoc-filter-simple-column-dropdown {
@@ -208,7 +209,7 @@ export default class AdhocFilterEditPopover extends React.Component {
         >
           <Tabs.TabPane
             className="adhoc-filter-edit-tab"
-            key={EXPRESSION_TYPES.SIMPLE}
+            key={ExpressionTypes.Simple}
             tab={t('Simple')}
           >
             <ErrorBoundary>
@@ -227,7 +228,7 @@ export default class AdhocFilterEditPopover extends React.Component {
           </Tabs.TabPane>
           <Tabs.TabPane
             className="adhoc-filter-edit-tab"
-            key={EXPRESSION_TYPES.SQL}
+            key={ExpressionTypes.Sql}
             tab={t('Custom SQL')}
           >
             <ErrorBoundary>

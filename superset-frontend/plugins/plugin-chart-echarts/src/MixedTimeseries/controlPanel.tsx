@@ -17,7 +17,7 @@
  * under the License.
  */
 import React from 'react';
-import { ensureIsArray, hasGenericChartAxes, t } from '@superset-ui/core';
+import { ensureIsArray, t } from '@superset-ui/core';
 import { cloneDeep } from 'lodash';
 import {
   ControlPanelConfig,
@@ -38,6 +38,7 @@ import {
   richTooltipSection,
   truncateXAxis,
   xAxisBounds,
+  xAxisLabelRotation,
 } from '../controls';
 
 const {
@@ -55,7 +56,6 @@ const {
   truncateYAxis,
   yAxisBounds,
   zoomable,
-  xAxisLabelRotation,
   yAxisIndex,
 } = DEFAULT_FORM_DATA;
 
@@ -284,14 +284,11 @@ function createAdvancedAnalyticsSection(
 
 const config: ControlPanelConfig = {
   controlPanelSections: [
-    sections.genericTime,
-    hasGenericChartAxes
-      ? {
-          label: t('Shared query fields'),
-          expanded: true,
-          controlSetRows: [['x_axis'], ['time_grain_sqla']],
-        }
-      : null,
+    {
+      label: t('Shared query fields'),
+      expanded: true,
+      controlSetRows: [['x_axis'], ['time_grain_sqla']],
+    },
     createQuerySection(t('Query A'), ''),
     createAdvancedAnalyticsSection(t('Advanced analytics Query A'), ''),
     createQuerySection(t('Query B'), '_b'),
@@ -321,27 +318,7 @@ const config: ControlPanelConfig = {
         ...legendSection,
         [<ControlSubSectionHeader>{t('X Axis')}</ControlSubSectionHeader>],
         ['x_axis_time_format'],
-        [
-          {
-            name: 'xAxisLabelRotation',
-            config: {
-              type: 'SelectControl',
-              freeForm: true,
-              clearable: false,
-              label: t('Rotate x axis label'),
-              choices: [
-                [0, '0°'],
-                [45, '45°'],
-                [90, '90°'],
-              ],
-              default: xAxisLabelRotation,
-              renderTrigger: true,
-              description: t(
-                'Input field supports custom rotation. e.g. 30 for 30°',
-              ),
-            },
-          },
-        ],
+        [xAxisLabelRotation],
         ...richTooltipSection,
         // eslint-disable-next-line react/jsx-key
         [<ControlSubSectionHeader>{t('Y Axis')}</ControlSubSectionHeader>],

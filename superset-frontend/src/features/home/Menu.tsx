@@ -16,47 +16,39 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
+import React from // useState,
+// useEffect
+'react';
 // import { styled, css, useTheme, SupersetTheme } from '@superset-ui/core';
 // import { debounce } from 'lodash';
 // import { Global } from '@emotion/react';
-// import { getUrlParam } from 'src/utils/urlUtils';
+import { getUrlParam } from 'src/utils/urlUtils';
 // import { Row, Col, Grid } from 'src/components';
 // import { MainNav as DropdownMenu, MenuMode } from 'src/components/Menu';
 // import { Tooltip } from 'src/components/Tooltip';
-// import { Link } from 'react-router-dom';
+// import { NavLink, useLocation } from 'react-router-dom';
+// import { GenericLink } from 'src/components/GenericLink/GenericLink';
 // import Icons from 'src/components/Icons';
-// import { useUiConfig } from 'src/components/UiConfigContext';
-// import { URL_PARAMS } from 'src/constants';
-// import RightMenu from './MenuRight';
-// import { Languages } from './LanguagePicker';
+import { useUiConfig } from 'src/components/UiConfigContext';
+import { URL_PARAMS } from 'src/constants';
+import {
+  MenuObjectChildProps,
+  MenuObjectProps,
+  MenuData,
+} from 'src/types/bootstrapTypes';
+// import RightMenu from './RightMenu';
 
 interface MenuProps {
-  data: any;
+  data: MenuData;
   isFrontendRoute?: (path?: string) => boolean;
-}
-
-export interface MenuObjectChildProps {
-  label: string;
-  name?: string;
-  icon?: string;
-  index?: number;
-  url?: string;
-  isFrontendRoute?: boolean;
-  perm?: string | boolean;
-  view?: string;
-  disable?: boolean;
-}
-
-export interface MenuObjectProps extends MenuObjectChildProps {
-  childs?: (MenuObjectChildProps | string)[];
-  isHeader?: boolean;
 }
 
 // const StyledHeader = styled.header`
 //   ${({ theme }) => `
 //       background-color: ${theme.colors.grayscale.light5};
 //       margin-bottom: 2px;
+//       z-index: 10;
+
 //       &:nth-last-of-type(2) nav {
 //         margin-bottom: 2px;
 //       }
@@ -69,10 +61,11 @@ export interface MenuObjectProps extends MenuObjectChildProps {
 //         justify-content: center;
 //         /* must be exactly the height of the Antd navbar */
 //         min-height: 50px;
-//         padding: ${theme.gridUnit}px ${theme.gridUnit * 2}px ${
-//     theme.gridUnit
-//   }px ${theme.gridUnit * 4}px;
-//         max-width: ${theme.gridUnit * 37}px;
+//         padding: ${theme.gridUnit}px
+//           ${theme.gridUnit * 2}px
+//           ${theme.gridUnit}px
+//           ${theme.gridUnit * 4}px;
+//         max-width: ${theme.gridUnit * theme.brandIconMaxWidth}px;
 //         img {
 //           height: 100%;
 //           object-fit: contain;
@@ -125,7 +118,7 @@ export interface MenuObjectProps extends MenuObjectChildProps {
 //         .ant-menu > .ant-menu-item > a {
 //           padding: 0px;
 //         }
-//         .main-nav .ant-menu-submenu-title > svg:nth-child(1) {
+//         .main-nav .ant-menu-submenu-title > svg:nth-of-type(1) {
 //           display: none;
 //         }
 //         .ant-menu-item-active > a {
@@ -163,31 +156,90 @@ export interface MenuObjectProps extends MenuObjectChildProps {
 //       margin-left: ${theme.gridUnit * 1.75}px;
 //     }
 //   }
+//   .ant-menu-item-selected {
+//     background-color: transparent;
+//     &:not(.ant-menu-item-active) {
+//       color: inherit;
+//       border-bottom-color: transparent;
+//       & > a {
+//         color: inherit;
+//       }
+//     }
+//   }
+//   .ant-menu-horizontal > .ant-menu-item:has(> .is-active) {
+//     color: ${theme.colors.primary.base};
+//     border-bottom-color: ${theme.colors.primary.base};
+//     & > a {
+//       color: ${theme.colors.primary.base};
+//     }
+//   }
+//   .ant-menu-vertical > .ant-menu-item:has(> .is-active) {
+//     background-color: ${theme.colors.primary.light5};
+//     & > a {
+//       color: ${theme.colors.primary.base};
+//     }
+//   }
 // `;
 // const { SubMenu } = DropdownMenu;
 
 // const { useBreakpoint } = Grid;
 
-export function Menu() {
-  // const [setMenu] = useState<MenuMode>('horizontal');
+export function Menu({
+  data: {
+    menu,
+    brand,
+    navbar_right: navbarRight,
+    settings,
+    environment_tag: environmentTag,
+  },
+  isFrontendRoute = () => false,
+}: MenuProps) {
+  // const [showMenu, setMenu] = useState<MenuMode>('horizontal');
   // const screens = useBreakpoint();
-  // const uiConfig = useUiConfig();
+  const uiConfig = useUiConfig();
   // const theme = useTheme();
 
   // useEffect(() => {
-  //   // function handleResize() {
-  //   //   if (window.innerWidth <= 767) {
-  //   //     // setMenu('inline');
-  //   //   } else setMenu('horizontal');
-  //   // }
+  //   function handleResize() {
+  //     if (window.innerWidth <= 767) {
+  //       setMenu('inline');
+  //     } else setMenu('horizontal');
+  //   }
   //   handleResize();
   //   const windowResize = debounce(() => handleResize(), 10);
   //   window.addEventListener('resize', windowResize);
   //   return () => window.removeEventListener('resize', windowResize);
   // }, []);
 
-  // const standalone = getUrlParam(URL_PARAMS.standalone);
-  // if (standalone || uiConfig.hideNav) return <></>;
+  // enum Paths {
+  //   Explore = '/explore',
+  //   Dashboard = '/dashboard',
+  //   Chart = '/chart',
+  //   Datasets = '/tablemodelview',
+  // }
+
+  // const defaultTabSelection: string[] = [];
+  // const [activeTabs, setActiveTabs] = useState(defaultTabSelection);
+  // const location = useLocation();
+  // useEffect(() => {
+  //   const path = location.pathname;
+  //   switch (true) {
+  //     case path.startsWith(Paths.Dashboard):
+  //       setActiveTabs(['Dashboards']);
+  //       break;
+  //     case path.startsWith(Paths.Chart) || path.startsWith(Paths.Explore):
+  //       setActiveTabs(['Charts']);
+  //       break;
+  //     case path.startsWith(Paths.Datasets):
+  //       setActiveTabs(['Datasets']);
+  //       break;
+  //     default:
+  //       setActiveTabs(defaultTabSelection);
+  //   }
+  // }, [location.pathname]);
+
+  const standalone = getUrlParam(URL_PARAMS.standalone);
+  if (standalone || uiConfig.hideNav) return <></>;
 
   // const renderSubMenu = ({
   //   label,
@@ -199,9 +251,9 @@ export function Menu() {
   //   if (url && isFrontendRoute) {
   //     return (
   //       <DropdownMenu.Item key={label} role="presentation">
-  //         <Link role="button" to={url}>
+  //         <NavLink role="button" to={url} activeClassName="is-active">
   //           {label}
-  //         </Link>
+  //         </NavLink>
   //       </DropdownMenu.Item>
   //     );
   //   }
@@ -226,7 +278,13 @@ export function Menu() {
   //           return (
   //             <DropdownMenu.Item key={`${child.label}`}>
   //               {child.isFrontendRoute ? (
-  //                 <Link to={child.url || ''}>{child.label}</Link>
+  //                 <NavLink
+  //                   to={child.url || ''}
+  //                   exact
+  //                   activeClassName="is-active"
+  //                 >
+  //                   {child.label}
+  //                 </NavLink>
   //               ) : (
   //                 <a href={child.url}>{child.label}</a>
   //               )}
@@ -250,9 +308,15 @@ export function Menu() {
     //         title={brand.tooltip}
     //         arrowPointAtCenter
     //       >
-    //         <a className="navbar-brand" href={brand.path}>
-    //           <img src={brand.icon} alt={brand.alt} />
-    //         </a>
+    //         {isFrontendRoute(window.location.pathname) ? (
+    //           <GenericLink className="navbar-brand" to={brand.path}>
+    //             <img src={brand.icon} alt={brand.alt} />
+    //           </GenericLink>
+    //         ) : (
+    //           <a className="navbar-brand" href={brand.path}>
+    //             <img src={brand.icon} alt={brand.alt} />
+    //           </a>
+    //         )}
     //       </Tooltip>
     //       {brand.text && (
     //         <div className="navbar-brand-text">
@@ -263,6 +327,7 @@ export function Menu() {
     //         mode={showMenu}
     //         data-test="navbar-top"
     //         className="main-nav"
+    //         selectedKeys={activeTabs}
     //       >
     //         {menu.map((item, index) => {
     //           const props = {
@@ -291,6 +356,7 @@ export function Menu() {
     //         settings={settings}
     //         navbarRight={navbarRight}
     //         isFrontendRoute={isFrontendRoute}
+    //         environmentTag={environmentTag}
     //       />
     //     </Col>
     //   </Row>
@@ -346,5 +412,5 @@ export default function MenuWrapper({ data, ...rest }: MenuProps) {
   newMenuData.menu = cleanedMenu;
   newMenuData.settings = settings;
 
-  return <Menu />;
+  return <Menu data={newMenuData} {...rest} />;
 }

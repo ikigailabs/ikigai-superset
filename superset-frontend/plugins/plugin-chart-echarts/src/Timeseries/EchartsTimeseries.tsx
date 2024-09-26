@@ -25,6 +25,7 @@ import {
   getColumnLabel,
   getNumberFormatter,
   LegendState,
+  ensureIsArray,
 } from '@superset-ui/core';
 import { ViewRootGroup } from 'echarts/types/src/util/types';
 import GlobalModel from 'echarts/types/src/model/Global';
@@ -173,7 +174,8 @@ export default function EchartsTimeseries({
           ...(eventParams.name ? [eventParams.name] : []),
           ...(labelMap[seriesName] ?? []),
         ];
-        if (data && xAxis.type === AxisType.time) {
+        const groupBy = ensureIsArray(formData.groupby);
+        if (data && xAxis.type === AxisType.Time) {
           drillToDetailFilters.push({
             col:
               // if the xAxis is '__timestamp', granularity_sqla will be the column of filter
@@ -187,8 +189,8 @@ export default function EchartsTimeseries({
           });
         }
         [
-          ...(xAxis.type === AxisType.category && data ? [xAxis.label] : []),
-          ...formData.groupby,
+          ...(xAxis.type === AxisType.Category && data ? [xAxis.label] : []),
+          ...groupBy,
         ].forEach((dimension, i) =>
           drillToDetailFilters.push({
             col: dimension,
@@ -197,7 +199,7 @@ export default function EchartsTimeseries({
             formattedVal: String(values[i]),
           }),
         );
-        formData.groupby.forEach((dimension, i) => {
+        groupBy.forEach((dimension, i) => {
           const val = labelMap[seriesName][i];
           drillByFilters.push({
             col: dimension,

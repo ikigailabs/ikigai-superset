@@ -71,7 +71,7 @@ const StyledDiv = styled.div`
 `;
 
 const queriesDataPlaceholder = [{ data: [{}] }];
-const behaviors = [Behavior.NATIVE_FILTER];
+const behaviors = [Behavior.NativeFilter];
 
 const useShouldFilterRefresh = () => {
   const isDashboardRefreshing = useSelector<RootState, boolean>(
@@ -93,7 +93,7 @@ const FilterValue: React.FC<FilterControlProps> = ({
   showOverflow,
   parentRef,
   setFilterActive,
-  orientation = FilterBarOrientation.VERTICAL,
+  orientation = FilterBarOrientation.Vertical,
   overflow = false,
   validateStatus,
 }) => {
@@ -174,11 +174,11 @@ const FilterValue: React.FC<FilterControlProps> = ({
       setIsRefreshing(true);
       getChartDataRequest({
         formData: newFormData,
-        force: false,
+        force: shouldRefresh,
         ownState: filterOwnState,
       })
         .then(({ response, json }) => {
-          if (isFeatureEnabled(FeatureFlag.GLOBAL_ASYNC_QUERIES)) {
+          if (isFeatureEnabled(FeatureFlag.GlobalAsyncQueries)) {
             // deal with getChartDataRequest transforming the response data
             const result = 'result' in json ? json.result[0] : json;
 

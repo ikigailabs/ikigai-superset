@@ -84,7 +84,7 @@ from superset.utils.hashing import md5_sha_from_str
 
 if TYPE_CHECKING:
     from superset.common.query_context_factory import QueryContextFactory
-    from superset.connectors.base.models import BaseDatasource
+    from superset.connectors.sqla.models import BaseDatasource
 
 config = app.config
 stats_logger = config["STATS_LOGGER"]
@@ -221,7 +221,7 @@ class BaseViz:  # pylint: disable=too-many-public-methods
         min_periods = int(self.form_data.get("min_periods") or 0)
 
         if rolling_type in ("mean", "std", "sum") and rolling_periods:
-            kwargs = dict(window=rolling_periods, min_periods=min_periods)
+            kwargs = {"window": rolling_periods, "min_periods": min_periods}
             if rolling_type == "mean":
                 df = df.rolling(**kwargs).mean()
             elif rolling_type == "std":
@@ -262,6 +262,8 @@ class BaseViz:  # pylint: disable=too-many-public-methods
             "data": payload["df"].to_dict(orient="records"),
             "colnames": payload.get("colnames"),
             "coltypes": payload.get("coltypes"),
+            "rowcount": payload.get("rowcount"),
+            "sql_rowcount": payload.get("sql_rowcount"),
         }
 
     @deprecated(deprecated_in="3.0")
@@ -352,7 +354,6 @@ class BaseViz:  # pylint: disable=too-many-public-methods
 
         is_timeseries = self.is_timeseries
 
-        # pylint: disable=superfluous-parens
         if DTTM_ALIAS in (groupby_labels := get_column_names(groupby)):
             del groupby[groupby_labels.index(DTTM_ALIAS)]
             is_timeseries = True
@@ -680,7 +681,7 @@ class BaseViz:  # pylint: disable=too-many-public-methods
         return csv.df_to_escaped_csv(df, index=include_index, **config["CSV_EXPORT"])
 
     @deprecated(deprecated_in="3.0")
-    def get_data(self, df: pd.DataFrame) -> VizData:  # pylint: disable=no-self-use
+    def get_data(self, df: pd.DataFrame) -> VizData:
         return df.to_dict(orient="records")
 
     @property
@@ -739,11 +740,11 @@ class TimeTableViz(BaseViz):
         pt = df.pivot_table(index=DTTM_ALIAS, columns=columns, values=values)
         pt.index = pt.index.map(str)
         pt = pt.sort_index()
-        return dict(
-            records=pt.to_dict(orient="index"),
-            columns=list(pt.columns),
-            is_group_by=bool(self.form_data.get("groupby")),
-        )
+        return {
+            "records": pt.to_dict(orient="index"),
+            "columns": list(pt.columns),
+            "is_group_by": bool(self.form_data.get("groupby")),
+        }
 
 
 class CalHeatmapViz(BaseViz):
@@ -1353,55 +1354,6 @@ class DistributionBarViz(BaseViz):
         return chart_data
 
 
-class SunburstViz(BaseViz):
-
-    """A multi level sunburst chart"""
-
-    viz_type = "sunburst"
-    verbose_name = _("Sunburst")
-    is_timeseries = False
-    credits = (
-        "Kerry Rodden "
-        '@<a href="https://bl.ocks.org/kerryrodden/7090426">bl.ocks.org</a>'
-    )
-
-    @deprecated(deprecated_in="3.0")
-    def get_data(self, df: pd.DataFrame) -> VizData:
-        if df.empty:
-            return None
-        form_data = copy.deepcopy(self.form_data)
-        cols = get_column_names(form_data.get("groupby"))
-        cols.extend(["m1", "m2"])
-        metric = utils.get_metric_name(form_data["metric"])
-        secondary_metric = (
-            utils.get_metric_name(form_data["secondary_metric"])
-            if form_data.get("secondary_metric")
-            else None
-        )
-        if metric == secondary_metric or secondary_metric is None:
-            df.rename(columns={df.columns[-1]: "m1"}, inplace=True)
-            df["m2"] = df["m1"]
-        else:
-            df.rename(columns={df.columns[-2]: "m1"}, inplace=True)
-            df.rename(columns={df.columns[-1]: "m2"}, inplace=True)
-
-        # Re-order the columns as the query result set column ordering may differ from
-        # that listed in the hierarchy.
-        df = df[cols]
-        return df.to_numpy().tolist()
-
-    @deprecated(deprecated_in="3.0")
-    def query_obj(self) -> QueryObjectDict:
-        query_obj = super().query_obj()
-        query_obj["metrics"] = [self.form_data["metric"]]
-        secondary_metric = self.form_data.get("secondary_metric")
-        if secondary_metric and secondary_metric != self.form_data["metric"]:
-            query_obj["metrics"].append(secondary_metric)
-        if self.form_data.get("sort_by_metric", False):
-            query_obj["orderby"] = [(query_obj["metrics"][0], False)]
-        return query_obj
-
-
 class SankeyViz(BaseViz):
 
     """A Sankey diagram that requires a parent-child dataset"""
@@ -1616,85 +1568,6 @@ class WorldMapViz(BaseViz):
             else:
                 row["country"] = "XXX"
         return data
-
-
-class FilterBoxViz(BaseViz):
-
-    """A multi filter, multi-choice filter box to make dashboards interactive"""
-
-    query_context_factory: QueryContextFactory | None = None
-    viz_type = "filter_box"
-    verbose_name = _("Filters")
-    is_timeseries = False
-    credits = 'a <a href="https://github.com/airbnb/superset">Superset</a> original'
-    cache_type = "get_data"
-    filter_row_limit = 1000
-
-    @deprecated(deprecated_in="3.0")
-    def query_obj(self) -> QueryObjectDict:
-        return {}
-
-    @deprecated(deprecated_in="3.0")
-    def run_extra_queries(self) -> None:
-        query_obj = super().query_obj()
-        filters = self.form_data.get("filter_configs") or []
-        query_obj["row_limit"] = self.filter_row_limit
-        self.dataframes = {}  # pylint: disable=attribute-defined-outside-init
-        for flt in filters:
-            col = flt.get("column")
-            if not col:
-                raise QueryObjectValidationError(
-                    _("Invalid filter configuration, please select a column")
-                )
-            query_obj["groupby"] = [col]
-            metric = flt.get("metric")
-            query_obj["metrics"] = [metric] if metric else []
-            asc = flt.get("asc")
-            if metric and asc is not None:
-                query_obj["orderby"] = [(metric, asc)]
-            self.get_query_context_factory().create(
-                datasource={"id": self.datasource.id, "type": self.datasource.type},
-                form_data=self.form_data,
-                queries=[query_obj],
-            ).raise_for_access()
-            df = self.get_df_payload(query_obj=query_obj).get("df")
-            self.dataframes[col] = df
-
-    @deprecated(deprecated_in="3.0")
-    def get_data(self, df: pd.DataFrame) -> VizData:
-        filters = self.form_data.get("filter_configs") or []
-        data = {}
-        for flt in filters:
-            col = flt.get("column")
-            metric = flt.get("metric")
-            df = self.dataframes.get(col)
-            if df is not None and not df.empty:
-                if metric:
-                    df = df.sort_values(
-                        utils.get_metric_name(metric), ascending=flt.get("asc", False)
-                    )
-                    data[col] = [
-                        {"id": row[0], "text": row[0], "metric": row[1]}
-                        for row in df.itertuples(index=False)
-                    ]
-                else:
-                    df = df.sort_values(col, ascending=flt.get("asc", False))
-                    data[col] = [
-                        {"id": row[0], "text": row[0]}
-                        for row in df.itertuples(index=False)
-                    ]
-            else:
-                data[col] = []
-        return data
-
-    @deprecated(deprecated_in="3.0")
-    def get_query_context_factory(self) -> QueryContextFactory:
-        if self.query_context_factory is None:
-            # pylint: disable=import-outside-toplevel
-            from superset.common.query_context_factory import QueryContextFactory
-
-            self.query_context_factory = QueryContextFactory()
-        return self.query_context_factory
 
 
 class ParallelCoordinatesViz(BaseViz):
@@ -2020,15 +1893,15 @@ class BaseDeckGLViz(BaseViz):
 
     @staticmethod
     @deprecated(deprecated_in="3.0")
-    def parse_coordinates(latlog: Any) -> tuple[float, float] | None:
-        if not latlog:
+    def parse_coordinates(latlong: Any) -> tuple[float, float] | None:
+        if not latlong:
             return None
         try:
-            point = Point(latlog)
+            point = Point(latlong)
             return (point.latitude, point.longitude)
         except Exception as ex:
             raise SpatialException(
-                _("Invalid spatial point encountered: %s" % latlog)
+                _("Invalid spatial point encountered: %(latlong)s", latlong=latlong)
             ) from ex
 
     @staticmethod
@@ -2412,6 +2285,27 @@ class DeckHeatmap(BaseDeckGLViz):
         return super().get_data(df)
 
 
+class DeckContour(BaseDeckGLViz):
+
+    """deck.gl's ContourLayer"""
+
+    viz_type = "deck_contour"
+    verbose_name = _("Deck.gl - Contour")
+    spatial_control_keys = ["spatial"]
+
+    def get_properties(self, data: dict[str, Any]) -> dict[str, Any]:
+        return {
+            "position": data.get("spatial"),
+            "weight": (data.get(self.metric_label) if self.metric_label else None) or 1,
+        }
+
+    def get_data(self, df: pd.DataFrame) -> VizData:
+        self.metric_label = (  # pylint: disable=attribute-defined-outside-init
+            utils.get_metric_name(self.metric) if self.metric else None
+        )
+        return super().get_data(df)
+
+
 class DeckGeoJson(BaseDeckGLViz):
 
     """deck.gl's GeoJSONLayer"""
@@ -2545,7 +2439,7 @@ class PairedTTestViz(BaseViz):
         metrics = self.metric_labels
         df = df.pivot_table(index=DTTM_ALIAS, columns=groups, values=metrics)
         cols = []
-        # Be rid of falsey keys
+        # Be rid of falsy keys
         for col in df.columns:
             if col == "":
                 cols.append("N/A")
@@ -2637,7 +2531,7 @@ class PartitionViz(NVD3TimeSeriesViz):
         for i in range(0, len(groups) + 1):
             agg_df = df.groupby(groups[:i]) if i else df
             levels[i] = (
-                agg_df.mean()
+                agg_df.mean(numeric_only=True)
                 if time_op == "agg_mean"
                 else agg_df.sum(numeric_only=True)
             )
@@ -2662,7 +2556,7 @@ class PartitionViz(NVD3TimeSeriesViz):
                 lambda a, b, fill_value: a / float(b) - 1,
             ],
         }[time_op]
-        agg_df = df.groupby(DTTM_ALIAS).sum()
+        agg_df = df.groupby(DTTM_ALIAS).sum(numeric_only=True)
         levels = {
             0: pd.Series(
                 {
@@ -2672,7 +2566,7 @@ class PartitionViz(NVD3TimeSeriesViz):
             )
         }
         for i in range(1, len(groups) + 1):
-            agg_df = df.groupby([DTTM_ALIAS] + groups[:i]).sum()
+            agg_df = df.groupby([DTTM_ALIAS] + groups[:i]).sum(numeric_only=True)
             levels[i] = pd.DataFrame(
                 {
                     m: func[0](agg_df[m][until], agg_df[m][since], fill_value=0)
@@ -2688,7 +2582,7 @@ class PartitionViz(NVD3TimeSeriesViz):
         procs = {}
         for i in range(0, len(groups) + 1):
             self.form_data["groupby"] = groups[:i]
-            df_drop = df.drop(groups[i:], 1)
+            df_drop = df.drop(groups[i:], axis=1)
             procs[i] = self.process_data(df_drop, aggregate=True)
         self.form_data["groupby"] = groups
         return procs

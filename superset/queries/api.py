@@ -71,11 +71,19 @@ class QueryRestApi(BaseSupersetModelRestApi):
     list_columns = [
         "id",
         "changed_on",
+        "client_id",
+        "database.id",
         "database.database_name",
         "executed_sql",
+        "error_message",
+        "limit",
+        "limiting_factor",
+        "progress",
         "rows",
         "schema",
+        "select_as_cta",
         "sql",
+        "sql_editor_id",
         "sql_tables",
         "status",
         "tab_name",
@@ -86,6 +94,7 @@ class QueryRestApi(BaseSupersetModelRestApi):
         "end_time",
         "tmp_table_name",
         "tracking_url",
+        "results_key",
     ]
     show_columns = [
         "id",
@@ -143,7 +152,15 @@ class QueryRestApi(BaseSupersetModelRestApi):
         "user": RelatedFieldFilter("first_name", FilterRelatedOwners),
     }
 
-    search_columns = ["changed_on", "database", "sql", "status", "user", "start_time"]
+    search_columns = [
+        "changed_on",
+        "database",
+        "sql",
+        "status",
+        "user",
+        "start_time",
+        "sql_editor_id",
+    ]
 
     allowed_rel_fields = {"database", "user"}
     allowed_distinct_fields = {"status"}
@@ -159,7 +176,7 @@ class QueryRestApi(BaseSupersetModelRestApi):
         log_to_statsd=False,
     )
     def get_updated_since(self, **kwargs: Any) -> FlaskResponse:
-        """Get a list of queries that changed after last_updated_ms
+        """Get a list of queries that changed after last_updated_ms.
         ---
         get:
           summary: Get a list of queries that changed after last_updated_ms
@@ -220,7 +237,7 @@ class QueryRestApi(BaseSupersetModelRestApi):
     )
     @requires_json
     def stop_query(self) -> FlaskResponse:
-        """Manually stop a query with client_id
+        """Manually stop a query with client_id.
         ---
         post:
           summary: Manually stop a query with client_id

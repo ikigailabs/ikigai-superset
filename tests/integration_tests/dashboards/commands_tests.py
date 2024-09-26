@@ -23,16 +23,16 @@ import yaml
 from werkzeug.utils import secure_filename
 
 from superset import db, security_manager
-from superset.commands.exceptions import CommandInvalidError
-from superset.commands.importers.exceptions import IncorrectVersionError
-from superset.connectors.sqla.models import SqlaTable
-from superset.dashboards.commands.exceptions import DashboardNotFoundError
-from superset.dashboards.commands.export import (
+from superset.commands.dashboard.exceptions import DashboardNotFoundError
+from superset.commands.dashboard.export import (
     append_charts,
     ExportDashboardsCommand,
     get_default_position,
 )
-from superset.dashboards.commands.importers import v0, v1
+from superset.commands.dashboard.importers import v0, v1
+from superset.commands.exceptions import CommandInvalidError
+from superset.commands.importers.exceptions import IncorrectVersionError
+from superset.connectors.sqla.models import SqlaTable
 from superset.models.core import Database
 from superset.models.dashboard import Dashboard
 from superset.models.slice import Slice
@@ -92,6 +92,9 @@ class TestExportDashboardsCommand(SupersetTestCase):
             "description": None,
             "css": None,
             "slug": "world_health",
+            "certified_by": None,
+            "certification_details": None,
+            "published": False,
             "uuid": str(example_dashboard.uuid),
             "position": {
                 "CHART-37982887": {
@@ -273,6 +276,9 @@ class TestExportDashboardsCommand(SupersetTestCase):
             "description",
             "css",
             "slug",
+            "certified_by",
+            "certification_details",
+            "published",
             "uuid",
             "position",
             "metadata",
@@ -280,7 +286,7 @@ class TestExportDashboardsCommand(SupersetTestCase):
         ]
 
     @pytest.mark.usefixtures("load_world_bank_dashboard_with_slices")
-    @patch("superset.dashboards.commands.export.suffix")
+    @patch("superset.commands.dashboard.export.suffix")
     def test_append_charts(self, mock_suffix):
         """Test that orphaned charts are added to the dashboard position"""
         # return deterministic IDs
@@ -545,14 +551,9 @@ class TestImportDashboardsCommand(SupersetTestCase):
         }
         assert json.loads(dashboard.json_metadata) == {
             "color_scheme": None,
-            "default_filters": "{}",
             "expanded_slices": {str(new_chart_id): True},
-            "filter_scopes": {
-                str(new_chart_id): {
-                    "region": {"scope": ["ROOT_ID"], "immune": [new_chart_id]}
-                },
-            },
             "import_time": 1604342885,
+            "native_filter_configuration": [],
             "refresh_frequency": 0,
             "remote_id": 7,
             "timed_refresh_immune_slices": [new_chart_id],

@@ -129,7 +129,7 @@ const publishDataMask = debounce(
 
 export const FilterBarScrollContext = createContext(false);
 const FilterBar: React.FC<FiltersBarProps> = ({
-  orientation = FilterBarOrientation.VERTICAL,
+  orientation = FilterBarOrientation.Vertical,
   verticalConfig,
   hidden = false,
 }) => {
@@ -287,7 +287,7 @@ const FilterBar: React.FC<FiltersBarProps> = ({
   );
 
   const filterBarComponent =
-    orientation === FilterBarOrientation.HORIZONTAL ? (
+    orientation === FilterBarOrientation.Horizontal ? (
       <Horizontal
         actions={actions}
         canEdit={canEdit}
@@ -305,7 +305,6 @@ const FilterBar: React.FC<FiltersBarProps> = ({
         filtersOpen={verticalConfig.filtersOpen}
         filterValues={filterValues}
         isInitialized={isInitialized}
-        isDisabled={isApplyDisabled}
         height={verticalConfig.height}
         offset={verticalConfig.offset}
         onSelectionChange={handleFilterSelectionChange}

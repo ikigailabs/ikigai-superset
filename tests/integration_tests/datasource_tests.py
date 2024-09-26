@@ -17,17 +17,18 @@
 """Unit tests for Superset"""
 import json
 from contextlib import contextmanager
+from datetime import datetime, timedelta
 from unittest import mock
 
 import prison
 import pytest
 
 from superset import app, db
+from superset.commands.dataset.exceptions import DatasetNotFoundError
 from superset.common.utils.query_cache_manager import QueryCacheManager
 from superset.connectors.sqla.models import SqlaTable, SqlMetric, TableColumn
 from superset.constants import CacheRegion
 from superset.daos.exceptions import DatasourceNotFound, DatasourceTypeNotSupportedError
-from superset.datasets.commands.exceptions import DatasetNotFoundError
 from superset.exceptions import SupersetGenericDBErrorException
 from superset.models.core import Database
 from superset.utils.core import backend, get_example_default_schema
@@ -76,24 +77,74 @@ class TestDatasource(SupersetTestCase):
             col_names, {"num_boys", "num", "gender", "name", "ds", "state", "num_girls"}
         )
 
+    def test_always_filter_main_dttm(self):
+        self.login(username="admin")
+        database = get_example_database()
+
+        sql = f"SELECT DATE() as default_dttm, DATE() as additional_dttm, 1 as metric;"
+        if database.backend == "sqlite":
+            pass
+        elif database.backend in ["postgresql", "mysql"]:
+            sql = sql.replace("DATE()", "NOW()")
+        else:
+            return
+
+        query_obj = {
+            "columns": ["metric"],
+            "filter": [],
+            "from_dttm": datetime.now() - timedelta(days=1),
+            "granularity": "additional_dttm",
+            "orderby": [],
+            "to_dttm": datetime.now() + timedelta(days=1),
+            "series_columns": [],
+            "row_limit": 1000,
+            "row_offset": 0,
+        }
+        table = SqlaTable(
+            table_name="dummy_sql_table",
+            database=database,
+            schema=get_example_default_schema(),
+            main_dttm_col="default_dttm",
+            columns=[
+                TableColumn(column_name="default_dttm", type="DATETIME", is_dttm=True),
+                TableColumn(
+                    column_name="additional_dttm", type="DATETIME", is_dttm=True
+                ),
+            ],
+            sql=sql,
+        )
+
+        db.session.add(table)
+        db.session.commit()
+
+        table.always_filter_main_dttm = False
+        result = str(table.get_sqla_query(**query_obj).sqla_query.whereclause)
+        assert "default_dttm" not in result and "additional_dttm" in result
+
+        table.always_filter_main_dttm = True
+        result = str(table.get_sqla_query(**query_obj).sqla_query.whereclause)
+        assert "default_dttm" in result and "additional_dttm" in result
+
+        db.session.delete(table)
+        db.session.commit()
+
     def test_external_metadata_for_virtual_table(self):
         self.login(username="admin")
-        session = db.session
         table = SqlaTable(
             table_name="dummy_sql_table",
             database=get_example_database(),
             schema=get_example_default_schema(),
             sql="select 123 as intcol, 'abc' as strcol",
         )
-        session.add(table)
-        session.commit()
+        db.session.add(table)
+        db.session.commit()
 
         table = self.get_table(name="dummy_sql_table")
         url = f"/datasource/external_metadata/table/{table.id}/"
         resp = self.get_json_resp(url)
         assert {o.get("column_name") for o in resp} == {"intcol", "strcol"}
-        session.delete(table)
-        session.commit()
+        db.session.delete(table)
+        db.session.commit()
 
     @pytest.mark.usefixtures("load_birth_names_dashboard_with_slices")
     def test_external_metadata_by_name_for_physical_table(self):
@@ -106,6 +157,7 @@ class TestDatasource(SupersetTestCase):
                 "schema_name": tbl.schema,
                 "table_name": tbl.table_name,
                 "normalize_columns": tbl.normalize_columns,
+                "always_filter_main_dttm": tbl.always_filter_main_dttm,
             }
         )
         url = f"/datasource/external_metadata_by_name/?q={params}"
@@ -117,15 +169,14 @@ class TestDatasource(SupersetTestCase):
 
     def test_external_metadata_by_name_for_virtual_table(self):
         self.login(username="admin")
-        session = db.session
         table = SqlaTable(
             table_name="dummy_sql_table",
             database=get_example_database(),
             schema=get_example_default_schema(),
             sql="select 123 as intcol, 'abc' as strcol",
         )
-        session.add(table)
-        session.commit()
+        db.session.add(table)
+        db.session.commit()
 
         tbl = self.get_table(name="dummy_sql_table")
         params = prison.dumps(
@@ -135,13 +186,14 @@ class TestDatasource(SupersetTestCase):
                 "schema_name": tbl.schema,
                 "table_name": tbl.table_name,
                 "normalize_columns": tbl.normalize_columns,
+                "always_filter_main_dttm": tbl.always_filter_main_dttm,
             }
         )
         url = f"/datasource/external_metadata_by_name/?q={params}"
         resp = self.get_json_resp(url)
         assert {o.get("column_name") for o in resp} == {"intcol", "strcol"}
-        session.delete(tbl)
-        session.commit()
+        db.session.delete(tbl)
+        db.session.commit()
 
     def test_external_metadata_by_name_from_sqla_inspector(self):
         self.login(username="admin")
@@ -154,6 +206,7 @@ class TestDatasource(SupersetTestCase):
                     "table_name": "test_table",
                     "schema_name": get_example_default_schema(),
                     "normalize_columns": False,
+                    "always_filter_main_dttm": False,
                 }
             )
             url = f"/datasource/external_metadata_by_name/?q={params}"
@@ -168,6 +221,7 @@ class TestDatasource(SupersetTestCase):
                 "database_name": "foo",
                 "table_name": "bar",
                 "normalize_columns": False,
+                "always_filter_main_dttm": False,
             }
         )
         url = f"/datasource/external_metadata_by_name/?q={params}"
@@ -185,6 +239,7 @@ class TestDatasource(SupersetTestCase):
                 "database_name": example_database.database_name,
                 "table_name": "fooooooooobarrrrrr",
                 "normalize_columns": False,
+                "always_filter_main_dttm": False,
             }
         )
         url = f"/datasource/external_metadata_by_name/?q={params}"
@@ -207,7 +262,6 @@ class TestDatasource(SupersetTestCase):
 
     def test_external_metadata_for_virtual_table_template_params(self):
         self.login(username="admin")
-        session = db.session
         table = SqlaTable(
             table_name="dummy_sql_table_with_template_params",
             database=get_example_database(),
@@ -215,15 +269,15 @@ class TestDatasource(SupersetTestCase):
             sql="select {{ foo }} as intcol",
             template_params=json.dumps({"foo": "123"}),
         )
-        session.add(table)
-        session.commit()
+        db.session.add(table)
+        db.session.commit()
 
         table = self.get_table(name="dummy_sql_table_with_template_params")
         url = f"/datasource/external_metadata/table/{table.id}/"
         resp = self.get_json_resp(url)
         assert {o.get("column_name") for o in resp} == {"intcol"}
-        session.delete(table)
-        session.commit()
+        db.session.delete(table)
+        db.session.commit()
 
     def test_external_metadata_for_malicious_virtual_table(self):
         self.login(username="admin")
@@ -416,7 +470,7 @@ class TestDatasource(SupersetTestCase):
 
         pytest.raises(
             DatasourceNotFound,
-            lambda: DatasourceDAO.get_datasource(db.session, "table", 9999999),
+            lambda: DatasourceDAO.get_datasource("table", 9999999),
         )
 
         self.login(username="admin")
@@ -428,7 +482,7 @@ class TestDatasource(SupersetTestCase):
 
         pytest.raises(
             DatasourceTypeNotSupportedError,
-            lambda: DatasourceDAO.get_datasource(db.session, "druid", 9999999),
+            lambda: DatasourceDAO.get_datasource("druid", 9999999),
         )
 
         self.login(username="admin")
@@ -492,7 +546,6 @@ def test_get_samples_with_incorrect_cc(test_client, login_as_admin, virtual_data
         table=virtual_dataset,
         expression="INCORRECT SQL",
     )
-    db.session.merge(virtual_dataset)
 
     uri = (
         f"/datasource/samples?datasource_id={virtual_dataset.id}&datasource_type=table"

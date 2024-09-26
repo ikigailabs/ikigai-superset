@@ -38,8 +38,8 @@ const metadata = new ChartMetadata({
     { url: example3, caption: t('Video game consoles') },
     { url: example4, caption: t('Vehicle Types') },
   ],
-  label: ChartLabel.DEPRECATED,
-  name: t('Area Chart (legacy)'),
+  label: ChartLabel.Deprecated,
+  name: t('Time-series Area Chart (legacy)'),
   supportedAnnotationTypes: [ANNOTATION_TYPES.INTERVAL, ANNOTATION_TYPES.EVENT],
   tags: [
     t('Aesthetic'),

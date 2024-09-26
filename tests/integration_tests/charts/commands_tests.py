@@ -22,15 +22,15 @@ import yaml
 from flask import g
 
 from superset import db, security_manager
-from superset.charts.commands.create import CreateChartCommand
-from superset.charts.commands.exceptions import (
+from superset.commands.chart.create import CreateChartCommand
+from superset.commands.chart.exceptions import (
     ChartNotFoundError,
     WarmUpCacheChartNotFoundError,
 )
-from superset.charts.commands.export import ExportChartsCommand
-from superset.charts.commands.importers.v1 import ImportChartsCommand
-from superset.charts.commands.update import UpdateChartCommand
-from superset.charts.commands.warm_up_cache import ChartWarmUpCacheCommand
+from superset.commands.chart.export import ExportChartsCommand
+from superset.commands.chart.importers.v1 import ImportChartsCommand
+from superset.commands.chart.update import UpdateChartCommand
+from superset.commands.chart.warm_up_cache import ChartWarmUpCacheCommand
 from superset.commands.exceptions import CommandInvalidError
 from superset.commands.importers.exceptions import IncorrectVersionError
 from superset.connectors.sqla.models import SqlaTable
@@ -325,7 +325,7 @@ class TestImportChartsCommand(SupersetTestCase):
 
 class TestChartsCreateCommand(SupersetTestCase):
     @patch("superset.utils.core.g")
-    @patch("superset.charts.commands.create.g")
+    @patch("superset.commands.chart.create.g")
     @patch("superset.security.manager.g")
     @pytest.mark.usefixtures("load_energy_table_with_slice")
     def test_create_v1_response(self, mock_sm_g, mock_c_g, mock_u_g):
@@ -355,7 +355,7 @@ class TestChartsCreateCommand(SupersetTestCase):
 
 
 class TestChartsUpdateCommand(SupersetTestCase):
-    @patch("superset.charts.commands.update.g")
+    @patch("superset.commands.chart.update.g")
     @patch("superset.utils.core.g")
     @patch("superset.security.manager.g")
     @pytest.mark.usefixtures("load_energy_table_with_slice")
@@ -413,7 +413,7 @@ class TestChartWarmUpCacheCommand(SupersetTestCase):
 
     @pytest.mark.usefixtures("load_birth_names_dashboard_with_slices")
     def test_warm_up_cache(self):
-        slc = self.get_slice("Top 10 Girl Name Share", db.session)
+        slc = self.get_slice("Top 10 Girl Name Share")
         result = ChartWarmUpCacheCommand(slc.id, None, None).run()
         self.assertEqual(
             result, {"chart_id": slc.id, "viz_error": None, "viz_status": "success"}

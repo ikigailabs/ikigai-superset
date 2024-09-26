@@ -31,6 +31,8 @@ import CopyToClipboard from 'src/components/CopyToClipboard';
 import { storeQuery } from 'src/utils/common';
 import { getClientErrorObject } from 'src/utils/getClientErrorObject';
 import useQueryEditor from 'src/SqlLab/hooks/useQueryEditor';
+import { LOG_ACTIONS_SQLLAB_COPY_LINK } from 'src/logger/LogUtils';
+import useLogAction from 'src/logger/useLogAction';
 
 interface ShareSqlLabQueryProps {
   queryEditorId: string;
@@ -52,7 +54,7 @@ const ShareSqlLabQuery = ({
   addDangerToast,
 }: ShareSqlLabQueryProps) => {
   const theme = useTheme();
-
+  const logAction = useLogAction({ queryEditorId });
   const { dbId, name, schema, autorun, sql, remoteId, templateParams } =
     useQueryEditor(queryEditorId, [
       'dbId',
@@ -92,7 +94,10 @@ const ShareSqlLabQuery = ({
     }
   };
   const getCopyUrl = (callback: Function) => {
-    if (isFeatureEnabled(FeatureFlag.SHARE_QUERIES_VIA_KV_STORE)) {
+    logAction(LOG_ACTIONS_SQLLAB_COPY_LINK, {
+      shortcut: false,
+    });
+    if (isFeatureEnabled(FeatureFlag.ShareQueriesViaKvStore)) {
       return getCopyUrlForKvStore(callback);
     }
     return getCopyUrlForSavedQuery(callback);
@@ -116,7 +121,7 @@ const ShareSqlLabQuery = ({
   };
 
   const canShare =
-    !!remoteId || isFeatureEnabled(FeatureFlag.SHARE_QUERIES_VIA_KV_STORE);
+    !!remoteId || isFeatureEnabled(FeatureFlag.ShareQueriesViaKvStore);
 
   return (
     <>

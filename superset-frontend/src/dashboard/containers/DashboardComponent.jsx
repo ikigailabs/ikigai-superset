@@ -35,7 +35,7 @@ import {
 } from 'src/dashboard/actions/dashboardLayout';
 import {
   setDirectPathToChild,
-  setActiveTabs,
+  setActiveTab,
   setFullSizeChartId,
 } from 'src/dashboard/actions/dashboardState';
 
@@ -113,7 +113,7 @@ function mapDispatchToProps(dispatch) {
       handleComponentDrop,
       setDirectPathToChild,
       setFullSizeChartId,
-      setActiveTabs,
+      setActiveTab,
       logEvent,
     },
     dispatch,

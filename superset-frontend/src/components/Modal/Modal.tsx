@@ -41,6 +41,7 @@ export interface ModalProps {
   className?: string;
   children: ReactNode;
   disablePrimaryButton?: boolean;
+  primaryTooltipMessage?: ReactNode;
   primaryButtonLoading?: boolean;
   onHide: () => void;
   onHandledPrimaryAction?: () => void;
@@ -234,6 +235,7 @@ const defaultResizableConfig = (hideFooter: boolean | undefined) => ({
 const CustomModal = ({
   children,
   disablePrimaryButton = false,
+  primaryTooltipMessage,
   primaryButtonLoading = false,
   onHide,
   onHandledPrimaryAction,
@@ -263,7 +265,9 @@ const CustomModal = ({
   if (React.isValidElement(footer)) {
     // If a footer component is provided inject a closeModal function
     // so the footer can provide a "close" button if desired
-    FooterComponent = React.cloneElement(footer, { closeModal: onHide });
+    FooterComponent = React.cloneElement(footer, {
+      closeModal: onHide,
+    } as Partial<unknown>);
   }
   const modalFooter = isNil(FooterComponent)
     ? [
@@ -274,6 +278,7 @@ const CustomModal = ({
           key="submit"
           buttonStyle={primaryButtonType}
           disabled={disablePrimaryButton}
+          tooltip={primaryTooltipMessage}
           loading={primaryButtonLoading}
           onClick={onHandledPrimaryAction}
           cta

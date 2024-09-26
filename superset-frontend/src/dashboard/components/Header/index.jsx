@@ -41,7 +41,7 @@ import { AntdButton } from 'src/components/';
 import { findPermission } from 'src/utils/findPermission';
 import { Tooltip } from 'src/components/Tooltip';
 import { safeStringify } from 'src/utils/safeStringify';
-import HeaderActionsDropdown from 'src/dashboard/components/Header/HeaderActionsDropdown';
+import ConnectedHeaderActionsDropdown from 'src/dashboard/components/Header/HeaderActionsDropdown';
 import PublishedStatus from 'src/dashboard/components/PublishedStatus';
 import UndoRedoKeyListeners from 'src/dashboard/components/UndoRedoKeyListeners';
 import PropertiesModal from 'src/dashboard/components/PropertiesModal';
@@ -55,8 +55,7 @@ import setPeriodicRunner, {
   stopPeriodicRender,
 } from 'src/dashboard/util/setPeriodicRunner';
 import { PageHeaderWithActions } from 'src/components/PageHeaderWithActions';
-import { Dropdown } from 'src/components/Dropdown';
-import { DashboardEmbedModal } from '../DashboardEmbedControls';
+import DashboardEmbedModal from '../EmbeddedModal';
 import OverwriteConfirm from '../OverwriteConfirm';
 
 const extensionsRegistry = getExtensionsRegistry();
@@ -485,7 +484,7 @@ class Header extends React.PureComponent {
     const userCanShare = dashboardInfo.dash_share_perm;
     const userCanSaveAs = dashboardInfo.dash_save_perm;
     const userCanCurate =
-      isFeatureEnabled(FeatureFlag.EMBEDDED_SUPERSET) &&
+      isFeatureEnabled(FeatureFlag.EmbeddedSuperset) &&
       findPermission('can_set_embedded', 'Dashboard', user.roles);
     const refreshLimit =
       dashboardInfo.common?.conf?.SUPERSET_DASHBOARD_PERIODICAL_REFRESH_LIMIT;
@@ -706,7 +705,7 @@ class Header extends React.PureComponent {
             onVisibleChange: this.setIsDropdownVisible,
           }}
           additionalActionsMenu={
-            <HeaderActionsDropdown
+            <ConnectedHeaderActionsDropdown
               addSuccessToast={this.props.addSuccessToast}
               addDangerToast={this.props.addDangerToast}
               dashboardId={dashboardInfo.id}

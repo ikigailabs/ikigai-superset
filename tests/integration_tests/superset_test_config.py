@@ -31,6 +31,7 @@ logging.getLogger("flask_appbuilder.api").setLevel(logging.WARNING)
 logging.getLogger("flask_appbuilder.security.sqla.manager").setLevel(logging.WARNING)
 logging.getLogger("sqlalchemy.engine.Engine").setLevel(logging.WARNING)
 
+SECRET_KEY = "dummy_secret_key_for_test_to_silence_warnings"
 AUTH_USER_REGISTRATION_ROLE = "alpha"
 SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.path.join(
     DATA_DIR, "unittests.integration_tests.db"
@@ -68,7 +69,6 @@ FEATURE_FLAGS = {
     "SHARE_QUERIES_VIA_KV_STORE": True,
     "ENABLE_TEMPLATE_PROCESSING": True,
     "ALERT_REPORTS": True,
-    "DASHBOARD_NATIVE_FILTERS": True,
     "DRILL_TO_DETAIL": True,
     "DRILL_BY": True,
     "HORIZONTAL_FILTER_BAR": True,
@@ -131,11 +131,10 @@ ALERT_REPORTS_WORKING_TIME_OUT_KILL = True
 ALERT_REPORTS_QUERY_EXECUTION_MAX_TRIES = 3
 
 class CeleryConfig:
-    BROKER_URL = f"redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_CELERY_DB}"
-    CELERY_IMPORTS = ("superset.sql_lab",)
-    CELERY_RESULT_BACKEND = f"redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_RESULTS_DB}"
-    CELERY_ANNOTATIONS = {"sql_lab.add": {"rate_limit": "10/s"}}
-    CONCURRENCY = 1
+    broker_url = f"redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_CELERY_DB}"
+    imports = ("superset.sql_lab",)
+    result_backend = f"redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_RESULTS_DB}"
+    concurrency = 1
 
 
 CELERY_CONFIG = CeleryConfig

@@ -23,8 +23,16 @@ import logging
 import re
 from datetime import datetime
 from re import Match, Pattern
-from typing import Any, Callable, cast, ContextManager, NamedTuple, TYPE_CHECKING, Union
-import os
+from typing import (
+    Any,
+    Callable,
+    cast,
+    ContextManager,
+    NamedTuple,
+    TYPE_CHECKING,
+    TypedDict,
+    Union,
+)
 
 import pandas as pd
 import sqlparse
@@ -42,17 +50,16 @@ from sqlalchemy.engine.interfaces import Compiled, Dialect
 from sqlalchemy.engine.reflection import Inspector
 from sqlalchemy.engine.url import URL
 from sqlalchemy.ext.compiler import compiles
-from sqlalchemy.orm import Session
-from sqlalchemy.sql import quoted_name, text
+from sqlalchemy.sql import literal_column, quoted_name, text
 from sqlalchemy.sql.expression import ColumnClause, Select, TextAsFrom, TextClause
 from sqlalchemy.types import TypeEngine
 from sqlparse.tokens import CTE
-from typing_extensions import TypedDict
 
 from superset import security_manager, sql_parse
 from superset.constants import TimeGrain as TimeGrainConstants
 from superset.databases.utils import make_url_safe
 from superset.errors import ErrorLevel, SupersetError, SupersetErrorType
+from superset.exceptions import DisallowedSQLFunction
 from superset.sql_parse import ParsedQuery, Table
 from superset.superset_typing import ResultSetColumnType, SQLAColumnType
 from superset.utils import core as utils
@@ -115,8 +122,8 @@ class TimestampExpression(
     ColumnClause
 ):  # pylint: disable=abstract-method, too-many-ancestors
     def __init__(self, expr: str, col: ColumnClause, **kwargs: Any) -> None:
-        """Sqlalchemy class that can be can be used to render native column elements
-        respecting engine-specific quoting rules as part of a string-based expression.
+        """Sqlalchemy class that can be used to render native column elements respecting
+        engine-specific quoting rules as part of a string-based expression.
 
         :param expr: Sql expression with '{col}' denoting the locations where the col
         object will be rendered.
@@ -186,6 +193,12 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
     engine_aliases: set[str] = set()
     drivers: dict[str, str] = {}
     default_driver: str | None = None
+
+    # placeholder with the SQLAlchemy URI template
+    sqlalchemy_uri_placeholder = (
+        "engine+driver://user:password@host:port/dbname[?key=value&key=value...]"
+    )
+
     disable_ssh_tunneling = False
 
     _date_trunc_functions: dict[str, str] = {}
@@ -317,7 +330,6 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
     # Does database support join-free timeslot grouping
     time_groupby_inline = False
     limit_method = LimitMethod.FORCE_LIMIT
-    time_secondary_columns = False
     allows_joins = True
     allows_subqueries = True
     allows_alias_in_select = True
@@ -330,7 +342,7 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
     allows_alias_to_source_column = True
 
     # Whether ORDER BY clause must appear in SELECT
-    # if TRUE, then it doesn't have to.
+    # if True, then it doesn't have to.
     allows_hidden_orderby_agg = True
 
     # Whether ORDER BY clause can use sql calculated expression
@@ -363,7 +375,7 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
 
     force_column_alias_quotes = False
     arraysize = 0
-    max_column_name_length = 0
+    max_column_name_length: int | None = None
     try_remove_schema_from_table_name = True  # pylint: disable=invalid-name
     run_multiple_statements_as_one = False
     custom_errors: dict[
@@ -385,6 +397,19 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
 
     # Can the catalog be changed on a per-query basis?
     supports_dynamic_catalog = False
+
+    @classmethod
+    def get_allows_alias_in_select(
+        cls, database: Database  # pylint: disable=unused-argument
+    ) -> bool:
+        """
+        Method for dynamic `allows_alias_in_select`.
+
+        In Dremio this atribute is version-dependent, so Superset needs to inspect the
+        database configuration in order to determine it. This method allows engine-specs
+        to define dynamic values for the attribute.
+        """
+        return cls.allows_alias_in_select
 
     @classmethod
     def supports_url(cls, url: URL) -> bool:
@@ -453,7 +478,7 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
         connect_args: dict[str, Any],
     ) -> str | None:
         """
-        Return the schema configured in a SQLALchemy URI and connection argments, if any.
+        Return the schema configured in a SQLALchemy URI and connection arguments, if any.
         """
         return None
 
@@ -1022,7 +1047,7 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
         to_sql_kwargs["name"] = table.table
 
         if table.schema:
-            # Only add schema when it is preset and non empty.
+            # Only add schema when it is preset and non-empty.
             to_sql_kwargs["schema"] = table.schema
 
         with cls.get_engine(database) as engine:
@@ -1046,7 +1071,7 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
         return None
 
     @classmethod
-    def handle_cursor(cls, cursor: Any, query: Query, session: Session) -> None:
+    def handle_cursor(cls, cursor: Any, query: Query) -> None:
         """Handle a live cursor between the execute and fetchall calls
 
         The flow works without this method doing anything, but it allows
@@ -1055,9 +1080,7 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
         # TODO: Fix circular import error caused by importing sql_lab.Query
 
     @classmethod
-    def execute_with_cursor(
-        cls, cursor: Any, sql: str, query: Query, session: Session
-    ) -> None:
+    def execute_with_cursor(cls, cursor: Any, sql: str, query: Query) -> None:
         """
         Trigger execution of a query and handle the resulting cursor.
 
@@ -1070,7 +1093,7 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
         logger.debug("Query %d: Running query: %s", query.id, sql)
         cls.execute(cursor, sql, async_=True)
         logger.debug("Query %d: Handling cursor", query.id)
-        cls.handle_cursor(cursor, query, session)
+        cls.handle_cursor(cursor, query)
 
     @classmethod
     def extract_error_message(cls, ex: Exception) -> str:
@@ -1092,8 +1115,7 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
 
         context = context or {}
         for regex, (message, error_type, extra) in cls.custom_errors.items():
-            match = regex.search(raw_message)
-            if match:
+            if match := regex.search(raw_message):
                 params = {**context, **match.groupdict()}
                 extra["engine_name"] = cls.engine_name
                 return [
@@ -1163,7 +1185,7 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
         connection arguments.
 
         For example, in order to specify a default schema in RDS we need to run a query
-        at the beggining of the session:
+        at the beginning of the session:
 
             sql> set search_path = my_schema;
 
@@ -1301,8 +1323,12 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
         return comment
 
     @classmethod
-    def get_columns(
-        cls, inspector: Inspector, table_name: str, schema: str | None
+    def get_columns(  # pylint: disable=unused-argument
+        cls,
+        inspector: Inspector,
+        table_name: str,
+        schema: str | None,
+        options: dict[str, Any] | None = None,
     ) -> list[ResultSetColumnType]:
         """
         Get all columns from a given schema and table
@@ -1310,6 +1336,8 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
         :param inspector: SqlAlchemy Inspector instance
         :param table_name: Table name
         :param schema: Schema name. If omitted, uses default schema for database
+        :param options: Extra options to customise the display of columns in
+                        some databases
         :return: All columns in table
         """
         return convert_inspector_columns(
@@ -1361,7 +1389,12 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
 
     @classmethod
     def _get_fields(cls, cols: list[ResultSetColumnType]) -> list[Any]:
-        return [column(c["column_name"]) for c in cols]
+        return [
+            literal_column(query_as)
+            if (query_as := c.get("query_as"))
+            else column(c["column_name"])
+            for c in cols
+        ]
 
     @classmethod
     def select_star(  # pylint: disable=too-many-arguments,too-many-locals
@@ -1409,7 +1442,7 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
 
         qry = select(fields).select_from(text(full_table_name))
 
-        if limit:
+        if limit and cls.allow_limit_clause:
             qry = qry.limit(limit)
         if latest_partition:
             partition_query = cls.where_latest_partition(
@@ -1431,7 +1464,9 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
         :param cursor: Cursor instance
         :return: Dictionary with different costs
         """
-        raise Exception("Database does not support cost estimation")
+        raise Exception(  # pylint: disable=broad-exception-raised
+            "Database does not support cost estimation"
+        )
 
     @classmethod
     def query_cost_formatter(
@@ -1443,7 +1478,9 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
         :param raw_cost: Raw estimate from `estimate_query_cost`
         :return: Human readable cost estimate
         """
-        raise Exception("Database does not support cost estimation")
+        raise Exception(  # pylint: disable=broad-exception-raised
+            "Database does not support cost estimation"
+        )
 
     @classmethod
     def process_statement(cls, statement: str, database: Database) -> str:
@@ -1485,7 +1522,9 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
         """
         extra = database.get_extra() or {}
         if not cls.get_allow_cost_estimate(extra):
-            raise Exception("Database does not support cost estimation")
+            raise Exception(  # pylint: disable=broad-exception-raised
+                "Database does not support cost estimation"
+            )
 
         parsed_query = sql_parse.ParsedQuery(sql, engine=cls.engine)
         statements = parsed_query.get_statements()
@@ -1549,6 +1588,11 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
         """
         if not cls.allows_sql_comments:
             query = sql_parse.strip_comments_from_sql(query, engine=cls.engine)
+        disallowed_functions = current_app.config["DISALLOWED_SQL_FUNCTIONS"].get(
+            cls.engine, set()
+        )
+        if sql_parse.check_sql_functions_exist(query, disallowed_functions, cls.engine):
+            raise DisallowedSQLFunction(disallowed_functions)
 
         if cls.arraysize:
             cursor.arraysize = cls.arraysize
@@ -1809,7 +1853,7 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
 
     # pylint: disable=unused-argument
     @classmethod
-    def prepare_cancel_query(cls, query: Query, session: Session) -> None:
+    def prepare_cancel_query(cls, query: Query) -> None:
         """
         Some databases may acquire the query cancelation id after the query
         cancelation request has been received. For those cases, the db engine spec
@@ -1876,7 +1920,7 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
         """
         Construct an impersonation key, by default it's the given username.
 
-        :param user: logged in user
+        :param user: logged-in user
 
         :returns: username if given user is not null
         """
@@ -2008,11 +2052,6 @@ class BasicParametersMixin:
     # recommended driver name for the DB engine spec
     default_driver = ""
 
-    # placeholder with the SQLAlchemy URI template
-    sqlalchemy_uri_placeholder = (
-        "engine+driver://user:password@host:port/dbname[?key=value&key=value...]"
-    )
-
     # query parameter to enable encryption in the database connection
     # for Postgres this would be `{"sslmode": "verify-ca"}`, eg.
     encryption_parameters: dict[str, str] = {}
@@ -2027,7 +2066,9 @@ class BasicParametersMixin:
         query = parameters.get("query", {}).copy()
         if parameters.get("encryption"):
             if not cls.encryption_parameters:
-                raise Exception("Unable to build a URL with encryption enabled")
+                raise Exception(  # pylint: disable=broad-exception-raised
+                    "Unable to build a URL with encryption enabled"
+                )
             query.update(cls.encryption_parameters)
 
         return str(

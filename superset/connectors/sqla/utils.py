@@ -26,10 +26,10 @@ from flask_babel import lazy_gettext as _
 from sqlalchemy.engine.url import URL as SqlaURL
 from sqlalchemy.exc import NoSuchTableError
 from sqlalchemy.ext.declarative import DeclarativeMeta
-from sqlalchemy.orm import Session
 from sqlalchemy.orm.exc import ObjectDeletedError
 from sqlalchemy.sql.type_api import TypeEngine
 
+from superset import db
 from superset.constants import LRU_CACHE_MAX_SIZE
 from superset.errors import ErrorLevel, SupersetError, SupersetErrorType
 from superset.exceptions import (
@@ -129,28 +129,19 @@ def get_virtual_table_metadata(dataset: SqlaTable) -> list[ResultSetColumnType]:
                 level=ErrorLevel.ERROR,
             )
         )
-    # TODO(villebro): refactor to use same code that's used by
-    #  sql_lab.py:execute_sql_statements
-    try:
-        with dataset.database.get_raw_connection(schema=dataset.schema) as conn:
-            cursor = conn.cursor()
-            query = dataset.database.apply_limit_to_sql(statements[0], limit=1)
-            db_engine_spec.execute(cursor, query)
-            result = db_engine_spec.fetch_data(cursor, limit=1)
-            result_set = SupersetResultSet(result, cursor.description, db_engine_spec)
-            cols = result_set.columns
-    except Exception as ex:
-        raise SupersetGenericDBErrorException(message=str(ex)) from ex
-    return cols
+    return get_columns_description(dataset.database, dataset.schema, statements[0])
 
 
 def get_columns_description(
     database: Database,
+    schema: str | None,
     query: str,
 ) -> list[ResultSetColumnType]:
+    # TODO(villebro): refactor to use same code that's used by
+    #  sql_lab.py:execute_sql_statements
     db_engine_spec = database.db_engine_spec
     try:
-        with database.get_raw_connection() as conn:
+        with database.get_raw_connection(schema=schema) as conn:
             cursor = conn.cursor()
             query = database.apply_limit_to_sql(query, limit=1)
             cursor.execute(query)
@@ -177,14 +168,12 @@ logger = logging.getLogger(__name__)
 
 
 def find_cached_objects_in_session(
-    session: Session,
     cls: type[DeclarativeModel],
     ids: Iterable[int] | None = None,
     uuids: Iterable[UUID] | None = None,
 ) -> Iterator[DeclarativeModel]:
     """Find known ORM instances in cached SQLA session states.
 
-    :param session: a SQLA session
     :param cls: a SQLA DeclarativeModel
     :param ids: ids of the desired model instances (optional)
     :param uuids: uuids of the desired instances, will be ignored if `ids` are provides
@@ -193,7 +182,7 @@ def find_cached_objects_in_session(
         return iter([])
     uuids = uuids or []
     try:
-        items = list(session)
+        items = list(db.session)
     except ObjectDeletedError:
         logger.warning("ObjectDeletedError", exc_info=True)
         return iter(())

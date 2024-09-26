@@ -20,21 +20,23 @@ import json
 
 from sqlalchemy.orm.session import Session
 
+from superset import db
+
 
 def test_export(session: Session) -> None:
     """
     Test exporting a dataset.
     """
+    from superset.commands.dataset.export import ExportDatasetsCommand
     from superset.connectors.sqla.models import SqlaTable, SqlMetric, TableColumn
-    from superset.datasets.commands.export import ExportDatasetsCommand
     from superset.models.core import Database
 
-    engine = session.get_bind()
+    engine = db.session.get_bind()
     SqlaTable.metadata.create_all(engine)  # pylint: disable=no-member
 
     database = Database(database_name="my_database", sqlalchemy_uri="sqlite://")
-    session.add(database)
-    session.flush()
+    db.session.add(database)
+    db.session.flush()
 
     columns = [
         TableColumn(column_name="ds", is_dttm=1, type="TIMESTAMP"),
@@ -82,6 +84,7 @@ def test_export(session: Session) -> None:
         template_params=json.dumps({"answer": "42"}),
         schema_perm=None,
         normalize_columns=False,
+        always_filter_main_dttm=False,
         extra=json.dumps({"warning_markdown": "*WARNING*"}),
     )
 
@@ -110,6 +113,7 @@ fetch_values_predicate: foo IN (1, 2)
 extra:
   warning_markdown: '*WARNING*'
 normalize_columns: false
+always_filter_main_dttm: false
 uuid: null
 metrics:
 - metric_name: cnt
