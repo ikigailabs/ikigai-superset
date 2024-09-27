@@ -53,6 +53,7 @@ import { FILTER_BOX_MIGRATION_STATES } from 'src/explore/constants';
 import { PageHeaderWithActions } from 'src/components/PageHeaderWithActions';
 import { Dropdown } from 'src/components/Dropdown';
 import { DashboardEmbedModal } from '../DashboardEmbedControls';
+import { IkiConfirmationModal } from '../IkiConfimationModal/IkiConfirmationModal';
 
 const propTypes = {
   addSuccessToast: PropTypes.func.isRequired,
@@ -188,6 +189,7 @@ class Header extends React.PureComponent {
       emphasizeRedo: false,
       showingPropertiesModal: false,
       isDropdownVisible: false,
+      confirmationModalIsOpen: false
     };
 
     this.handleChangeText = this.handleChangeText.bind(this);
@@ -205,6 +207,7 @@ class Header extends React.PureComponent {
   componentDidMount() {
     const { refreshFrequency } = this.props;
     this.startPeriodicRender(refreshFrequency * 1000);
+    this.handleIncomingWindowMsg();
   }
 
   componentDidUpdate(prevProps) {
@@ -232,6 +235,8 @@ class Header extends React.PureComponent {
 
   componentWillUnmount() {
     stopPeriodicRender(this.refreshTimer);
+    window.removeEventListener("message", this.messagesListener);
+
     this.props.setRefreshFrequency(0);
     clearTimeout(this.ctrlYTimeout);
     clearTimeout(this.ctrlZTimeout);
@@ -433,6 +438,38 @@ class Header extends React.PureComponent {
   hideEmbedModal = () => {
     this.setState({ showingEmbedModal: false });
   };
+
+  handleExitWithSave = () => {
+    this.overwriteDashboard();
+    parent.postMessage({action: 'continue'}, this.props.ikigaiOrigin);
+  }
+
+  showConfirmationModal = () => {
+    this.setState({confirmationModalIsOpen: !this.state.confirmationModalIsOpen});
+  }
+
+  handleExit = () => {
+    if (this.props.hasUnsavedChanges) {
+      this.setState({confirmationModalIsOpen: !this.state.confirmationModalIsOpen});
+    } else {
+      this.handleExitWithoutSave();
+    }
+  }
+
+  handleExitWithoutSave = () => {
+    parent.postMessage({action: 'continue'}, this.props.ikigaiOrigin);
+  }
+
+  handleIncomingWindowMsg = () => {
+    this.messagesListener = this.messagesListener.bind(this);
+    window.addEventListener('message', this.messagesListener);
+  }
+
+  messagesListener = (event) => {
+    if (event.data?.action === "back") {
+      this.handleExit();
+    } 
+  }
 
   render() {
     const {
@@ -717,6 +754,14 @@ class Header extends React.PureComponent {
               border-right: none;
             }
           `}
+        />
+        <IkiConfirmationModal
+          open={this.state.confirmationModalIsOpen}
+          title="Unsaved changes"
+          description="You have unsaved changes. Would you like to save before leaving?"
+          secondaryText="Continue"
+          onConfirm={this.handleExitWithSave}
+          onClose={this.handleExitWithoutSave}
         />
       </div>
     );
