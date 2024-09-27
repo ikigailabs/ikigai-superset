@@ -652,50 +652,6 @@ class Header extends React.PureComponent {
                   )}
                 </div>
               )}
-              <Dropdown
-                overlay={
-                  <HeaderActionsDropdown
-                    addSuccessToast={this.props.addSuccessToast}
-                    addDangerToast={this.props.addDangerToast}
-                    dashboardId={dashboardInfo.id}
-                    dashboardTitle={dashboardTitle}
-                    dashboardInfo={dashboardInfo}
-                    dataMask={dataMask}
-                    layout={layout}
-                    expandedSlices={expandedSlices}
-                    customCss={customCss}
-                    colorNamespace={colorNamespace}
-                    colorScheme={colorScheme}
-                    onSave={onSave}
-                    onChange={onChange}
-                    forceRefreshAllCharts={this.forceRefresh}
-                    startPeriodicRender={this.startPeriodicRender}
-                    refreshFrequency={refreshFrequency}
-                    shouldPersistRefreshFrequency={
-                      shouldPersistRefreshFrequency
-                    }
-                    setRefreshFrequency={setRefreshFrequency}
-                    updateCss={updateCss}
-                    editMode={editMode}
-                    hasUnsavedChanges={hasUnsavedChanges}
-                    userCanEdit={userCanEdit}
-                    userCanShare={userCanShare}
-                    userCanSave={userCanSaveAs}
-                    userCanCurate={userCanCurate}
-                    isLoading={isLoading}
-                    showPropertiesModal={this.showPropertiesModal}
-                    manageEmbedded={this.showEmbedModal}
-                    refreshLimit={refreshLimit}
-                    refreshWarning={refreshWarning}
-                    lastModifiedTime={lastModifiedTime}
-                    // filterboxMigrationState={filterboxMigrationState}
-                    isDropdownVisible={this.state.isDropdownVisible}
-                    setIsDropdownVisible={this.setIsDropdownVisible}
-                  />
-                }
-              >
-                <Icons.MoreVert iconColor="red" />
-              </Dropdown>
             </div>
           }
           menuDropdownProps={{

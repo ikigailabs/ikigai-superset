@@ -80,27 +80,12 @@ def copy_dashboard(_mapper: Mapper, _connection: Connection, target: Dashboard) 
     )
     session.add(dashboard)
 
-        # copy template dashboard to user
-        template = session.query(Dashboard).filter_by(id=int(dashboard_id)).first()
-        dashboard = Dashboard(
-            dashboard_title=template.dashboard_title,
-            position_json=template.position_json,
-            description=template.description,
-            css=template.css,
-            json_metadata=template.json_metadata,
-            slices=template.slices,
-            owners=[new_user],
-        )
-        session.add(dashboard)
-
-        # set dashboard as the welcome dashboard
-        extra_attributes = UserAttribute(
-            user_id=target.id, welcome_dashboard_id=dashboard.id
-        )
-        session.add(extra_attributes)
-        session.commit()
-    finally:
-        session.close()
+    # set dashboard as the welcome dashboard
+    extra_attributes = UserAttribute(
+        user_id=target.id, welcome_dashboard_id=dashboard.id
+    )
+    session.add(extra_attributes)
+    session.commit()
 
 
 sqla.event.listen(User, "after_insert", copy_dashboard)
