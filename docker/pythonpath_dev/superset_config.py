@@ -98,16 +98,13 @@ WEBDRIVER_BASEURL = "http://superset:8088/"
 # The base URL for the email report hyperlinks.
 WEBDRIVER_BASEURL_USER_FRIENDLY = WEBDRIVER_BASEURL
 
-SQLALCHEMY_DATABASE_URI='postgresql://postgres:admin@host.docker.internal:5432/superset_db'
-WTF_CSRF_ENABLED = False
-ENABLE_PROXY_FIX = True
-SESSION_COOKIE_HTTPONLY = False
-ENABLE_CORS = True
-CUSTOM_SECURITY_MANAGER = False
-
 SQLLAB_CTAS_NO_LIMIT = True
 OVERRIDE_HTTP_HEADERS = {'X-Frame-Options': 'ALLOWALL'}
 TALISMAN_ENABLED = False
+ENABLE_CORS = True
+HTTP_HEADERS={"X-Frame-Options":"ALLOWALL"}
+PUBLIC_ROLE_LIKE = "Public"
+ENABLE_PROXY_FIX=True
 
 #
 # Optionally import superset_config_docker.py (which will have been included on
