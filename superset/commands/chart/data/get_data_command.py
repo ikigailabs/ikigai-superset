@@ -37,6 +37,12 @@ class ChartDataCommand(BaseCommand):
         self._query_context = query_context
 
     def run(self, **kwargs: Any) -> dict[str, Any]:
+        logger.warning(
+            "========================================================\n========================================================"
+        )
+        logger.warning(
+            "*** HIT ***",
+        )
         # caching is handled in query_context.get_df_payload
         # (also evals `force` property)
         cache_query_context = kwargs.get("cache", False)
@@ -45,8 +51,17 @@ class ChartDataCommand(BaseCommand):
             payload = self._query_context.get_payload(
                 cache_query_context=cache_query_context, force_cached=force_cached
             )
-        except CacheLoadError as ex:
-            raise ChartDataCacheLoadError(ex.message) from ex
+        # except CacheLoadError as ex:
+        #     raise ChartDataCacheLoadError(ex.message) from ex
+        
+        except Exception as e:
+            logger.warning(
+                f"new exception: {e}"
+            )
+        
+        logger.warning(
+            f"recieved payload"
+        )
 
         # TODO: QueryContext should support SIP-40 style errors
         for query in payload["queries"]:
@@ -54,6 +69,7 @@ class ChartDataCommand(BaseCommand):
                 raise ChartDataQueryFailedError(
                     _("Error: %(error)s", error=query["error"])
                 )
+        logger.warning('***** got queries:')
 
         return_value = {
             "query_context": self._query_context,
@@ -62,6 +78,10 @@ class ChartDataCommand(BaseCommand):
         if cache_query_context:
             return_value.update(cache_key=payload["cache_key"])
 
+        logger.warning('***** returning value:')
+        logger.warning(
+            "========================================================\n========================================================"
+        )
         return return_value
 
     def validate(self) -> None:
