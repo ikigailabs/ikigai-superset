@@ -27,7 +27,6 @@ import {
   GRID_BASE_UNIT,
 } from 'src/dashboard/util/constants';
 import { refreshChart } from 'src/components/Chart/chartAction';
-import { CustomHtmlContainer } from '@ikigailabs/custom-html';
 
 const propTypes = {
   id: PropTypes.string.isRequired,
@@ -101,7 +100,7 @@ class IkiDynamicMarkdown extends React.PureComponent {
       ts: new Date().getTime(),
       duration: Logger.getTimestamp() - this.renderStartTime,
     });
-    // this.handleIncomingWindowMsg();
+    this.handleIncomingWindowMsg();
   }
 
   static getDerivedStateFromProps(nextProps, state) {
@@ -322,7 +321,7 @@ class IkiDynamicMarkdown extends React.PureComponent {
 
     this.setState(nextState);
     let widgetUrl;
-    /*const widgetUrlQuery = new URLSearchParams(widgetUrl.search);
+    const widgetUrlQuery = new URLSearchParams(widgetUrl.search);
     // widgetUrlQuery.set('mode', mode);
     widgetUrl.search = widgetUrlQuery.toString();
     const tempIframe = `<iframe
@@ -332,7 +331,7 @@ class IkiDynamicMarkdown extends React.PureComponent {
                       title="Custom Component"
                       style="min-height: 100%;"
                     />`;
-    this.handleIkiRunPipelineChange(tempIframe, true);*/
+    this.handleIkiRunPipelineChange(tempIframe, true);
   }
 
   updateMarkdownContent() {
@@ -373,7 +372,7 @@ class IkiDynamicMarkdown extends React.PureComponent {
 
   renderIframe() {
     const { markdownSource, hasError } = this.state;
-    /*const { ikigaiOrigin, editMode } = this.props;
+    const { ikigaiOrigin, editMode } = this.props;
     let iframe = '';
     let iframeSrc = '';
     if (ikigaiOrigin) {
@@ -402,23 +401,7 @@ class IkiDynamicMarkdown extends React.PureComponent {
     } else {
       iframe = '';
     }
-    return <SafeMarkdown source={hasError ? MARKDOWN_ERROR_MESSAGE : iframe} />;*/
-
-    return (
-      <CustomHtmlContainer
-        appId={'2nkZld2ZVp1tmyW8JUmozNvKtLr'}
-        componentId={'2o4uo0fs1QAjOlf8Jtvi4pJ5hYV'}
-        mode={'edit'}
-        parent={'editor'}
-        apiBaseUrl={'https://dev-api.ikigailabs.io'}
-        userEmail={'sasa@ikigailabs.io'}
-        token={
-          '{"idToken":"eyJraWQiOiJRT0l4NUNiaWEzcjNmRmZXRWdMUDh5Y0htVHd0TDBIVHhCWUtKTEg0WThzPSIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiI4OTlhZGY3MS1jNjBiLTQ1NTEtYmExNC1lMGYzNmY1YTUzMDgiLCJhdWQiOiIzMm9sOXYwa2lydDJzNzk0Nmk0bWNnbWxvbiIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJldmVudF9pZCI6IjJjM2M1MTA2LTgwNDItNDYyZS1iODFkLTQwZDVjYTgwMGRiOCIsInRva2VuX3VzZSI6ImlkIiwiYXV0aF90aW1lIjoxNzMyMDMxMzE2LCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAudXMtZWFzdC0xLmFtYXpvbmF3cy5jb21cL3VzLWVhc3QtMV9zN2ZqdmRBUlQiLCJjb2duaXRvOnVzZXJuYW1lIjoic2FzYUBpa2lnYWlsYWJzLmlvIiwiZXhwIjoxNzMyMTE3NzE2LCJpYXQiOjE3MzIwMzEzMTYsImVtYWlsIjoic2FzYUBpa2lnYWlsYWJzLmlvIn0.HsL0FxnI_pTukbVKrRjVapyPyvOKFT6dau17k8AjupowYfPKQJnVKGJIoe3OU1IqaZADnu5kKGtUHotVj2z1SsKAxolna83K_F1s2fHRMcH2CwsLdk2KNahjJPhLKePZJirvieqAaauZq4FvGAuQ0zCBgZ78CLaPwzasikwkIzRvRWdpQBIn7c4X-EKoAZ759dO7WJ9wUHCWB82pOeOc14IvJerEnlsqxPDMF0Iq7ZdTDMTkDPmOsWmXTBzhiNAb4Y8232cgmy3SX7h5S5VxLJMrOLwgpoqPsMRZCCzyCp6nm8jaCnHZMO7-qFRNduBya4kBrdMBTkWndqoARXs9gA","refreshToken":"eyJjdHkiOiJKV1QiLCJlbmMiOiJBMjU2R0NNIiwiYWxnIjoiUlNBLU9BRVAifQ.C1tN-piQAdyZD80yPhMoHida7Uw6bjCVegaBt0J-cRZRvgsB5RgBUcocqkhgoCzRefejKRnnewE_q--NDUrkYK9UVpPzim4WgRoAFtO0aGKUYIwHYtbRznwV0Y6TvrYE1fd4UzbMiouD7iFkb089KZvT_rTmzypORFrmqz8AQQqvqX74E6omfo4yRXOY6nFiUDpc8gvS5udKDA9Hcm-79QTh2wyhgzxwCQQNzaIVXd1yl14R9FqJB_926mnsFaGI2m86o2j0KCxU04hnYCD1Uf5kk3FNmXZ1mFJEsUsye9Teor8xh84yQ6ooJUrMLi5wMb1zoCvpslSyoaW7faIBvA.8NeyRLtHslVm9iHK.5IyY2EhAQCJibsMCEqN32zRC1b6AgD8gdLt0N6Ar8UnBDweFUNbrLUNbtT3zxosgtdzYrVmcqZG-gJHmdR4kBCtabhJLITG2epg0JjylL1oYhRYFE-E_53JcvIqGOwLXKFYHvzKO9dZp1Gk57PhZ5n-zlDr-689e52UUgnP5lgCIAQJxgeUN5vbgltxMN4qs5OfqW_fmRuYkV6RcJJQWTHqi7Wwk_0TGMj3WVatxv4V5QvT8fKqEU1oaq9NU1AmUWE4YLWgfv52UgE28WR2btX81Zf4lIDghyXumOpNPhuvu3ngCumqqkGNcEYVj_qyo-BLfPrr21kF0GmLhu4NHyROvz4SuOlHuGMvgnTFl3M-aYDriY_PuPtrHiLCtkM9nTMY-F-upFhS8xkN5vJSykTpLSEODn0a5wz3gCGqd0H8vHzt4MhACxDbPN8_I8Mk9Mj7lpE73kehDHL7xHeaRduw8DtDtMreEtHyKFHkZpuIgy2pt1fpztjEuS8ZW1ZmqdJCJhsJ34fD6peOPutEnj1pbd0SBgBqw58KbmGopkdSNtGbzOy86uWcXvZTWpfYKMes4Y6nNHW3bLmttyH1PFVihwFi0YeY8CVhLGNoZzBsgVPjlSgXz9vRZyeyVLe7QpxpQrlReco6uvXGoO4LryS25BzhNDcvPPhZRYB_YP_sPBwW3Nv3M7ZBhXjcqsJKjFodVcRRP3p7WacP8z_KlcqD1Y_OQnRoI4U3aGe43BdpXiRkdYGUoUfddDowjOJxuiKsfwsWrnuR7Qf73vDCqdUDal6i7d3g_X77HMb6VzeOS7lra3j-nnhpb-5ysOYh9e6MdjHzd-dl9aORXULOdIeXljYPLkqv8FxZmeA8rd_TmB6jZ-qxhl7NYOzeNdEtDrgAWKRKByp1KvKwFhydyD53Xm2waF6TIAfimaUThqJMW2JJlU_kr53pJnjujWM2ad9kmXco7d1gEWLF5dPwyzXo8t0fh8gj7kRAUDHt-RpZtXNQ2SklIA8BO-Rk_UdFAvFShcmtMnFjeMDI4QKpEJ8vrTvpCjBHP3396Mm1OEs3yM33k1eIVEs9ouqTo1E1qL8SxFgXaLlvatwuqIfXgJNUa6t4R_Vl7fnkyLUc86ZPT-U7DjdIVdxocNwAN9iZbQ5_NnevhuXcwWmuWyDNv_YB_I32vaLljpLakE-g-RluspEB-OjXiySIXFU0r9jiEw375C1Mf0h45EAXYauhfFNY0JTpSaXZbELVJ7gHKo47tGULMPdbGz8UHvpkp_wrysrFB5KGpfm01dsLtjjccOIe_6RuqBw.8DwRHUbSA5iDTc_WCW8oRg","accessToken":"eyJraWQiOiJISHRORExQUGdWWUNPS1dWcDhQU1RaQnNqak9zbVRUcnpITnV1cnJoczRNPSIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiI4OTlhZGY3MS1jNjBiLTQ1NTEtYmExNC1lMGYzNmY1YTUzMDgiLCJldmVudF9pZCI6IjJjM2M1MTA2LTgwNDItNDYyZS1iODFkLTQwZDVjYTgwMGRiOCIsInRva2VuX3VzZSI6ImFjY2VzcyIsInNjb3BlIjoiYXdzLmNvZ25pdG8uc2lnbmluLnVzZXIuYWRtaW4iLCJhdXRoX3RpbWUiOjE3MzIwMzEzMTYsImlzcyI6Imh0dHBzOlwvXC9jb2duaXRvLWlkcC51cy1lYXN0LTEuYW1hem9uYXdzLmNvbVwvdXMtZWFzdC0xX3M3Zmp2ZEFSVCIsImV4cCI6MTczMjAzMTkxNiwiaWF0IjoxNzMyMDMxMzE2LCJqdGkiOiI1Njc2ZWNiYi0zZDg5LTQ3MDctYWVmNi1hMTAwZjdlNDhhNDciLCJjbGllbnRfaWQiOiIzMm9sOXYwa2lydDJzNzk0Nmk0bWNnbWxvbiIsInVzZXJuYW1lIjoic2FzYUBpa2lnYWlsYWJzLmlvIn0.S7fy1zJsjT1LXBai041SB_GHt-7uk3L42PNMkWtzBjgm6Xf5nflGmAS9ABVkD92pQRf5js2ieTHdZ6iWEyc3Bx0JNN7TJGQKMGQ6Q3RXfIyke2QDwIC_xn6Yqb1LUuKny1bx5TnNB-VYovIHXtEU6erI7K2oXWQ3HhbzVC3wIGaDAFwYOVbhUzmbffo0s-l_neA5-NCdLIWpKkNlxKIxCkOTdUtLOXom0kB4JuGgr1V2Ij9QMfxe_B_2s-mT9mGvKZEsZnh5tn4d0y-7Pkg6P1CYQFuqM-ZLMygRqre2IuAf-VgYBPx4FWK9HEZFtyiqUi1MN9GKu_1dm3oK7_ZPsA"}'
-        }
-        urlRoot={''}
-        supersetUrl={''}
-      />
-    );
+    return <SafeMarkdown source={hasError ? MARKDOWN_ERROR_MESSAGE : iframe} />;
   }
 
   renderEditMode() {
@@ -461,7 +444,6 @@ class IkiDynamicMarkdown extends React.PureComponent {
         depth={depth}
         onDrop={handleComponentDrop}
         disableDragDrop={isFocused}
-        //disableDragDrop={true}
         editMode={editMode}
       >
         {({ dropIndicatorProps, dragSourceRef }) => (
