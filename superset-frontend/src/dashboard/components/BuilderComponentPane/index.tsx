@@ -57,15 +57,18 @@ const BuilderComponentPane = ({ topOffset = 0 }) => (
       height: calc(100vh - ${topOffset}px);
       width: ${BUILDER_PANE_WIDTH}px;
     `}
+    className="dashboard-builder-sidepane"
   >
     <div
       css={(theme: SupersetTheme) => css`
         position: absolute;
         height: 100%;
         width: ${BUILDER_PANE_WIDTH}px;
-        box-shadow: -4px 0 4px 0 ${rgba(theme.colors.grayscale.dark2, 0.1)};
-        background-color: ${theme.colors.grayscale.light5};
+        box-shadow: 0 0 0 #fff !important;
+        background-color: #fff;
+        border-left: 1px solid #eee;
       `}
+      className="viewport"
     >
       <Tabs
         data-test="dashboard-builder-component-pane-tabs-navigation"
@@ -74,6 +77,7 @@ const BuilderComponentPane = ({ topOffset = 0 }) => (
           line-height: inherit;
           margin-top: ${theme.gridUnit * 2}px;
           height: 100%;
+          padding: 0 24px;
 
           & .ant-tabs-content-holder {
             height: 100%;

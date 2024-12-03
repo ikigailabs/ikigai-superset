@@ -36,8 +36,7 @@ export interface Props {
 // eslint-disable-next-line theme-colors/no-literal-colors
 const LoaderImg = styled.div`
   z-index: 99;
-  width: 50px;
-  height: unset;
+  width: 72px;
   position: relative;
   margin: 10px;
   text-align: center;
