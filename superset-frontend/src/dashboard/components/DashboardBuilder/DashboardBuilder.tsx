@@ -100,11 +100,16 @@ const FiltersPanel = styled.div<{ width: number; hidden: boolean }>`
   z-index: 11;
   width: ${({ width }) => width}px;
   ${({ hidden }) => hidden && `display: none;`}
+  background-color: #fff;
+  border-top: 1px solid #eee;
+  border-right: 1px solid #eee;
+  position: relative;
+  top: 65px;
 `;
 
 const StickyPanel = styled.div<{ width: number }>`
-  position: sticky;
-  top: -1px;
+  position: absolute;
+  top: -65px;
   width: ${({ width }) => width}px;
   flex: 0 0 ${({ width }) => width}px;
 `;
@@ -487,8 +492,9 @@ const DashboardBuilder: FC<DashboardBuilderProps> = () => {
     threshold: [1],
   });
 
-  /* const showFilterBar = (crossFiltersEnabled || nativeFiltersEnabled) && !editMode; */
-  const showFilterBar = false;
+  const showFilterBar =
+    (crossFiltersEnabled || nativeFiltersEnabled) && !editMode;
+  // const showFilterBar = false;
 
   const offset =
     FILTER_BAR_HEADER_HEIGHT +

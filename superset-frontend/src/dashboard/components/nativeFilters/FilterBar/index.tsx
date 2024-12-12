@@ -165,6 +165,7 @@ const FilterBar: React.FC<FiltersBarProps> = ({
       filter: Pick<Filter, 'id'> & Partial<Filter>,
       dataMask: Partial<DataMask>,
     ) => {
+      console.log('handleFilterSelectionChange', filter, dataMask);
       setDataMaskSelected(draft => {
         // force instant updating on initialization for filters with `requiredFirst` is true or instant filters
         if (

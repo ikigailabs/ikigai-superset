@@ -57,7 +57,7 @@ const Bar = styled.div<{ width: number }>`
       width: 100%;
     }
     position: absolute;
-    top: 0;
+    top: 66px;
     left: 0;
     flex-direction: column;
     flex-grow: 1;
@@ -196,11 +196,11 @@ const VerticalFilterBar: React.FC<VerticalBarProps> = ({
     [],
   );
 
-  const actionsElement = useMemo(
-    () =>
-      isFeatureEnabled(FeatureFlag.DASHBOARD_NATIVE_FILTERS) ? actions : null,
-    [actions],
-  );
+  const actionsElement = useMemo(() =>
+    //isFeatureEnabled(FeatureFlag.DASHBOARD_NATIVE_FILTERS) ? actions : null,
+    {
+      actions;
+    }, [actions]);
 
   // Filter sets depend on native filters
   const filterSetEnabled =
@@ -229,11 +229,7 @@ const VerticalFilterBar: React.FC<VerticalBarProps> = ({
             iconSize="l"
           />
         </CollapsedBar>
-        <Bar
-          className={cx({ open: filtersOpen })}
-          width={width}
-          style={{ paddingTop: '100px' }}
-        >
+        <Bar className={cx({ open: filtersOpen })} width={width}>
           <Header toggleFiltersBar={toggleFiltersBar} />
           {!isInitialized ? (
             <div css={{ height }}>
@@ -243,12 +239,13 @@ const VerticalFilterBar: React.FC<VerticalBarProps> = ({
             <div css={tabPaneStyle} onScroll={onScroll}>
               <>
                 {crossFilters}
-                {isFeatureEnabled(FeatureFlag.DASHBOARD_NATIVE_FILTERS) &&
-                  filterControls}
+                {/* {isFeatureEnabled(FeatureFlag.DASHBOARD_NATIVE_FILTERS) &&
+                  filterControls} */}
+                <div>{filterControls}</div>
               </>
             </div>
           )}
-          {actionsElement}
+          {actions}
         </Bar>
       </BarWrapper>
     </FilterBarScrollContext.Provider>

@@ -91,6 +91,7 @@ function UIFilters(
                   isClear?: boolean,
                 ) => {
                   if (onFilterUpdate) {
+                    console.log('Select onFilterUpdate', option);
                     // Filter change triggers both onChange AND onClear, only want to track onChange
                     if (!isClear) {
                       onFilterUpdate(option);

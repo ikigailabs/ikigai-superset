@@ -3,7 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { bindActionCreators } from 'redux';
-import { connect } from 'react-redux';
+import { connect, useDispatch } from 'react-redux';
 import cx from 'classnames';
 
 import { t, SafeMarkdown } from '@superset-ui/core';
@@ -27,7 +27,11 @@ import {
   GRID_BASE_UNIT,
 } from 'src/dashboard/util/constants';
 import { refreshChart } from 'src/components/Chart/chartAction';
+import getFiltersList from './util/getFiltersList';
 import { CustomHtmlContainer } from '@ikigailabs/custom-html';
+import { useFilters } from '../nativeFilters/FilterBar/state';
+import { getSelectExtraFormData } from '../../../filters/utils';
+import { updateDataMask } from 'src/dataMask/actions';
 
 /*
 Old Iframe src URL format: 
@@ -44,6 +48,8 @@ const propTypes = {
   editMode: PropTypes.bool.isRequired,
   ikigaiOrigin: PropTypes.string,
   dashboardLayout: PropTypes.object,
+  charts: PropTypes.object,
+  datasources: PropTypes.object,
 
   // from redux
   logEvent: PropTypes.func.isRequired,
@@ -86,6 +92,7 @@ class IkiDynamicMarkdown extends React.PureComponent {
       customMarkdownId: '',
       customMarkdownIsReady: false, // if data from parent window is received (project_id, etc)
       componentSetupData: null,
+      supersetFilters: null,
     };
     this.renderStartTime = Logger.getTimestamp();
 
@@ -110,83 +117,28 @@ class IkiDynamicMarkdown extends React.PureComponent {
       ts: new Date().getTime(),
       duration: Logger.getTimestamp() - this.renderStartTime,
     });
-    console.log('markdownSource', this.state.markdownSource);
+    // console.log('markdownSource', this.state.markdownSource);
+    console.log('props', this.props);
     this.handleIncomingWindowMsg();
     this.retrieveDataFromParentWindow();
     this.handleBackwardCompatibility();
   }
 
-  retrieveDataFromParentWindow() {
-    const crossWindowMessage = {
-      info: 'superset-to-top-window/get-data',
-      data: '',
-      dataType: 'string',
-    };
-    const crossBrowserInfoString = JSON.stringify(crossWindowMessage);
-    /* console.log(
-      'crossBrowserInfoString',
-      crossBrowserInfoString,
-      this.props.ikigaiOrigin,
-    ); */
-    window?.top?.postMessage(crossBrowserInfoString, this.props.ikigaiOrigin);
-  }
-
-  /**
-   * Check if customMarkdownId state value is set. If yes - it is new custom-html npm, if no - it is old iframe version
-   */
-  handleBackwardCompatibility() {
-    if (!this.state.customMarkdownId) {
-      const { markdownSource, hasError } = this.state;
-      const { ikigaiOrigin, editMode } = this.props;
-      let iframe = '';
-      let iframeSrc = '';
-      if (ikigaiOrigin) {
-        if (markdownSource) {
-          const iframeWrapper = document.createElement('div');
-          iframeWrapper.innerHTML = markdownSource;
-          const iframeFound = iframeWrapper.getElementsByTagName('iframe');
-          // console.log('iframeFound', iframeFound, iframeWrapper);
-          if (iframeFound && iframeFound.length > 0) {
-            const iframeHtml = iframeWrapper.firstChild;
-            const iframeSrcUrl = new URL(iframeHtml.src);
-            const custom_markdown_id =
-              iframeSrcUrl.searchParams.get('component_id');
-            if (custom_markdown_id) {
-              this.setState({
-                customMarkdownId: custom_markdown_id,
-              });
-            }
-          } else {
-            this.getCustomHtmlIdFromMarkdownSource();
-          }
-        }
-      }
-    }
-  }
-
-  /**
-   * Grab custom markdown id from span html element saved in state variable markdownSource (on custom markdown selection event)
-   */
-  getCustomHtmlIdFromMarkdownSource() {
-    const { markdownSource } = this.state;
-    let customMarkdownIdFromSource = '';
-    if (markdownSource) {
-      const iframeWrapper = document.createElement('div');
-      iframeWrapper.innerHTML = markdownSource;
-      const spanFound = iframeWrapper.querySelector(
-        `#custom-markdown-span-${this.props.component.id}`,
-      );
-      console.log('spanFound', spanFound, iframeWrapper);
-      if (spanFound) {
-        const customMarkdownId = spanFound.dataset.customhtmlid;
-        console.log('customMarkdownId', customMarkdownId);
-        customMarkdownIdFromSource = customMarkdownId;
-      }
-    }
-    return customMarkdownIdFromSource;
-  }
-
   static getDerivedStateFromProps(nextProps, state) {
+    const { filters, charts, datasources, dashboardLayout } = nextProps;
+    if (filters && charts && datasources && dashboardLayout) {
+      const supersetFilters = getFiltersList(
+        nextProps?.filters,
+        charts,
+        datasources,
+        dashboardLayout?.present,
+      );
+      // console.log('supersetFilters!!!', supersetFilters);
+      return {
+        ...state,
+        supersetFilters: supersetFilters,
+      };
+    }
     const { hasError, editorMode, markdownSource, undoLength, redoLength } =
       state;
     const {
@@ -260,13 +212,83 @@ class IkiDynamicMarkdown extends React.PureComponent {
     }
   }
 
+  retrieveDataFromParentWindow() {
+    const crossWindowMessage = {
+      info: 'superset-to-top-window/get-data',
+      data: '',
+      dataType: 'string',
+    };
+    const crossBrowserInfoString = JSON.stringify(crossWindowMessage);
+    /* console.log(
+      'crossBrowserInfoString',
+      crossBrowserInfoString,
+      this.props.ikigaiOrigin,
+    ); */
+    window?.top?.postMessage(crossBrowserInfoString, this.props.ikigaiOrigin);
+  }
+
+  /**
+   * Check if customMarkdownId state value is set. If yes - it is new custom-html npm, if no - it is old iframe version
+   */
+  handleBackwardCompatibility() {
+    if (!this.state.customMarkdownId) {
+      const { markdownSource, hasError } = this.state;
+      const { ikigaiOrigin, editMode } = this.props;
+      let iframe = '';
+      let iframeSrc = '';
+      if (ikigaiOrigin) {
+        if (markdownSource) {
+          const iframeWrapper = document.createElement('div');
+          iframeWrapper.innerHTML = markdownSource;
+          const iframeFound = iframeWrapper.getElementsByTagName('iframe');
+          // console.log('iframeFound', iframeFound, iframeWrapper);
+          if (iframeFound && iframeFound.length > 0) {
+            const iframeHtml = iframeWrapper.firstChild;
+            const iframeSrcUrl = new URL(iframeHtml.src);
+            const custom_markdown_id =
+              iframeSrcUrl.searchParams.get('component_id');
+            if (custom_markdown_id) {
+              this.setState({
+                customMarkdownId: custom_markdown_id,
+              });
+            }
+          } else {
+            this.getCustomHtmlIdFromMarkdownSource();
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * Grab custom markdown id from span html element saved in state variable markdownSource (on custom markdown selection event)
+   */
+  getCustomHtmlIdFromMarkdownSource() {
+    const { markdownSource } = this.state;
+    let customMarkdownIdFromSource = '';
+    if (markdownSource) {
+      const iframeWrapper = document.createElement('div');
+      iframeWrapper.innerHTML = markdownSource;
+      const spanFound = iframeWrapper.querySelector(
+        `#custom-markdown-span-${this.props.component.id}`,
+      );
+      // console.log('spanFound', spanFound, iframeWrapper);
+      if (spanFound) {
+        const customMarkdownId = spanFound.dataset.customhtmlid;
+        // console.log('customMarkdownId', customMarkdownId);
+        customMarkdownIdFromSource = customMarkdownId;
+      }
+    }
+    return customMarkdownIdFromSource;
+  }
+
   // eslint-disable-next-line class-methods-use-this
   handleIncomingWindowMsg() {
     window.addEventListener('message', event => {
-      console.log('event.origin', event.origin, this.props.ikigaiOrigin);
+      // console.log('event.origin', event.origin, this.props.ikigaiOrigin);
       if (event.origin === this.props.ikigaiOrigin) {
         const messageObject = JSON.parse(event.data);
-        console.log('messageObject', messageObject);
+        // console.log('messageObject', messageObject);
         if (messageObject.info && messageObject.dataType) {
           const { dataType } = messageObject;
           let messageData;
@@ -280,11 +302,11 @@ class IkiDynamicMarkdown extends React.PureComponent {
           }
 
           if (messageObject.info === 'top-window-to-superset/sending-data') {
-            console.log(
+            /* console.log(
               'top-window-to-superset/sending-data',
               'messageData',
               messageData,
-            );
+            ); */
             if (!this.state.customMarkdownIsReady) {
               this.setState({
                 customMarkdownIsReady: true,
@@ -292,88 +314,9 @@ class IkiDynamicMarkdown extends React.PureComponent {
               });
             }
           }
-
-          /* if (
-            document.getElementById(
-              `ikidynamicmarkdown-widget-${this.props.component.id}`,
-            )
-          ) {
-            widgetUrl = new URL(
-              document.getElementById(
-                `ikidynamicmarkdown-widget-${this.props.component.id}`,
-              ).src,
-            );
-          } else {
-            widgetUrl = `${this.props.ikigaiOrigin}/widget//widget/custom?mode=edit&parent=superset`;
-          } */
-
-          /* if (
-            messageObject.info === 'widget-to-superset/dynamic-markdown-setup'
-          ) {
-            if (messageData.scid === this.props.component.id) {
-              widgetUrlQuery = new URLSearchParams(widgetUrl);
-              widgetUrlQuery.set('mode', 'preview');
-              widgetUrlQuery.set('parent', 'superset');
-              widgetUrlQuery.set('project_id', messageData.projectId);
-              widgetUrlQuery.set('component_id', messageData.componentId);
-              widgetUrl.search = widgetUrlQuery.toString();
-              const tempIframe = `<iframe
-                                  id="ikiinteractiveforecast-widget-${this.props.component.id}"
-                                  name="ikiinteractiveforecast"
-                                  src="${widgetUrl}"
-                                  title="Hero Section Component"
-                                  style="min-height: 100%;"
-                              />`;
-              this.handleIkiRunPipelineChange(tempIframe, true);
-            }
-          } else if (
-            messageObject.info ===
-            'widget-to-superset/sending-charts-to-refresh'
-          ) {
-            const { matchedChartIds } = messageData;
-            this.refreshCharts(matchedChartIds);
-          } */
         }
       }
     });
-  }
-
-  refreshCharts(selectedCharts) {
-    let chartIds = [];
-    if (!Array.isArray(selectedCharts)) {
-      chartIds = selectedCharts.split();
-    } else {
-      chartIds = selectedCharts;
-    }
-    if (chartIds) {
-      const layoutElements = this.props.dashboardLayout?.present
-        ? this.props.dashboardLayout?.present
-        : null;
-      if (chartIds) {
-        chartIds.forEach(chartId => {
-          let findChartEle = null;
-          if (layoutElements) {
-            Object.keys(layoutElements).forEach(ele => {
-              const supChartId = layoutElements[ele].meta?.chartId;
-              if (supChartId && supChartId.toString() === chartId) {
-                findChartEle = supChartId;
-              }
-            });
-          }
-          if (findChartEle) {
-            this.refreshChart(findChartEle, this.state.dashboardId, false);
-          }
-        });
-      }
-    }
-  }
-
-  refreshChart(chartId, dashboardId, isCached) {
-    this.props.logEvent(LOG_ACTIONS_FORCE_REFRESH_CHART, {
-      slice_id: chartId,
-      is_cached: isCached,
-    });
-    return this.props.refreshChart(chartId, true, dashboardId);
   }
 
   handleUpdateSource(nextValue, saveToDashboard) {
@@ -419,8 +362,8 @@ class IkiDynamicMarkdown extends React.PureComponent {
     };
 
     this.setState(nextState);
-    let widgetUrl;
-    /*const widgetUrlQuery = new URLSearchParams(widgetUrl.search);
+    /* let widgetUrl;
+    const widgetUrlQuery = new URLSearchParams(widgetUrl.search);
     // widgetUrlQuery.set('mode', mode);
     widgetUrl.search = widgetUrlQuery.toString();
     const tempIframe = `<iframe
@@ -430,7 +373,7 @@ class IkiDynamicMarkdown extends React.PureComponent {
                       title="Custom Component"
                       style="min-height: 100%;"
                     />`;
-    this.handleIkiRunPipelineChange(tempIframe, true);*/
+    this.handleIkiRunPipelineChange(tempIframe, true); */
   }
 
   updateMarkdownContent() {
@@ -477,49 +420,11 @@ class IkiDynamicMarkdown extends React.PureComponent {
       customMarkdownIsReady,
       componentSetupData,
       editorMode,
+      supersetFilters,
     } = this.state;
-    const { ikigaiOrigin, editMode } = this.props;
+    // console.log('supersetFilters', supersetFilters);
+    const { ikigaiOrigin, editMode, charts } = this.props;
     const customMarkdownId = this.getCustomHtmlIdFromMarkdownSource();
-    /*let iframe = '';
-    let iframeSrc = '';
-    if (ikigaiOrigin) {
-      if (markdownSource) {
-        // iframe = markdownSource;
-        const iframeWrapper = document.createElement('div');
-        iframeWrapper.innerHTML = markdownSource;
-        const iframeHtml = iframeWrapper.firstChild;
-        const iframeSrcUrl = new URL(iframeHtml.src);
-        iframeSrcUrl.searchParams.set(
-          'dashboard_mode',
-          editMode ? 'edit' : 'preview',
-        );
-        iframeSrcUrl.searchParams.set('scid', this.props.component.id);
-        iframeSrc = ikigaiOrigin + iframeSrcUrl.pathname + iframeSrcUrl.search;
-      } else {
-        iframeSrc = `${ikigaiOrigin}/widget/custom?mode=edit&parent=superset&scid=${this.props.component.id}`;
-      }
-      iframe = `<iframe
-                  id="ikidynamicmarkdown-widget-${this.props.component.id}"
-                  name="dynamic-markdown-${timestamp}"
-                  src="${iframeSrc}"
-                  title="Custom Component"
-                  style="height:100%;"
-                />`;
-    } else {
-      iframe = '';
-    }
-    return <SafeMarkdown source={hasError ? MARKDOWN_ERROR_MESSAGE : iframe} />;*/
-    console.log(
-      'iframe data',
-      markdownSource,
-      editMode,
-      editorMode,
-      customMarkdownId,
-      ikigaiOrigin,
-      editMode ? 'edit' : 'preview',
-      customMarkdownIsReady,
-      componentSetupData,
-    );
 
     return (
       <>
@@ -528,20 +433,33 @@ class IkiDynamicMarkdown extends React.PureComponent {
             <CustomHtmlContainer
               appId={componentSetupData?.appId}
               componentId={customMarkdownId}
-              //mode={editorMode}
               mode={editMode ? 'edit' : 'preview'}
-              //mode="edit"
-              //parent={'editor'}
               parent={'superset'}
               urlRoot={ikigaiOrigin}
               apiBaseUrl={componentSetupData?.apiBaseUrl}
               supersetUrl={''}
               userEmail={componentSetupData?.userEmail}
               token={componentSetupData?.token}
+              supersetFilters={supersetFilters}
+              supersetCharts={charts}
               onDrag={dragging => this.onDraggingInsideCustomHtml(dragging)}
               onSelectCustomMarkdown={custom_markdown_id =>
                 this.onSelectCustomMarkdown(custom_markdown_id)
               }
+              onSupersetDataFilter={(
+                filterName,
+                columnName,
+                filterValue,
+                filterType,
+              ) =>
+                this.onDataFilter(
+                  filterName,
+                  columnName,
+                  filterValue,
+                  filterType,
+                )
+              }
+              onReloadCharts={chart_ids => this.onReloadCharts(chart_ids)}
             />
           </>
         ) : (
@@ -551,8 +469,18 @@ class IkiDynamicMarkdown extends React.PureComponent {
     );
   }
 
+  onDataFilter(filterName, columnName, filterValue, filterType) {
+    console.log('onDataFilter', filterName, columnName, filterValue);
+    this.props?.updateFilter(filterName, '-', filterValue, filterType);
+  }
+
+  onReloadCharts(chartIds) {
+    console.log('onReloadCharts', chartIds);
+    this.refreshCharts(chartIds);
+  }
+
   onSelectCustomMarkdown(custom_markdown_id) {
-    console.log('onSelectCustomMarkdown', custom_markdown_id);
+    // console.log('onSelectCustomMarkdown', custom_markdown_id);
     if (custom_markdown_id) {
       this.setState(
         {
@@ -567,10 +495,28 @@ class IkiDynamicMarkdown extends React.PureComponent {
   }
 
   onDraggingInsideCustomHtml(dragging) {
-    console.log('onDraggingInsideCustomHtml', dragging);
+    // console.log('onDraggingInsideCustomHtml', dragging);
     this.setState({
       innerDragging: dragging,
     });
+  }
+
+  refreshCharts(charts) {
+    console.log('refreshCharts', charts);
+    if (charts) {
+      charts.forEach(chartId => {
+        this.refreshChart(chartId, this.state.dashboardId, false);
+      });
+    }
+  }
+
+  refreshChart(chartId, dashboardId, isCached) {
+    console.log('refreshChart', chartId, dashboardId);
+    this.props.logEvent(LOG_ACTIONS_FORCE_REFRESH_CHART, {
+      slice_id: chartId,
+      is_cached: isCached,
+    });
+    return this.props.refreshChart(chartId, true, dashboardId);
   }
 
   renderEditMode() {
@@ -598,6 +544,8 @@ class IkiDynamicMarkdown extends React.PureComponent {
       editMode,
     } = this.props;
 
+    console.log('editorMode state', editorMode, 'editMode props', editMode);
+
     // inherit the size of parent columns
     const widthMultiple =
       parentComponent.type === COLUMN_TYPE
@@ -605,70 +553,80 @@ class IkiDynamicMarkdown extends React.PureComponent {
         : component.meta.width || GRID_MIN_COLUMN_COUNT;
 
     return (
-      <DragDroppable
-        component={component}
-        parentComponent={parentComponent}
-        orientation={parentComponent.type === ROW_TYPE ? 'column' : 'row'}
-        index={index}
-        depth={depth}
-        onDrop={handleComponentDrop}
-        disableDragDrop={isFocused}
-        //disableDragDrop={innerDragging}
-        //disableDragDrop={true}
-        editMode={editMode}
-      >
-        {({ dropIndicatorProps, dragSourceRef }) => (
-          <WithPopoverMenu
-            onChangeFocus={this.handleChangeFocus}
-            menuItems={[
-              <MarkdownModeDropdown
-                id={`${component.id}-mode`}
-                value={this.state.editorMode}
-                onChange={this.handleChangeEditorMode}
-              />,
-              <DeleteComponentButton onDelete={this.handleDeleteComponent} />,
-            ]}
+      <>
+        {editMode ? (
+          <DragDroppable
+            component={component}
+            parentComponent={parentComponent}
+            orientation={parentComponent.type === ROW_TYPE ? 'column' : 'row'}
+            index={index}
+            depth={depth}
+            onDrop={handleComponentDrop}
+            //disableDragDrop={isFocused}
+            disableDragDrop={innerDragging || isFocused}
+            //disableDragDrop={true}
             editMode={editMode}
           >
-            <div
-              data-test="dashboard-markdown-editor"
-              className={cx(
-                this.state.markdownSource === undefined
-                  ? 'dashboard-component-ikirunpipeline'
-                  : 'dashboard-component',
-                isEditing && 'dashboard-component--editing',
-              )}
-              id={component.id}
-            >
-              <ResizableContainer
-                id={component.id}
-                adjustableWidth={parentComponent.type === ROW_TYPE}
-                adjustableHeight
-                widthStep={columnWidth}
-                widthMultiple={widthMultiple}
-                heightStep={GRID_BASE_UNIT}
-                heightMultiple={component.meta.height}
-                minWidthMultiple={GRID_MIN_COLUMN_COUNT}
-                minHeightMultiple={GRID_MIN_ROW_UNITS}
-                maxWidthMultiple={availableColumnCount + widthMultiple}
-                onResizeStart={this.handleResizeStart}
-                onResize={onResize}
-                onResizeStop={onResizeStop}
-                editMode={isFocused ? false : editMode}
+            {({ dropIndicatorProps, dragSourceRef }) => (
+              <WithPopoverMenu
+                onChangeFocus={this.handleChangeFocus}
+                menuItems={[
+                  <MarkdownModeDropdown
+                    id={`${component.id}-mode`}
+                    value={this.state.editorMode}
+                    onChange={this.handleChangeEditorMode}
+                  />,
+                  <DeleteComponentButton
+                    onDelete={this.handleDeleteComponent}
+                  />,
+                ]}
+                editMode={editMode}
               >
                 <div
-                  ref={dragSourceRef}
-                  className="dashboard-component-inner"
-                  data-test="dashboard-component-chart-holder"
+                  data-test="dashboard-markdown-editor"
+                  className={cx(
+                    this.state.markdownSource === undefined
+                      ? 'dashboard-component-ikirunpipeline'
+                      : 'dashboard-component',
+                    isEditing && 'dashboard-component--editing',
+                  )}
+                  id={component.id}
                 >
-                  {this.renderPreviewMode()}
+                  <ResizableContainer
+                    id={component.id}
+                    adjustableWidth={parentComponent.type === ROW_TYPE}
+                    adjustableHeight
+                    widthStep={columnWidth}
+                    widthMultiple={widthMultiple}
+                    heightStep={GRID_BASE_UNIT}
+                    heightMultiple={component.meta.height}
+                    minWidthMultiple={GRID_MIN_COLUMN_COUNT}
+                    minHeightMultiple={GRID_MIN_ROW_UNITS}
+                    maxWidthMultiple={availableColumnCount + widthMultiple}
+                    onResizeStart={this.handleResizeStart}
+                    onResize={onResize}
+                    onResizeStop={onResizeStop}
+                    editMode={isFocused ? false : editMode}
+                  >
+                    <div
+                      ref={dragSourceRef}
+                      className="dashboard-component-inner"
+                      data-test="dashboard-component-chart-holder"
+                    >
+                      {this.renderPreviewMode()}
+                    </div>
+                  </ResizableContainer>
                 </div>
-              </ResizableContainer>
-            </div>
-            {dropIndicatorProps && <div {...dropIndicatorProps} />}
-          </WithPopoverMenu>
+                {dropIndicatorProps && <div {...dropIndicatorProps} />}
+              </WithPopoverMenu>
+            )}
+          </DragDroppable>
+        ) : (
+          <div className="custom-component-holder">
+            {this.renderPreviewMode()}
+          </div>
         )}
-      </DragDroppable>
+      </>
     );
   }
 }
@@ -681,6 +639,8 @@ function mapStateToProps(state) {
     undoLength: state.dashboardLayout.past.length,
     redoLength: state.dashboardLayout.future.length,
     dashboardLayout: state.dashboardLayout,
+    charts: state.charts,
+    datasources: state.datasources,
   };
 }
 function mapDispatchToProps(dispatch) {
@@ -691,4 +651,85 @@ function mapDispatchToProps(dispatch) {
     dispatch,
   );
 }
-export default connect(mapStateToProps, mapDispatchToProps)(IkiDynamicMarkdown);
+
+const IkiDynamicMarkdownHOC = props => {
+  const dispatch = useDispatch();
+  const filters = useFilters();
+  console.log('filters in hoc hook', filters);
+
+  const updateFilter = (filterName, dataMask, filterValue, filterType) => {
+    let value = '';
+    if (filterType === 'filter_time') {
+      value = filterValue;
+    } else if (filterType === 'filter_select') {
+      value = Array.isArray(filterValue) ? filterValue : filterValue.split();
+    } else {
+      value = filterValue;
+    }
+    console.log(
+      'updateFilter',
+      filters,
+      filterName,
+      dataMask,
+      filterValue,
+      value,
+      filterType,
+    );
+    let findFilter = null;
+    Object.keys(filters).forEach(filterId => {
+      if (filters[filterId]?.name === filterName) {
+        findFilter = filters[filterId];
+      }
+    });
+    if (findFilter) {
+      const temp_colName = findFilter?.targets[0]?.column?.name;
+      console.log('temp_colName', temp_colName, filterValue);
+      let extraFormData = null;
+      let filterState = findFilter?.defaultDataMask?.filterState;
+      if (filterType === 'filter_time') {
+        extraFormData = {
+          time_range: filterValue,
+        };
+        filterState = {
+          value: filterValue,
+        };
+      } else {
+        extraFormData = getSelectExtraFormData(temp_colName, value);
+        filterState = {
+          ...filterState,
+          label: value.toString(),
+          /* label: values?.length
+          ? `${(values || [])
+              .map(value => labelFormatter(value, datatype))
+              .join(', ')}${suffix}`
+          : undefined,*/
+          value: value,
+        };
+      }
+      console.log('filterState', filterState, extraFormData);
+      console.log('findFilter', findFilter);
+
+      // dispatch(updateDataMask(filter.id, dataMask));
+
+      const filterDataMask = {
+        extraFormData: { ...extraFormData },
+        filterState: { ...filterState },
+      };
+      console.log('filterDataMask', filterDataMask);
+      dispatch(updateDataMask(findFilter?.id, filterDataMask));
+    }
+  };
+
+  return (
+    <IkiDynamicMarkdown
+      {...props}
+      filters={filters}
+      updateFilter={updateFilter}
+    />
+  );
+};
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(IkiDynamicMarkdownHOC);
