@@ -131,7 +131,7 @@ export default function PluginFilterSelect(props: PluginFilterSelectProps) {
         enableEmptyFilter && !inverseSelection && !values?.length;
 
       const suffix = inverseSelection && values?.length ? t(' (excluded)') : '';
-      console.log(
+      /* console.log(
         'updateDataMask values',
         values,
         emptyFilter,
@@ -141,7 +141,7 @@ export default function PluginFilterSelect(props: PluginFilterSelectProps) {
         col,
         'filterState',
         filterState,
-      );
+      ); */
       dispatchDataMask({
         type: 'filterState',
         extraFormData: getSelectExtraFormData(
@@ -206,7 +206,7 @@ export default function PluginFilterSelect(props: PluginFilterSelectProps) {
   const handleChange = useCallback(
     (value?: SelectValue | number | string) => {
       const values = value === null ? [null] : ensureIsArray(value);
-      console.log('Select handleChange value', value);
+      // console.log('Select handleChange value', value);
 
       if (values.length === 0) {
         updateDataMask(null);

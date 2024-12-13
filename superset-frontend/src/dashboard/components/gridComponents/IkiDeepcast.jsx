@@ -244,7 +244,7 @@ class IkiDeepcast extends React.PureComponent {
   }
 
   handleChangeFocus(nextFocus) {
-    console.log(nextFocus);
+    // console.log(nextFocus);
     // const nextFocused = !!nextFocus;
     // const nextEditMode = nextFocused ? 'edit' : 'preview';
     // this.setState(() => ({ isFocused: nextFocused }));

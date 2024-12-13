@@ -196,16 +196,16 @@ const VerticalFilterBar: React.FC<VerticalBarProps> = ({
     [],
   );
 
-  const actionsElement = useMemo(() =>
-    //isFeatureEnabled(FeatureFlag.DASHBOARD_NATIVE_FILTERS) ? actions : null,
+  /* const actionsElement = useMemo(() =>
+    // isFeatureEnabled(FeatureFlag.DASHBOARD_NATIVE_FILTERS) ? actions : null,
     {
       actions;
-    }, [actions]);
+    }, [actions]); */
 
   // Filter sets depend on native filters
-  const filterSetEnabled =
+  /* const filterSetEnabled =
     isFeatureEnabled(FeatureFlag.DASHBOARD_NATIVE_FILTERS_SET) &&
-    isFeatureEnabled(FeatureFlag.DASHBOARD_NATIVE_FILTERS);
+    isFeatureEnabled(FeatureFlag.DASHBOARD_NATIVE_FILTERS); */
 
   return (
     <FilterBarScrollContext.Provider value={isScrolling}>

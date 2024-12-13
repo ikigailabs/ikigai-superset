@@ -118,7 +118,7 @@ class IkiDynamicMarkdown extends React.PureComponent {
       duration: Logger.getTimestamp() - this.renderStartTime,
     });
     // console.log('markdownSource', this.state.markdownSource);
-    console.log('props', this.props);
+    // console.log('props', this.props);
     this.handleIncomingWindowMsg();
     this.retrieveDataFromParentWindow();
     this.handleBackwardCompatibility();

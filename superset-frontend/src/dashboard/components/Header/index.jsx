@@ -176,7 +176,7 @@ class Header extends React.PureComponent {
   static discardChanges(ikigaiOrigin, supersetUrl) {
     const url = new URL(window.location.href);
     const originalUrl = url.origin + url.pathname;
-    console.log('Discard - url', url, originalUrl, ikigaiOrigin, supersetUrl);
+    // console.log('Discard - url', url, originalUrl, ikigaiOrigin, supersetUrl);
 
     // url.searchParams.delete('edit');
     // window.location.assign(url);
