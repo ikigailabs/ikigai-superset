@@ -468,7 +468,7 @@ const config = {
       {
         test: /\.[jt]sx?$/,
         exclude: /node_modules/,
-        use: [
+        /* use: [
           {
             loader: require.resolve('babel-loader'),
             options: {
@@ -477,7 +477,7 @@ const config = {
               ].filter(Boolean),
             },
           },
-        ],
+        ], */
       },
     ],
   },

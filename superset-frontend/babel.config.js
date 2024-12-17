@@ -36,10 +36,7 @@ module.exports = {
     ],
     [
       '@babel/preset-react',
-      {
-        development: process.env.BABEL_ENV === 'development',
-        runtime: 'automatic',
-      },
+      { development: process.env.BABEL_ENV === 'development' },
     ],
     '@babel/preset-typescript',
     [
@@ -60,8 +57,8 @@ module.exports = {
     ['@babel/plugin-transform-runtime', { corejs: 3 }],
     // only used in packages/superset-ui-core/src/chart/components/reactify.tsx
     ['babel-plugin-typescript-to-proptypes', { loose: true }],
-    //'react-hot-loader/babel', // windows issue - https://github.com/apache/superset/issues/28557#issuecomment-2180397714
-    ['react-refresh/babel', { loose: true }],
+    // 'react-hot-loader/babel', // windows issue - https://github.com/apache/superset/issues/28557#issuecomment-2180397714
+    // ['react-refresh/babel', { loose: true }],
   ],
   env: {
     // Setup a different config for tests as they run in node instead of a browser
@@ -113,7 +110,5 @@ module.exports = {
       sourceType: 'unambiguous',
     },
   ],
-  ...(process.env.BABEL_ENV === 'development' && {
-    plugins: ['react-refresh/babel'],
-  }),
+  ...(process.env.BABEL_ENV === 'development' && {}),
 };
