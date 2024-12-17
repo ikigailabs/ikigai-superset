@@ -55,9 +55,9 @@ import setPeriodicRunner, {
   stopPeriodicRender,
 } from 'src/dashboard/util/setPeriodicRunner';
 import { PageHeaderWithActions } from 'src/components/PageHeaderWithActions';
+import { Dropdown } from 'src/components/Dropdown';
 import DashboardEmbedModal from '../EmbeddedModal';
 import OverwriteConfirm from '../OverwriteConfirm';
-import { Dropdown } from 'src/components/Dropdown';
 
 const extensionsRegistry = getExtensionsRegistry();
 

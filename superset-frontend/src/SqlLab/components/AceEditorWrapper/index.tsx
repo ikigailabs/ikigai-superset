@@ -53,7 +53,9 @@ const StyledAceEditor = styled(AceEditor)`
     && {
       // double class is better than !important
       border: 1px solid ${theme.colors.grayscale.light2};
-      font-feature-settings: 'liga' off, 'calt' off;
+      font-feature-settings:
+        'liga' off,
+        'calt' off;
     }
   `}
 `;

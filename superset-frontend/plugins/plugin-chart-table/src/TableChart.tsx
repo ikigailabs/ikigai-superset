@@ -366,8 +366,8 @@ export default function TableChart<D extends DataRecord = DataRecord>(
     const textAlign = config.horizontalAlign
       ? config.horizontalAlign
       : isNumeric
-      ? 'right'
-      : 'left';
+        ? 'right'
+        : 'left';
     return {
       textAlign,
     };

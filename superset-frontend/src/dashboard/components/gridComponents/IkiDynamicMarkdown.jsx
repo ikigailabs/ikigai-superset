@@ -27,11 +27,11 @@ import {
   GRID_BASE_UNIT,
 } from 'src/dashboard/util/constants';
 import { refreshChart } from 'src/components/Chart/chartAction';
-import getFiltersList from './util/getFiltersList';
 import { CustomHtmlContainer } from '@ikigailabs/custom-html';
+import { updateDataMask } from 'src/dataMask/actions';
+import getFiltersList from './util/getFiltersList';
 import { useFilters } from '../nativeFilters/FilterBar/state';
 import { getSelectExtraFormData } from '../../../filters/utils';
-import { updateDataMask } from 'src/dataMask/actions';
 
 /*
 Old Iframe src URL format: 
@@ -136,7 +136,7 @@ class IkiDynamicMarkdown extends React.PureComponent {
       // console.log('supersetFilters!!!', supersetFilters);
       return {
         ...state,
-        supersetFilters: supersetFilters,
+        supersetFilters,
       };
     }
     const { hasError, editorMode, markdownSource, undoLength, redoLength } =
@@ -234,8 +234,8 @@ class IkiDynamicMarkdown extends React.PureComponent {
     if (!this.state.customMarkdownId) {
       const { markdownSource, hasError } = this.state;
       const { ikigaiOrigin, editMode } = this.props;
-      let iframe = '';
-      let iframeSrc = '';
+      const iframe = '';
+      const iframeSrc = '';
       if (ikigaiOrigin) {
         if (markdownSource) {
           const iframeWrapper = document.createElement('div');
@@ -416,7 +416,7 @@ class IkiDynamicMarkdown extends React.PureComponent {
     const {
       markdownSource,
       hasError,
-      //customMarkdownId,
+      // customMarkdownId,
       customMarkdownIsReady,
       componentSetupData,
       editorMode,
@@ -434,10 +434,10 @@ class IkiDynamicMarkdown extends React.PureComponent {
               appId={componentSetupData?.appId}
               componentId={customMarkdownId}
               mode={editMode ? 'edit' : 'preview'}
-              parent={'superset'}
+              parent="superset"
               urlRoot={ikigaiOrigin}
               apiBaseUrl={componentSetupData?.apiBaseUrl}
-              supersetUrl={''}
+              supersetUrl=""
               userEmail={componentSetupData?.userEmail}
               token={componentSetupData?.token}
               supersetFilters={supersetFilters}
@@ -562,9 +562,9 @@ class IkiDynamicMarkdown extends React.PureComponent {
             index={index}
             depth={depth}
             onDrop={handleComponentDrop}
-            //disableDragDrop={isFocused}
+            // disableDragDrop={isFocused}
             disableDragDrop={innerDragging || isFocused}
-            //disableDragDrop={true}
+            // disableDragDrop={true}
             editMode={editMode}
           >
             {({ dropIndicatorProps, dragSourceRef }) => (
@@ -702,8 +702,8 @@ const IkiDynamicMarkdownHOC = props => {
           ? `${(values || [])
               .map(value => labelFormatter(value, datatype))
               .join(', ')}${suffix}`
-          : undefined,*/
-          value: value,
+          : undefined, */
+          value,
         };
       }
       console.log('filterState', filterState, extraFormData);

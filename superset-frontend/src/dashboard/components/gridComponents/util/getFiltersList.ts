@@ -5,7 +5,7 @@ function getFiltersList(
   dashboardLayout: any,
 ) {
   // console.log('getFiltersList', filters, charts, datasources, dashboardLayout);
-  let supersetFilters: any[] = [];
+  const supersetFilters: any[] = [];
   const tempCharts: any = { ...charts };
   if (dashboardLayout && Object.keys(dashboardLayout).length > 0) {
     Object.keys(dashboardLayout).forEach((eleId: string) => {
@@ -14,7 +14,7 @@ function getFiltersList(
         const chartId = dashboardLayout[eleId]?.meta?.chartId;
         const sliceName = dashboardLayout[eleId]?.meta?.sliceName;
         if (tempCharts[chartId]) {
-          tempCharts[chartId]['name'] = sliceName;
+          tempCharts[chartId].name = sliceName;
         }
       }
     });
@@ -35,12 +35,12 @@ function getFiltersList(
           }
         });
         if (filterCharts) {
-          supersetFilters[filterIndex]['charts'] = filterCharts;
+          supersetFilters[filterIndex].charts = filterCharts;
         }
       }
     });
   }
-  //console.log('filters', filters);
+  // console.log('filters', filters);
   return supersetFilters;
 }
 
