@@ -856,10 +856,10 @@ td.rdtYear:hover {
 }
 .background--white {
   background-color: #fff;
-  box-shadow: 0px 2px 8px rgba(115, 115, 115, 0.09);
+  box-shadow: 0px 2px 8px rgba(115, 115, 115, 0.09) !important;
 }
 .dashboard-builder-sidepane {
-  position: relative;
+  // position: relative;
 }
 .dashboard-builder-sidepane .dashboard-builder-sidepane-header {
   font-size: 16px;
@@ -888,7 +888,7 @@ td.rdtYear:hover {
   width: 374px;
   right: 0;
   height: 100%;
-  height: calc(100% - 118px);
+  // height: calc(100% - 118px);
   box-shadow: -4px 0 4px 0 rgba(0, 0, 0, 0.1);
 }
 .dashboard-builder-sidepane .slider-container {
@@ -1763,7 +1763,7 @@ div:hover > .hover-menu {
     border-color 0.2s,
     box-shadow 0.2s;
   border: 2px solid transparent;
-  box-shadow: 0px 2px 8px rgba(115, 115, 115, 0.09);
+  box-shadow: 0px 2px 8px rgba(115, 115, 115, 0.09) !important;
 }
 .dashboard-component-chart-holder .missing-chart-container {
   display: flex;
@@ -2201,13 +2201,13 @@ a[role='menuitem'] .dot {
 /* Sidepane / components slide in Sidebar */
 
 .dashboard-builder-sidepane {
-  margin-top: 23px;
+  // margin-top: 23px;
 }
 
 .dashboard-builder-sidepane .viewport {
   position: fixed;
-  top: 65px !important;
-  padding: 0 24px;
+  // top: 98px !important;
+  // padding: 0 24px;
   box-shadow: 0 0 0 transparent !important;
   border-left: 1px solid #eee;
   background-color: #fff;
@@ -2365,14 +2365,14 @@ a[role='menuitem'] .dot {
 
 /* Inputs */
 
-input {
+/* input {
   border: 1px solid var(--borderColor) !important;
   border-radius: 4px !important;
   box-shadow: 0 0 0 transparent !important;
   transition: all 0.2s ease;
-}
+} */
 
-input:hover {
+/* input:hover {
   border: 1px solid var(--borderColorHoverInput) !important;
   box-shadow: 0 0 0 transparent !important;
   transition: all 0.2s ease;
@@ -2382,7 +2382,7 @@ input:focus {
   border: 1px solid var(--primaryColor) !important;
   box-shadow: 0 0 0 transparent !important;
   transition: all 0.2s ease;
-}
+} */
 
 .editable-title input[type='text'] {
   padding: 6px 8px !important;
@@ -2392,7 +2392,7 @@ input:focus {
 
 /* Select */
 
-.ant-select:not(.ant-select-customize-input) .ant-select-selector {
+/* .ant-select:not(.ant-select-customize-input) .ant-select-selector {
   border: 1px solid var(--borderColor) !important;
   border-radius: 4px !important;
   box-shadow: 0 0 0 transparent !important;
@@ -2430,7 +2430,7 @@ input:focus {
   font-weight: 400 !important;
   border-left: 2px solid var(--primaryColor);
   transition: all 0.2s ease;
-}
+} */
 
 /* Link */
 
@@ -2505,9 +2505,9 @@ a:hover {
 
 .dashboard-component.dashboard-component-chart-holder {
   padding: 24px;
-  border: 1px solid var(--borderColor);
+  border: 1px solid var(--borderColor) !important;
   border-radius: 5px;
-  box-shadow: 0px 2px 8px rgba(115, 115, 115, 0.09);
+  box-shadow: 0px 2px 8px rgba(115, 115, 115, 0.09) !important;
 }
 
 .dashboard-component-chart-holder.fade-in {

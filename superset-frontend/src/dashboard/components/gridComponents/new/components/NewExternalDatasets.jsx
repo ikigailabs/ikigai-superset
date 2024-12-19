@@ -12,7 +12,7 @@ export default function DraggableNewDivider() {
       type={IKI_EXTERNAL_DATASETS_TYPE}
       label={t('External Datasets')}
       description="Add datasets to improve your forecast"
-      className="fa fa-file-o"
+      className="fa fa-file"
       demandApp
     />
   );

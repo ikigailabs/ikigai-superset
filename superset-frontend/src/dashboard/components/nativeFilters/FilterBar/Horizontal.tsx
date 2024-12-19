@@ -131,7 +131,7 @@ const HorizontalFilterBar: React.FC<HorizontalBarProps> = ({
 
   const actionsElement = useMemo(
     () =>
-      isFeatureEnabled(FeatureFlag.DASHBOARD_NATIVE_FILTERS) ? actions : null,
+      isFeatureEnabled(FeatureFlag.DashboardNativeFilters) ? actions : null,
     [actions],
   );
 
@@ -144,7 +144,7 @@ const HorizontalFilterBar: React.FC<HorizontalBarProps> = ({
           <>
             <FilterBarSettings />
             {canEdit &&
-              isFeatureEnabled(FeatureFlag.DASHBOARD_NATIVE_FILTERS) && (
+              isFeatureEnabled(FeatureFlag.DashboardNativeFilters) && (
                 <FiltersLinkContainer hasFilters={hasFilters}>
                   <FilterConfigurationLink
                     dashboardId={dashboardId}

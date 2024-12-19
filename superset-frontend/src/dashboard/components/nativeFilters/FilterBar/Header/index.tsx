@@ -132,14 +132,14 @@ const Header: FC<HeaderProps> = ({ toggleFiltersBar }) => {
 
   return (
     <Wrapper>
-      <HeaderButton
+      {/* <HeaderButton
         {...getFilterBarTestId('collapse-button')}
         buttonStyle="link"
         buttonSize="xsmall"
         onClick={() => toggleFiltersBar(false)}
       >
         <StyledCollapseIcon iconSize="l" />
-      </HeaderButton>
+      </HeaderButton> */}
       <TitleArea>
         <span>{t('Filters')}</span>
         <FilterBarSettings />
@@ -152,7 +152,7 @@ const Header: FC<HeaderProps> = ({ toggleFiltersBar }) => {
           <Icons.Expand iconColor={theme.colors.grayscale.base} />
         </HeaderButton>
       </TitleArea>
-      {canEdit && isFeatureEnabled(FeatureFlag.DashboardNativeFilters) && (
+      {canEdit && ( // canEdit && isFeatureEnabled(FeatureFlag.DASHBOARD_NATIVE_FILTERS) && (
         <AddFiltersButtonContainer>
           <FilterConfigurationLink
             dashboardId={dashboardId}
