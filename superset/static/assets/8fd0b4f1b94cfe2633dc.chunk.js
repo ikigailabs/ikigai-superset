@@ -1,0 +1,2 @@
+"use strict";(globalThis.webpackChunksuperset=globalThis.webpackChunksuperset||[]).push([[2561],{81718:(s,e,r)=>{r.r(e),r.d(e,{default:()=>l}),r(96540);var u=r(56347),a=r(94229),t=r(17437);const l=()=>{const{idOrSlug:s}=(0,u.g)();return(0,t.Y)(a.DashboardPage,{idOrSlug:s})}}}]);
+//# sourceMappingURL=8fd0b4f1b94cfe2633dc.chunk.js.map

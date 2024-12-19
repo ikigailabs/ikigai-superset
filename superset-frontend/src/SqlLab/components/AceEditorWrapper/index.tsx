@@ -17,7 +17,7 @@
  * under the License.
  */
 import React, { useState, useEffect, useRef } from 'react';
-import type { IAceEditor } from 'react-ace/lib/types';
+// import type { IAceEditor } from 'react-ace/lib/types';
 import { useDispatch } from 'react-redux';
 import { css, styled, usePrevious, useTheme } from '@superset-ui/core';
 import { Global } from '@emotion/react';
@@ -25,18 +25,18 @@ import { Global } from '@emotion/react';
 import { SQL_EDITOR_LEFTBAR_WIDTH } from 'src/SqlLab/constants';
 import { queryEditorSetSelectedText } from 'src/SqlLab/actions/sqlLab';
 import { FullSQLEditor as AceEditor } from 'src/components/AsyncAceEditor';
-import type { KeyboardShortcut } from 'src/SqlLab/components/KeyboardShortcutButton';
+// import type { KeyboardShortcut } from 'src/SqlLab/components/KeyboardShortcutButton';
 import useQueryEditor from 'src/SqlLab/hooks/useQueryEditor';
 import type { CursorPosition } from 'src/SqlLab/types';
 import { useAnnotations } from './useAnnotations';
 import { useKeywords } from './useKeywords';
 
-type HotKey = {
+/* type HotKey = {
   key: KeyboardShortcut;
   descr?: string;
   name: string;
   func: (aceEditor: IAceEditor) => void;
-};
+}; */
 
 type AceEditorWrapperProps = {
   autocomplete: boolean;
@@ -45,7 +45,7 @@ type AceEditorWrapperProps = {
   queryEditorId: string;
   onCursorPositionChange: (position: CursorPosition) => void;
   height: string;
-  hotkeys: HotKey[];
+  hotkeys: any; // HotKey[];
 };
 
 const StyledAceEditor = styled(AceEditor)`
@@ -53,7 +53,9 @@ const StyledAceEditor = styled(AceEditor)`
     && {
       // double class is better than !important
       border: 1px solid ${theme.colors.grayscale.light2};
-      font-feature-settings: 'liga' off, 'calt' off;
+      font-feature-settings:
+        'liga' off,
+        'calt' off;
     }
   `}
 `;
@@ -117,7 +119,7 @@ const AceEditorWrapper = ({
       },
     });
 
-    hotkeys.forEach(keyConfig => {
+    hotkeys.forEach((keyConfig: any) => {
       editor.commands.addCommand({
         name: keyConfig.name,
         bindKey: { win: keyConfig.key, mac: keyConfig.key },

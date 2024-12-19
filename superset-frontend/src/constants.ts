@@ -51,10 +51,6 @@ export const URL_PARAMS = {
     name: 'show_filters',
     type: 'boolean',
   },
-  showFilters: {
-    name: 'show_filters',
-    type: 'boolean',
-  },
   expandFilters: {
     name: 'expand_filters',
     type: 'boolean',

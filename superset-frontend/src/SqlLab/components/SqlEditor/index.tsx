@@ -396,7 +396,7 @@ const SqlEditor: React.FC<Props> = ({
         name: 'runQuery3',
         key: 'ctrl+shift+enter',
         descr: t('Run current query'),
-        func: editor => {
+        func: (editor: any) => {
           if (!editor.getValue().trim()) {
             return;
           }

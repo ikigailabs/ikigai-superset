@@ -1,0 +1,13 @@
+"use strict";(globalThis.webpackChunksuperset=globalThis.webpackChunksuperset||[]).push([[4923],{86523:(e,t,n)=>{n.d(t,{A:()=>l});var a=n(77925);const l=(0,n(90017).A)(a.A.Item)`
+  ${({theme:e})=>`\n    .ant-form-item-label {\n      padding-bottom: ${e.gridUnit}px;\n      & > label {\n        text-transform: uppercase;\n        font-size: ${e.typography.sizes.s}px;\n        color: ${e.colors.grayscale.base};\n\n        &.ant-form-item-required:not(.ant-form-item-required-mark-optional) {\n          &::before {\n            display: none;\n          }\n          &::after {\n            display: inline-block;\n            color: ${e.colors.error.base};\n            font-size: ${e.typography.sizes.s}px;\n            content: '*';\n          }\n        }\n      }\n    }\n  `}
+`},54923:(e,t,n)=>{n.r(t),n.d(t,{default:()=>c});var a=n(97032),l=n(62952),o=n(87903),r=n(95579),s=n(96540),i=n(15595),u=n(67874),d=n(17437);function c(e){const{data:t,formData:n,height:c,width:h,setDataMask:p,setHoveredFilter:m,unsetHoveredFilter:f,setFocusedFilter:g,unsetFocusedFilter:v,setFilterActive:b,filterState:y,inputRef:F}=e,{defaultValue:A}=n,[$,w]=(0,s.useState)(null!=A?A:[]),x=e=>{const t=(0,l.A)(e);w(t);const n={};t.length&&(n.granularity_sqla=t[0]),p({extraFormData:n,filterState:{value:t.length?t:null}})};(0,s.useEffect)((()=>{x(null!=A?A:null)}),[JSON.stringify(A)]),(0,s.useEffect)((()=>{var e;x(null!=(e=y.value)?e:null)}),[JSON.stringify(y.value)]);const S=(t||[]).filter((e=>e.dtype===o.s.Temporal)),k=0===S.length?(0,r.t)("No time columns"):(0,r.tn)("%s option","%s options",S.length,S.length),M={};y.validateMessage&&(M.extra=(0,d.Y)(u.Mo,{status:y.validateStatus},y.validateMessage));const C=S.map((e=>{const{column_name:t,verbose_name:n}=e;return{label:null!=n?n:t,value:t}}));return(0,d.Y)(u.j3,{height:c,width:h},(0,d.Y)(u.JF,(0,a.A)({validateStatus:y.validateStatus},M),(0,d.Y)(i.l6,{allowClear:!0,value:$,placeholder:k,onChange:x,onBlur:v,onFocus:g,onMouseEnter:m,onMouseLeave:f,ref:F,options:C,onDropdownVisibleChange:b})))}},67874:(e,t,n)=>{n.d(t,{JF:()=>s,Mo:()=>i,YH:()=>o,j3:()=>r});var a=n(90017),l=n(86523);const o=0,r=a.A.div`
+  min-height: ${({height:e})=>e}px;
+  width: ${({width:e})=>e===o?"100%":`${e}px`};
+`,s=(0,a.A)(l.A)`
+  &.ant-row.ant-form-item {
+    margin: 0;
+  }
+`,i=a.A.div`
+  color: ${({theme:e,status:t="error"})=>{var n;return null==(n=e.colors[t])?void 0:n.base}};
+`}}]);
+//# sourceMappingURL=df69cacb341a0c3c7116.chunk.js.map

@@ -36,6 +36,12 @@
     "plugins/*",
     "src/setup/*"
   ],
+  "eslintIgnore": [
+    "*.test.{js,ts,jsx,tsx}",
+    "*.test.*",
+    "*.test.jsx",
+    "**/*.test.*"
+  ],
   "scripts": {
     "_prettier": "prettier './({src,spec,cypress-base,plugins,packages,.storybook}/**/*{.js,.jsx,.ts,.tsx,.css,.less,.scss,.sass}|package.json)'",
     "build": "cross-env NODE_OPTIONS=--max_old_space_size=8192 NODE_ENV=production BABEL_ENV=\"${BABEL_ENV:=production}\" webpack --mode=production --color",
@@ -48,11 +54,11 @@
     "cover": "cross-env NODE_ENV=test jest --coverage",
     "dev": "webpack --mode=development --color --watch",
     "dev-server": "cross-env NODE_ENV=development BABEL_ENV=development node --max_old_space_size=4096 ./node_modules/webpack-dev-server/bin/webpack-dev-server.js --mode=development",
-    "eslint": "eslint --ignore-path=.eslintignore --ext .js,.jsx,.ts,tsx",
+    "eslint": "eslint --ext .js,.jsx,.ts,tsx",
     "format": "npm run _prettier -- --write",
     "lint": "npm run eslint -- . && npm run type",
     "lint-fix": "npm run eslint -- . --fix --quiet",
-    "lint-stats": "eslint -f ./scripts/eslint-metrics-uploader.js --ignore-path=.eslintignore --ext .js,.jsx,.ts,.tsx . ",
+    "lint-stats": "eslint -f ./scripts/eslint-metrics-uploader.js --ext .js,.jsx,.ts,.tsx . ",
     "plugins:build": "node ./scripts/build.js",
     "plugins:build-assets": "node ./scripts/copyAssets.js",
     "plugins:build-storybook": "cd packages/superset-ui-demo && npm run build-storybook",
@@ -86,6 +92,7 @@
     "@emotion/react": "^11.4.1",
     "@emotion/styled": "^11.3.0",
     "@fontsource/inter": "^4.0.0",
+    "@ikigailabs/custom-html": "^0.0.102",
     "@react-spring/web": "^9.7.3",
     "@reduxjs/toolkit": "^1.9.3",
     "@scarf/scarf": "^1.3.0",
@@ -150,6 +157,7 @@
     "js-yaml-loader": "^1.2.2",
     "json-bigint": "^1.0.0",
     "json-stringify-pretty-compact": "^2.0.0",
+    "lint-fix": "^0.24.0",
     "lodash": "^4.17.21",
     "mapbox-gl": "^2.10.0",
     "markdown-to-jsx": "^7.4.1",

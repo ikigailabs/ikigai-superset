@@ -198,14 +198,14 @@ const VerticalFilterBar: React.FC<VerticalBarProps> = ({
 
   const actionsElement = useMemo(
     () =>
-      isFeatureEnabled(FeatureFlag.DASHBOARD_NATIVE_FILTERS) ? actions : null,
+      isFeatureEnabled(FeatureFlag.DashboardNativeFilters) ? actions : null,
     [actions],
   );
 
   // Filter sets depend on native filters
-  const filterSetEnabled =
-    isFeatureEnabled(FeatureFlag.DASHBOARD_NATIVE_FILTERS_SET) &&
-    isFeatureEnabled(FeatureFlag.DASHBOARD_NATIVE_FILTERS);
+  /* const filterSetEnabled =
+    isFeatureEnabled(FeatureFlag.DashboardNativeFiltersSet) &&
+    isFeatureEnabled(FeatureFlag.DASHBOARD_NATIVE_FILTERS); */
 
   return (
     <FilterBarScrollContext.Provider value={isScrolling}>
@@ -243,7 +243,7 @@ const VerticalFilterBar: React.FC<VerticalBarProps> = ({
             <div css={tabPaneStyle} onScroll={onScroll}>
               <>
                 {crossFilters}
-                {isFeatureEnabled(FeatureFlag.DASHBOARD_NATIVE_FILTERS) &&
+                {isFeatureEnabled(FeatureFlag.DashboardNativeFilters) &&
                   filterControls}
               </>
             </div>
