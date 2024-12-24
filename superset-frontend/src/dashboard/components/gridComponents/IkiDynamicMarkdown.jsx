@@ -33,6 +33,7 @@ import { updateDataMask } from 'src/dataMask/actions';
 import getFiltersList from './util/getFiltersList';
 import { useFilters } from '../nativeFilters/FilterBar/state';
 import { getSelectExtraFormData } from '../../../filters/utils';
+import Loading from 'src/components/Loading';
 
 /*
 Old Iframe src URL format: 
@@ -423,7 +424,11 @@ class IkiDynamicMarkdown extends React.PureComponent {
       editorMode,
       supersetFilters,
     } = this.state;
-    // console.log('supersetFilters', supersetFilters);
+    console.log(
+      'customMarkdownIsReady',
+      customMarkdownIsReady,
+      componentSetupData,
+    );
     const { ikigaiOrigin, editMode, charts } = this.props;
     const customMarkdownId = this.getCustomHtmlIdFromMarkdownSource();
 
@@ -464,7 +469,10 @@ class IkiDynamicMarkdown extends React.PureComponent {
             />
           </>
         ) : (
-          <div>Loading...</div>
+          <div style={{ minHeight: '120px', minWidth: '120px' }}>
+            <Loading />
+            <span>Loading...</span>
+          </div>
         )}
       </>
     );
@@ -555,78 +563,71 @@ class IkiDynamicMarkdown extends React.PureComponent {
 
     return (
       <>
-        {editMode ? (
-          <DragDroppable
-            component={component}
-            parentComponent={parentComponent}
-            orientation={parentComponent.type === ROW_TYPE ? 'column' : 'row'}
-            index={index}
-            depth={depth}
-            onDrop={handleComponentDrop}
-            // disableDragDrop={isFocused}
-            disableDragDrop={innerDragging || isFocused}
-            // disableDragDrop={true}
-            editMode={editMode}
-          >
-            {({ dropIndicatorProps, dragSourceRef }) => (
-              <WithPopoverMenu
-                onChangeFocus={this.handleChangeFocus}
-                menuItems={[
-                  <MarkdownModeDropdown
-                    id={`${component.id}-mode`}
-                    value={this.state.editorMode}
-                    onChange={this.handleChangeEditorMode}
-                  />,
-                  <DeleteComponentButton
-                    onDelete={this.handleDeleteComponent}
-                  />,
-                ]}
-                editMode={editMode}
+        <DragDroppable
+          component={component}
+          parentComponent={parentComponent}
+          orientation={parentComponent.type === ROW_TYPE ? 'column' : 'row'}
+          index={index}
+          depth={depth}
+          onDrop={handleComponentDrop}
+          // disableDragDrop={isFocused}
+          disableDragDrop={innerDragging || isFocused}
+          // disableDragDrop={true}
+          editMode={editMode}
+        >
+          {({ dropIndicatorProps, dragSourceRef }) => (
+            <WithPopoverMenu
+              onChangeFocus={this.handleChangeFocus}
+              menuItems={[
+                <MarkdownModeDropdown
+                  id={`${component.id}-mode`}
+                  value={this.state.editorMode}
+                  onChange={this.handleChangeEditorMode}
+                />,
+                <DeleteComponentButton onDelete={this.handleDeleteComponent} />,
+              ]}
+              editMode={editMode}
+            >
+              <div
+                data-test="dashboard-markdown-editor"
+                className={cx(
+                  this.state.markdownSource === undefined
+                    ? 'dashboard-component-ikirunpipeline'
+                    : 'dashboard-component',
+                  isEditing && 'dashboard-component--editing',
+                )}
+                id={component.id}
               >
-                <div
-                  data-test="dashboard-markdown-editor"
-                  className={cx(
-                    this.state.markdownSource === undefined
-                      ? 'dashboard-component-ikirunpipeline'
-                      : 'dashboard-component',
-                    isEditing && 'dashboard-component--editing',
-                  )}
+                <ResizableContainer
                   id={component.id}
+                  adjustableWidth={parentComponent.type === ROW_TYPE}
+                  adjustableHeight
+                  widthStep={columnWidth}
+                  widthMultiple={widthMultiple}
+                  heightStep={GRID_BASE_UNIT}
+                  heightMultiple={component.meta.height}
+                  minWidthMultiple={GRID_MIN_COLUMN_COUNT}
+                  minHeightMultiple={GRID_MIN_ROW_UNITS}
+                  maxWidthMultiple={availableColumnCount + widthMultiple}
+                  onResizeStart={this.handleResizeStart}
+                  onResize={onResize}
+                  onResizeStop={onResizeStop}
+                  editMode={isFocused ? false : editMode}
+                  isDynamicMarkdown={true}
                 >
-                  <ResizableContainer
-                    id={component.id}
-                    adjustableWidth={parentComponent.type === ROW_TYPE}
-                    adjustableHeight
-                    widthStep={columnWidth}
-                    widthMultiple={widthMultiple}
-                    heightStep={GRID_BASE_UNIT}
-                    heightMultiple={component.meta.height}
-                    minWidthMultiple={GRID_MIN_COLUMN_COUNT}
-                    minHeightMultiple={GRID_MIN_ROW_UNITS}
-                    maxWidthMultiple={availableColumnCount + widthMultiple}
-                    onResizeStart={this.handleResizeStart}
-                    onResize={onResize}
-                    onResizeStop={onResizeStop}
-                    editMode={isFocused ? false : editMode}
+                  <div
+                    ref={dragSourceRef}
+                    className="dashboard-component-inner"
+                    data-test="dashboard-component-chart-holder"
                   >
-                    <div
-                      ref={dragSourceRef}
-                      className="dashboard-component-inner"
-                      data-test="dashboard-component-chart-holder"
-                    >
-                      {this.renderPreviewMode()}
-                    </div>
-                  </ResizableContainer>
-                </div>
-                {dropIndicatorProps && <div {...dropIndicatorProps} />}
-              </WithPopoverMenu>
-            )}
-          </DragDroppable>
-        ) : (
-          <div className="custom-component-holder">
-            {this.renderPreviewMode()}
-          </div>
-        )}
+                    {this.renderPreviewMode()}
+                  </div>
+                </ResizableContainer>
+              </div>
+              {dropIndicatorProps && <div {...dropIndicatorProps} />}
+            </WithPopoverMenu>
+          )}
+        </DragDroppable>
       </>
     );
   }
