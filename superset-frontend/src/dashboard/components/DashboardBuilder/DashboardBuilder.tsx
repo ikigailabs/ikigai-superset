@@ -493,7 +493,7 @@ const DashboardBuilder: FC<DashboardBuilderProps> = () => {
   });
 
   const showFilterBar =
-    (crossFiltersEnabled || nativeFiltersEnabled) && !editMode;
+    (crossFiltersEnabled || nativeFiltersEnabled) && editMode;
   // const showFilterBar = false;
 
   const offset =
