@@ -105,6 +105,7 @@ ENABLE_CORS = True
 HTTP_HEADERS={"X-Frame-Options":"ALLOWALL"}
 PUBLIC_ROLE_LIKE = "Public"
 ENABLE_PROXY_FIX=True
+CUSTOM_SECURITY_MANAGER = None
 
 #
 # Optionally import superset_config_docker.py (which will have been included on
