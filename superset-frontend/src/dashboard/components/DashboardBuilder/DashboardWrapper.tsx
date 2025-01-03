@@ -148,7 +148,7 @@ const DashboardWrapper: React.FC<Props> = ({ children }) => {
   return (
     <StyledDiv
       className={classNames({
-        'dragdroppable--dragging': editMode && isDragged,
+        // 'dragdroppable--dragging': editMode && isDragged,
       })}
       isPreview={!editMode}
     >
