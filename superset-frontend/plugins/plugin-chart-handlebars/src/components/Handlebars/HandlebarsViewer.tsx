@@ -39,6 +39,7 @@ export const HandlebarsViewer = ({
     appContainer?.getAttribute('data-bootstrap') || '{}',
   );
   const htmlSanitization = common?.conf?.HTML_SANITIZATION ?? true;
+  // const htmlSanitization = false;
   const htmlSchemaOverrides =
     common?.conf?.HTML_SANITIZATION_SCHEMA_EXTENSIONS || {};
 

@@ -35,7 +35,7 @@ import {
   portField,
   queryField,
   usernameField,
-  SSHTunnelSwitch,
+  // SSHTunnelSwitch,
 } from './CommonParameters';
 import { validatedInputField } from './ValidatedInputField';
 import { EncryptedField } from './EncryptedField';

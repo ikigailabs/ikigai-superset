@@ -24,7 +24,8 @@
       ],
       "@superset-ui/plugin-chart-*": ["./plugins/plugin-chart-*/src"],
       "@superset-ui/preset-chart-*": ["./plugins/preset-chart-*/src"],
-      "@superset-ui/switchboard": ["./packages/superset-ui-switchboard/src"]
+      "@superset-ui/switchboard": ["./packages/superset-ui-switchboard/src"],
+      "react": ["./node_modules/@types/react"]
     },
     "types": [
       "@emotion/react/types/css-prop",
@@ -50,7 +51,7 @@
     "forceConsistentCasingInFileNames": true,
 
     /* Backwards Compatibility */
-    "suppressImplicitAnyIndexErrors": true,
+    /* "suppressImplicitAnyIndexErrors": true, */
 
     /* Language and Environment */
     "target": "esnext",
@@ -63,9 +64,7 @@
     /* Completeness */
     "skipLibCheck": true
   },
-  "exclude": [
-    "./packages/generator-superset/test/**/*"
-  ],
+  "exclude": ["./packages/generator-superset/test/**/*"],
   "include": [
     "./src/**/*",
     "./spec/**/*",

@@ -20,6 +20,7 @@
 const fs = require('fs');
 const path = require('path');
 const webpack = require('webpack');
+const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const CopyPlugin = require('copy-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
@@ -169,6 +170,10 @@ if (!isDevMode) {
   );
 }
 
+if (isDevMode) {
+  plugins.push(new ReactRefreshWebpackPlugin());
+}
+
 const PREAMBLE = [path.join(APP_DIR, '/src/preamble.ts')];
 if (isDevMode) {
   // A Superset webpage normally includes two JS bundles in dev, `theme.ts` and
@@ -245,11 +250,9 @@ const config = {
               'prop-types-extra',
               'redux',
               'react-redux',
-              'react-hot-loader',
               'react-sortable-hoc',
               'react-table',
               'react-ace',
-              '@hot-loader.*',
               'webpack.*',
               '@?babel.*',
               'lodash.*',
@@ -352,11 +355,11 @@ const config = {
       // react-hot-loader use "ProxyFacade", which is a wrapper for react Component
       // see https://github.com/gaearon/react-hot-loader/issues/1311
       // TODO: refactor recurseReactClone
-      {
+      /* {
         test: /\.js$/,
         include: /node_modules\/react-dom/,
         use: ['react-hot-loader/webpack'],
-      },
+      }, */
       {
         test: /\.css$/,
         include: [APP_DIR, /superset-ui.+\/src/],
@@ -462,6 +465,20 @@ const config = {
       //     },
       //   ],
       // },
+      {
+        test: /\.[jt]sx?$/,
+        exclude: /node_modules/,
+        /* use: [
+          {
+            loader: require.resolve('babel-loader'),
+            options: {
+              plugins: [
+                isDevMode && require.resolve('react-refresh/babel'),
+              ].filter(Boolean),
+            },
+          },
+        ], */
+      },
     ],
   },
   externals: {

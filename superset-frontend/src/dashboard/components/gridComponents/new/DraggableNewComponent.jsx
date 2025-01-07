@@ -92,6 +92,7 @@ export default class DraggableNewComponent extends React.PureComponent {
       type,
       className,
       meta,
+      description,
       // description, demandApp
     } = this.props;
     return (
@@ -106,11 +107,18 @@ export default class DraggableNewComponent extends React.PureComponent {
         editMode
       >
         {({ dragSourceRef }) => (
-          <NewComponent ref={dragSourceRef} data-test="new-component">
+          <NewComponent
+            ref={dragSourceRef}
+            data-test="new-component"
+            className="new-component"
+          >
             <NewComponentPlaceholder
               className={cx('new-component-placeholder', className)}
             />
-            {label}
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <div className="new-component-label">{label}</div>
+              <div className="new-component-description">{description}</div>
+            </div>
           </NewComponent>
         )}
       </DragDroppable>
