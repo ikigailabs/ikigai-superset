@@ -196,17 +196,6 @@ const VerticalFilterBar: React.FC<VerticalBarProps> = ({
     [],
   );
 
-  const actionsElement = useMemo(
-    () =>
-      isFeatureEnabled(FeatureFlag.DASHBOARD_NATIVE_FILTERS) ? actions : null,
-    [actions],
-  );
-
-  // Filter sets depend on native filters
-  const filterSetEnabled =
-    isFeatureEnabled(FeatureFlag.DASHBOARD_NATIVE_FILTERS_SET) &&
-    isFeatureEnabled(FeatureFlag.DASHBOARD_NATIVE_FILTERS);
-
   return (
     <FilterBarScrollContext.Provider value={isScrolling}>
       <BarWrapper
@@ -229,11 +218,7 @@ const VerticalFilterBar: React.FC<VerticalBarProps> = ({
             iconSize="l"
           />
         </CollapsedBar>
-        <Bar
-          className={cx({ open: filtersOpen })}
-          width={width}
-          style={{ paddingTop: '100px' }}
-        >
+        <Bar className={cx({ open: filtersOpen })} width={width}>
           <Header toggleFiltersBar={toggleFiltersBar} />
           {!isInitialized ? (
             <div css={{ height }}>
@@ -243,12 +228,11 @@ const VerticalFilterBar: React.FC<VerticalBarProps> = ({
             <div css={tabPaneStyle} onScroll={onScroll}>
               <>
                 {crossFilters}
-                {isFeatureEnabled(FeatureFlag.DASHBOARD_NATIVE_FILTERS) &&
-                  filterControls}
+                {filterControls}
               </>
             </div>
           )}
-          {actionsElement}
+          {actions}
         </Bar>
       </BarWrapper>
     </FilterBarScrollContext.Provider>

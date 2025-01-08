@@ -1,4 +1,3 @@
-/* eslint-disable import/no-unresolved */
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -213,23 +212,20 @@ const FilterControls: FC<FilterControlsProps> = ({
         selectedCrossFilters.at(-1),
       ),
     }));
-    if (isFeatureEnabled(FeatureFlag.DASHBOARD_NATIVE_FILTERS)) {
-      const nativeFiltersInScope = filtersInScope.map((filter, index) => ({
-        id: filter.id,
-        element: (
-          <div
-            className="filter-item-wrapper"
-            css={css`
-              flex-shrink: 0;
-            `}
-          >
-            {renderer(filter, index)}
-          </div>
-        ),
-      }));
-      return [...crossFilters, ...nativeFiltersInScope];
-    }
-    return [...crossFilters];
+    const nativeFiltersInScope = filtersInScope.map((filter, index) => ({
+      id: filter.id,
+      element: (
+        <div
+          className="filter-item-wrapper"
+          css={css`
+            flex-shrink: 0;
+          `}
+        >
+          {renderer(filter, index)}
+        </div>
+      ),
+    }));
+    return [...crossFilters, ...nativeFiltersInScope];
   }, [filtersInScope, renderer, rendererCrossFilter, selectedCrossFilters]);
 
   const renderHorizontalContent = () => (
