@@ -152,7 +152,7 @@ const Header: FC<HeaderProps> = ({ toggleFiltersBar }) => {
           <Icons.Expand iconColor={theme.colors.grayscale.base} />
         </HeaderButton>
       </TitleArea>
-      {canEdit && isFeatureEnabled(FeatureFlag.DASHBOARD_NATIVE_FILTERS) && (
+      {canEdit && (
         <AddFiltersButtonContainer>
           <FilterConfigurationLink
             dashboardId={dashboardId}
