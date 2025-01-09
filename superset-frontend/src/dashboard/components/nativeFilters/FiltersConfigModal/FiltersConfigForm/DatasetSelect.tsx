@@ -33,9 +33,10 @@ import {
 interface DatasetSelectProps {
   onChange: (value: { label: string; value: number }) => void;
   value?: { label: string; value: number };
+  datasets: any;
 }
 
-const DatasetSelect = ({ onChange, value }: DatasetSelectProps) => {
+const DatasetSelect = ({ onChange, value, datasets }: DatasetSelectProps) => {
   const getErrorMessage = useCallback(
     ({ error, message }: ClientErrorObject) => {
       let errorText = message || error || t('An error has occurred');
@@ -47,11 +48,25 @@ const DatasetSelect = ({ onChange, value }: DatasetSelectProps) => {
     [],
   );
 
+  console.log('datasets', datasets);
+
   const loadDatasetOptions = async (
     search: string,
     page: number,
     pageSize: number,
   ) => {
+    console.log('datasets2', datasets);
+    const customOptions: any = [];
+    if (datasets && Object.keys(datasets).length > 0) {
+      Object.keys(datasets).forEach((d: any) => {
+        const newOption: any = {
+          label: datasets[d]?.table_name,
+          value: datasets[d]?.id,
+        };
+        customOptions.push(newOption);
+      });
+    }
+    console.log('customOptions', customOptions);
     const query = rison.encode({
       columns: ['id', 'table_name', 'database.database_name', 'schema'],
       filters: [{ col: 'table_name', opr: 'ct', value: search }],
@@ -60,7 +75,12 @@ const DatasetSelect = ({ onChange, value }: DatasetSelectProps) => {
       order_column: 'table_name',
       order_direction: 'asc',
     });
-    return cachedSupersetGet({
+    console.log('query', query);
+    return {
+      data: customOptions,
+      totalCount: customOptions.length,
+    };
+    /* return cachedSupersetGet({
       endpoint: `/api/v1/dataset/?q=${query}`,
     })
       .then((response: JsonResponse) => {
@@ -73,6 +93,7 @@ const DatasetSelect = ({ onChange, value }: DatasetSelectProps) => {
           label: item.table_name,
           value: item.id,
         }));
+        console.log('list', list);
         return {
           data: list,
           totalCount: response.json.count,
@@ -81,7 +102,7 @@ const DatasetSelect = ({ onChange, value }: DatasetSelectProps) => {
       .catch(async error => {
         const errorMessage = getErrorMessage(await getClientErrorObject(error));
         throw new Error(errorMessage);
-      });
+      }); */
   };
 
   return (

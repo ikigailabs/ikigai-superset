@@ -377,12 +377,16 @@ const FiltersConfigForm = (
     // @ts-ignore
     .filter(([, { value }]) => value.behaviors?.includes(Behavior.NativeFilter))
     .map(([key]) => key);
+  console.log('nativeFilterVizTypes', nativeFilterVizTypes, nativeFilterItems);
 
   const loadedDatasets = useSelector<RootState, DatasourcesState>(
     ({ datasources }) => datasources,
   );
 
+  console.log('loadedDatasets', loadedDatasets);
+
   const charts = useSelector<RootState, ChartsState>(({ charts }) => charts);
+  console.log('charts', charts);
 
   const doLoadedDatasetsHaveTemporalColumns = useMemo(
     () =>
@@ -403,6 +407,8 @@ const FiltersConfigForm = (
   const hasDataset =
     // @ts-ignore
     !!nativeFilterItems[formFilter?.filterType]?.value?.datasourceCount;
+
+  console.log('hasDataset', hasDataset);
 
   const datasetId =
     formFilter?.dataset?.value ??
@@ -425,6 +431,7 @@ const FiltersConfigForm = (
   const hasColumn = !!mainControlItems.groupby;
 
   const nativeFilterItem = nativeFilterItems[formFilter?.filterType] ?? {};
+  console.log('nativeFilterItem', nativeFilterItem);
   // @ts-ignore
   const enableNoResults = !!nativeFilterItem.value?.enableNoResults;
 
@@ -552,6 +559,8 @@ const FiltersConfigForm = (
 
   const showDataset =
     !datasetId || datasetDetails || formFilter?.dataset?.label;
+
+  console.log('showDataset', showDataset);
 
   const formChanged = useCallback(() => {
     form.setFields([
@@ -875,7 +884,7 @@ const FiltersConfigForm = (
         )}
         {hasDataset && (
           <StyledRowContainer>
-            {showDataset ? (
+            {showDataset || loadedDatasets ? (
               <StyledFormItem
                 name={['filters', filterId, 'dataset']}
                 label={<StyledLabel>{t('Dataset')}</StyledLabel>}
@@ -901,6 +910,7 @@ const FiltersConfigForm = (
                 {...getFiltersConfigModalTestId('datasource-input')}
               >
                 <DatasetSelect
+                  datasets={loadedDatasets}
                   onChange={(value: { label: string; value: number }) => {
                     // We need to reset the column when the dataset has changed
                     if (value.value !== datasetId) {
