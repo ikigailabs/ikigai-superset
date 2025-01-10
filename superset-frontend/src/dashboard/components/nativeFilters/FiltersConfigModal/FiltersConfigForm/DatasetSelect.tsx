@@ -29,6 +29,7 @@ import {
   Dataset,
   DatasetSelectLabel,
 } from 'src/features/datasets/DatasetSelectLabel';
+import { useSelector } from 'react-redux';
 
 interface DatasetSelectProps {
   onChange: (value: { label: string; value: number }) => void;
@@ -50,6 +51,11 @@ const DatasetSelect = ({ onChange, value, datasets }: DatasetSelectProps) => {
 
   console.log('datasets', datasets);
 
+  const layout = useSelector<any>(
+    (state: any) => state.dashboardLayout.present,
+  );
+
+  console.log('layout', layout);
   const loadDatasetOptions = async (
     search: string,
     page: number,
@@ -60,7 +66,7 @@ const DatasetSelect = ({ onChange, value, datasets }: DatasetSelectProps) => {
     if (datasets && Object.keys(datasets).length > 0) {
       Object.keys(datasets).forEach((d: any) => {
         const newOption: any = {
-          label: datasets[d]?.table_name,
+          label: layout[datasets[d]?.table_name]?.meta?.sliceName,
           value: datasets[d]?.id,
         };
         customOptions.push(newOption);
