@@ -50,12 +50,9 @@ const DatasetSelect = ({ onChange, value, datasets }: DatasetSelectProps) => {
   );
 
   console.log('datasets', datasets);
+  const charts = useSelector<any>(({ charts }) => charts);
+  console.log('charts', charts);
 
-  const layout = useSelector<any>(
-    (state: any) => state.dashboardLayout.present,
-  );
-
-  console.log('layout', layout);
   const loadDatasetOptions = async (
     search: string,
     page: number,
@@ -66,7 +63,14 @@ const DatasetSelect = ({ onChange, value, datasets }: DatasetSelectProps) => {
     if (datasets && Object.keys(datasets).length > 0) {
       Object.keys(datasets).forEach((d: any) => {
         const newOption: any = {
-          label: layout[datasets[d]?.table_name]?.meta?.sliceName,
+          label: DatasetSelectLabel({
+            id: datasets[d]?.id,
+            table_name: datasets[d]?.table_name,
+            schema: datasets[d]?.schema,
+            database: {
+              database_name: datasets[d]?.database.database_name,
+            },
+          }),
           value: datasets[d]?.id,
         };
         customOptions.push(newOption);
