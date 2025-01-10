@@ -75,6 +75,7 @@ const ScopingTree: FC<ScopingTreeProps> = ({
     title,
   );
   const [autoExpandParent, setAutoExpandParent] = useState<boolean>(true);
+  console.log('treeData', treeData, initialScope, chartId);
 
   const handleExpand = (expandedKeys: string[]) => {
     setExpandedKeys(expandedKeys);
@@ -96,6 +97,7 @@ const ScopingTree: FC<ScopingTreeProps> = ({
     () => getTreeCheckedItems({ ...(formScope || initialScope) }, layout),
     [formScope, initialScope, layout],
   );
+  console.log('checkedKeys', checkedKeys, expandedKeys);
 
   return (
     <Tree

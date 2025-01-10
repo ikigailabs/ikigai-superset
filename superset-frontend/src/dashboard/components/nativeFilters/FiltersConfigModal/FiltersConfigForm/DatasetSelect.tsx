@@ -60,14 +60,14 @@ const DatasetSelect = ({ onChange, value, datasets }: DatasetSelectProps) => {
     if (datasets && Object.keys(datasets).length > 0) {
       Object.keys(datasets).forEach((d: any) => {
         const newOption: any = {
-          label: datasets[d]?.table_name,
+          label: datasets[d]?.new_table_name,
           value: datasets[d]?.id,
         };
         customOptions.push(newOption);
       });
     }
     console.log('customOptions', customOptions);
-    const query = rison.encode({
+    /* const query = rison.encode({
       columns: ['id', 'table_name', 'database.database_name', 'schema'],
       filters: [{ col: 'table_name', opr: 'ct', value: search }],
       page,
@@ -75,15 +75,17 @@ const DatasetSelect = ({ onChange, value, datasets }: DatasetSelectProps) => {
       order_column: 'table_name',
       order_direction: 'asc',
     });
-    console.log('query', query);
+    console.log('query', query); */
     return {
       data: customOptions,
       totalCount: customOptions.length,
     };
     /* return cachedSupersetGet({
-      endpoint: `/api/v1/dataset/?q=${query}`,
+      // endpoint: `/api/v1/dataset/?q=${query}`,
+      endpoint: `/api/v1/dataset/`,
     })
       .then((response: JsonResponse) => {
+        console.log('response', response);
         const list: {
           customLabel: ReactNode;
           label: string;
@@ -100,6 +102,7 @@ const DatasetSelect = ({ onChange, value, datasets }: DatasetSelectProps) => {
         };
       })
       .catch(async error => {
+        console.log('datasets error', error);
         const errorMessage = getErrorMessage(await getClientErrorObject(error));
         throw new Error(errorMessage);
       }); */

@@ -300,6 +300,7 @@ export const FilterPanels = {
 };
 
 export interface FiltersConfigFormProps {
+  appDatasets: any[];
   filterId: string;
   filterToEdit?: Filter;
   removedFilters: Record<string, FilterRemoval>;
@@ -334,6 +335,7 @@ const FILTER_TYPE_NAME_MAPPING = {
  */
 const FiltersConfigForm = (
   {
+    appDatasets,
     filterId,
     filterToEdit,
     removedFilters,
@@ -384,6 +386,33 @@ const FiltersConfigForm = (
   );
 
   console.log('loadedDatasets', loadedDatasets);
+  if (loadedDatasets && Object.keys(loadedDatasets).length > 0) {
+    Object.keys(loadedDatasets).map((ld: any) => {
+      const tempDataset: any = loadedDatasets[ld];
+      const table_name = tempDataset?.table_name;
+      // const table_name = 'TEST_2j8svHTs7ab1ReAtREIidBzTYty"';
+      let dataset_id = '';
+      let new_table_name = '';
+      if (table_name?.includes('_')) {
+        const split_name = table_name.split('_');
+        if (split_name[1]) {
+          dataset_id = split_name[1];
+        }
+      }
+      if (appDatasets && dataset_id) {
+        const foundDataset: any = appDatasets.filter(
+          (ad: any) => ad?.dataset_id === dataset_id,
+        );
+        if (foundDataset[0]) {
+          new_table_name = foundDataset[0]?.name;
+        }
+      }
+      // tempDataset.new_table_name = new_table_name;
+      tempDataset.new_table_name = new_table_name;
+      console.log('ld', tempDataset);
+      return tempDataset;
+    });
+  }
 
   const charts = useSelector<RootState, ChartsState>(({ charts }) => charts);
   console.log('charts', charts);
@@ -414,6 +443,7 @@ const FiltersConfigForm = (
     formFilter?.dataset?.value ??
     filterToEdit?.targets[0]?.datasetId ??
     mostUsedDataset(loadedDatasets, charts);
+  console.log('datasetId', datasetId);
 
   const { controlItems = {}, mainControlItems = {} } = formFilter
     ? getControlItemsMap({
@@ -429,6 +459,7 @@ const FiltersConfigForm = (
       })
     : {};
   const hasColumn = !!mainControlItems.groupby;
+  console.log('hasColumn', hasColumn);
 
   const nativeFilterItem = nativeFilterItems[formFilter?.filterType] ?? {};
   console.log('nativeFilterItem', nativeFilterItem);

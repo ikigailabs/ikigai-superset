@@ -50,7 +50,9 @@ export function ColumnSelect({
   onChange,
   mode,
 }: ColumnSelectProps) {
+  console.log('datasetId', datasetId, value);
   const [columns, setColumns] = useState<Column[]>();
+  console.log('columns', columns);
   const { addDangerToast } = useToasts();
   const resetColumnField = useCallback(() => {
     form.setFields([
@@ -66,6 +68,7 @@ export function ColumnSelect({
         .map((column: string) => ({ label: column, value: column })),
     [columns, filterValues],
   );
+  console.log('options', options);
 
   const currentFilterType =
     form.getFieldValue('filters')?.[filterId].filterType;
@@ -81,6 +84,7 @@ export function ColumnSelect({
   }, [currentColumn, currentFilterType, resetColumnField]);
 
   useChangeEffect(datasetId, previous => {
+    console.log('useChangeEffect', datasetId, previous);
     if (previous != null) {
       resetColumnField();
     }

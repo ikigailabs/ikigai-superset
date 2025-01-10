@@ -135,6 +135,25 @@ const DEFAULT_FORM_VALUES: NativeFiltersForm = {
   filters: {},
 };
 
+function getIframeUrl() {
+  let ikigaiOrigin = '';
+  const iframeUrl: any = document.location;
+  if (iframeUrl?.search) {
+    // console.log('iframeUrl2', iframeUrl);
+    const iframeUrlParameters: any = new URLSearchParams(iframeUrl.search);
+    // console.log('iframeUrlParameters', iframeUrlParameters);
+    if (iframeUrlParameters) {
+      const ikigaiURL: any = iframeUrlParameters.get('dash_url')
+        ? new URL(iframeUrlParameters.get('dash_url'))
+        : '';
+      // console.log('ikigaiURL', ikigaiURL);
+      ikigaiOrigin = ikigaiURL ? ikigaiURL.origin : '';
+      // console.log('ikigaiOrigin', ikigaiOrigin);
+    }
+  }
+  return ikigaiOrigin;
+}
+
 /**
  * This is the modal to configure all the dashboard-native filters.
  * Manages modal-level state, such as what filters are in the list,
@@ -166,6 +185,7 @@ function FiltersConfigModal({
   const [newFilterIds, setNewFilterIds] = useState<string[]>(
     DEFAULT_EMPTY_FILTERS,
   );
+  const [appDatasets, setAppDatasets] = useState<any[]>();
 
   // store ids of filters that have been removed with the time they were removed
   // so that we can disappear them after a few secs.
@@ -546,6 +566,70 @@ function FiltersConfigModal({
     [handleErroredFilters],
   );
 
+  function getDatasetsFromParentWindow(parentOrigin: string) {
+    const crossWindowMessage = {
+      info: 'superset-to-top-window/get-datasets',
+      data: '',
+      dataType: 'string',
+    };
+    const crossBrowserInfoString = JSON.stringify(crossWindowMessage);
+    /* console.log(
+      'crossBrowserInfoString',
+      crossBrowserInfoString,
+      this.props.ikigaiOrigin,
+    ); */
+    window?.top?.postMessage(crossBrowserInfoString, parentOrigin);
+  }
+
+  function handleIncomingWindowMsg(parentOrigin: string) {
+    console.log('handleIncomingWindowMsg', parentOrigin);
+    window.addEventListener('message', event => {
+      console.log('event.origin', event.origin, parentOrigin);
+      if (event.origin === parentOrigin) {
+        const messageObject = JSON.parse(event.data);
+        // console.log('messageObject', messageObject);
+        if (messageObject.info && messageObject.dataType) {
+          const { dataType } = messageObject;
+          let messageData: any;
+
+          if (dataType === 'object') {
+            messageData = JSON.parse(messageObject.data);
+          } else {
+            messageData = messageObject.data;
+          }
+
+          if (
+            messageObject.info === 'top-window-to-superset/sending-datasets'
+          ) {
+            console.log(
+              'top-window-to-superset/sending-data',
+              'messageData',
+              messageData,
+            );
+            if (messageData?.datasets) setAppDatasets(messageData?.datasets);
+          }
+        }
+      }
+    });
+
+    getDatasetsFromParentWindow(parentOrigin);
+  }
+
+  useEffect(() => {
+    const ikigaiOrigin: any = getIframeUrl();
+    console.log('ikigaiOrigin', ikigaiOrigin);
+    handleIncomingWindowMsg(ikigaiOrigin);
+  }, []);
+
+  /* useEffect(() => {
+    console.log('isOpen', isOpen);
+    if (isOpen) {
+      const ikigaiOrigin: any = getIframeUrl();
+      console.log('FILTER SIDEBAR IS OPEN', ikigaiOrigin);
+      getDatasetsFromParentWindow(ikigaiOrigin);
+    }
+  }, [isOpen]); */
+
   useEffect(() => {
     if (!isEmpty(removedFilters)) {
       setErroredFilters(prevErroredFilters =>
@@ -587,6 +671,7 @@ function FiltersConfigModal({
               />
             ) : (
               <FiltersConfigForm
+                appDatasets={appDatasets}
                 ref={configFormRef}
                 form={form}
                 filterId={id}
