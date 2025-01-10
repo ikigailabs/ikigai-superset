@@ -62,10 +62,14 @@ const DatasetSelect = ({ onChange, value, datasets }: DatasetSelectProps) => {
     const customOptions: any = [];
     if (datasets && Object.keys(datasets).length > 0) {
       Object.keys(datasets).forEach((d: any) => {
+        const datasetName = charts.find(
+          (chart: any) =>
+            chart.form_data.datasource.split('__')[0] === datasets[d]?.id,
+        );
         const newOption: any = {
           label: DatasetSelectLabel({
             id: datasets[d]?.id,
-            table_name: datasets[d]?.table_name,
+            table_name: datasetName || datasets[d]?.table_name,
             schema: datasets[d]?.schema,
             database: {
               database_name: datasets[d]?.database.database_name,
