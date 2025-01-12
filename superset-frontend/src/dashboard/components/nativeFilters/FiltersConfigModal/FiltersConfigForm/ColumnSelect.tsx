@@ -24,6 +24,7 @@ import { useToasts } from 'src/components/MessageToasts/withToasts';
 import { getClientErrorObject } from 'src/utils/getClientErrorObject';
 import { cachedSupersetGet } from 'src/utils/cachedSupersetGet';
 import { NativeFiltersForm } from '../types';
+import { useSelector } from 'react-redux';
 
 interface ColumnSelectProps {
   allowClear?: boolean;
@@ -35,7 +36,6 @@ interface ColumnSelectProps {
   value?: string | string[];
   onChange?: (value: string) => void;
   mode?: 'multiple';
-  columns?: Column[];
 }
 
 /** Special purpose AsyncSelect that selects a column from a dataset */
@@ -50,12 +50,14 @@ export function ColumnSelect({
   value,
   onChange,
   mode,
-  columns,
 }: ColumnSelectProps) {
   console.log('datasetId', datasetId, value);
-  // const [columns, setColumns] = useState<Column[]>();
+  const [columns, setColumns] = useState<Column[]>();
   console.log('columns', columns);
   const { addDangerToast } = useToasts();
+  const loadedDatasets = useSelector<any>(
+    ({ datasources }) => datasources,
+  );
   const resetColumnField = useCallback(() => {
     form.setFields([
       { name: ['filters', filterId, formField], touched: false, value: null },
@@ -91,34 +93,40 @@ export function ColumnSelect({
       resetColumnField();
     }
     if (datasetId != null) {
-      cachedSupersetGet({
-        endpoint: `/api/v1/dataset/${datasetId}?q=${rison.encode({
-          columns: [
-            'columns.column_name',
-            'columns.is_dttm',
-            'columns.type_generic',
-          ],
-        })}`,
-      }).then(
-        ({ json: { result } }) => {
-          const lookupValue = Array.isArray(value) ? value : [value];
-          const valueExists = result.columns.some(
-            (column: Column) => lookupValue?.includes(column.column_name),
-          );
-          if (!valueExists) {
-            resetColumnField();
-          }
-          // setColumns(result.columns);
-        },
-        async badResponse => {
-          const { error, message } = await getClientErrorObject(badResponse);
-          let errorText = message || error || t('An error has occurred');
-          if (message === 'Forbidden') {
-            errorText = t('You do not have permission to edit this dashboard');
-          }
-          addDangerToast(errorText);
-        },
-      );
+      const columns = Object.values(loadedDatasets).find(
+        (dataset: any) => dataset.id === datasetId,
+      )?.columns ?? [];
+
+      console.info('columns', columns);
+      setColumns(columns);
+      // cachedSupersetGet({
+      //   endpoint: `/api/v1/dataset/${datasetId}?q=${rison.encode({
+      //     columns: [
+      //       'columns.column_name',
+      //       'columns.is_dttm',
+      //       'columns.type_generic',
+      //     ],
+      //   })}`,
+      // }).then(
+      //   ({ json: { result } }) => {
+      //     const lookupValue = Array.isArray(value) ? value : [value];
+      //     const valueExists = result.columns.some(
+      //       (column: Column) => lookupValue?.includes(column.column_name),
+      //     );
+      //     if (!valueExists) {
+      //       resetColumnField();
+      //     }
+      //     setColumns(result.columns);
+      //   },
+      //   async badResponse => {
+      //     const { error, message } = await getClientErrorObject(badResponse);
+      //     let errorText = message || error || t('An error has occurred');
+      //     if (message === 'Forbidden') {
+      //       errorText = t('You do not have permission to edit this dashboard');
+      //     }
+      //     addDangerToast(errorText);
+      //   },
+      // );
     }
   });
 
