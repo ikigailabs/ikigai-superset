@@ -35,6 +35,7 @@ interface ColumnSelectProps {
   value?: string | string[];
   onChange?: (value: string) => void;
   mode?: 'multiple';
+  columns?: Column[];
 }
 
 /** Special purpose AsyncSelect that selects a column from a dataset */
@@ -49,9 +50,10 @@ export function ColumnSelect({
   value,
   onChange,
   mode,
+  columns,
 }: ColumnSelectProps) {
   console.log('datasetId', datasetId, value);
-  const [columns, setColumns] = useState<Column[]>();
+  // const [columns, setColumns] = useState<Column[]>();
   console.log('columns', columns);
   const { addDangerToast } = useToasts();
   const resetColumnField = useCallback(() => {
@@ -106,7 +108,7 @@ export function ColumnSelect({
           if (!valueExists) {
             resetColumnField();
           }
-          setColumns(result.columns);
+          // setColumns(result.columns);
         },
         async badResponse => {
           const { error, message } = await getClientErrorObject(badResponse);
