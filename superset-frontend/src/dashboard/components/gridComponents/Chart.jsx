@@ -408,11 +408,9 @@ class Chart extends React.Component {
     const { width } = this.state;
     // this prevents throwing in the case that a gridComponent
     // references a chart that is not associated with the dashboard
-
-    console.info('chart', chart, slice);
-    // if (!chart || !slice) {
-    //   return <MissingChart height={this.getChartHeight()} />;
-    // }
+    if (!chart || !slice) {
+      return <MissingChart height={this.getChartHeight()} />;
+    }
 
     const { queriesResponse, chartUpdateEndTime, chartStatus } = chart;
     const isLoading = chartStatus === 'loading';
