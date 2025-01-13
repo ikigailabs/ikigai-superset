@@ -16,72 +16,87 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useCallback, useMemo, ReactNode } from 'react';
-import rison from 'rison';
-import { t, JsonResponse } from '@superset-ui/core';
+import React, { useCallback, useMemo } from 'react';
+// import rison from 'rison';
+import { t } from '@superset-ui/core';
 import { AsyncSelect } from 'src/components';
 import {
   ClientErrorObject,
-  getClientErrorObject,
+  // getClientErrorObject,
 } from 'src/utils/getClientErrorObject';
-import { cachedSupersetGet } from 'src/utils/cachedSupersetGet';
-import {
-  Dataset,
-  DatasetSelectLabel,
-} from 'src/features/datasets/DatasetSelectLabel';
+// import { cachedSupersetGet } from 'src/utils/cachedSupersetGet';
+// import {
+//   Dataset,
+//   DatasetSelectLabel,
+// } from 'src/features/datasets/DatasetSelectLabel';
 
 interface DatasetSelectProps {
+  datasets: any;
   onChange: (value: { label: string; value: number }) => void;
   value?: { label: string; value: number };
 }
 
-const DatasetSelect = ({ onChange, value }: DatasetSelectProps) => {
-  const getErrorMessage = useCallback(
-    ({ error, message }: ClientErrorObject) => {
-      let errorText = message || error || t('An error has occurred');
-      if (message === 'Forbidden') {
-        errorText = t('You do not have permission to edit this dashboard');
-      }
-      return errorText;
-    },
-    [],
-  );
+const DatasetSelect = ({ datasets, onChange, value }: DatasetSelectProps) => {
+  // const getErrorMessage = useCallback(
+  //   ({ error, message }: ClientErrorObject) => {
+  //     let errorText = message || error || t('An error has occurred');
+  //     if (message === 'Forbidden') {
+  //       errorText = t('You do not have permission to edit this dashboard');
+  //     }
+  //     return errorText;
+  //   },
+  //   [],
+  // );
 
   const loadDatasetOptions = async (
     search: string,
     page: number,
     pageSize: number,
   ) => {
-    const query = rison.encode({
-      columns: ['id', 'table_name', 'database.database_name', 'schema'],
-      filters: [{ col: 'table_name', opr: 'ct', value: search }],
-      page,
-      page_size: pageSize,
-      order_column: 'table_name',
-      order_direction: 'asc',
-    });
-    return cachedSupersetGet({
-      endpoint: `/api/v1/dataset/?q=${query}`,
-    })
-      .then((response: JsonResponse) => {
-        const list: {
-          customLabel: ReactNode;
-          label: string;
-          value: string | number;
-        }[] = response.json.result.map((item: Dataset) => ({
-          customLabel: DatasetSelectLabel(item),
-          label: item.table_name,
-          value: item.id,
-        }));
-        return {
-          data: list,
-          totalCount: response.json.count,
+    const customOptions: any = [];
+    if (datasets && Object.keys(datasets).length > 0) {
+      Object.keys(datasets).forEach((d: any) => {
+        const newOption: any = {
+          label: datasets[d]?.new_table_name,
+          value: datasets[d]?.id,
         };
-      })
-      .catch(async error => {
-        const errorMessage = getErrorMessage(await getClientErrorObject(error));
-        throw new Error(errorMessage);
+        customOptions.push(newOption);
       });
+    }
+    return {
+      data: customOptions,
+      totalCount: customOptions.length,
+    };
+    // const query = rison.encode({
+    //   columns: ['id', 'table_name', 'database.database_name', 'schema'],
+    //   filters: [{ col: 'table_name', opr: 'ct', value: search }],
+    //   page,
+    //   page_size: pageSize,
+    //   order_column: 'table_name',
+    //   order_direction: 'asc',
+    // });
+    // return cachedSupersetGet({
+    //   endpoint: `/api/v1/dataset/?q=${query}`,
+    // })
+    //   .then((response: JsonResponse) => {
+    //     const list: {
+    //       customLabel: ReactNode;
+    //       label: string;
+    //       value: string | number;
+    //     }[] = response.json.result.map((item: Dataset) => ({
+    //       customLabel: DatasetSelectLabel(item),
+    //       label: item.table_name,
+    //       value: item.id,
+    //     }));
+    //     return {
+    //       data: list,
+    //       totalCount: response.json.count,
+    //     };
+    //   })
+    //   .catch(async error => {
+    //     const errorMessage = getErrorMessage(await getClientErrorObject(error));
+    //     throw new Error(errorMessage);
+    //   });
   };
 
   return (

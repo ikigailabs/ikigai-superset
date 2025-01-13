@@ -24,7 +24,9 @@ import { useDragDropManager } from 'react-dnd';
 import classNames from 'classnames';
 import { debounce } from 'lodash';
 
-const StyledDiv = styled.div`
+const StyledDiv = styled.div<{ isPreview: boolean }>`
+  ${({ isPreview }) =>
+    isPreview && `padding-left: 24px; background-color: #fcfdff;`}
   ${({ theme }) => css`
     position: relative;
     display: grid;
@@ -145,8 +147,9 @@ const DashboardWrapper: React.FC<Props> = ({ children }) => {
   return (
     <StyledDiv
       className={classNames({
-        'dragdroppable--dragging': editMode && isDragged,
+        // 'dragdroppable--dragging': editMode && isDragged,
       })}
+      isPreview={!editMode}
     >
       {children}
     </StyledDiv>

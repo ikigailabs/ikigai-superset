@@ -26,15 +26,15 @@ Object.entries(packageConfig.dependencies).forEach(([pkg]) => {
 });
 
 // ignore files in production mode
-let ignorePatterns = [];
-if (process.env.NODE_ENV === 'production') {
-  ignorePatterns = [
-    '*.test.{js,ts,jsx,tsx}',
-    'plugins/**/test/**/*',
-    'packages/**/test/**/*',
-    'packages/generator-superset/**/*',
-  ];
-}
+// let ignorePatterns = [];
+// if (process.env.NODE_ENV === 'production') {
+//   ignorePatterns = [
+//     '*.test.{js,ts,jsx,tsx}',
+//     'plugins/**/test/**/*',
+//     'packages/**/test/**/*',
+//     'packages/generator-superset/**/*',
+//   ];
+// }
 
 module.exports = {
   extends: [

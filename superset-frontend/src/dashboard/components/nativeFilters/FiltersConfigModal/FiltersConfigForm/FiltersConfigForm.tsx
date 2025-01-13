@@ -304,6 +304,7 @@ export const FilterPanels = {
 export interface FiltersConfigFormProps {
   expanded: boolean;
   filterId: string;
+  appDatasets: any;
   filterToEdit?: Filter;
   removedFilters: Record<string, FilterRemoval>;
   restoreFilter: (filterId: string) => void;
@@ -337,6 +338,7 @@ const FILTER_TYPE_NAME_MAPPING = {
  */
 const FiltersConfigForm = (
   {
+    appDatasets,
     expanded,
     filterId,
     filterToEdit,
@@ -385,6 +387,26 @@ const FiltersConfigForm = (
   const loadedDatasets = useSelector<RootState, DatasourcesState>(
     ({ datasources }) => datasources,
   );
+
+  if (loadedDatasets && Object.keys(loadedDatasets).length > 0) {
+    Object.keys(loadedDatasets).map((ld: any) => {
+      const tempDataset: any = loadedDatasets[ld];
+      const table_name = tempDataset?.table_name;
+      let dataset_id = '';
+      let new_table_name = '';
+      if (appDatasets && dataset_id) {
+        const foundDataset: any = appDatasets.filter(
+          (ad: any) => ad?.full_id === table_name,
+        );
+        if (foundDataset[0]) {
+          new_table_name = foundDataset[0]?.name;
+        }
+      }
+      tempDataset.new_table_name = new_table_name;
+      console.log('ld', tempDataset);
+      return tempDataset;
+    });
+  }
 
   const charts = useSelector<RootState, ChartsState>(({ charts }) => charts);
 
@@ -884,7 +906,7 @@ const FiltersConfigForm = (
         )}
         {hasDataset && (
           <StyledRowContainer>
-            {showDataset ? (
+            {showDataset || loadedDatasets ? (
               <StyledFormItem
                 expanded={expanded}
                 name={['filters', filterId, 'dataset']}
@@ -911,6 +933,7 @@ const FiltersConfigForm = (
                 {...getFiltersConfigModalTestId('datasource-input')}
               >
                 <DatasetSelect
+                  datasets={loadedDatasets}
                   onChange={(value: { label: string; value: number }) => {
                     // We need to reset the column when the dataset has changed
                     if (value.value !== datasetId) {

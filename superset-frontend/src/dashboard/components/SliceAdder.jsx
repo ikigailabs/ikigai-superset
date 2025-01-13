@@ -362,7 +362,7 @@ class SliceAdder extends React.Component {
             placeholder={t('Sort by')}
           />
         </Controls>
-        <div
+        {/* <div
           css={theme => css`
             display: flex;
             flex-direction: row;
@@ -385,7 +385,7 @@ class SliceAdder extends React.Component {
               Your filter selection will be saved and remain active until you choose to change it.`,
             )}
           />
-        </div>
+        </div> */}
         {this.props.isLoading && <Loading />}
         {!this.props.isLoading && this.state.filteredSlices.length > 0 && (
           <ChartList>
