@@ -578,7 +578,9 @@ function FiltersConfigModal({
       crossBrowserInfoString,
       this.props.ikigaiOrigin,
     ); */
-    window?.top?.postMessage(crossBrowserInfoString, parentOrigin);
+    if (window?.top && parentOrigin) {
+      window?.top?.postMessage(crossBrowserInfoString, parentOrigin);
+    }
   }
 
   function handleIncomingWindowMsg(parentOrigin: string) {

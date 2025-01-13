@@ -393,15 +393,9 @@ const FiltersConfigForm = (
       // const table_name = 'TEST_2j8svHTs7ab1ReAtREIidBzTYty"';
       let dataset_id = '';
       let new_table_name = '';
-      if (table_name?.includes('_')) {
-        const split_name = table_name.split('_');
-        if (split_name[1]) {
-          dataset_id = split_name[1];
-        }
-      }
       if (appDatasets && dataset_id) {
         const foundDataset: any = appDatasets.filter(
-          (ad: any) => ad?.dataset_id === dataset_id,
+          (ad: any) => ad?.full_id === table_name,
         );
         if (foundDataset[0]) {
           new_table_name = foundDataset[0]?.name;

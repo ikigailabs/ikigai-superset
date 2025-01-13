@@ -142,6 +142,12 @@ export default function PluginFilterSelect(props: PluginFilterSelectProps) {
         'filterState',
         filterState,
       ); */
+      /* console.log(
+        'updateDataMask',
+        col,
+        values,
+        getSelectExtraFormData(col, values, emptyFilter, inverseSelection),
+      ); */
       dispatchDataMask({
         type: 'filterState',
         extraFormData: getSelectExtraFormData(
@@ -152,6 +158,7 @@ export default function PluginFilterSelect(props: PluginFilterSelectProps) {
         ),
         filterState: {
           ...filterState,
+          // label: values ? values.toString() : '',
           label: values?.length
             ? `${(values || [])
                 .map(value => labelFormatter(value, datatype))
