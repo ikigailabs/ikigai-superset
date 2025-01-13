@@ -370,5 +370,5 @@ module.exports = {
     'no-promise-executor-return': 0,
     'react/no-unused-class-component-methods': 0,
   },
-  ignorePatterns,
+  // ignorePatterns,
 };
