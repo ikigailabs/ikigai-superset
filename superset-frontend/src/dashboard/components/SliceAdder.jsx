@@ -26,8 +26,8 @@ import { t, styled, css } from '@superset-ui/core';
 import { Input } from 'src/components/Input';
 import { Select } from 'src/components';
 import Loading from 'src/components/Loading';
-// import Button from 'src/components/Button';
-// import Icons from 'src/components/Icons';
+import Button from 'src/components/Button';
+import Icons from 'src/components/Icons';
 import {
   LocalStorageKeys,
   getItem,
@@ -56,7 +56,7 @@ const propTypes = {
   slices: PropTypes.objectOf(slicePropShape).isRequired,
   lastUpdated: PropTypes.number.isRequired,
   errorMessage: PropTypes.string,
-  userId: PropTypes.number,
+  userId: PropTypes.number.isRequired,
   selectedSliceIds: PropTypes.arrayOf(PropTypes.number),
   editMode: PropTypes.bool,
   dashboardId: PropTypes.number,
@@ -97,27 +97,27 @@ const StyledSelect = styled(Select)`
   min-width: 150px;
 `;
 
-// const NewChartButtonContainer = styled.div`
-//   ${({ theme }) => css`
-//     display: flex;
-//     justify-content: flex-end;
-//     padding-right: ${theme.gridUnit * 2}px;
-//   `}
-// `;
+const NewChartButtonContainer = styled.div`
+  ${({ theme }) => css`
+    display: flex;
+    justify-content: flex-end;
+    padding-right: ${theme.gridUnit * 2}px;
+  `}
+`;
 
-// const NewChartButton = styled(Button)`
-//   ${({ theme }) => css`
-//     height: auto;
-//     & > .anticon + span {
-//       margin-left: 0;
-//     }
-//     & > [role='img']:first-of-type {
-//       margin-right: ${theme.gridUnit}px;
-//       padding-bottom: 1px;
-//       line-height: 0;
-//     }
-//   `}
-// `;
+const NewChartButton = styled(Button)`
+  ${({ theme }) => css`
+    height: auto;
+    & > .anticon + span {
+      margin-left: 0;
+    }
+    & > [role='img']:first-of-type {
+      margin-right: ${theme.gridUnit}px;
+      padding-bottom: 1px;
+      line-height: 0;
+    }
+  `}
+`;
 
 export const ChartList = styled.div`
   flex-grow: 1;
@@ -324,7 +324,7 @@ class SliceAdder extends React.Component {
           flex-direction: column;
         `}
       >
-        {/* <NewChartButtonContainer>
+        <NewChartButtonContainer>
           <NewChartButton
             buttonStyle="link"
             buttonSize="xsmall"
@@ -339,7 +339,7 @@ class SliceAdder extends React.Component {
             <Icons.PlusSmall />
             {t('Create new chart')}
           </NewChartButton>
-        </NewChartButtonContainer> */}
+        </NewChartButtonContainer>
         <Controls>
           <Input
             placeholder={
@@ -362,7 +362,7 @@ class SliceAdder extends React.Component {
             placeholder={t('Sort by')}
           />
         </Controls>
-        {/* <div
+        <div
           css={theme => css`
             display: flex;
             flex-direction: row;
@@ -385,7 +385,7 @@ class SliceAdder extends React.Component {
               Your filter selection will be saved and remain active until you choose to change it.`,
             )}
           />
-        </div> */}
+        </div>
         {this.props.isLoading && <Loading />}
         {!this.props.isLoading && this.state.filteredSlices.length > 0 && (
           <ChartList>
