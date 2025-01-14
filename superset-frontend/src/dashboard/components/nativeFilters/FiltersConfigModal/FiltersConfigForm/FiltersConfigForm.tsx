@@ -300,7 +300,6 @@ export const FilterPanels = {
 };
 
 export interface FiltersConfigFormProps {
-  appDatasets: any[];
   filterId: string;
   filterToEdit?: Filter;
   removedFilters: Record<string, FilterRemoval>;
@@ -335,7 +334,6 @@ const FILTER_TYPE_NAME_MAPPING = {
  */
 const FiltersConfigForm = (
   {
-    appDatasets,
     filterId,
     filterToEdit,
     removedFilters,
@@ -379,36 +377,12 @@ const FiltersConfigForm = (
     // @ts-ignore
     .filter(([, { value }]) => value.behaviors?.includes(Behavior.NativeFilter))
     .map(([key]) => key);
-  console.log('nativeFilterVizTypes', nativeFilterVizTypes, nativeFilterItems);
 
   const loadedDatasets = useSelector<RootState, DatasourcesState>(
     ({ datasources }) => datasources,
   );
 
-  console.log('loadedDatasets', loadedDatasets, appDatasets);
-  if (loadedDatasets && Object.keys(loadedDatasets).length > 0) {
-    Object.keys(loadedDatasets).map((ld: any) => {
-      const tempDataset: any = loadedDatasets[ld];
-      const table_name = tempDataset?.table_name;
-      // const table_name = 'TEST_2j8svHTs7ab1ReAtREIidBzTYty"';
-      let new_table_name = '';
-      if (appDatasets && table_name) {
-        const foundDataset: any = appDatasets.filter(
-          (ad: any) => ad?.full_id === table_name,
-        );
-        if (foundDataset[0]) {
-          new_table_name = foundDataset[0]?.name;
-        }
-      }
-      // tempDataset.new_table_name = new_table_name;
-      tempDataset.new_table_name = new_table_name;
-      console.log('ld', tempDataset);
-      return tempDataset;
-    });
-  }
-
   const charts = useSelector<RootState, ChartsState>(({ charts }) => charts);
-  console.log('charts', charts);
 
   const doLoadedDatasetsHaveTemporalColumns = useMemo(
     () =>
@@ -430,13 +404,10 @@ const FiltersConfigForm = (
     // @ts-ignore
     !!nativeFilterItems[formFilter?.filterType]?.value?.datasourceCount;
 
-  console.log('hasDataset', hasDataset);
-
   const datasetId =
     formFilter?.dataset?.value ??
     filterToEdit?.targets[0]?.datasetId ??
     mostUsedDataset(loadedDatasets, charts);
-  console.log('datasetId', datasetId);
 
   const { controlItems = {}, mainControlItems = {} } = formFilter
     ? getControlItemsMap({
@@ -452,10 +423,8 @@ const FiltersConfigForm = (
       })
     : {};
   const hasColumn = !!mainControlItems.groupby;
-  console.log('hasColumn', hasColumn);
 
   const nativeFilterItem = nativeFilterItems[formFilter?.filterType] ?? {};
-  console.log('nativeFilterItem', nativeFilterItem);
   // @ts-ignore
   const enableNoResults = !!nativeFilterItem.value?.enableNoResults;
 
@@ -583,8 +552,6 @@ const FiltersConfigForm = (
 
   const showDataset =
     !datasetId || datasetDetails || formFilter?.dataset?.label;
-
-  console.log('showDataset', showDataset);
 
   const formChanged = useCallback(() => {
     form.setFields([
@@ -817,7 +784,7 @@ const FiltersConfigForm = (
         filterValues={(column: Column) => !!column.is_dttm}
         datasetId={datasetId}
         onChange={column => {
-          // We need reset default value when column changed
+          // We need reset default value when when column changed
           setNativeFilterFieldValues(form, filterId, {
             granularity_sqla: column,
           });
@@ -908,7 +875,7 @@ const FiltersConfigForm = (
         )}
         {hasDataset && (
           <StyledRowContainer>
-            {showDataset || loadedDatasets ? (
+            {showDataset ? (
               <StyledFormItem
                 name={['filters', filterId, 'dataset']}
                 label={<StyledLabel>{t('Dataset')}</StyledLabel>}
@@ -934,7 +901,6 @@ const FiltersConfigForm = (
                 {...getFiltersConfigModalTestId('datasource-input')}
               >
                 <DatasetSelect
-                  datasets={loadedDatasets}
                   onChange={(value: { label: string; value: number }) => {
                     // We need to reset the column when the dataset has changed
                     if (value.value !== datasetId) {
