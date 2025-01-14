@@ -89,7 +89,7 @@ import { getRootLevelTabsComponent, shouldFocusTabs } from './utils';
 import DashboardContainer from './DashboardContainer';
 import { useNativeFilters } from './state';
 import DashboardWrapper from './DashboardWrapper';
-import '../../stylesheets/dashboard.less';
+// import '../../stylesheets/dashboard.less';
 
 type DashboardBuilderProps = {};
 

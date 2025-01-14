@@ -385,15 +385,14 @@ const FiltersConfigForm = (
     ({ datasources }) => datasources,
   );
 
-  console.log('loadedDatasets', loadedDatasets);
+  console.log('loadedDatasets', loadedDatasets, appDatasets);
   if (loadedDatasets && Object.keys(loadedDatasets).length > 0) {
     Object.keys(loadedDatasets).map((ld: any) => {
       const tempDataset: any = loadedDatasets[ld];
       const table_name = tempDataset?.table_name;
       // const table_name = 'TEST_2j8svHTs7ab1ReAtREIidBzTYty"';
-      let dataset_id = '';
       let new_table_name = '';
-      if (appDatasets && dataset_id) {
+      if (appDatasets && table_name) {
         const foundDataset: any = appDatasets.filter(
           (ad: any) => ad?.full_id === table_name,
         );
