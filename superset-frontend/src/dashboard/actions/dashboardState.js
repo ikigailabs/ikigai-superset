@@ -573,7 +573,7 @@ export function addSliceToDashboard(id) {
 
     return Promise.all([
       dispatch(addChart(newChart, id)),
-      dispatch(fetchDatasourceMetadata(form_data.datasource)),
+      // dispatch(fetchDatasourceMetadata(form_data.datasource)),
     ]).then(() => {
       dispatch(addSlice(selectedSlice));
     });

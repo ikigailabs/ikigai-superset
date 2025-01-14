@@ -23,14 +23,14 @@ import { connect } from 'react-redux';
 import { t } from '@superset-ui/core';
 import { Menu } from 'src/components/Menu';
 import { URL_PARAMS } from 'src/constants';
-// import ShareMenuItems from 'src/dashboard/components/menu/ShareMenuItems';
+import ShareMenuItems from 'src/dashboard/components/menu/ShareMenuItems';
 import DownloadMenuItems from 'src/dashboard/components/menu/DownloadMenuItems';
 import CssEditor from 'src/dashboard/components/CssEditor';
 import RefreshIntervalModal from 'src/dashboard/components/RefreshIntervalModal';
-// import SaveModal from 'src/dashboard/components/SaveModal';
-// import HeaderReportDropdown from 'src/features/reports/ReportModal/HeaderReportDropdown';
+import SaveModal from 'src/dashboard/components/SaveModal';
+import HeaderReportDropdown from 'src/features/reports/ReportModal/HeaderReportDropdown';
 import injectCustomCss from 'src/dashboard/util/injectCustomCss';
-// import { SAVE_TYPE_NEWDASHBOARD } from 'src/dashboard/util/constants';
+import { SAVE_TYPE_NEWDASHBOARD } from 'src/dashboard/util/constants';
 import FilterScopeModal from 'src/dashboard/components/filterscope/FilterScopeModal';
 import getDashboardUrl from 'src/dashboard/util/getDashboardUrl';
 import { getActiveFilters } from 'src/dashboard/util/activeDashboardFilters';
@@ -105,15 +105,13 @@ export class HeaderActionsDropdown extends PureComponent {
     super(props);
     this.state = {
       css: props.customCss,
-      // cssTemplates: [],
-      // showReportSubMenu: null,
       showReportSubMenu: null,
     };
 
     this.changeCss = this.changeCss.bind(this);
     this.changeRefreshInterval = this.changeRefreshInterval.bind(this);
     this.handleMenuClick = this.handleMenuClick.bind(this);
-    // this.setShowReportSubMenu = this.setShowReportSubMenu.bind(this);
+    this.setShowReportSubMenu = this.setShowReportSubMenu.bind(this);
   }
 
   UNSAFE_componentWillReceiveProps(nextProps) {
@@ -124,11 +122,11 @@ export class HeaderActionsDropdown extends PureComponent {
     }
   }
 
-  /* setShowReportSubMenu(show) {
+  setShowReportSubMenu(show) {
     this.setState({
       showReportSubMenu: show,
     });
-  } */
+  }
 
   changeCss(css) {
     this.props.onChange();
@@ -176,7 +174,6 @@ export class HeaderActionsDropdown extends PureComponent {
       refreshFrequency,
       shouldPersistRefreshFrequency,
       editMode,
-      isEmbedded,
       customCss,
       colorNamespace,
       colorScheme,
@@ -199,15 +196,17 @@ export class HeaderActionsDropdown extends PureComponent {
       ...rest
     } = this.props;
 
-    // const emailTitle = t('Superset dashboard');
-    // const emailSubject = `${emailTitle} ${dashboardTitle}`;
-    // const emailBody = t('Check out this dashboard: ');
+    const emailTitle = t('Superset dashboard');
+    const emailSubject = `${emailTitle} ${dashboardTitle}`;
+    const emailBody = t('Check out this dashboard: ');
 
-    // const url = getDashboardUrl({
-    //   pathname: window.location.pathname,
-    //   filters: getActiveFilters(),
-    //   hash: window.location.hash,
-    // });
+    const isEmbedded = !dashboardInfo?.userId;
+
+    const url = getDashboardUrl({
+      pathname: window.location.pathname,
+      filters: getActiveFilters(),
+      hash: window.location.hash,
+    });
 
     const refreshIntervalOptions =
       dashboardInfo.common?.conf?.DASHBOARD_AUTO_REFRESH_INTERVALS;
@@ -236,14 +235,14 @@ export class HeaderActionsDropdown extends PureComponent {
               : t('Enter fullscreen')}
           </Menu.Item>
         )}
-        {/* {editMode && (
+        {editMode && (
           <Menu.Item
             key={MENU_KEYS.EDIT_PROPERTIES}
             onClick={this.handleMenuClick}
           >
             {t('Edit properties')}
           </Menu.Item>
-        )} */}
+        )}
         {editMode && (
           <Menu.Item key={MENU_KEYS.EDIT_CSS}>
             <CssEditor
@@ -254,8 +253,8 @@ export class HeaderActionsDropdown extends PureComponent {
             />
           </Menu.Item>
         )}
-        {/* <Menu.Divider /> */}
-        {/* userCanSave && (
+        <Menu.Divider />
+        {userCanSave && (
           <Menu.Item key={MENU_KEYS.SAVE_MODAL}>
             <SaveModal
               addSuccessToast={this.props.addSuccessToast}
@@ -279,7 +278,7 @@ export class HeaderActionsDropdown extends PureComponent {
               canOverwrite={userCanEdit}
             />
           </Menu.Item>
-        )} */}
+        )}
         <Menu.SubMenu
           key={MENU_KEYS.DOWNLOAD_DASHBOARD}
           disabled={isLoading}
@@ -293,7 +292,6 @@ export class HeaderActionsDropdown extends PureComponent {
             addDangerToast={addDangerToast}
           />
         </Menu.SubMenu>
-        {/*
         {userCanShare && (
           <Menu.SubMenu
             key={MENU_KEYS.SHARE_DASHBOARD}
@@ -313,17 +311,17 @@ export class HeaderActionsDropdown extends PureComponent {
               dashboardComponentId={dashboardComponentId}
             />
           </Menu.SubMenu>
-        )} */}
-        {/* {!editMode && userCanCurate && (
+        )}
+        {!editMode && userCanCurate && (
           <Menu.Item
             key={MENU_KEYS.MANAGE_EMBEDDED}
             onClick={this.handleMenuClick}
           >
             {t('Embed dashboard')}
           </Menu.Item>
-        )} */}
-        {/* <Menu.Divider /> */}
-        {/* {!editMode ? (
+        )}
+        <Menu.Divider />
+        {!editMode ? (
           this.state.showReportSubMenu ? (
             <>
               <Menu.SubMenu title={t('Manage email report')}>
@@ -349,7 +347,7 @@ export class HeaderActionsDropdown extends PureComponent {
               />
             </Menu>
           )
-        ) : null} */}
+        ) : null}
         {editMode && !isEmpty(dashboardInfo?.metadata?.filter_scopes) && (
           <Menu.Item key={MENU_KEYS.SET_FILTER_MAPPING}>
             <FilterScopeModal
