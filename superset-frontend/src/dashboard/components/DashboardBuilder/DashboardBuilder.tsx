@@ -57,6 +57,7 @@ import {
   RootState,
 } from 'src/dashboard/types';
 import {
+  setAppDatasources,
   setDirectPathToChild,
   setEditMode,
   setSupersetUrl,
@@ -92,6 +93,25 @@ import DashboardWrapper from './DashboardWrapper';
 // import '../../stylesheets/dashboard.less';
 
 type DashboardBuilderProps = {};
+
+function getIframeUrl() {
+  let ikigaiOrigin = '';
+  const iframeUrl: any = document.location;
+  if (iframeUrl?.search) {
+    // console.log('iframeUrl2', iframeUrl);
+    const iframeUrlParameters: any = new URLSearchParams(iframeUrl.search);
+    // console.log('iframeUrlParameters', iframeUrlParameters);
+    if (iframeUrlParameters) {
+      const ikigaiURL: any = iframeUrlParameters.get('dash_url')
+        ? new URL(iframeUrlParameters.get('dash_url'))
+        : '';
+      // console.log('ikigaiURL', ikigaiURL);
+      ikigaiOrigin = ikigaiURL ? ikigaiURL.origin : '';
+      // console.log('ikigaiOrigin', ikigaiOrigin);
+    }
+  }
+  return ikigaiOrigin;
+}
 
 // @z-index-above-dashboard-charts + 1 = 11
 const FiltersPanel = styled.div<{ width: number; hidden: boolean }>`
@@ -600,6 +620,66 @@ const DashboardBuilder: FC<DashboardBuilderProps> = () => {
     filterBarOrientation !== FilterBarOrientation.Horizontal
       ? 0
       : theme.gridUnit * 8;
+
+  function handleIncomingWindowMsg(parentOrigin: string) {
+    console.log('handleIncomingWindowMsg', parentOrigin);
+    window.addEventListener('message', event => {
+      console.log('event.origin', event.origin, parentOrigin);
+      if (event.origin === parentOrigin) {
+        const messageObject = JSON.parse(event.data);
+        // console.log('messageObject', messageObject);
+        if (messageObject.info && messageObject.dataType) {
+          const { dataType } = messageObject;
+          let messageData: any;
+
+          if (dataType === 'object') {
+            messageData = JSON.parse(messageObject.data);
+          } else {
+            messageData = messageObject.data;
+          }
+
+          if (
+            messageObject.info === 'top-window-to-superset/sending-datasets'
+          ) {
+            console.log(
+              'top-window-to-superset/sending-data',
+              'messageData',
+              messageData,
+            );
+            if (messageData?.datasets)
+              dispatch(setAppDatasources(messageData?.datasets));
+          }
+        }
+      }
+    });
+
+    getDatasetsFromParentWindow(parentOrigin);
+  }
+
+  function getDatasetsFromParentWindow(parentOrigin: string) {
+    const crossWindowMessage = {
+      info: 'superset-to-top-window/get-datasets',
+      data: '',
+      dataType: 'string',
+    };
+    const crossBrowserInfoString = JSON.stringify(crossWindowMessage);
+    /* console.log(
+      'crossBrowserInfoString',
+      crossBrowserInfoString,
+      this.props.ikigaiOrigin,
+    ); */
+    if (window?.top && parentOrigin) {
+      window?.top?.postMessage(crossBrowserInfoString, parentOrigin);
+    }
+  }
+
+  useEffect(() => {
+    // dispatch(setAppDatasources('test11'));
+    const ikigaiOrigin: any = getIframeUrl();
+    console.log('ikigaiOrigin', ikigaiOrigin);
+    handleIncomingWindowMsg(ikigaiOrigin);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <DashboardWrapper>

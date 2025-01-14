@@ -60,6 +60,7 @@ const propTypes = {
   isComponentVisible: PropTypes.bool,
   ikigaiOrigin: PropTypes.string,
   supersetUrl: PropTypes.string,
+  appDatasources: PropTypes.any,
 };
 
 const defaultProps = {
@@ -83,6 +84,7 @@ function mapStateToProps(
     filters: getActiveFilters(),
     dashboardId: dashboardInfo.id,
     fullSizeChartId: dashboardState.fullSizeChartId,
+    appDatasources: dashboardState.appDatasources,
   };
 
   // rows and columns need more data about their child dimensions

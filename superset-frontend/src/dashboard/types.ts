@@ -113,6 +113,7 @@ export type DashboardState = {
     dashboardId: number;
     data: JsonObject;
   };
+  appDatasources: any;
 };
 export type DashboardInfo = {
   id: number;

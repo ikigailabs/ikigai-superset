@@ -656,3 +656,9 @@ export function setSupersetUrl(supersetUrl) {
   console.log('supersetUrl', supersetUrl);
   return { type: SET_SUPERSET_URL, supersetUrl };
 }
+
+export const SET_APP_DATASOURCES = 'SET_APP_DATASOURCES';
+export function setAppDatasources(appDatasources) {
+  console.log('setAppDatasources', appDatasources);
+  return { type: SET_APP_DATASOURCES, appDatasources };
+}

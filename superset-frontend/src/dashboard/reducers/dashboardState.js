@@ -46,6 +46,7 @@ import {
   SET_OVERRIDE_CONFIRM,
   SAVE_DASHBOARD_STARTED,
   SAVE_DASHBOARD_FINISHED,
+  SET_APP_DATASOURCES,
 } from '../actions/dashboardState';
 import { HYDRATE_DASHBOARD } from '../actions/hydrate';
 
@@ -255,6 +256,15 @@ export default function dashboardStateReducer(state = {}, action) {
         ...state,
         supersetUrl,
         ikigaiOrigin,
+      };
+    },
+    [SET_APP_DATASOURCES]() {
+      console.log('SET_APP_DATASOURCES', action);
+      const { appDatasources } = action;
+
+      return {
+        ...state,
+        appDatasources,
       };
     },
   };

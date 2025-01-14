@@ -25,6 +25,7 @@ import {
   resizeComponent,
 } from '../actions/dashboardLayout';
 import {
+  setAppDatasources,
   setDirectPathToChild,
   setEditMode,
   setSupersetUrl,
@@ -46,6 +47,7 @@ function mapDispatchToProps(dispatch) {
       setDirectPathToChild,
       setEditMode,
       setSupersetUrl,
+      setAppDatasources,
     },
     dispatch,
   );

@@ -300,7 +300,6 @@ export const FilterPanels = {
 };
 
 export interface FiltersConfigFormProps {
-  appDatasets: any[];
   filterId: string;
   filterToEdit?: Filter;
   removedFilters: Record<string, FilterRemoval>;
@@ -335,7 +334,6 @@ const FILTER_TYPE_NAME_MAPPING = {
  */
 const FiltersConfigForm = (
   {
-    appDatasets,
     filterId,
     filterToEdit,
     removedFilters,
@@ -360,6 +358,10 @@ const FiltersConfigForm = (
   const dashboardId = useSelector<RootState, number>(
     state => state.dashboardInfo.id,
   );
+  const appDatasources = useSelector<RootState, number>(
+    state => state.dashboardState.appDatasources,
+  );
+  console.log('appDatasources in modal', appDatasources);
   const [undoFormValues, setUndoFormValues] = useState<Record<
     string,
     any
@@ -385,15 +387,15 @@ const FiltersConfigForm = (
     ({ datasources }) => datasources,
   );
 
-  console.log('loadedDatasets', loadedDatasets, appDatasets);
+  console.log('loadedDatasets', loadedDatasets, appDatasources);
   if (loadedDatasets && Object.keys(loadedDatasets).length > 0) {
     Object.keys(loadedDatasets).map((ld: any) => {
       const tempDataset: any = loadedDatasets[ld];
       const table_name = tempDataset?.table_name;
       // const table_name = 'TEST_2j8svHTs7ab1ReAtREIidBzTYty"';
       let new_table_name = '';
-      if (appDatasets && table_name) {
-        const foundDataset: any = appDatasets.filter(
+      if (appDatasources && table_name) {
+        const foundDataset: any = appDatasources.filter(
           (ad: any) => ad?.full_id === table_name,
         );
         if (foundDataset[0]) {
