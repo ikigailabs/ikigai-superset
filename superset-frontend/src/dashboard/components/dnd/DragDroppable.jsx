@@ -95,11 +95,6 @@ const DragDroppableStyles = styled.div`
       z-index: 10;
     }
 
-    &.empty-droptarget--full > .drop-indicator--top {
-      height: 100%;
-      opacity: 0.3;
-    }
-
     & {
       .drop-indicator {
         display: block;
@@ -187,10 +182,10 @@ export class UnwrappedDragDroppable extends React.PureComponent {
         data-test="dragdroppable-object"
         className={cx(
           'dragdroppable',
-          // editMode && 'dragdroppable--edit-mode',
-          // orientation === 'row' && 'dragdroppable-row',
-          // orientation === 'column' && 'dragdroppable-column',
-          // isDragging && 'dragdroppable--dragging',
+          editMode && 'dragdroppable--edit-mode',
+          orientation === 'row' && 'dragdroppable-row',
+          orientation === 'column' && 'dragdroppable-column',
+          isDragging && 'dragdroppable--dragging',
           className,
         )}
       >

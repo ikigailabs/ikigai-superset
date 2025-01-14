@@ -53,8 +53,6 @@ import { getRootLevelTabsComponent } from './utils';
 
 type DashboardContainerProps = {
   topLevelTabs?: LayoutItem;
-  ikigaiOrigin?: string;
-  supersetUrl?: string;
 };
 
 const useNativeFilterScopes = () => {

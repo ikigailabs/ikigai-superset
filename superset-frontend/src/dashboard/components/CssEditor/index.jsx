@@ -1,4 +1,3 @@
-/* eslint-disable theme-colors/no-literal-colors */
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -123,84 +122,9 @@ class CssEditor extends React.PureComponent {
         modalTitle={t('CSS')}
         modalBody={
           <StyledWrapper>
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'row',
-              }}
-            >
-              <div className="css-editor-header">
-                <h5>{t('Live CSS editor')}</h5>
-                {this.renderTemplateSelector()}
-              </div>
-              <button
-                type="button"
-                style={{
-                  border: 'none',
-                  cursor: 'pointer',
-                  color: 'rgb(89, 89, 112)',
-                  backgroundColor: 'rgb(240, 240, 240)',
-                  marginLeft: 'auto',
-                  borderRadius: '4px',
-                  marginBottom: '8px',
-                  padding: '4px 8px',
-                  transition: 'all 0.2s',
-                  fontWeight: 'bold',
-                }}
-                onClick={() =>
-                  this.changeCss(`
-/* Top level  */
-.dashboard {
-  margin-left: 0 !important;
-}
-
-.dashboard--editing .grid-container {
-  margin: 0 0 0 32px !important;
-}
-
-/* Dashboard grid */
-.grid-container {
-  padding: 0 !important;
-  margin: 0 !important;
-  max-width: 100% !important;
-}
-
-/* Dashboard rows */
-.grid-row {
-  margin: 0 !important;
-  margin-bottom: 0 !important;
-}
-
-/* All dashboard components */
-.dashboard-component.dashboard-component {
-  box-shadow: none !important;
-}
-
-/* Custom Components */
-[id*="DYNAMIC"] .resizable-container {
-  padding: 0 !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-}
-
-/* Charts & chart headers */
-.chart-header {
-  display: none !important;
-}
-
-/* Big # chart */
-.header-line {
-  font-size: 46px !important;
-  font-weight: bold;
-}
-
-/* Big # subheader text */
-.subheader-line {}
-                `)
-                }
-              >
-                Load default template
-              </button>
+            <div className="css-editor-header">
+              <h5>{t('Live CSS editor')}</h5>
+              {this.renderTemplateSelector()}
             </div>
             <AceCssEditor
               className="css-editor"

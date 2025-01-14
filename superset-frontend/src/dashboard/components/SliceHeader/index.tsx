@@ -1,4 +1,3 @@
-/* eslint-disable import/no-unresolved */
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -73,7 +72,7 @@ const ChartHeaderStyles = styled.div`
     display: flex;
     max-width: 100%;
     align-items: flex-start;
-    min-height: unset;
+    min-height: 0;
 
     & > .header-title {
       overflow: hidden;
@@ -199,8 +198,7 @@ const SliceHeader: FC<SliceHeaderProps> = ({
   return (
     <ChartHeaderStyles data-test="slice-header" ref={innerRef}>
       <div className="header-title" ref={headerRef}>
-        <span>{sliceName}</span>
-        {/* <Tooltip title={headerTooltip}>
+        <Tooltip title={headerTooltip}>
           <EditableTitle
             title={
               sliceName ||
@@ -213,7 +211,7 @@ const SliceHeader: FC<SliceHeaderProps> = ({
             showTooltip={false}
             url={canExplore ? exploreUrl : undefined}
           />
-        </Tooltip> */}
+        </Tooltip>
         {!!Object.values(annotationQuery).length && (
           <Tooltip
             id="annotations-loading-tooltip"
@@ -250,7 +248,7 @@ const SliceHeader: FC<SliceHeaderProps> = ({
                 dashboardId={dashboardId}
               />
             )}
-            {/* {crossFilterValue && (
+            {crossFilterValue && (
               <Tooltip
                 placement="top"
                 title={t(
@@ -259,7 +257,7 @@ const SliceHeader: FC<SliceHeaderProps> = ({
               >
                 <CrossFilterIcon iconSize="m" />
               </Tooltip>
-            )} */}
+            )}
             {!uiConfig.hideChartControls && (
               <FiltersBadge chartId={slice.slice_id} />
             )}

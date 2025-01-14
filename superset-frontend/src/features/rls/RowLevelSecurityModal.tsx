@@ -52,9 +52,6 @@ const StyledModal = styled(Modal)`
   .ant-modal-footer {
     white-space: nowrap;
   }
-  .ant-modal-footer {
-    white-space: nowrap;
-  }
 `;
 
 const StyledIcon = (theme: SupersetTheme) => css`

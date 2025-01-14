@@ -20,7 +20,6 @@ import logger from './logging';
 
 // We can codegen the enum definition based on a list of supported flags that we
 // check into source control. We're hardcoding the supported flags for now.
-
 export enum FeatureFlag {
   // PLEASE KEEP THE LIST SORTED ALPHABETICALLY
   AlertsAttachReports = 'ALERTS_ATTACH_REPORTS',
@@ -57,8 +56,6 @@ export enum FeatureFlag {
   TaggingSystem = 'TAGGING_SYSTEM',
   Thumbnails = 'THUMBNAILS',
   UseAnalagousColors = 'USE_ANALAGOUS_COLORS',
-  DashboardNativeFilters = 'DASHBOARD_NATIVE_FILTERS',
-  DashboardNativeFiltersSet = 'DASHBOARD_NATIVE_FILTERS_SET',
 }
 
 export type ScheduleQueriesProps = {

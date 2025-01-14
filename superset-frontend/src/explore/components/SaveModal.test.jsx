@@ -316,27 +316,3 @@ test('make sure slice_id in the URLSearchParams before the redirect', () => {
   );
   expect(result.get('slice_id')).toEqual('1');
 });
-
-test('make sure slice_id in the URLSearchParams before the redirect', () => {
-  const myProps = {
-    ...defaultProps,
-    slice: { slice_id: 1, slice_name: 'title', owners: [1] },
-    actions: {
-      setFormData: jest.fn(),
-      updateSlice: jest.fn(() => Promise.resolve({ id: 1 })),
-      getSliceDashboards: jest.fn(),
-    },
-    user: { userId: 1 },
-    history: {
-      replace: jest.fn(),
-    },
-    dispatch: jest.fn(),
-  };
-
-  const saveModal = new PureSaveModal(myProps);
-  const result = saveModal.handleRedirect(
-    'https://example.com/?name=John&age=30',
-    { id: 1 },
-  );
-  expect(result.get('slice_id')).toEqual('1');
-});

@@ -221,6 +221,7 @@ describe('should collect control values and create SFD', () => {
     datasource: '100__table',
     viz_type: 'source_viz',
   };
+
   const sourceMockStore = {
     form_data: sourceMockFormData,
     controls: Object.fromEntries(
@@ -234,6 +235,7 @@ describe('should collect control values and create SFD', () => {
       columns: [],
     },
   };
+
   beforeAll(() => {
     getChartControlPanelRegistry().registerValue('source_viz', {
       controlPanelSections: [

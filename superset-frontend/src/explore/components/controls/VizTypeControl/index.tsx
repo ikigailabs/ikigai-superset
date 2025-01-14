@@ -23,8 +23,6 @@ import {
   getChartMetadataRegistry,
   styled,
   SupersetTheme,
-  isFeatureEnabled,
-  FeatureFlag,
 } from '@superset-ui/core';
 import { usePluginContext } from 'src/components/DynamicPlugins';
 import Modal from 'src/components/Modal';
@@ -50,13 +48,6 @@ const denyList: string[] = (
   bootstrapData.common.conf.VIZ_TYPE_DENYLIST || []
 ).concat(Object.values(FilterPlugins));
 const metadataRegistry = getChartMetadataRegistry();
-
-if (
-  isFeatureEnabled(FeatureFlag.DASHBOARD_NATIVE_FILTERS) &&
-  !denyList.includes('filter_box')
-) {
-  denyList.push('filter_box');
-}
 
 export const VIZ_TYPE_CONTROL_TEST_ID = 'viz-type-control';
 

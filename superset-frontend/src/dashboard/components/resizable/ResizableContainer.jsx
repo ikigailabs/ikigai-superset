@@ -50,7 +50,6 @@ const propTypes = {
   onResize: PropTypes.func,
   onResizeStart: PropTypes.func,
   editMode: PropTypes.bool.isRequired,
-  isDynamicMarkdown: PropTypes.bool,
 };
 
 const defaultProps = {
@@ -73,7 +72,6 @@ const defaultProps = {
   onResizeStop: null,
   onResize: null,
   onResizeStart: null,
-  isDynamicMarkdown: false,
 };
 
 // because columns are not multiples of a single variable (width = n*cols + (n-1) * gutters)
@@ -248,7 +246,6 @@ class ResizableContainer extends React.PureComponent {
       maxHeightMultiple,
       gutterWidth,
       editMode,
-      isDynamicMarkdown,
     } = this.props;
 
     const size = {
@@ -263,9 +260,6 @@ class ResizableContainer extends React.PureComponent {
           staticHeight ||
           undefined,
     };
-    if (isDynamicMarkdown && !editMode) {
-      size.height = 'auto';
-    }
 
     let enableConfig = resizableConfig.notAdjustable;
 

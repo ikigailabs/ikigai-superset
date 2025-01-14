@@ -35,14 +35,13 @@ import {
   portField,
   queryField,
   usernameField,
-  SSHTunnelSwitch,
 } from './CommonParameters';
 import { validatedInputField } from './ValidatedInputField';
 import { EncryptedField } from './EncryptedField';
 import { TableCatalog } from './TableCatalog';
 import { formScrollableStyles, validatedFormStyles } from '../styles';
 import { DatabaseForm, DatabaseObject } from '../../types';
-// import SSHTunnelSwitch from '../SSHTunnelSwitch';
+import SSHTunnelSwitch from '../SSHTunnelSwitch';
 
 export const FormFieldOrder = [
   'host',

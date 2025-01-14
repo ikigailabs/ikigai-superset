@@ -1,4 +1,3 @@
-/* eslint-disable import/no-unresolved */
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -59,7 +58,6 @@ import {
 import {
   setDirectPathToChild,
   setEditMode,
-  setSupersetUrl,
 } from 'src/dashboard/actions/dashboardState';
 import {
   deleteTopLevelTabs,
@@ -85,11 +83,11 @@ import {
   OPEN_FILTER_BAR_WIDTH,
   EMPTY_CONTAINER_Z_INDEX,
 } from 'src/dashboard/constants';
+import BasicErrorAlert from 'src/components/ErrorMessage/BasicErrorAlert';
 import { getRootLevelTabsComponent, shouldFocusTabs } from './utils';
 import DashboardContainer from './DashboardContainer';
 import { useNativeFilters } from './state';
 import DashboardWrapper from './DashboardWrapper';
-// import '../../stylesheets/dashboard.less';
 
 type DashboardBuilderProps = {};
 
@@ -100,16 +98,11 @@ const FiltersPanel = styled.div<{ width: number; hidden: boolean }>`
   z-index: 11;
   width: ${({ width }) => width}px;
   ${({ hidden }) => hidden && `display: none;`}
-  background-color: #fff;
-  border-top: 1px solid #eee;
-  border-right: 1px solid #eee;
-  position: relative;
-  top: 65px;
 `;
 
 const StickyPanel = styled.div<{ width: number }>`
-  position: absolute;
-  top: -65px;
+  position: sticky;
+  top: -1px;
   width: ${({ width }) => width}px;
   flex: 0 0 ${({ width }) => width}px;
 `;
@@ -470,12 +463,6 @@ const DashboardBuilder: FC<DashboardBuilderProps> = () => {
       observer.observe(headerRef.current);
     }
 
-    const iframeUrl: any = new URL(window.location.href);
-
-    if (iframeUrl?.search) {
-      dispatch(setSupersetUrl(iframeUrl.toString()));
-    }
-
     return () => {
       observer?.disconnect();
     };
@@ -483,6 +470,7 @@ const DashboardBuilder: FC<DashboardBuilderProps> = () => {
 
   const {
     showDashboard,
+    missingInitialFilters,
     dashboardFiltersOpen,
     toggleDashboardFiltersOpen,
     nativeFiltersEnabled,
@@ -493,8 +481,7 @@ const DashboardBuilder: FC<DashboardBuilderProps> = () => {
   });
 
   const showFilterBar =
-    (crossFiltersEnabled || nativeFiltersEnabled) && editMode;
-  // const showFilterBar = false;
+    (crossFiltersEnabled || nativeFiltersEnabled) && !editMode;
 
   const offset =
     FILTER_BAR_HEADER_HEIGHT +
@@ -696,7 +683,32 @@ const DashboardBuilder: FC<DashboardBuilderProps> = () => {
             marginLeft={dashboardContentMarginLeft}
           >
             {showDashboard ? (
-              <DashboardContainer topLevelTabs={topLevelTabs} />
+              missingInitialFilters.length > 0 ? (
+                <div
+                  css={css`
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                    justify-content: center;
+                    flex: 1;
+                    & div {
+                      width: 500px;
+                    }
+                  `}
+                >
+                  <BasicErrorAlert
+                    title={t('Unable to load dashboard')}
+                    body={t(
+                      `The following filters have the 'Select first filter value by default'
+                    option checked and could not be loaded, which is preventing the dashboard
+                    from rendering: %s`,
+                      missingInitialFilters.join(', '),
+                    )}
+                  />
+                </div>
+              ) : (
+                <DashboardContainer topLevelTabs={topLevelTabs} />
+              )
             ) : (
               <Loading />
             )}

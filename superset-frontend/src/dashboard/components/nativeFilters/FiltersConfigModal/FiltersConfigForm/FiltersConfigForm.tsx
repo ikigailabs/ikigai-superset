@@ -105,6 +105,8 @@ import {
 import { FILTER_SUPPORTED_TYPES, INPUT_WIDTH } from './constants';
 import DependencyList from './DependencyList';
 
+const FORM_ITEM_WIDTH = 260;
+
 const TabPane = styled(Tabs.TabPane)`
   padding: ${({ theme }) => theme.gridUnit * 4}px 0px;
 `;
@@ -136,8 +138,8 @@ const controlsOrder: ControlKey[] = [
   'inverseSelection',
 ];
 
-export const StyledFormItem = styled(FormItem)`
-  width: 49%;
+export const StyledFormItem = styled(FormItem)<{ expanded: boolean }>`
+  width: ${({ expanded }) => (expanded ? '49%' : `${FORM_ITEM_WIDTH}px`)};
   margin-bottom: ${({ theme }) => theme.gridUnit * 4}px;
 
   & .ant-form-item-label {
@@ -149,10 +151,10 @@ export const StyledFormItem = styled(FormItem)`
   }
 `;
 
-export const StyledRowFormItem = styled(FormItem)`
+export const StyledRowFormItem = styled(FormItem)<{ expanded: boolean }>`
   margin-bottom: 0;
   padding-bottom: 0;
-  min-width: 50%;
+  min-width: ${({ expanded }) => (expanded ? '50%' : `${FORM_ITEM_WIDTH}px`)};
 
   & .ant-form-item-label {
     padding-bottom: 0;
@@ -167,8 +169,8 @@ export const StyledRowFormItem = styled(FormItem)`
   }
 `;
 
-export const StyledRowSubFormItem = styled(FormItem)`
-  min-width: 50%;
+export const StyledRowSubFormItem = styled(FormItem)<{ expanded: boolean }>`
+  min-width: ${({ expanded }) => (expanded ? '50%' : `${FORM_ITEM_WIDTH}px`)};
 
   & .ant-form-item-label {
     padding-bottom: 0;
@@ -264,9 +266,9 @@ const StyledAsterisk = styled.span`
   }
 `;
 
-const FilterTypeInfo = styled.div`
-  ${({ theme }) => `
-    width: 49%;
+const FilterTypeInfo = styled.div<{ expanded: boolean }>`
+  ${({ theme, expanded }) => `
+    width: ${expanded ? '49%' : `${FORM_ITEM_WIDTH}px`};
     font-size: ${theme.typography.sizes.s}px;
     color: ${theme.colors.grayscale.light1};
     margin:
@@ -300,7 +302,7 @@ export const FilterPanels = {
 };
 
 export interface FiltersConfigFormProps {
-  appDatasets: any[];
+  expanded: boolean;
   filterId: string;
   filterToEdit?: Filter;
   removedFilters: Record<string, FilterRemoval>;
@@ -335,7 +337,7 @@ const FILTER_TYPE_NAME_MAPPING = {
  */
 const FiltersConfigForm = (
   {
-    appDatasets,
+    expanded,
     filterId,
     filterToEdit,
     removedFilters,
@@ -378,38 +380,13 @@ const FiltersConfigForm = (
   const nativeFilterVizTypes = Object.entries(nativeFilterItems)
     // @ts-ignore
     .filter(([, { value }]) => value.behaviors?.includes(Behavior.NativeFilter))
-    .map(([key]) => key);
-  console.log('nativeFilterVizTypes', nativeFilterVizTypes, nativeFilterItems);
+    .map(([key]) => key as keyof typeof FILTER_SUPPORTED_TYPES);
 
   const loadedDatasets = useSelector<RootState, DatasourcesState>(
     ({ datasources }) => datasources,
   );
 
-  console.log('loadedDatasets', loadedDatasets);
-  if (loadedDatasets && Object.keys(loadedDatasets).length > 0) {
-    Object.keys(loadedDatasets).map((ld: any) => {
-      const tempDataset: any = loadedDatasets[ld];
-      const table_name = tempDataset?.table_name;
-      // const table_name = 'TEST_2j8svHTs7ab1ReAtREIidBzTYty"';
-      let dataset_id = '';
-      let new_table_name = '';
-      if (appDatasets && dataset_id) {
-        const foundDataset: any = appDatasets.filter(
-          (ad: any) => ad?.full_id === table_name,
-        );
-        if (foundDataset[0]) {
-          new_table_name = foundDataset[0]?.name;
-        }
-      }
-      // tempDataset.new_table_name = new_table_name;
-      tempDataset.new_table_name = new_table_name;
-      console.log('ld', tempDataset);
-      return tempDataset;
-    });
-  }
-
   const charts = useSelector<RootState, ChartsState>(({ charts }) => charts);
-  console.log('charts', charts);
 
   const doLoadedDatasetsHaveTemporalColumns = useMemo(
     () =>
@@ -431,16 +408,14 @@ const FiltersConfigForm = (
     // @ts-ignore
     !!nativeFilterItems[formFilter?.filterType]?.value?.datasourceCount;
 
-  console.log('hasDataset', hasDataset);
-
   const datasetId =
     formFilter?.dataset?.value ??
     filterToEdit?.targets[0]?.datasetId ??
     mostUsedDataset(loadedDatasets, charts);
-  console.log('datasetId', datasetId);
 
   const { controlItems = {}, mainControlItems = {} } = formFilter
     ? getControlItemsMap({
+        expanded,
         datasetId,
         disabled: false,
         forceUpdate,
@@ -453,10 +428,8 @@ const FiltersConfigForm = (
       })
     : {};
   const hasColumn = !!mainControlItems.groupby;
-  console.log('hasColumn', hasColumn);
 
   const nativeFilterItem = nativeFilterItems[formFilter?.filterType] ?? {};
-  console.log('nativeFilterItem', nativeFilterItem);
   // @ts-ignore
   const enableNoResults = !!nativeFilterItem.value?.enableNoResults;
 
@@ -584,8 +557,6 @@ const FiltersConfigForm = (
 
   const showDataset =
     !datasetId || datasetDetails || formFilter?.dataset?.label;
-
-  console.log('showDataset', showDataset);
 
   const formChanged = useCallback(() => {
     form.setFields([
@@ -794,6 +765,7 @@ const FiltersConfigForm = (
 
   const timeColumn = (
     <StyledRowFormItem
+      expanded={expanded}
       name={['filters', filterId, 'granularity_sqla']}
       label={
         <>
@@ -818,7 +790,7 @@ const FiltersConfigForm = (
         filterValues={(column: Column) => !!column.is_dttm}
         datasetId={datasetId}
         onChange={column => {
-          // We need reset default value when column changed
+          // We need reset default value when when column changed
           setNativeFilterFieldValues(form, filterId, {
             granularity_sqla: column,
           });
@@ -841,6 +813,7 @@ const FiltersConfigForm = (
       >
         <StyledContainer>
           <StyledFormItem
+            expanded={expanded}
             name={['filters', filterId, 'type']}
             hidden
             initialValue={NativeFilterType.NativeFilter}
@@ -848,6 +821,7 @@ const FiltersConfigForm = (
             <Input />
           </StyledFormItem>
           <StyledFormItem
+            expanded={expanded}
             name={['filters', filterId, 'name']}
             label={<StyledLabel>{t('Filter name')}</StyledLabel>}
             initialValue={filterToEdit?.name}
@@ -856,6 +830,7 @@ const FiltersConfigForm = (
             <Input {...getFiltersConfigModalTestId('name-input')} />
           </StyledFormItem>
           <StyledFormItem
+            expanded={expanded}
             name={['filters', filterId, 'filterType']}
             rules={[{ required: !isRemoved, message: t('Name is required') }]}
             initialValue={filterToEdit?.filterType || 'filter_select'}
@@ -901,7 +876,7 @@ const FiltersConfigForm = (
           </StyledFormItem>
         </StyledContainer>
         {formFilter?.filterType === 'filter_time' && (
-          <FilterTypeInfo>
+          <FilterTypeInfo expanded={expanded}>
             {t(`Dashboard time range filters apply to temporal columns defined in
           the filter section of each chart. Add temporal columns to the chart
           filters to have this dashboard filter impact those charts.`)}
@@ -909,8 +884,9 @@ const FiltersConfigForm = (
         )}
         {hasDataset && (
           <StyledRowContainer>
-            {showDataset || loadedDatasets ? (
+            {showDataset ? (
               <StyledFormItem
+                expanded={expanded}
                 name={['filters', filterId, 'dataset']}
                 label={<StyledLabel>{t('Dataset')}</StyledLabel>}
                 initialValue={
@@ -935,7 +911,6 @@ const FiltersConfigForm = (
                 {...getFiltersConfigModalTestId('datasource-input')}
               >
                 <DatasetSelect
-                  datasets={loadedDatasets}
                   onChange={(value: { label: string; value: number }) => {
                     // We need to reset the column when the dataset has changed
                     if (value.value !== datasetId) {
@@ -950,7 +925,10 @@ const FiltersConfigForm = (
                 />
               </StyledFormItem>
             ) : (
-              <StyledFormItem label={<StyledLabel>{t('Dataset')}</StyledLabel>}>
+              <StyledFormItem
+                expanded={expanded}
+                label={<StyledLabel>{t('Dataset')}</StyledLabel>}
+              >
                 <Loading position="inline-centered" />
               </StyledFormItem>
             )}
@@ -976,6 +954,7 @@ const FiltersConfigForm = (
             >
               {canDependOnOtherFilters && hasAvailableFilters && (
                 <StyledRowFormItem
+                  expanded={expanded}
                   name={['filters', filterId, 'dependencies']}
                   initialValue={dependencies}
                 >
@@ -1016,6 +995,7 @@ const FiltersConfigForm = (
                     }}
                   >
                     <StyledRowSubFormItem
+                      expanded={expanded}
                       name={['filters', filterId, 'adhoc_filters']}
                       css={{ width: INPUT_WIDTH }}
                       initialValue={filterToEdit?.adhoc_filters}
@@ -1051,6 +1031,7 @@ const FiltersConfigForm = (
                     </StyledRowSubFormItem>
                     {showTimeRangePicker && (
                       <StyledRowFormItem
+                        expanded={expanded}
                         name={['filters', filterId, 'time_range']}
                         label={<StyledLabel>{t('Time range')}</StyledLabel>}
                         initialValue={
@@ -1092,6 +1073,7 @@ const FiltersConfigForm = (
                     }}
                   >
                     <StyledRowFormItem
+                      expanded={expanded}
                       name={[
                         'filters',
                         filterId,
@@ -1112,6 +1094,7 @@ const FiltersConfigForm = (
                     </StyledRowFormItem>
                     {hasMetrics && (
                       <StyledRowSubFormItem
+                        expanded={expanded}
                         name={['filters', filterId, 'sortMetric']}
                         initialValue={filterToEdit?.sortMetric}
                         label={
@@ -1161,6 +1144,7 @@ const FiltersConfigForm = (
                     }}
                   >
                     <StyledRowFormItem
+                      expanded={expanded}
                       name={[
                         'filters',
                         filterId,
@@ -1199,6 +1183,7 @@ const FiltersConfigForm = (
             key={`${filterId}-${FilterPanels.settings.key}`}
           >
             <StyledFormItem
+              expanded={expanded}
               name={['filters', filterId, 'description']}
               initialValue={filterToEdit?.description}
               label={<StyledLabel>{t('Description')}</StyledLabel>}
@@ -1229,6 +1214,7 @@ const FiltersConfigForm = (
               >
                 {!isRemoved && (
                   <StyledRowSubFormItem
+                    expanded={expanded}
                     name={['filters', filterId, 'defaultDataMask']}
                     initialValue={initialDefaultValue}
                     data-test="default-input"

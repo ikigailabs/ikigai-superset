@@ -16,9 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-/*
- *Sep 8 2022 - Added functionality to modify all custom component URL's added manualy (html iframe) - update url origin
- */
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
@@ -50,7 +47,6 @@ const propTypes = {
   index: PropTypes.number.isRequired,
   depth: PropTypes.number.isRequired,
   editMode: PropTypes.bool.isRequired,
-  ikigaiOrigin: PropTypes.string,
 
   // from redux
   logEvent: PropTypes.func.isRequired,
@@ -296,38 +292,14 @@ class Markdown extends React.PureComponent {
   }
 
   renderPreviewMode() {
-    const { hasError, markdownSource } = this.state;
-    const { ikigaiOrigin } = this.props;
-    let markdown = markdownSource;
-    // console.log('renderPreviewMode', markdownSource);
-    if (markdown && ikigaiOrigin) {
-      const foundWidget = markdown.includes('/widget/');
-      // console.log('foundWidget', foundWidget);
-      if (foundWidget) {
-        const iframeWrapper = document.createElement('div');
-        iframeWrapper.innerHTML = markdown;
-        // console.log('iframeWrapper', iframeWrapper);
-        const iframeHtml = iframeWrapper.getElementsByTagName('iframe')[0];
-        // console.log('iframeHtml', iframeHtml);
-        const iframeSrcUrl = new URL(iframeHtml.src);
-        // console.log('iframeSrcUrl', iframeSrcUrl);
-        const newIframeSrc = `${ikigaiOrigin}${iframeSrcUrl.pathname}${iframeSrcUrl.search}`;
-        // console.log('newIframeSrc', newIframeSrc);
-        // iframeHtml.setAttribute('src', newIframeSrc);
-        // console.log('iframeHtml2', iframeHtml);
-        iframeWrapper
-          .getElementsByTagName('iframe')[0]
-          .setAttribute('src', newIframeSrc);
-        // console.log('iframeWrapper2', iframeWrapper);
-        markdown = iframeWrapper.innerHTML;
-        // console.log('markdown', markdown);
-      }
-    }
+    const { hasError } = this.state;
 
     return (
       <SafeMarkdown
         source={
-          hasError ? MARKDOWN_ERROR_MESSAGE : markdown || MARKDOWN_PLACE_HOLDER
+          hasError
+            ? MARKDOWN_ERROR_MESSAGE
+            : this.state.markdownSource || MARKDOWN_PLACE_HOLDER
         }
         htmlSanitization={this.props.htmlSanitization}
         htmlSchemaOverrides={this.props.htmlSchemaOverrides}

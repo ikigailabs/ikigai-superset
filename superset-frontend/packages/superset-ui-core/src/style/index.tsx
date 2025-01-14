@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-// import emotionStyled from '@emotion/styled';
+import emotionStyled from '@emotion/styled';
 import { useTheme as useThemeBasic } from '@emotion/react';
 import createCache from '@emotion/cache';
 
@@ -50,8 +50,7 @@ export const emotionCache = createCache({
   key: 'superset',
 });
 
-// export const styled = emotionStyled;
-export { default as styled } from '@emotion/styled';
+export const styled = emotionStyled;
 
 const defaultTheme = {
   borderRadius: 4,
@@ -61,13 +60,13 @@ const defaultTheme = {
       help: '#737373',
     },
     primary: {
-      base: '#7822ff',
-      dark1: '#7822ff',
+      base: '#20A7C9',
+      dark1: '#1A85A0',
       dark2: '#156378',
       light1: '#79CADE',
       light2: '#A5DAE9',
       light3: '#D2EDF4',
-      light4: '#f2f3ff',
+      light4: '#E9F6F9',
       light5: '#F3F8FA',
     },
     secondary: {

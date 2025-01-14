@@ -212,7 +212,6 @@ export default function EditableTitle({
             : noPermitTooltip ||
               t("You don't have the rights to alter this title.")
         }
-        placement="bottom"
       >
         {titleComponent}
       </Tooltip>

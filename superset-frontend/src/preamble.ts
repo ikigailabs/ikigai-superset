@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-// import { setConfig as setHotLoaderConfig } from 'react-hot-loader';
+import { setConfig as setHotLoaderConfig } from 'react-hot-loader';
 import 'abortcontroller-polyfill/dist/abortcontroller-polyfill-only';
 import moment from 'moment';
 // eslint-disable-next-line no-restricted-imports
@@ -35,7 +35,7 @@ import { User } from './types/bootstrapTypes';
 import getBootstrapData from './utils/getBootstrapData';
 
 if (process.env.WEBPACK_MODE === 'development') {
-  // setHotLoaderConfig({ logLevel: 'debug', trackTailUpdates: false });
+  setHotLoaderConfig({ logLevel: 'debug', trackTailUpdates: false });
 }
 
 // eslint-disable-next-line import/no-mutable-exports

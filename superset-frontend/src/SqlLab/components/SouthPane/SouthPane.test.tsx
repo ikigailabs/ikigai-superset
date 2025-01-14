@@ -23,7 +23,6 @@ import '@testing-library/jest-dom/extend-expect';
 import { STATUS_OPTIONS } from 'src/SqlLab/constants';
 import { initialState, table, defaultQueryEditor } from 'src/SqlLab/fixtures';
 import { denormalizeTimestamp } from '@superset-ui/core';
-// import { Store } from 'redux';
 
 const mockedProps = {
   queryEditorId: defaultQueryEditor.id,
@@ -40,8 +39,6 @@ const mockedEmptyProps = {
   displayLimit: 100,
   defaultQueryLimit: 100,
 };
-
-jest.mock('src/SqlLab/components/SqlEditorLeftBar', () => jest.fn());
 
 const latestQueryProgressMsg = 'LATEST QUERY MESSAGE - LCly_kkIN';
 

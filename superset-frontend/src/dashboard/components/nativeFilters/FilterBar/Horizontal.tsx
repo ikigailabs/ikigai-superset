@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import {
   DataMaskStateWithId,
   FeatureFlag,
@@ -129,12 +129,6 @@ const HorizontalFilterBar: React.FC<HorizontalBarProps> = ({
     : [];
   const hasFilters = filterValues.length > 0 || selectedCrossFilters.length > 0;
 
-  const actionsElement = useMemo(
-    () =>
-      isFeatureEnabled(FeatureFlag.DashboardNativeFilters) ? actions : null,
-    [actions],
-  );
-
   return (
     <HorizontalBar {...getFilterBarTestId()}>
       <HorizontalBarContent>
@@ -143,17 +137,16 @@ const HorizontalFilterBar: React.FC<HorizontalBarProps> = ({
         ) : (
           <>
             <FilterBarSettings />
-            {canEdit &&
-              isFeatureEnabled(FeatureFlag.DashboardNativeFilters) && (
-                <FiltersLinkContainer hasFilters={hasFilters}>
-                  <FilterConfigurationLink
-                    dashboardId={dashboardId}
-                    createNewOnOpen={filterValues.length === 0}
-                  >
-                    <Icons.PlusSmall /> {t('Add/Edit Filters')}
-                  </FilterConfigurationLink>
-                </FiltersLinkContainer>
-              )}
+            {canEdit && (
+              <FiltersLinkContainer hasFilters={hasFilters}>
+                <FilterConfigurationLink
+                  dashboardId={dashboardId}
+                  createNewOnOpen={filterValues.length === 0}
+                >
+                  <Icons.PlusSmall /> {t('Add/Edit Filters')}
+                </FilterConfigurationLink>
+              </FiltersLinkContainer>
+            )}
             {!hasFilters && (
               <FilterBarEmptyStateContainer data-test="horizontal-filterbar-empty">
                 {t('No filters are currently added to this dashboard.')}
@@ -165,7 +158,7 @@ const HorizontalFilterBar: React.FC<HorizontalBarProps> = ({
                 onFilterSelectionChange={onSelectionChange}
               />
             )}
-            {actionsElement}
+            {actions}
           </>
         )}
       </HorizontalBarContent>

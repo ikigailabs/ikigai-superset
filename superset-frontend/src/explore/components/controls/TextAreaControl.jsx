@@ -92,7 +92,7 @@ class TextAreaControl extends React.Component {
         style.resize = this.props.resize;
       }
       if (this.props.readOnly) {
-        style.backgroundColor = '#f2f3ff';
+        style.backgroundColor = '#f2f2f2';
       }
 
       return (

@@ -650,9 +650,3 @@ export function setDatasetsStatus(status) {
     status,
   };
 }
-
-export const SET_SUPERSET_URL = 'SET_SUPERSET_URL';
-export function setSupersetUrl(supersetUrl) {
-  console.log('supersetUrl', supersetUrl);
-  return { type: SET_SUPERSET_URL, supersetUrl };
-}

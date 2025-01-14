@@ -31,11 +31,6 @@ const defaultProps = {
   onSelectionChange: jest.fn(),
 };
 
-// @ts-ignore
-global.featureFlags = {
-  [FeatureFlag.DASHBOARD_NATIVE_FILTERS]: true,
-};
-
 const renderWrapper = (overrideProps?: Record<string, any>) =>
   waitFor(() =>
     render(<HorizontalBar {...defaultProps} {...overrideProps} />, {

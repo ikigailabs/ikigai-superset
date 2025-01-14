@@ -17,7 +17,6 @@
  * under the License.
  */
 import { css, SupersetTheme } from '@superset-ui/core';
-// import './stylesheets/dashboard.less';
 
 export const headerStyles = (theme: SupersetTheme) => css`
   body {

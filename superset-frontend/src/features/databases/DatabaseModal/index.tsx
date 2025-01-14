@@ -794,6 +794,7 @@ const DatabaseModal: FunctionComponent<DatabaseModalProps> = ({
           t('Connection failed, please check your connection settings.'),
         );
         setLoading(false);
+        return;
       }
 
       const parameters_schema = isEditMode

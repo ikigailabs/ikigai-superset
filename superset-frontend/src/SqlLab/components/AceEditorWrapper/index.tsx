@@ -17,26 +17,26 @@
  * under the License.
  */
 import React, { useState, useEffect, useRef } from 'react';
-// import type { IAceEditor } from 'react-ace/lib/types';
-import { useDispatch } from 'react-redux';
+import type { IAceEditor } from 'react-ace/lib/types';
+import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import { css, styled, usePrevious, useTheme } from '@superset-ui/core';
 import { Global } from '@emotion/react';
 
 import { SQL_EDITOR_LEFTBAR_WIDTH } from 'src/SqlLab/constants';
 import { queryEditorSetSelectedText } from 'src/SqlLab/actions/sqlLab';
 import { FullSQLEditor as AceEditor } from 'src/components/AsyncAceEditor';
-// import type { KeyboardShortcut } from 'src/SqlLab/components/KeyboardShortcutButton';
+import type { KeyboardShortcut } from 'src/SqlLab/components/KeyboardShortcutButton';
 import useQueryEditor from 'src/SqlLab/hooks/useQueryEditor';
-import type { CursorPosition } from 'src/SqlLab/types';
+import { SqlLabRootState, type CursorPosition } from 'src/SqlLab/types';
 import { useAnnotations } from './useAnnotations';
 import { useKeywords } from './useKeywords';
 
-/* type HotKey = {
+type HotKey = {
   key: KeyboardShortcut;
   descr?: string;
   name: string;
   func: (aceEditor: IAceEditor) => void;
-}; */
+};
 
 type AceEditorWrapperProps = {
   autocomplete: boolean;
@@ -45,7 +45,7 @@ type AceEditorWrapperProps = {
   queryEditorId: string;
   onCursorPositionChange: (position: CursorPosition) => void;
   height: string;
-  hotkeys: any; // HotKey[];
+  hotkeys: HotKey[];
 };
 
 const StyledAceEditor = styled(AceEditor)`
@@ -76,11 +76,20 @@ const AceEditorWrapper = ({
     'sql',
     'schema',
     'templateParams',
-    'cursorPosition',
   ]);
+  // Prevent a maximum update depth exceeded error
+  // by skipping access the unsaved query editor state
+  const cursorPosition = useSelector<SqlLabRootState, CursorPosition>(
+    ({ sqlLab: { queryEditors } }) => {
+      const { cursorPosition } = {
+        ...queryEditors.find(({ id }) => id === queryEditorId),
+      };
+      return cursorPosition ?? { row: 0, column: 0 };
+    },
+    shallowEqual,
+  );
 
   const currentSql = queryEditor.sql ?? '';
-  const cursorPosition = queryEditor.cursorPosition ?? { row: 0, column: 0 };
   const [sql, setSql] = useState(currentSql);
 
   // The editor changeSelection is called multiple times in a row,
@@ -119,7 +128,7 @@ const AceEditorWrapper = ({
       },
     });
 
-    hotkeys.forEach((keyConfig: any) => {
+    hotkeys.forEach(keyConfig => {
       editor.commands.addCommand({
         name: keyConfig.name,
         bindKey: { win: keyConfig.key, mac: keyConfig.key },

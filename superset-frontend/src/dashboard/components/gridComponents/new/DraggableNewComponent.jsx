@@ -30,7 +30,6 @@ const propTypes = {
   type: PropTypes.string.isRequired,
   label: PropTypes.string.isRequired,
   className: PropTypes.string,
-  demandApp: PropTypes.bool,
 };
 
 const defaultProps = {
@@ -86,15 +85,7 @@ const NewComponentPlaceholder = styled.div`
 
 export default class DraggableNewComponent extends React.PureComponent {
   render() {
-    const {
-      label,
-      id,
-      type,
-      className,
-      meta,
-      description,
-      // description, demandApp
-    } = this.props;
+    const { label, id, type, className, meta } = this.props;
     return (
       <DragDroppable
         component={{ type, id, meta }}
@@ -107,18 +98,11 @@ export default class DraggableNewComponent extends React.PureComponent {
         editMode
       >
         {({ dragSourceRef }) => (
-          <NewComponent
-            ref={dragSourceRef}
-            data-test="new-component"
-            className="new-component"
-          >
+          <NewComponent ref={dragSourceRef} data-test="new-component">
             <NewComponentPlaceholder
               className={cx('new-component-placeholder', className)}
             />
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <div className="new-component-label">{label}</div>
-              <div className="new-component-description">{description}</div>
-            </div>
+            {label}
           </NewComponent>
         )}
       </DragDroppable>

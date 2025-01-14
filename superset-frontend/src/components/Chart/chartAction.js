@@ -563,29 +563,21 @@ export function redirectSQLLab(formData, history) {
 export function refreshChart(chartKey, force, dashboardId) {
   return (dispatch, getState) => {
     const chart = (getState().charts || {})[chartKey];
-    console.log(
-      'chart',
-      getState().charts,
-      chart,
-      chartKey,
-      force,
-      dashboardId,
-    );
     const timeout =
       getState().dashboardInfo.common.conf.SUPERSET_WEBSERVER_TIMEOUT;
 
     if (
-      !chart?.latestQueryFormData ||
-      Object.keys(chart?.latestQueryFormData).length === 0
+      !chart.latestQueryFormData ||
+      Object.keys(chart.latestQueryFormData).length === 0
     ) {
       return;
     }
     dispatch(
       postChartFormData(
-        chart?.latestQueryFormData,
+        chart.latestQueryFormData,
         force,
         timeout,
-        chart?.id,
+        chart.id,
         dashboardId,
         getState().dataMask[chart.id]?.ownState,
       ),

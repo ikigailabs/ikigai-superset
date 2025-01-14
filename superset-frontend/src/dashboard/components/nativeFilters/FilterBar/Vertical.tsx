@@ -57,7 +57,7 @@ const Bar = styled.div<{ width: number }>`
       width: 100%;
     }
     position: absolute;
-    top: 66px;
+    top: 0;
     left: 0;
     flex-direction: column;
     flex-grow: 1;
@@ -196,17 +196,6 @@ const VerticalFilterBar: React.FC<VerticalBarProps> = ({
     [],
   );
 
-  /* const actionsElement = useMemo(() =>
-    // isFeatureEnabled(FeatureFlag.DASHBOARD_NATIVE_FILTERS) ? actions : null,
-    {
-      actions;
-    }, [actions]); */
-
-  // Filter sets depend on native filters
-  /* const filterSetEnabled =
-    isFeatureEnabled(FeatureFlag.DASHBOARD_NATIVE_FILTERS_SET) &&
-    isFeatureEnabled(FeatureFlag.DASHBOARD_NATIVE_FILTERS); */
-
   return (
     <FilterBarScrollContext.Provider value={isScrolling}>
       <BarWrapper
@@ -239,9 +228,7 @@ const VerticalFilterBar: React.FC<VerticalBarProps> = ({
             <div css={tabPaneStyle} onScroll={onScroll}>
               <>
                 {crossFilters}
-                {/* {isFeatureEnabled(FeatureFlag.DASHBOARD_NATIVE_FILTERS) &&
-                  filterControls} */}
-                <div>{filterControls}</div>
+                {filterControls}
               </>
             </div>
           )}

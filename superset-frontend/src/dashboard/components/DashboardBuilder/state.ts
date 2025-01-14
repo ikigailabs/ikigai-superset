@@ -1,4 +1,3 @@
-/* eslint-disable import/no-unresolved */
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -19,8 +18,8 @@
  */
 import { useSelector } from 'react-redux';
 import { useCallback, useEffect, useState } from 'react';
-// import { URL_PARAMS } from 'src/constants';
-// import { getUrlParam } from 'src/utils/urlUtils';
+import { URL_PARAMS } from 'src/constants';
+import { getUrlParam } from 'src/utils/urlUtils';
 import { RootState } from 'src/dashboard/types';
 import {
   useFilters,
@@ -36,9 +35,10 @@ export const useNativeFilters = () => {
 
   const filters = useFilters();
   const filterValues = Object.values(filters);
-  // const expandFilters = getUrlParam(URL_PARAMS.expandFilters);
-  const expandFilters = false;
-  const [dashboardFiltersOpen, setDashboardFiltersOpen] = useState(false);
+  const expandFilters = getUrlParam(URL_PARAMS.expandFilters);
+  const [dashboardFiltersOpen, setDashboardFiltersOpen] = useState(
+    expandFilters ?? !!filterValues.length,
+  );
 
   const nativeFiltersEnabled =
     canEdit || (!canEdit && filterValues.length !== 0);
@@ -47,17 +47,14 @@ export const useNativeFilters = () => {
     filter => filter.requiredFirst,
   );
   const dataMask = useNativeFiltersDataMask();
+
+  const missingInitialFilters = requiredFirstFilter
+    .filter(({ id }) => dataMask[id]?.filterState?.value === undefined)
+    .map(({ name }) => name);
   const showDashboard =
     isInitialized ||
     !nativeFiltersEnabled ||
-    !(
-      nativeFiltersEnabled &&
-      requiredFirstFilter.length &&
-      requiredFirstFilter.find(
-        ({ id }) => dataMask[id]?.filterState?.value === undefined,
-      )
-    );
-
+    missingInitialFilters.length === 0;
   const toggleDashboardFiltersOpen = useCallback(
     (visible?: boolean) => {
       setDashboardFiltersOpen(visible ?? !dashboardFiltersOpen);
@@ -84,6 +81,7 @@ export const useNativeFilters = () => {
 
   return {
     showDashboard,
+    missingInitialFilters,
     dashboardFiltersOpen,
     toggleDashboardFiltersOpen,
     nativeFiltersEnabled,

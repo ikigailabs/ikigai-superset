@@ -21,25 +21,12 @@ import {
   CHART_TYPE,
   MARKDOWN_TYPE,
   DYNAMIC_TYPE,
-  IKI_DEEPCAST_TYPE,
-  IKI_RUN_PIPELINE_TYPE,
-  IKI_FORECAST_MODULE_TYPE,
-  IKI_DATASET_DOWNLOAD_TYPE,
-  IKI_DYNAMIC_MARKDOWN_TYPE,
 } from './componentTypes';
 
 export default function componentIsResizable(entity: { type: string }) {
   return (
-    [
-      COLUMN_TYPE,
-      CHART_TYPE,
-      MARKDOWN_TYPE,
-      DYNAMIC_TYPE,
-      IKI_RUN_PIPELINE_TYPE,
-      IKI_DEEPCAST_TYPE,
-      IKI_FORECAST_MODULE_TYPE,
-      IKI_DATASET_DOWNLOAD_TYPE,
-      IKI_DYNAMIC_MARKDOWN_TYPE,
-    ].indexOf(entity.type) > -1
+    [COLUMN_TYPE, CHART_TYPE, MARKDOWN_TYPE, DYNAMIC_TYPE].indexOf(
+      entity.type,
+    ) > -1
   );
 }
