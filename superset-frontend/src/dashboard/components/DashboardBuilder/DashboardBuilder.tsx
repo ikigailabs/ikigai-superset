@@ -95,7 +95,7 @@ import { getRootLevelTabsComponent, shouldFocusTabs } from './utils';
 import DashboardContainer from './DashboardContainer';
 import { useNativeFilters } from './state';
 import DashboardWrapper from './DashboardWrapper';
-// import '../../stylesheets/dashboard.less';
+import '../../stylesheets/dashboard.less';
 
 type DashboardBuilderProps = {};
 
@@ -328,6 +328,7 @@ const StyledDashboardContent = styled.div<{
     flex-wrap: nowrap;
     height: auto;
     flex: 1;
+    background-color: #f7f7f7;
 
     .grid-container .dashboard-component-tabs {
       box-shadow: none;
