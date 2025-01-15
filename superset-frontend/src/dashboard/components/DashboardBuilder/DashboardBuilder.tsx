@@ -37,6 +37,8 @@ import {
   t,
   useTheme,
   useElementOnScreen,
+  JsonResponse,
+  SupersetApiError,
 } from '@superset-ui/core';
 import { Global } from '@emotion/react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -86,6 +88,9 @@ import {
   OPEN_FILTER_BAR_WIDTH,
   EMPTY_CONTAINER_Z_INDEX,
 } from 'src/dashboard/constants';
+import { cachedSupersetGet } from 'src/utils/cachedSupersetGet';
+import rison from 'rison';
+import { addDangerToast } from 'src/components/MessageToasts/actions';
 import { getRootLevelTabsComponent, shouldFocusTabs } from './utils';
 import DashboardContainer from './DashboardContainer';
 import { useNativeFilters } from './state';
@@ -621,7 +626,7 @@ const DashboardBuilder: FC<DashboardBuilderProps> = () => {
       ? 0
       : theme.gridUnit * 8;
 
-  function handleIncomingWindowMsg(parentOrigin: string) {
+  function handleIncomingWindowMsg(parentOrigin: string, allDatasets: any) {
     console.log('handleIncomingWindowMsg', parentOrigin);
     window.addEventListener('message', event => {
       console.log('event.origin', event.origin, parentOrigin);
@@ -645,9 +650,11 @@ const DashboardBuilder: FC<DashboardBuilderProps> = () => {
               'top-window-to-superset/sending-data',
               'messageData',
               messageData,
+              'allDatasets',
+              allDatasets,
             );
             if (messageData?.datasets)
-              dispatch(setAppDatasources(messageData?.datasets));
+              dispatch(setAppDatasources(messageData?.datasets, allDatasets));
           }
         }
       }
@@ -677,7 +684,38 @@ const DashboardBuilder: FC<DashboardBuilderProps> = () => {
     // dispatch(setAppDatasources('test11'));
     const ikigaiOrigin: any = getIframeUrl();
     console.log('ikigaiOrigin', ikigaiOrigin);
-    handleIncomingWindowMsg(ikigaiOrigin);
+    cachedSupersetGet({
+      endpoint: `/api/v1/dataset?q=${rison.encode({
+        columns: [
+          'columns.column_name',
+          'columns.expression',
+          'columns.filterable',
+          'columns.is_dttm',
+          'columns.type',
+          'columns.verbose_name',
+          'database.id',
+          'database.database_name',
+          'datasource_type',
+          'filter_select_enabled',
+          'id',
+          'is_sqllab_view',
+          'main_dttm_col',
+          'metrics.metric_name',
+          'metrics.verbose_name',
+          'schema',
+          'sql',
+          'table_name',
+        ],
+      })}`,
+    })
+      .then((response: JsonResponse) => {
+        const allDatasets = response.json?.result;
+        // console.log('allDatasets', allDatasets);
+        handleIncomingWindowMsg(ikigaiOrigin, allDatasets);
+      })
+      .catch((response: SupersetApiError) => {
+        addDangerToast(response.message);
+      });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

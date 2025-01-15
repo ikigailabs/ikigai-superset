@@ -260,11 +260,12 @@ export default function dashboardStateReducer(state = {}, action) {
     },
     [SET_APP_DATASOURCES]() {
       console.log('SET_APP_DATASOURCES', action);
-      const { appDatasources } = action;
+      const { appDatasources, allDatasets } = action;
 
       return {
         ...state,
         appDatasources,
+        allDatasets,
       };
     },
   };

@@ -114,6 +114,7 @@ export type DashboardState = {
     data: JsonObject;
   };
   appDatasources: any;
+  allDatasets: any;
 };
 export type DashboardInfo = {
   id: number;

@@ -37,6 +37,7 @@ import {
   styled,
   SupersetApiError,
   t,
+  JsonObject,
 } from '@superset-ui/core';
 import { isEqual } from 'lodash';
 import React, {
@@ -67,6 +68,7 @@ import { cachedSupersetGet } from 'src/utils/cachedSupersetGet';
 import {
   Chart,
   ChartsState,
+  DashboardLayout,
   DatasourcesState,
   RootState,
 } from 'src/dashboard/types';
@@ -328,6 +330,81 @@ const FILTER_TYPE_NAME_MAPPING = {
   [t('Group By')]: t('Group by'),
 };
 
+function prepareDatasetDropdownData(
+  dashboardLayout: any,
+  allDatasets: any,
+  appDatasources: any,
+  charts: any,
+) {
+  let datasources: any = [];
+  const finalList: any = [];
+  if (dashboardLayout && Object.keys(dashboardLayout).length > 0) {
+    const datasourceIds: any = [];
+    Object.keys(dashboardLayout).forEach((layoutId: any) => {
+      const layoutObject: any = dashboardLayout[layoutId];
+      if (layoutObject?.type === 'CHART') {
+        const chartId = layoutObject?.meta?.chartId;
+        const temp_datasource = charts[chartId]
+          ? charts[chartId]?.form_data?.datasource
+          : '';
+        if (temp_datasource) {
+          const temp_datasource_arr: any = temp_datasource.split('__');
+          if (temp_datasource_arr[0]) {
+            const datasource_id = temp_datasource_arr[0];
+            datasourceIds.push(datasource_id);
+          }
+        }
+      }
+      /* const tempDataset: any = loadedDatasets[ld];
+      const table_name = tempDataset?.table_name;
+      // const table_name = 'TEST_2j8svHTs7ab1ReAtREIidBzTYty"';
+      let new_table_name = '';
+      if (appDatasources && table_name) {
+        const foundDataset: any = appDatasources.filter(
+          (ad: any) => ad?.full_id === table_name,
+        );
+        if (foundDataset[0]) {
+          new_table_name = foundDataset[0]?.name;
+        }
+      }
+      // tempDataset.new_table_name = new_table_name;
+      tempDataset.new_table_name = new_table_name;
+      // console.log('ld', tempDataset);
+      return tempDataset; */
+    });
+    if (datasourceIds && allDatasets) {
+      datasources = allDatasets.filter((d: any) =>
+        datasourceIds.includes(d?.id.toString()),
+      );
+    }
+    if (datasources && appDatasources) {
+      datasources.map((d: any) => {
+        const tempD: any = d;
+        const table_name = tempD?.table_name;
+        let new_table_name = '';
+        const foundDataset: any = appDatasources.filter(
+          (ad: any) => ad?.full_id === table_name,
+        );
+        if (foundDataset[0]) {
+          new_table_name = foundDataset[0]?.name;
+        }
+        tempD.new_table_name = new_table_name;
+
+        const tempOption: any = {
+          customLabel: null,
+          label: new_table_name,
+          value: d?.id,
+        };
+        finalList.push(tempOption);
+        return tempD;
+      });
+    }
+    console.log('datasourceIds', datasourceIds, datasources, finalList);
+  }
+
+  return finalList;
+}
+
 /**
  * The configuration form for a specific filter.
  * Assigns field values to `filters[filterId]` in the form.
@@ -361,7 +438,30 @@ const FiltersConfigForm = (
   const appDatasources = useSelector<RootState, number>(
     state => state.dashboardState.appDatasources,
   );
-  console.log('appDatasources in modal', appDatasources);
+  const allDatasets = useSelector<RootState, number>(
+    state => state.dashboardState.allDatasets,
+  );
+  const dashboardLayout = useSelector<RootState, DashboardLayout>(
+    state => state.dashboardLayout.present,
+  );
+  const charts = useSelector<RootState, ChartsState>(({ charts }) => charts);
+  // console.log('charts', charts);
+  console.log(
+    'appDatasources in modal',
+    appDatasources,
+    allDatasets,
+    dashboardLayout,
+    charts,
+  );
+
+  const datasetDropdownOptions: any = prepareDatasetDropdownData(
+    dashboardLayout,
+    allDatasets,
+    appDatasources,
+    charts,
+  );
+  console.log('datasetDropdownOptions', datasetDropdownOptions);
+
   const [undoFormValues, setUndoFormValues] = useState<Record<
     string,
     any
@@ -386,31 +486,7 @@ const FiltersConfigForm = (
   const loadedDatasets = useSelector<RootState, DatasourcesState>(
     ({ datasources }) => datasources,
   );
-
   console.log('loadedDatasets', loadedDatasets, appDatasources);
-  if (loadedDatasets && Object.keys(loadedDatasets).length > 0) {
-    Object.keys(loadedDatasets).map((ld: any) => {
-      const tempDataset: any = loadedDatasets[ld];
-      const table_name = tempDataset?.table_name;
-      // const table_name = 'TEST_2j8svHTs7ab1ReAtREIidBzTYty"';
-      let new_table_name = '';
-      if (appDatasources && table_name) {
-        const foundDataset: any = appDatasources.filter(
-          (ad: any) => ad?.full_id === table_name,
-        );
-        if (foundDataset[0]) {
-          new_table_name = foundDataset[0]?.name;
-        }
-      }
-      // tempDataset.new_table_name = new_table_name;
-      tempDataset.new_table_name = new_table_name;
-      console.log('ld', tempDataset);
-      return tempDataset;
-    });
-  }
-
-  const charts = useSelector<RootState, ChartsState>(({ charts }) => charts);
-  console.log('charts', charts);
 
   const doLoadedDatasetsHaveTemporalColumns = useMemo(
     () =>
@@ -461,7 +537,8 @@ const FiltersConfigForm = (
   // @ts-ignore
   const enableNoResults = !!nativeFilterItem.value?.enableNoResults;
 
-  const hasMetrics = hasColumn && !!metrics.length;
+  // const hasMetrics = hasColumn && !!metrics.length;
+  const hasMetrics = hasColumn && metrics;
 
   const hasFilledDataset =
     !hasDataset || (datasetId && (formFilter?.column || !hasColumn));
@@ -936,7 +1013,7 @@ const FiltersConfigForm = (
                 {...getFiltersConfigModalTestId('datasource-input')}
               >
                 <DatasetSelect
-                  datasets={loadedDatasets}
+                  datasetsOptions={datasetDropdownOptions}
                   onChange={(value: { label: string; value: number }) => {
                     // We need to reset the column when the dataset has changed
                     if (value.value !== datasetId) {

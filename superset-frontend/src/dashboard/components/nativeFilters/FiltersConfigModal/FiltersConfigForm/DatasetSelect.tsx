@@ -29,14 +29,24 @@ import {
   Dataset,
   DatasetSelectLabel,
 } from 'src/features/datasets/DatasetSelectLabel';
+import {
+  DashboardLayout,
+  DatasourcesState,
+  RootState,
+} from 'src/dashboard/types';
+import { useSelector } from 'react-redux';
 
 interface DatasetSelectProps {
   onChange: (value: { label: string; value: number }) => void;
   value?: { label: string; value: number };
-  datasets: any;
+  datasetsOptions: any;
 }
 
-const DatasetSelect = ({ onChange, value, datasets }: DatasetSelectProps) => {
+const DatasetSelect = ({
+  onChange,
+  value,
+  datasetsOptions,
+}: DatasetSelectProps) => {
   const getErrorMessage = useCallback(
     ({ error, message }: ClientErrorObject) => {
       let errorText = message || error || t('An error has occurred');
@@ -48,25 +58,13 @@ const DatasetSelect = ({ onChange, value, datasets }: DatasetSelectProps) => {
     [],
   );
 
-  console.log('datasets', datasets);
+  console.log('datasetsOptions', datasetsOptions);
 
   const loadDatasetOptions = async (
     search: string,
     page: number,
     pageSize: number,
   ) => {
-    console.log('datasets2', datasets);
-    const customOptions: any = [];
-    if (datasets && Object.keys(datasets).length > 0) {
-      Object.keys(datasets).forEach((d: any) => {
-        const newOption: any = {
-          label: datasets[d]?.new_table_name,
-          value: datasets[d]?.id,
-        };
-        customOptions.push(newOption);
-      });
-    }
-    console.log('customOptions', customOptions);
     /* const query = rison.encode({
       columns: ['id', 'table_name', 'database.database_name', 'schema'],
       filters: [{ col: 'table_name', opr: 'ct', value: search }],
@@ -77,12 +75,12 @@ const DatasetSelect = ({ onChange, value, datasets }: DatasetSelectProps) => {
     });
     console.log('query', query); */
     return {
-      data: customOptions,
-      totalCount: customOptions.length,
+      data: datasetsOptions,
+      totalCount: datasetsOptions.length,
     };
     /* return cachedSupersetGet({
-      // endpoint: `/api/v1/dataset/?q=${query}`,
-      endpoint: `/api/v1/dataset/`,
+      endpoint: `/api/v1/dataset/?q=${query}`,
+      // endpoint: `/api/v1/dataset/`,
     })
       .then((response: JsonResponse) => {
         console.log('response', response);
