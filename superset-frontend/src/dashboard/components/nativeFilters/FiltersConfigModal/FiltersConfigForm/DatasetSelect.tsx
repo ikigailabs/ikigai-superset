@@ -37,6 +37,8 @@ import {
 } from 'src/dashboard/types';
 import { useSelector } from 'react-redux';
 import { mockedDatasources } from './__mock_datasources';
+import { mockedDashboardLayout } from './__mock_dashboard_layout';
+import { mockedCharts } from './__mock_charts';
 
 interface DatasetSelectProps {
   onChange: (value: { label: string; value: number }) => void;
@@ -63,7 +65,90 @@ const DatasetSelect = ({ onChange, value }: DatasetSelectProps) => {
   );
   const charts = useSelector<RootState, ChartsState>(({ charts }) => charts);
 
-  function prepareDatasetDropdownData(
+  function getDropdownOptions(
+    dashboardLayout: any,
+    charts: any,
+    appDatasources: any,
+  ) {
+    console.log('getDropdownOptions', dashboardLayout, charts, appDatasources);
+    let selectOptionsObj: any = {};
+    const selectOptions: any = [];
+    if (dashboardLayout && Object.keys(dashboardLayout).length > 0) {
+      Object.keys(dashboardLayout).forEach((layoutId: any) => {
+        const layoutObject: any = dashboardLayout[layoutId];
+        if (layoutObject?.type === 'CHART') {
+          const chartId = layoutObject?.meta?.chartId;
+          const sliceName = layoutObject?.meta?.sliceName;
+          let chartName = '';
+          let datasetName = '';
+          if (appDatasources) {
+            const chartMatced: any = appDatasources.filter(
+              (appD: any) => appD.superset_chart_id === chartId.toString(),
+            );
+            if (chartMatced[0]) {
+              datasetName = chartMatced[0]?.dataset?.name;
+            }
+          }
+          if (datasetName) {
+            chartName = datasetName;
+          } else {
+            chartName = sliceName;
+          }
+          const temp_datasource = charts[chartId]
+            ? charts[chartId]?.form_data?.datasource
+            : '';
+          if (temp_datasource) {
+            const temp_datasource_arr: any = temp_datasource.split('__');
+            if (temp_datasource_arr[0]) {
+              const datasource_id = temp_datasource_arr[0];
+              selectOptionsObj = {
+                ...selectOptionsObj,
+                [datasource_id]: {
+                  customLabel: undefined,
+                  label: chartName,
+                  value: parseInt(datasource_id, 10),
+                },
+              };
+            }
+          }
+          // selectOptions.push(datasource_id);
+        }
+      });
+      console.log('selectOptionsObj', selectOptionsObj);
+      if (selectOptionsObj && Object.keys(selectOptionsObj).length > 0) {
+        Object.keys(selectOptionsObj).forEach((o: any) => {
+          selectOptions.push(selectOptionsObj[o]);
+        });
+      }
+      console.log('selectOptions', selectOptions);
+    }
+    return selectOptions;
+  }
+
+  /* function getDatasetIdsInDashboard(dashboardLayout: any, charts: any) {
+    const datasourceIds: any = [];
+    if (dashboardLayout && Object.keys(dashboardLayout).length > 0) {
+      Object.keys(dashboardLayout).forEach((layoutId: any) => {
+        const layoutObject: any = dashboardLayout[layoutId];
+        if (layoutObject?.type === 'CHART') {
+          const chartId = layoutObject?.meta?.chartId;
+          const temp_datasource = charts[chartId]
+            ? charts[chartId]?.form_data?.datasource
+            : '';
+          if (temp_datasource) {
+            const temp_datasource_arr: any = temp_datasource.split('__');
+            if (temp_datasource_arr[0]) {
+              const datasource_id = temp_datasource_arr[0];
+              datasourceIds.push(datasource_id);
+            }
+          }
+        }
+      });
+    }
+    return datasourceIds;
+  } */
+
+  /* function prepareDatasetDropdownData(
     dashboardLayout: any,
     allDatasets: any,
     appDatasources: any,
@@ -121,23 +206,36 @@ const DatasetSelect = ({ onChange, value }: DatasetSelectProps) => {
     }
 
     return finalList;
-  }
+  } */
 
   const loadDatasetOptions = async (
     search: string,
     page: number,
     pageSize: number,
   ) => {
-    const query = rison.encode({
-      columns: ['id', 'table_name', 'database.database_name', 'schema'],
-      filters: [{ col: 'table_name', opr: 'ct', value: search }],
+    const list: any = getDropdownOptions(
+      // dashboardLayout,
+      mockedDashboardLayout,
+      // charts,
+      mockedCharts,
+      appDatasources,
+    );
+    return {
+      data: list,
+      totalCount: list?.length,
+    };
+    // const datasetIds = getDatasetIdsInDashboard(dashboardLayout, charts);
+    // const datasetIdsStr = datasetIds ? datasetIds.toString() : '';
+    /* const query = rison.encode({
+      columns: ['id', 'table_name', 'database_name', 'schema'],
+      filters: [{ col: 'id', opr: 'any', value: datasetIdsStr }], // filters: [{ col: 'id', opr: 'ct', value: search }],
       page,
       page_size: pageSize,
       order_column: 'table_name',
       order_direction: 'asc',
     });
-    console.log('query', query);
-    return cachedSupersetGet({
+    console.log('query', query); */
+    /* return cachedSupersetGet({
       endpoint: `/api/v1/dataset/?q=${query}`,
       // endpoint: `/api/v1/dataset/`,
     })
@@ -152,25 +250,25 @@ const DatasetSelect = ({ onChange, value }: DatasetSelectProps) => {
           label: item.table_name,
           value: item.id,
         }));
-        console.log('list', list, mockedDatasources);
-        const finalList: any = prepareDatasetDropdownData(
-          dashboardLayout,
-          list,
-          // mockedDatasources,
-          appDatasources,
-          charts,
-        );
-        console.log('finalList', finalList);
+        // console.log('list', list);
+        // const finalList: any = prepareDatasetDropdownData(
+        //   dashboardLayout,
+        //   list,
+        //   // mockedDatasources,
+        //   appDatasources,
+        //   charts,
+        // );
+        // console.log('finalList', finalList);
         return {
-          data: finalList,
-          totalCount: finalList?.length,
+          data: list,
+          totalCount: list?.length,
         };
       })
       .catch(async error => {
         console.log('datasets error', error);
         const errorMessage = getErrorMessage(await getClientErrorObject(error));
         throw new Error(errorMessage);
-      });
+      }); */
   };
 
   return (
