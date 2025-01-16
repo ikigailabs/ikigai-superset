@@ -624,7 +624,7 @@ const DashboardBuilder: FC<DashboardBuilderProps> = () => {
     !editMode &&
     nativeFiltersEnabled &&
     filterBarOrientation !== FilterBarOrientation.Horizontal
-      ? 0
+      ? 24
       : theme.gridUnit * 8;
 
   function handleIncomingWindowMsg(parentOrigin: string, allDatasets: any) {

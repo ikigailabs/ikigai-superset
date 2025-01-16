@@ -235,14 +235,14 @@ export class HeaderActionsDropdown extends PureComponent {
               : t('Enter fullscreen')}
           </Menu.Item>
         )}
-        {editMode && (
+        {/* {editMode && (
           <Menu.Item
             key={MENU_KEYS.EDIT_PROPERTIES}
             onClick={this.handleMenuClick}
           >
             {t('Edit properties')}
           </Menu.Item>
-        )}
+        )} */}
         {editMode && (
           <Menu.Item key={MENU_KEYS.EDIT_CSS}>
             <CssEditor
