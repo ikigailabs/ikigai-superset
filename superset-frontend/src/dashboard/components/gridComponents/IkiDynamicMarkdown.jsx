@@ -489,7 +489,7 @@ class IkiDynamicMarkdown extends React.PureComponent {
   }
 
   onSelectCustomMarkdown(custom_markdown_id) {
-    // console.log('onSelectCustomMarkdown', custom_markdown_id);
+    console.log('onSelectCustomMarkdown', custom_markdown_id);
     if (custom_markdown_id) {
       this.setState(
         {
@@ -665,6 +665,15 @@ const IkiDynamicMarkdownHOC = props => {
       value = filterValue;
     } else if (filterType === 'filter_select') {
       value = Array.isArray(filterValue) ? filterValue : filterValue.split();
+      /* let tempVal = value ? value : [];
+      if (value && tempVal) {
+        value.forEach(val => {
+          if (Array.isArray(filterValue) && filterValue.includes(val)) {
+            tempVal = tempVal.filter(v => v !== val);
+          }
+        });
+      }
+      console.log('tempVal', tempVal); */
     } else {
       value = filterValue;
     }

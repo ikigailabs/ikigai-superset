@@ -685,7 +685,8 @@ const DashboardBuilder: FC<DashboardBuilderProps> = () => {
     // dispatch(setAppDatasources('test11'));
     const ikigaiOrigin: any = getIframeUrl();
     console.log('ikigaiOrigin', ikigaiOrigin);
-    cachedSupersetGet({
+    handleIncomingWindowMsg(ikigaiOrigin, []);
+    /* cachedSupersetGet({
       endpoint: `/api/v1/dataset?q=${rison.encode({
         columns: [
           'columns.column_name',
@@ -716,7 +717,7 @@ const DashboardBuilder: FC<DashboardBuilderProps> = () => {
       })
       .catch((response: SupersetApiError) => {
         addDangerToast(response.message);
-      });
+      }); */
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

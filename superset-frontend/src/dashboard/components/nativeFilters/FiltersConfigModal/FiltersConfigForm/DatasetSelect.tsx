@@ -65,7 +65,7 @@ const DatasetSelect = ({
     page: number,
     pageSize: number,
   ) => {
-    /* const query = rison.encode({
+    const query = rison.encode({
       columns: ['id', 'table_name', 'database.database_name', 'schema'],
       filters: [{ col: 'table_name', opr: 'ct', value: search }],
       page,
@@ -73,12 +73,12 @@ const DatasetSelect = ({
       order_column: 'table_name',
       order_direction: 'asc',
     });
-    console.log('query', query); */
-    return {
+    console.log('query', query);
+    /* return {
       data: datasetsOptions,
       totalCount: datasetsOptions.length,
-    };
-    /* return cachedSupersetGet({
+    }; */
+    return cachedSupersetGet({
       endpoint: `/api/v1/dataset/?q=${query}`,
       // endpoint: `/api/v1/dataset/`,
     })
@@ -103,7 +103,7 @@ const DatasetSelect = ({
         console.log('datasets error', error);
         const errorMessage = getErrorMessage(await getClientErrorObject(error));
         throw new Error(errorMessage);
-      }); */
+      });
   };
 
   return (
