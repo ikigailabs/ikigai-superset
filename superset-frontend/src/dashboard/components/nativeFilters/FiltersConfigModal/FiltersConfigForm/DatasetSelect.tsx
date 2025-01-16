@@ -214,10 +214,10 @@ const DatasetSelect = ({ onChange, value }: DatasetSelectProps) => {
     pageSize: number,
   ) => {
     const list: any = getDropdownOptions(
-      // dashboardLayout,
-      mockedDashboardLayout,
-      // charts,
-      mockedCharts,
+      dashboardLayout,
+      // mockedDashboardLayout,
+      charts,
+      // mockedCharts,
       appDatasources,
     );
     return {
