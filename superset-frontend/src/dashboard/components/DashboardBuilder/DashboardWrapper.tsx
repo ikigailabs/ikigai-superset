@@ -25,8 +25,7 @@ import classNames from 'classnames';
 import { debounce } from 'lodash';
 
 const StyledDiv = styled.div<{ isPreview: boolean }>`
-  ${({ isPreview }) =>
-    isPreview && `padding-left: 24px; background-color: #fcfdff;`}
+  ${({ isPreview }) => isPreview && `background-color: #fcfdff;`}
   ${({ theme }) => css`
     background-color: #fff;
     position: relative;

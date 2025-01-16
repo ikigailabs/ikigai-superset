@@ -41,7 +41,7 @@ import { AntdButton } from 'src/components/';
 import { findPermission } from 'src/utils/findPermission';
 import { Tooltip } from 'src/components/Tooltip';
 import { safeStringify } from 'src/utils/safeStringify';
-import HeaderActionsDropdown from 'src/dashboard/components/Header/HeaderActionsDropdown';
+import ConnectedHeaderActionsDropdown from 'src/dashboard/components/Header/HeaderActionsDropdown';
 import PublishedStatus from 'src/dashboard/components/PublishedStatus';
 import UndoRedoKeyListeners from 'src/dashboard/components/UndoRedoKeyListeners';
 import PropertiesModal from 'src/dashboard/components/PropertiesModal';
@@ -55,7 +55,6 @@ import setPeriodicRunner, {
   stopPeriodicRender,
 } from 'src/dashboard/util/setPeriodicRunner';
 import { PageHeaderWithActions } from 'src/components/PageHeaderWithActions';
-import { Dropdown } from 'src/components/Dropdown';
 import DashboardEmbedModal from '../EmbeddedModal';
 import OverwriteConfirm from '../OverwriteConfirm';
 
@@ -95,8 +94,6 @@ const propTypes = {
   hasUnsavedChanges: PropTypes.bool.isRequired,
   maxUndoHistoryExceeded: PropTypes.bool.isRequired,
   lastModifiedTime: PropTypes.number.isRequired,
-  ikigaiOrigin: PropTypes.string,
-  supersetUrl: PropTypes.string,
 
   // redux
   onRefresh: PropTypes.func.isRequired,
@@ -123,7 +120,8 @@ const headerContainerStyle = theme => css`
 `;
 
 const editButtonStyle = theme => css`
-  color: ${theme.colors.primary.dark2};
+  color: ${theme.colors.primary.base};
+  font-weight: 600;
 `;
 
 const actionButtonsStyle = theme => css`
@@ -173,20 +171,11 @@ const discardBtnStyle = theme => css`
 `;
 
 class Header extends React.PureComponent {
-  static discardChanges(ikigaiOrigin, supersetUrl) {
+  static discardChanges() {
     const url = new URL(window.location.href);
-    const originalUrl = url.origin + url.pathname;
-    // console.log('Discard - url', url, originalUrl, ikigaiOrigin, supersetUrl);
 
-    // url.searchParams.delete('edit');
-    // window.location.assign(url);
-    // window.location.href = url.toString();
-    // window.location.replace(originalUrl);
-    if (supersetUrl) {
-      window.location.replace(supersetUrl.toString());
-    } else {
-      window.location.assign(url);
-    }
+    url.searchParams.delete('edit');
+    window.location.assign(url);
   }
 
   constructor(props) {
@@ -476,8 +465,6 @@ class Header extends React.PureComponent {
       setRefreshFrequency,
       lastModifiedTime,
       logEvent,
-      ikigaiOrigin,
-      supersetUrl,
     } = this.props;
 
     const userCanEdit =
@@ -604,12 +591,7 @@ class Header extends React.PureComponent {
                       <Button
                         css={discardBtnStyle}
                         buttonSize="small"
-                        onClick={() =>
-                          this.constructor.discardChanges(
-                            ikigaiOrigin,
-                            supersetUrl,
-                          )
-                        }
+                        onClick={this.constructor.discardChanges}
                         buttonStyle="default"
                         data-test="discard-changes-button"
                         aria-label={t('Discard')}
@@ -627,50 +609,6 @@ class Header extends React.PureComponent {
                       >
                         {t('Save')}
                       </Button>
-                      <Dropdown
-                        overlay={
-                          <HeaderActionsDropdown
-                            addSuccessToast={this.props.addSuccessToast}
-                            addDangerToast={this.props.addDangerToast}
-                            dashboardId={dashboardInfo.id}
-                            dashboardTitle={dashboardTitle}
-                            dashboardInfo={dashboardInfo}
-                            dataMask={dataMask}
-                            layout={layout}
-                            expandedSlices={expandedSlices}
-                            customCss={customCss}
-                            colorNamespace={colorNamespace}
-                            colorScheme={colorScheme}
-                            onSave={onSave}
-                            onChange={onChange}
-                            forceRefreshAllCharts={this.forceRefresh}
-                            startPeriodicRender={this.startPeriodicRender}
-                            refreshFrequency={refreshFrequency}
-                            shouldPersistRefreshFrequency={
-                              shouldPersistRefreshFrequency
-                            }
-                            setRefreshFrequency={setRefreshFrequency}
-                            updateCss={updateCss}
-                            editMode={editMode}
-                            hasUnsavedChanges={hasUnsavedChanges}
-                            userCanEdit={userCanEdit}
-                            userCanShare={userCanShare}
-                            userCanSave={userCanSaveAs}
-                            userCanCurate={userCanCurate}
-                            isLoading={isLoading}
-                            showPropertiesModal={this.showPropertiesModal}
-                            manageEmbedded={this.showEmbedModal}
-                            refreshLimit={refreshLimit}
-                            refreshWarning={refreshWarning}
-                            lastModifiedTime={lastModifiedTime}
-                            isDropdownVisible={this.state.isDropdownVisible}
-                            setIsDropdownVisible={this.setIsDropdownVisible}
-                            logEvent={logEvent}
-                          />
-                        }
-                      >
-                        <Icons.MoreVert iconColor="red" />
-                      </Dropdown>
                     </div>
                   )}
                 </div>
@@ -705,7 +643,44 @@ class Header extends React.PureComponent {
             visible: this.state.isDropdownVisible,
             onVisibleChange: this.setIsDropdownVisible,
           }}
-          additionalActionsMenu={<></>}
+          additionalActionsMenu={
+            <ConnectedHeaderActionsDropdown
+              addSuccessToast={this.props.addSuccessToast}
+              addDangerToast={this.props.addDangerToast}
+              dashboardId={dashboardInfo.id}
+              dashboardTitle={dashboardTitle}
+              dashboardInfo={dashboardInfo}
+              dataMask={dataMask}
+              layout={layout}
+              expandedSlices={expandedSlices}
+              customCss={customCss}
+              colorNamespace={colorNamespace}
+              colorScheme={colorScheme}
+              onSave={onSave}
+              onChange={onChange}
+              forceRefreshAllCharts={this.forceRefresh}
+              startPeriodicRender={this.startPeriodicRender}
+              refreshFrequency={refreshFrequency}
+              shouldPersistRefreshFrequency={shouldPersistRefreshFrequency}
+              setRefreshFrequency={setRefreshFrequency}
+              updateCss={updateCss}
+              editMode={editMode}
+              hasUnsavedChanges={hasUnsavedChanges}
+              userCanEdit={userCanEdit}
+              userCanShare={userCanShare}
+              userCanSave={userCanSaveAs}
+              userCanCurate={userCanCurate}
+              isLoading={isLoading}
+              showPropertiesModal={this.showPropertiesModal}
+              manageEmbedded={this.showEmbedModal}
+              refreshLimit={refreshLimit}
+              refreshWarning={refreshWarning}
+              lastModifiedTime={lastModifiedTime}
+              isDropdownVisible={this.state.isDropdownVisible}
+              setIsDropdownVisible={this.setIsDropdownVisible}
+              logEvent={logEvent}
+            />
+          }
           showFaveStar={user?.userId && dashboardInfo?.id}
           showTitlePanelItems
         />
