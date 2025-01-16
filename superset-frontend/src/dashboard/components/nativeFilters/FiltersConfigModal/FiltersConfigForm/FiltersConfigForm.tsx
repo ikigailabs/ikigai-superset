@@ -330,81 +330,6 @@ const FILTER_TYPE_NAME_MAPPING = {
   [t('Group By')]: t('Group by'),
 };
 
-function prepareDatasetDropdownData(
-  dashboardLayout: any,
-  allDatasets: any,
-  appDatasources: any,
-  charts: any,
-) {
-  let datasources: any = [];
-  const finalList: any = [];
-  if (dashboardLayout && Object.keys(dashboardLayout).length > 0) {
-    const datasourceIds: any = [];
-    Object.keys(dashboardLayout).forEach((layoutId: any) => {
-      const layoutObject: any = dashboardLayout[layoutId];
-      if (layoutObject?.type === 'CHART') {
-        const chartId = layoutObject?.meta?.chartId;
-        const temp_datasource = charts[chartId]
-          ? charts[chartId]?.form_data?.datasource
-          : '';
-        if (temp_datasource) {
-          const temp_datasource_arr: any = temp_datasource.split('__');
-          if (temp_datasource_arr[0]) {
-            const datasource_id = temp_datasource_arr[0];
-            datasourceIds.push(datasource_id);
-          }
-        }
-      }
-      /* const tempDataset: any = loadedDatasets[ld];
-      const table_name = tempDataset?.table_name;
-      // const table_name = 'TEST_2j8svHTs7ab1ReAtREIidBzTYty"';
-      let new_table_name = '';
-      if (appDatasources && table_name) {
-        const foundDataset: any = appDatasources.filter(
-          (ad: any) => ad?.full_id === table_name,
-        );
-        if (foundDataset[0]) {
-          new_table_name = foundDataset[0]?.name;
-        }
-      }
-      // tempDataset.new_table_name = new_table_name;
-      tempDataset.new_table_name = new_table_name;
-      // console.log('ld', tempDataset);
-      return tempDataset; */
-    });
-    if (datasourceIds && allDatasets) {
-      datasources = allDatasets.filter((d: any) =>
-        datasourceIds.includes(d?.id.toString()),
-      );
-    }
-    if (datasources && appDatasources) {
-      datasources.map((d: any) => {
-        const tempD: any = d;
-        const table_name = tempD?.table_name;
-        let new_table_name = '';
-        const foundDataset: any = appDatasources.filter(
-          (ad: any) => ad?.full_id === table_name,
-        );
-        if (foundDataset[0]) {
-          new_table_name = foundDataset[0]?.name;
-        }
-        tempD.new_table_name = new_table_name;
-
-        const tempOption: any = {
-          customLabel: null,
-          label: new_table_name,
-          value: d?.id,
-        };
-        finalList.push(tempOption);
-        return tempD;
-      });
-    }
-    console.log('datasourceIds', datasourceIds, datasources, finalList);
-  }
-
-  return finalList;
-}
-
 /**
  * The configuration form for a specific filter.
  * Assigns field values to `filters[filterId]` in the form.
@@ -453,14 +378,6 @@ const FiltersConfigForm = (
     dashboardLayout,
     charts,
   );
-
-  const datasetDropdownOptions: any = prepareDatasetDropdownData(
-    dashboardLayout,
-    allDatasets,
-    appDatasources,
-    charts,
-  );
-  console.log('datasetDropdownOptions', datasetDropdownOptions);
 
   const [undoFormValues, setUndoFormValues] = useState<Record<
     string,
@@ -1013,7 +930,6 @@ const FiltersConfigForm = (
                 {...getFiltersConfigModalTestId('datasource-input')}
               >
                 <DatasetSelect
-                  datasetsOptions={datasetDropdownOptions}
                   onChange={(value: { label: string; value: number }) => {
                     // We need to reset the column when the dataset has changed
                     if (value.value !== datasetId) {

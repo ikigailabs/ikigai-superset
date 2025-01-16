@@ -30,23 +30,20 @@ import {
   DatasetSelectLabel,
 } from 'src/features/datasets/DatasetSelectLabel';
 import {
+  ChartsState,
   DashboardLayout,
   DatasourcesState,
   RootState,
 } from 'src/dashboard/types';
 import { useSelector } from 'react-redux';
+import { mockedDatasources } from './__mock_datasources';
 
 interface DatasetSelectProps {
   onChange: (value: { label: string; value: number }) => void;
   value?: { label: string; value: number };
-  datasetsOptions: any;
 }
 
-const DatasetSelect = ({
-  onChange,
-  value,
-  datasetsOptions,
-}: DatasetSelectProps) => {
+const DatasetSelect = ({ onChange, value }: DatasetSelectProps) => {
   const getErrorMessage = useCallback(
     ({ error, message }: ClientErrorObject) => {
       let errorText = message || error || t('An error has occurred');
@@ -58,7 +55,73 @@ const DatasetSelect = ({
     [],
   );
 
-  console.log('datasetsOptions', datasetsOptions);
+  const appDatasources = useSelector<RootState, number>(
+    state => state.dashboardState.appDatasources,
+  );
+  const dashboardLayout = useSelector<RootState, DashboardLayout>(
+    state => state.dashboardLayout.present,
+  );
+  const charts = useSelector<RootState, ChartsState>(({ charts }) => charts);
+
+  function prepareDatasetDropdownData(
+    dashboardLayout: any,
+    allDatasets: any,
+    appDatasources: any,
+    charts: any,
+  ) {
+    let datasources: any = [];
+    const finalList: any = [];
+    if (dashboardLayout && Object.keys(dashboardLayout).length > 0) {
+      const datasourceIds: any = [];
+      Object.keys(dashboardLayout).forEach((layoutId: any) => {
+        const layoutObject: any = dashboardLayout[layoutId];
+        if (layoutObject?.type === 'CHART') {
+          const chartId = layoutObject?.meta?.chartId;
+          const temp_datasource = charts[chartId]
+            ? charts[chartId]?.form_data?.datasource
+            : '';
+          if (temp_datasource) {
+            const temp_datasource_arr: any = temp_datasource.split('__');
+            if (temp_datasource_arr[0]) {
+              const datasource_id = temp_datasource_arr[0];
+              datasourceIds.push(datasource_id);
+            }
+          }
+        }
+      });
+      console.log('datasourceIds', datasourceIds);
+      if (datasourceIds && allDatasets) {
+        datasources = allDatasets.filter((d: any) =>
+          datasourceIds.includes(d?.value.toString()),
+        );
+      }
+      if (datasources && appDatasources) {
+        datasources.map((d: any) => {
+          const tempD: any = d;
+          const table_name = tempD?.label;
+          let new_table_name = '';
+          const foundDataset: any = appDatasources.filter(
+            (ad: any) => ad?.full_id === table_name,
+          );
+          if (foundDataset[0]) {
+            new_table_name = foundDataset[0]?.name;
+          }
+          tempD.new_table_name = new_table_name;
+
+          const tempOption: any = {
+            customLabel: d?.customLabel,
+            label: new_table_name,
+            value: d?.value,
+          };
+          finalList.push(tempOption);
+          return tempD;
+        });
+      }
+      console.log('datasourceIds', datasourceIds, datasources, finalList);
+    }
+
+    return finalList;
+  }
 
   const loadDatasetOptions = async (
     search: string,
@@ -74,10 +137,6 @@ const DatasetSelect = ({
       order_direction: 'asc',
     });
     console.log('query', query);
-    /* return {
-      data: datasetsOptions,
-      totalCount: datasetsOptions.length,
-    }; */
     return cachedSupersetGet({
       endpoint: `/api/v1/dataset/?q=${query}`,
       // endpoint: `/api/v1/dataset/`,
@@ -93,10 +152,18 @@ const DatasetSelect = ({
           label: item.table_name,
           value: item.id,
         }));
-        console.log('list', list);
+        console.log('list', list, mockedDatasources);
+        const finalList: any = prepareDatasetDropdownData(
+          dashboardLayout,
+          list,
+          // mockedDatasources,
+          appDatasources,
+          charts,
+        );
+        console.log('finalList', finalList);
         return {
-          data: list,
-          totalCount: response.json.count,
+          data: finalList,
+          totalCount: finalList?.length,
         };
       })
       .catch(async error => {
