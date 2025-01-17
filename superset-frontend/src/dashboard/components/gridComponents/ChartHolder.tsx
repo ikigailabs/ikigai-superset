@@ -74,7 +74,7 @@ const fullSizeStyle = css`
     position: fixed;
     z-index: 3000;
     left: 0;
-    top: 0;
+    top: 64px;
   }
 `;
 
