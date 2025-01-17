@@ -664,7 +664,11 @@ const IkiDynamicMarkdownHOC = props => {
     if (filterType === 'filter_time') {
       value = filterValue;
     } else if (filterType === 'filter_select') {
-      value = Array.isArray(filterValue) ? filterValue : filterValue.split();
+      if (filterValue) {
+        value = Array.isArray(filterValue) ? filterValue : filterValue.split();
+      } else {
+        value = [];
+      }
       /* let tempVal = value ? value : [];
       if (value && tempVal) {
         value.forEach(val => {
