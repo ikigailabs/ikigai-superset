@@ -328,7 +328,7 @@ const StyledDashboardContent = styled.div<{
     flex-wrap: nowrap;
     height: auto;
     flex: 1;
-    background-color: #f7f7f7;
+    background-color: #f5f7f8;
 
     .grid-container .dashboard-component-tabs {
       box-shadow: none;
