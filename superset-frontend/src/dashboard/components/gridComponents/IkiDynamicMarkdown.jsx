@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 import { bindActionCreators } from 'redux';
 import { connect, useDispatch } from 'react-redux';
 import cx from 'classnames';
-
+import moment from 'moment';
 import { t, SafeMarkdown } from '@superset-ui/core';
 import {
   Logger,
@@ -660,75 +660,136 @@ const IkiDynamicMarkdownHOC = props => {
   console.log('filters in hoc hook', filters);
 
   const updateFilter = (filterName, dataMask, filterValue, filterType) => {
-    let value = '';
-    if (filterType === 'filter_time') {
-      value = filterValue;
-    } else if (filterType === 'filter_select') {
-      if (filterValue) {
-        value = Array.isArray(filterValue) ? filterValue : filterValue.split();
+    let filterDataObj = null;
+    let findFilter = null;
+
+    Object.keys(filters).forEach(filterId => {
+      if (filters[filterId]?.name === filterName) {
+        findFilter = filters[filterId];
+      }
+    });
+    console.log('findFilter', findFilter);
+
+    function handleDateTimeFilter(val) {
+      let extraFormData = null;
+      let filterState = findFilter?.defaultDataMask?.filterState;
+      if (val) {
+        const format = val?.format;
+        const mode = val?.mode;
+        const type = val?.type;
+        const value = val?.value;
+        let from = '',
+          to = '',
+          range = '';
+        if (type === 'date-picker') {
+          const addFormat =
+            mode === 'year' ? 'y' : mode === 'month' ? 'M' : 'd';
+          from = value ? moment(value, format) : '';
+          to = value ? moment(value, format).add(1, addFormat) : '';
+        } else {
+          from = value[0] ? moment(value[0], format) : '';
+          to = value[1] ? moment(value[1], format) : '';
+        }
+        if (value && from && to) {
+          range = `${from.toString()} : ${to.toString()}`;
+        }
+        console.log('range', range);
+        extraFormData = {
+          time_range: range,
+        };
+        filterState = {
+          value: range,
+        };
       } else {
-        value = [];
+        extraFormData = {
+          time_range: '',
+        };
+        filterState = {
+          value: '',
+        };
       }
-      /* let tempVal = value ? value : [];
-      if (value && tempVal) {
-        value.forEach(val => {
-          if (Array.isArray(filterValue) && filterValue.includes(val)) {
-            tempVal = tempVal.filter(v => v !== val);
-          }
-        });
-      }
-      console.log('tempVal', tempVal); */
-    } else {
-      value = filterValue;
+      return { extraFormData, filterState };
     }
+
+    function handleSelectFilter(val, findFilter) {
+      let extraFormData = null;
+      let filterState = findFilter?.defaultDataMask?.filterState;
+      let tempValue = '';
+      const temp_colName = findFilter?.targets[0]?.column?.name;
+      console.log('temp_colName', temp_colName);
+      if (val) {
+        if (findFilter?.controlValues?.multiSelect) {
+          if (filterValue) {
+            tempValue = Array.isArray(filterValue)
+              ? filterValue
+              : filterValue.split();
+          } else {
+            tempValue = [];
+          }
+        } else {
+          tempValue = filterValue;
+        }
+        extraFormData = getSelectExtraFormData(temp_colName, val);
+        filterState = {
+          ...filterState,
+          label: tempValue.toString(),
+          /* label: values?.length
+          ? `${(values || [])
+              .map(value => labelFormatter(value, datatype))
+              .join(', ')}${suffix}`
+          : undefined, */
+          tempValue,
+        };
+      } else {
+        extraFormData = {};
+        filterState = {
+          ...filterState,
+          label: '',
+          value: '',
+        };
+      }
+      return { extraFormData, filterState };
+    }
+
+    if (filterType === 'filter_time') {
+      filterDataObj = handleDateTimeFilter(filterValue);
+    } else if (filterType === 'filter_select') {
+      filterDataObj = handleSelectFilter(filterValue, findFilter);
+    } else {
+      let extraFormData = null;
+      let filterState = findFilter?.defaultDataMask?.filterState;
+      const temp_colName = findFilter?.targets[0]?.column?.name;
+      console.log('temp_colName', temp_colName);
+      extraFormData = getSelectExtraFormData(temp_colName, filterValue);
+      filterState = {
+        ...filterState,
+        label: filterValue.toString(),
+        /* label: values?.length
+          ? `${(values || [])
+              .map(value => labelFormatter(value, datatype))
+              .join(', ')}${suffix}`
+          : undefined, */
+        filterValue,
+      };
+      filterDataObj = { extraFormData, filterState };
+    }
+
     console.log(
       'updateFilter',
       filters,
       filterName,
       dataMask,
       filterValue,
-      value,
       filterType,
+      filterDataObj,
     );
-    let findFilter = null;
-    Object.keys(filters).forEach(filterId => {
-      if (filters[filterId]?.name === filterName) {
-        findFilter = filters[filterId];
-      }
-    });
-    if (findFilter) {
-      const temp_colName = findFilter?.targets[0]?.column?.name;
-      console.log('temp_colName', temp_colName, filterValue);
-      let extraFormData = null;
-      let filterState = findFilter?.defaultDataMask?.filterState;
-      if (filterType === 'filter_time') {
-        extraFormData = {
-          time_range: filterValue,
-        };
-        filterState = {
-          value: filterValue,
-        };
-      } else {
-        extraFormData = getSelectExtraFormData(temp_colName, value);
-        filterState = {
-          ...filterState,
-          label: value.toString(),
-          /* label: values?.length
-          ? `${(values || [])
-              .map(value => labelFormatter(value, datatype))
-              .join(', ')}${suffix}`
-          : undefined, */
-          value,
-        };
-      }
-      console.log('filterState', filterState, extraFormData);
-      console.log('findFilter', findFilter);
 
-      // dispatch(updateDataMask(filter.id, dataMask));
+    // dispatch(updateDataMask(filter.id, dataMask));
 
+    if (filterDataObj?.extraFormData) {
       const filterDataMask = {
-        extraFormData: { ...extraFormData },
-        filterState: { ...filterState },
+        extraFormData: { ...filterDataObj?.extraFormData },
+        filterState: { ...filterDataObj?.filterState },
       };
       console.log('filterDataMask', filterDataMask);
       dispatch(updateDataMask(findFilter?.id, filterDataMask));
