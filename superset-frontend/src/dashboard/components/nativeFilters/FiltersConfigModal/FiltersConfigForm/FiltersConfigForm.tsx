@@ -824,12 +824,14 @@ const FiltersConfigForm = (
   );
 
   const getInitialDatasetValue = () => {
+    console.info('%%% appDatasources %%% ', appDatasources, showDataset);
     if (!showDataset?.table_name || !Array.isArray(appDatasources)) {
       return undefined;
     }
     const matchingDatasource = appDatasources.find(
       (datasource: any) => datasource?.full_id === showDataset.table_name,
     );
+    console.info('%%% matchingDatasource %%% ', matchingDatasource);
 
     if (!matchingDatasource?.name) {
       return undefined;
@@ -840,6 +842,7 @@ const FiltersConfigForm = (
       value: filterToEdit?.targets?.[0]?.datasetId,
     };
   };
+  console.info('%%% getInitialDatasetValue %%% ', getInitialDatasetValue());
   return (
     <StyledTabs
       activeKey={activeTabKey}
