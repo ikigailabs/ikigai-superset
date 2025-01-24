@@ -842,6 +842,12 @@ const FiltersConfigForm = (
     };
   }, [appDatasources, showDataset, filterToEdit]);
 
+  useEffect(() => {
+    setNativeFilterFieldValues(form, filterId, {
+      dataset: initialDatasetValue,
+    });
+  }, [initialDatasetValue]);
+
   console.info('%%% initialDatasetValue %%% ', initialDatasetValue);
   return (
     <StyledTabs
@@ -929,7 +935,6 @@ const FiltersConfigForm = (
                 name={['filters', filterId, 'dataset']}
                 label={<StyledLabel>{t('Dataset')}</StyledLabel>}
                 initialValue={initialDatasetValue}
-                preserve={true}
                 rules={[
                   { required: !isRemoved, message: t('Dataset is required') },
                 ]}
