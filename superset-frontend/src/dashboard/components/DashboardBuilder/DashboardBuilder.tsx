@@ -627,43 +627,6 @@ const DashboardBuilder: FC<DashboardBuilderProps> = () => {
       ? 24
       : theme.gridUnit * 8;
 
-  function handleIncomingWindowMsg(parentOrigin: string, allDatasets: any) {
-    console.log('handleIncomingWindowMsg', parentOrigin);
-    window.addEventListener('message', event => {
-      console.log('event.origin', event.origin, parentOrigin);
-      if (event.origin === parentOrigin) {
-        const messageObject = JSON.parse(event.data);
-        // console.log('messageObject', messageObject);
-        if (messageObject.info && messageObject.dataType) {
-          const { dataType } = messageObject;
-          let messageData: any;
-
-          if (dataType === 'object') {
-            messageData = JSON.parse(messageObject.data);
-          } else {
-            messageData = messageObject.data;
-          }
-
-          if (
-            messageObject.info === 'top-window-to-superset/sending-datasets'
-          ) {
-            console.log(
-              'top-window-to-superset/sending-data',
-              'messageData',
-              messageData,
-              'allDatasets',
-              allDatasets,
-            );
-            if (messageData?.datasets)
-              dispatch(setAppDatasources(messageData?.datasets, allDatasets));
-          }
-        }
-      }
-    });
-
-    getDatasetsFromParentWindow(parentOrigin);
-  }
-
   function getDatasetsFromParentWindow(parentOrigin: string) {
     const crossWindowMessage = {
       info: 'superset-to-top-window/get-datasets',
@@ -681,43 +644,45 @@ const DashboardBuilder: FC<DashboardBuilderProps> = () => {
     }
   }
 
+  function handleMessagesListener(event: any) {
+    const ikigaiOrigin: any = getIframeUrl();
+    console.log('event.origin', event.origin, ikigaiOrigin);
+    if (event.origin === ikigaiOrigin) {
+      const messageObject = JSON.parse(event.data);
+      // console.log('messageObject', messageObject);
+      if (messageObject.info && messageObject.dataType) {
+        const { dataType } = messageObject;
+        let messageData: any;
+
+        if (dataType === 'object') {
+          messageData = JSON.parse(messageObject.data);
+        } else {
+          messageData = messageObject.data;
+        }
+
+        if (messageObject.info === 'top-window-to-superset/sending-datasets') {
+          console.log(
+            'top-window-to-superset/sending-data',
+            'messageData',
+            messageData,
+            'allDatasets',
+            [],
+          );
+          if (messageData?.datasets)
+            dispatch(setAppDatasources(messageData?.datasets, []));
+        }
+      }
+    }
+  }
+
   useEffect(() => {
     // dispatch(setAppDatasources('test11'));
     const ikigaiOrigin: any = getIframeUrl();
-    console.log('ikigaiOrigin', ikigaiOrigin);
-    handleIncomingWindowMsg(ikigaiOrigin, []);
-    /* cachedSupersetGet({
-      endpoint: `/api/v1/dataset?q=${rison.encode({
-        columns: [
-          'columns.column_name',
-          'columns.expression',
-          'columns.filterable',
-          'columns.is_dttm',
-          'columns.type',
-          'columns.verbose_name',
-          'database.id',
-          'database.database_name',
-          'datasource_type',
-          'filter_select_enabled',
-          'id',
-          'is_sqllab_view',
-          'main_dttm_col',
-          'metrics.metric_name',
-          'metrics.verbose_name',
-          'schema',
-          'sql',
-          'table_name',
-        ],
-      })}`,
-    })
-      .then((response: JsonResponse) => {
-        const allDatasets = response.json?.result;
-        // console.log('allDatasets', allDatasets);
-        handleIncomingWindowMsg(ikigaiOrigin, allDatasets);
-      })
-      .catch((response: SupersetApiError) => {
-        addDangerToast(response.message);
-      }); */
+    window.addEventListener('message', handleMessagesListener);
+    getDatasetsFromParentWindow(ikigaiOrigin);
+    return () => {
+      document.removeEventListener('click', handleMessagesListener);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

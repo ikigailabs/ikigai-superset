@@ -78,6 +78,25 @@ const defaultProps = {};
 
 const MARKDOWN_ERROR_MESSAGE = t('This component has an error.');
 
+function getIframeUrl() {
+  let ikigaiOrigin = '';
+  const iframeUrl = document.location;
+  if (iframeUrl?.search) {
+    // console.log('iframeUrl2', iframeUrl);
+    const iframeUrlParameters = new URLSearchParams(iframeUrl.search);
+    // console.log('iframeUrlParameters', iframeUrlParameters);
+    if (iframeUrlParameters) {
+      const ikigaiURL = iframeUrlParameters.get('dash_url')
+        ? new URL(iframeUrlParameters.get('dash_url'))
+        : '';
+      // console.log('ikigaiURL', ikigaiURL);
+      ikigaiOrigin = ikigaiURL ? ikigaiURL.origin : '';
+      // console.log('ikigaiOrigin', ikigaiOrigin);
+    }
+  }
+  return ikigaiOrigin;
+}
+
 class IkiDynamicMarkdown extends React.PureComponent {
   constructor(props) {
     super(props);
@@ -104,6 +123,7 @@ class IkiDynamicMarkdown extends React.PureComponent {
     this.handleDeleteComponent = this.handleDeleteComponent.bind(this);
     this.handleResizeStart = this.handleResizeStart.bind(this);
     this.setEditor = this.setEditor.bind(this);
+    this.handleMessagesListener = this.handleMessagesListener.bind(this);
   }
 
   componentDidMount() {
@@ -121,7 +141,7 @@ class IkiDynamicMarkdown extends React.PureComponent {
     });
     // console.log('markdownSource', this.state.markdownSource);
     // console.log('props', this.props);
-    this.handleIncomingWindowMsg();
+    window.addEventListener('message', this.handleMessagesListener);
     this.retrieveDataFromParentWindow();
     this.handleBackwardCompatibility();
   }
@@ -214,6 +234,10 @@ class IkiDynamicMarkdown extends React.PureComponent {
     }
   }
 
+  componentWillUnmount() {
+    window.removeEventListener('message', this.handleMessagesListener);
+  }
+
   retrieveDataFromParentWindow() {
     const crossWindowMessage = {
       info: 'superset-to-top-window/get-data',
@@ -285,40 +309,39 @@ class IkiDynamicMarkdown extends React.PureComponent {
   }
 
   // eslint-disable-next-line class-methods-use-this
-  handleIncomingWindowMsg() {
-    window.addEventListener('message', event => {
-      // console.log('event.origin', event.origin, this.props.ikigaiOrigin);
-      if (event.origin === this.props.ikigaiOrigin) {
-        const messageObject = JSON.parse(event.data);
-        // console.log('messageObject', messageObject);
-        if (messageObject.info && messageObject.dataType) {
-          const { dataType } = messageObject;
-          let messageData;
-          let widgetUrl;
-          let widgetUrlQuery;
+  handleMessagesListener(event) {
+    const ikigaiOrigin = getIframeUrl();
+    console.log('event.origin', event.origin, ikigaiOrigin);
+    if (event.origin === ikigaiOrigin) {
+      const messageObject = JSON.parse(event.data);
+      // console.log('messageObject', messageObject);
+      if (messageObject.info && messageObject.dataType) {
+        const { dataType } = messageObject;
+        let messageData;
+        let widgetUrl;
+        let widgetUrlQuery;
 
-          if (dataType === 'object') {
-            messageData = JSON.parse(messageObject.data);
-          } else {
-            messageData = messageObject.data;
-          }
+        if (dataType === 'object') {
+          messageData = JSON.parse(messageObject.data);
+        } else {
+          messageData = messageObject.data;
+        }
 
-          if (messageObject.info === 'top-window-to-superset/sending-data') {
-            /* console.log(
-              'top-window-to-superset/sending-data',
-              'messageData',
-              messageData,
-            ); */
-            if (!this.state.customMarkdownIsReady) {
-              this.setState({
-                customMarkdownIsReady: true,
-                componentSetupData: messageData,
-              });
-            }
+        if (messageObject.info === 'top-window-to-superset/sending-data') {
+          console.log(
+            'top-window-to-superset/sending-data',
+            'messageData',
+            messageData,
+          );
+          if (!this.state?.customMarkdownIsReady) {
+            this.setState({
+              customMarkdownIsReady: true,
+              componentSetupData: messageData,
+            });
           }
         }
       }
-    });
+    }
   }
 
   handleUpdateSource(nextValue, saveToDashboard) {
@@ -429,7 +452,8 @@ class IkiDynamicMarkdown extends React.PureComponent {
       customMarkdownIsReady,
       componentSetupData,
     );
-    const { ikigaiOrigin, editMode, charts } = this.props;
+    const { editMode, charts } = this.props;
+    const ikigaiOrigin = getIframeUrl();
     const customMarkdownId = this.getCustomHtmlIdFromMarkdownSource();
 
     return (
