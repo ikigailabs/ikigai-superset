@@ -823,6 +823,23 @@ const FiltersConfigForm = (
     </StyledRowFormItem>
   );
 
+  useEffect(() => {
+    if (Array.isArray(appDatasources) && showDataset?.table_name) {
+      const matchingDatasource = appDatasources.find(
+        datasource => datasource?.full_id === showDataset.table_name,
+      );
+
+      if (matchingDatasource) {
+        setNativeFilterFieldValues(form, filterId, {
+          dataset: {
+            label: matchingDatasource.name,
+            value: filterToEdit?.targets?.[0]?.datasetId,
+          },
+        });
+      }
+    }
+  }, [appDatasources, showDataset]);
+
   return (
     <StyledTabs
       activeKey={activeTabKey}
@@ -908,22 +925,22 @@ const FiltersConfigForm = (
               <StyledFormItem
                 name={['filters', filterId, 'dataset']}
                 label={<StyledLabel>{t('Dataset')}</StyledLabel>}
-                initialValue={
-                  showDataset?.table_name &&
-                  Array.isArray(appDatasources) &&
-                  appDatasources.find(
-                    datasource =>
-                      datasource?.full_id === showDataset.table_name,
-                  )?.name
-                    ? {
-                        label: appDatasources.find(
-                          datasource =>
-                            datasource?.full_id === showDataset.table_name,
-                        )?.name,
-                        value: filterToEdit?.targets?.[0]?.datasetId,
-                      }
-                    : undefined
-                }
+                // initialValue={
+                //   showDataset?.table_name &&
+                //   Array.isArray(appDatasources) &&
+                //   appDatasources.find(
+                //     datasource =>
+                //       datasource?.full_id === showDataset.table_name,
+                //   )?.name
+                //     ? {
+                //         label: appDatasources.find(
+                //           datasource =>
+                //             datasource?.full_id === showDataset.table_name,
+                //         )?.name,
+                //         value: filterToEdit?.targets?.[0]?.datasetId,
+                //       }
+                //     : undefined
+                // }
                 rules={[
                   { required: !isRemoved, message: t('Dataset is required') },
                 ]}
