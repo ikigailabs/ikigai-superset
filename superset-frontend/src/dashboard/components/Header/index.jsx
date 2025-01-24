@@ -601,7 +601,7 @@ class Header extends React.PureComponent {
                       <Button
                         css={saveBtnStyle}
                         buttonSize="small"
-                        disabled={!hasUnsavedChanges}
+                        // disabled={!hasUnsavedChanges}
                         buttonStyle="primary"
                         onClick={this.overwriteDashboard}
                         data-test="header-save-button"
