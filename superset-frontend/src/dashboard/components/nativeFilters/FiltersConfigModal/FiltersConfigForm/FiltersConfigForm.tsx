@@ -830,12 +830,17 @@ const FiltersConfigForm = (
       );
 
       if (matchingDatasource) {
-        setNativeFilterFieldValues(form, filterId, {
-          dataset: {
-            label: matchingDatasource.name,
-            value: filterToEdit?.targets?.[0]?.datasetId,
-          },
-        });
+        console.info('%%% matchingDatasource1 %%% ', matchingDatasource);
+        setTimeout(() => {
+          console.info('%%% matchingDatasource2 %%% ', matchingDatasource);
+          setNativeFilterFieldValues(form, filterId, {
+            dataset: {
+              label: matchingDatasource.name,
+              value: filterToEdit?.targets?.[0]?.datasetId,
+            },
+          });
+          console.info('%%% matchingDatasource3 %%% ', matchingDatasource);
+        }, 1000);
       }
     }
   }, [appDatasources, showDataset]);
