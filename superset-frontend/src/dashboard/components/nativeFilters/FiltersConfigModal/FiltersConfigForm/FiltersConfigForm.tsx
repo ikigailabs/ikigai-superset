@@ -823,28 +823,26 @@ const FiltersConfigForm = (
     </StyledRowFormItem>
   );
 
-  useEffect(() => {
-    if (Array.isArray(appDatasources) && showDataset?.table_name) {
-      const matchingDatasource = appDatasources.find(
-        datasource => datasource?.full_id === showDataset.table_name,
-      );
-
-      if (matchingDatasource) {
-        console.info('%%% matchingDatasource1 %%% ', matchingDatasource);
-        setTimeout(() => {
-          console.info('%%% matchingDatasource2 %%% ', matchingDatasource);
-          setNativeFilterFieldValues(form, filterId, {
-            dataset: {
-              label: matchingDatasource.name,
-              value: filterToEdit?.targets?.[0]?.datasetId,
-            },
-          });
-          console.info('%%% matchingDatasource3 %%% ', matchingDatasource);
-        }, 1000);
-      }
+  const initialDatasetValue = useMemo(() => {
+    if (!showDataset?.table_name || !Array.isArray(appDatasources)) {
+      return undefined;
     }
-  }, [appDatasources, showDataset]);
 
+    const matchingDatasource = appDatasources.find(
+      (datasource: any) => datasource?.full_id === showDataset.table_name,
+    );
+
+    if (!matchingDatasource?.name) {
+      return undefined;
+    }
+
+    return {
+      label: matchingDatasource.name,
+      value: filterToEdit?.targets?.[0]?.datasetId,
+    };
+  }, [appDatasources, showDataset, filterToEdit]);
+
+  console.info('initialDataset: ', initialDatasetValue);
   return (
     <StyledTabs
       activeKey={activeTabKey}
@@ -924,28 +922,14 @@ const FiltersConfigForm = (
           filters to have this dashboard filter impact those charts.`)}
           </FilterTypeInfo>
         )}
-        {hasDataset && (
+        {hasDataset && initialDatasetValue && (
           <StyledRowContainer>
             {showDataset || loadedDatasets ? (
               <StyledFormItem
                 name={['filters', filterId, 'dataset']}
                 label={<StyledLabel>{t('Dataset')}</StyledLabel>}
-                // initialValue={
-                //   showDataset?.table_name &&
-                //   Array.isArray(appDatasources) &&
-                //   appDatasources.find(
-                //     datasource =>
-                //       datasource?.full_id === showDataset.table_name,
-                //   )?.name
-                //     ? {
-                //         label: appDatasources.find(
-                //           datasource =>
-                //             datasource?.full_id === showDataset.table_name,
-                //         )?.name,
-                //         value: filterToEdit?.targets?.[0]?.datasetId,
-                //       }
-                //     : undefined
-                // }
+                initialValue={initialDatasetValue}
+                preserve={true}
                 rules={[
                   { required: !isRemoved, message: t('Dataset is required') },
                 ]}

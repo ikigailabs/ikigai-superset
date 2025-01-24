@@ -40,7 +40,6 @@ export const setNativeFilterFieldValues = (
   filterId: string,
   values: object,
 ) => {
-  console.info('%%% setNativeFilterFieldValues111 %%% ', values);
   const formFilters = form.getFieldValue(FILTERS_FIELD_NAME) || {};
   form.setFields([
     {
