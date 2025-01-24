@@ -823,32 +823,6 @@ const FiltersConfigForm = (
     </StyledRowFormItem>
   );
 
-  const initialDatasetValue = useMemo(() => {
-    if (!showDataset?.table_name || !Array.isArray(appDatasources)) {
-      return undefined;
-    }
-    const matchingDatasource = appDatasources.find(
-      (datasource: any) => datasource?.full_id === showDataset.table_name,
-    );
-
-    console.info('%%% matchingDatasource %%% ', matchingDatasource);
-    if (!matchingDatasource?.name) {
-      return undefined;
-    }
-
-    return {
-      label: matchingDatasource.name,
-      value: filterToEdit?.targets?.[0]?.datasetId,
-    };
-  }, [appDatasources, showDataset, filterToEdit]);
-
-  useEffect(() => {
-    setNativeFilterFieldValues(form, filterId, {
-      dataset: initialDatasetValue,
-    });
-  }, [initialDatasetValue]);
-
-  console.info('%%% initialDatasetValue %%% ', initialDatasetValue);
   return (
     <StyledTabs
       activeKey={activeTabKey}
@@ -934,7 +908,22 @@ const FiltersConfigForm = (
               <StyledFormItem
                 name={['filters', filterId, 'dataset']}
                 label={<StyledLabel>{t('Dataset')}</StyledLabel>}
-                initialValue={initialDatasetValue}
+                initialValue={
+                  showDataset?.table_name &&
+                  Array.isArray(appDatasources) &&
+                  appDatasources.find(
+                    datasource =>
+                      datasource?.full_id === showDataset.table_name,
+                  )?.name
+                    ? {
+                        label: appDatasources.find(
+                          datasource =>
+                            datasource?.full_id === showDataset.table_name,
+                        )?.name,
+                        value: filterToEdit?.targets?.[0]?.datasetId,
+                      }
+                    : undefined
+                }
                 rules={[
                   { required: !isRemoved, message: t('Dataset is required') },
                 ]}
