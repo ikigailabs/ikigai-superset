@@ -82,16 +82,16 @@ function getIframeUrl() {
   let ikigaiOrigin = '';
   const iframeUrl = document.location;
   if (iframeUrl?.search) {
-    // console.log('iframeUrl2', iframeUrl);
+    console.log('iframeUrl2', iframeUrl);
     const iframeUrlParameters = new URLSearchParams(iframeUrl.search);
-    // console.log('iframeUrlParameters', iframeUrlParameters);
+    console.log('iframeUrlParameters', iframeUrlParameters);
     if (iframeUrlParameters) {
       const ikigaiURL = iframeUrlParameters.get('dash_url')
         ? new URL(iframeUrlParameters.get('dash_url'))
         : '';
-      // console.log('ikigaiURL', ikigaiURL);
+      console.log('ikigaiURL', ikigaiURL);
       ikigaiOrigin = ikigaiURL ? ikigaiURL.origin : '';
-      // console.log('ikigaiOrigin', ikigaiOrigin);
+      console.log('ikigaiOrigin', ikigaiOrigin);
     }
   }
   return ikigaiOrigin;
@@ -250,7 +250,8 @@ class IkiDynamicMarkdown extends React.PureComponent {
       crossBrowserInfoString,
       this.props.ikigaiOrigin,
     ); */
-    window?.top?.postMessage(crossBrowserInfoString, this.props.ikigaiOrigin);
+    const ikigaiOrigin = getIframeUrl();
+    window?.top?.postMessage(crossBrowserInfoString, ikigaiOrigin);
   }
 
   /**
@@ -259,7 +260,8 @@ class IkiDynamicMarkdown extends React.PureComponent {
   handleBackwardCompatibility() {
     if (!this.state.customMarkdownId) {
       const { markdownSource, hasError } = this.state;
-      const { ikigaiOrigin, editMode } = this.props;
+      const { editMode } = this.props;
+      const ikigaiOrigin = getIframeUrl();
       const iframe = '';
       const iframeSrc = '';
       if (ikigaiOrigin) {
