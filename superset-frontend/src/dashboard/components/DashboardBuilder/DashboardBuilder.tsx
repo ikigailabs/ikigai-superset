@@ -99,25 +99,6 @@ import '../../stylesheets/dashboard.less';
 
 type DashboardBuilderProps = {};
 
-function getIframeUrl() {
-  let ikigaiOrigin = '';
-  const iframeUrl: any = document.location;
-  if (iframeUrl?.search) {
-    // console.log('iframeUrl2', iframeUrl);
-    const iframeUrlParameters: any = new URLSearchParams(iframeUrl.search);
-    // console.log('iframeUrlParameters', iframeUrlParameters);
-    if (iframeUrlParameters) {
-      const ikigaiURL: any = iframeUrlParameters.get('dash_url')
-        ? new URL(iframeUrlParameters.get('dash_url'))
-        : '';
-      // console.log('ikigaiURL', ikigaiURL);
-      ikigaiOrigin = ikigaiURL ? ikigaiURL.origin : '';
-      // console.log('ikigaiOrigin', ikigaiOrigin);
-    }
-  }
-  return ikigaiOrigin;
-}
-
 // @z-index-above-dashboard-charts + 1 = 11
 const FiltersPanel = styled.div<{ width: number; hidden: boolean }>`
   grid-column: 1;
@@ -424,6 +405,9 @@ const DashboardBuilder: FC<DashboardBuilderProps> = () => {
   const editMode = useSelector<RootState, boolean>(
     state => state.dashboardState.editMode,
   );
+  const ikigaiOrigin = useSelector<RootState, string>(
+    state => state.dashboardState.ikigaiOrigin,
+  );
   const canEdit = useSelector<RootState, boolean>(
     ({ dashboardInfo }) => dashboardInfo.dash_edit_perm,
   );
@@ -645,7 +629,6 @@ const DashboardBuilder: FC<DashboardBuilderProps> = () => {
   }
 
   function handleMessagesListener(event: any) {
-    const ikigaiOrigin: any = getIframeUrl();
     console.log('event.origin', event.origin, ikigaiOrigin);
     if (event.origin === ikigaiOrigin) {
       const messageObject = JSON.parse(event.data);
@@ -677,14 +660,21 @@ const DashboardBuilder: FC<DashboardBuilderProps> = () => {
 
   useEffect(() => {
     // dispatch(setAppDatasources('test11'));
-    const ikigaiOrigin: any = getIframeUrl();
-    window.addEventListener('message', handleMessagesListener);
-    getDatasetsFromParentWindow(ikigaiOrigin);
+    let msgListener: any = null;
+    if (ikigaiOrigin) {
+      msgListener = (e: any) => handleMessagesListener(e);
+    }
+    if (msgListener) {
+      window.addEventListener('message', handleMessagesListener);
+      getDatasetsFromParentWindow(ikigaiOrigin);
+    }
     return () => {
-      document.removeEventListener('click', handleMessagesListener);
+      if (msgListener) {
+        window.removeEventListener('message', handleMessagesListener);
+      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [ikigaiOrigin]);
 
   return (
     <DashboardWrapper>

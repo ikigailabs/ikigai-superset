@@ -581,6 +581,7 @@ const FiltersConfigForm = (
     !datasetId || datasetDetails || formFilter?.dataset?.label;
 
   console.log('showDataset', showDataset);
+  console.log('hasDataset', hasDataset);
 
   const formChanged = useCallback(() => {
     form.setFields([
@@ -832,9 +833,18 @@ const FiltersConfigForm = (
       (datasource: any) => datasource?.full_id === showDataset.table_name,
     );
 
+    if (showDataset?.table_name && !matchingDatasource?.name) {
+      return {
+        label: showDataset?.table_name,
+        value: showDataset?.id,
+      };
+    }
+
     if (!matchingDatasource?.name) {
       return undefined;
     }
+
+    console.log('matchingDatasource', matchingDatasource);
 
     return {
       label: matchingDatasource.name,
@@ -842,7 +852,12 @@ const FiltersConfigForm = (
     };
   }, [appDatasources, showDataset, filterToEdit]);
 
-  console.info('initialDataset: ', initialDatasetValue);
+  console.info(
+    'initialDataset: ',
+    initialDatasetValue,
+    appDatasources,
+    filterToEdit,
+  );
   return (
     <StyledTabs
       activeKey={activeTabKey}
@@ -929,7 +944,7 @@ const FiltersConfigForm = (
                 name={['filters', filterId, 'dataset']}
                 label={<StyledLabel>{t('Dataset')}</StyledLabel>}
                 initialValue={initialDatasetValue}
-                preserve={true}
+                preserve
                 rules={[
                   { required: !isRemoved, message: t('Dataset is required') },
                 ]}

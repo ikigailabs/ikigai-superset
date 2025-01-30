@@ -113,6 +113,8 @@ export type DashboardState = {
     dashboardId: number;
     data: JsonObject;
   };
+  supersetUrl: string;
+  ikigaiOrigin: string;
   appDatasources: any;
   allDatasets: any;
 };

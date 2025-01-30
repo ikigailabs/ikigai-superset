@@ -78,25 +78,6 @@ const defaultProps = {};
 
 const MARKDOWN_ERROR_MESSAGE = t('This component has an error.');
 
-function getIframeUrl() {
-  let ikigaiOrigin = '';
-  const iframeUrl = document.location;
-  if (iframeUrl?.search) {
-    console.log('iframeUrl2', iframeUrl);
-    const iframeUrlParameters = new URLSearchParams(iframeUrl.search);
-    console.log('iframeUrlParameters', iframeUrlParameters);
-    if (iframeUrlParameters) {
-      const ikigaiURL = iframeUrlParameters.get('dash_url')
-        ? new URL(iframeUrlParameters.get('dash_url'))
-        : '';
-      console.log('ikigaiURL', ikigaiURL);
-      ikigaiOrigin = ikigaiURL ? ikigaiURL.origin : '';
-      console.log('ikigaiOrigin', ikigaiOrigin);
-    }
-  }
-  return ikigaiOrigin;
-}
-
 class IkiDynamicMarkdown extends React.PureComponent {
   constructor(props) {
     super(props);
@@ -250,8 +231,7 @@ class IkiDynamicMarkdown extends React.PureComponent {
       crossBrowserInfoString,
       this.props.ikigaiOrigin,
     ); */
-    const ikigaiOrigin = getIframeUrl();
-    window?.top?.postMessage(crossBrowserInfoString, ikigaiOrigin);
+    window?.top?.postMessage(crossBrowserInfoString, this.props.ikigaiOrigin);
   }
 
   /**
@@ -261,10 +241,9 @@ class IkiDynamicMarkdown extends React.PureComponent {
     if (!this.state.customMarkdownId) {
       const { markdownSource, hasError } = this.state;
       const { editMode } = this.props;
-      const ikigaiOrigin = getIframeUrl();
       const iframe = '';
       const iframeSrc = '';
-      if (ikigaiOrigin) {
+      if (this.props.ikigaiOrigin) {
         if (markdownSource) {
           const iframeWrapper = document.createElement('div');
           iframeWrapper.innerHTML = markdownSource;
@@ -312,9 +291,8 @@ class IkiDynamicMarkdown extends React.PureComponent {
 
   // eslint-disable-next-line class-methods-use-this
   handleMessagesListener(event) {
-    const ikigaiOrigin = getIframeUrl();
-    console.log('event.origin', event.origin, ikigaiOrigin);
-    if (event.origin === ikigaiOrigin) {
+    console.log('event.origin', event.origin, this.props.ikigaiOrigin);
+    if (event.origin === this.props.ikigaiOrigin) {
       const messageObject = JSON.parse(event.data);
       // console.log('messageObject', messageObject);
       if (messageObject.info && messageObject.dataType) {
@@ -454,8 +432,7 @@ class IkiDynamicMarkdown extends React.PureComponent {
       customMarkdownIsReady,
       componentSetupData,
     );
-    const { editMode, charts } = this.props;
-    const ikigaiOrigin = getIframeUrl();
+    const { editMode, charts, ikigaiOrigin } = this.props;
     const customMarkdownId = this.getCustomHtmlIdFromMarkdownSource();
 
     return (
