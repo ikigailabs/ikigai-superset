@@ -82,7 +82,7 @@ class IkiDynamicMarkdown extends React.PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      isFocused: false,
+      isFocused: true,
       markdownSource: props.component.meta.code,
       editor: null,
       editorMode: 'preview',
