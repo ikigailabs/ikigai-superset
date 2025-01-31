@@ -938,7 +938,7 @@ const FiltersConfigForm = (
           </FilterTypeInfo>
         )}
         {(hasDataset && initialDatasetValue) ||
-          (hasDataset && !datasetId && (
+          (hasDataset && !datasetDetails && (
             <StyledRowContainer>
               {showDataset || loadedDatasets ? (
                 <StyledFormItem
