@@ -937,44 +937,47 @@ const FiltersConfigForm = (
           filters to have this dashboard filter impact those charts.`)}
           </FilterTypeInfo>
         )}
-        {hasDataset && initialDatasetValue && (
-          <StyledRowContainer>
-            {showDataset || loadedDatasets ? (
-              <StyledFormItem
-                name={['filters', filterId, 'dataset']}
-                label={<StyledLabel>{t('Dataset')}</StyledLabel>}
-                initialValue={initialDatasetValue}
-                preserve
-                rules={[
-                  { required: !isRemoved, message: t('Dataset is required') },
-                ]}
-                {...getFiltersConfigModalTestId('datasource-input')}
-              >
-                <DatasetSelect
-                  onChange={(value: { label: string; value: number }) => {
-                    // We need to reset the column when the dataset has changed
-                    if (value.value !== datasetId) {
-                      setNativeFilterFieldValues(form, filterId, {
-                        dataset: value,
-                        defaultDataMask: null,
-                        column: null,
-                      });
-                    }
-                    forceUpdate();
-                  }}
-                />
-              </StyledFormItem>
-            ) : (
-              <StyledFormItem label={<StyledLabel>{t('Dataset')}</StyledLabel>}>
-                <Loading position="inline-centered" />
-              </StyledFormItem>
-            )}
-            {hasDataset &&
-              Object.keys(mainControlItems).map(
-                key => mainControlItems[key].element,
+        {(hasDataset && initialDatasetValue) ||
+          (!hasDataset && (
+            <StyledRowContainer>
+              {showDataset || loadedDatasets ? (
+                <StyledFormItem
+                  name={['filters', filterId, 'dataset']}
+                  label={<StyledLabel>{t('Dataset')}</StyledLabel>}
+                  initialValue={initialDatasetValue}
+                  preserve
+                  rules={[
+                    { required: !isRemoved, message: t('Dataset is required') },
+                  ]}
+                  {...getFiltersConfigModalTestId('datasource-input')}
+                >
+                  <DatasetSelect
+                    onChange={(value: { label: string; value: number }) => {
+                      // We need to reset the column when the dataset has changed
+                      if (value.value !== datasetId) {
+                        setNativeFilterFieldValues(form, filterId, {
+                          dataset: value,
+                          defaultDataMask: null,
+                          column: null,
+                        });
+                      }
+                      forceUpdate();
+                    }}
+                  />
+                </StyledFormItem>
+              ) : (
+                <StyledFormItem
+                  label={<StyledLabel>{t('Dataset')}</StyledLabel>}
+                >
+                  <Loading position="inline-centered" />
+                </StyledFormItem>
               )}
-          </StyledRowContainer>
-        )}
+              {hasDataset &&
+                Object.keys(mainControlItems).map(
+                  key => mainControlItems[key].element,
+                )}
+            </StyledRowContainer>
+          ))}
         <StyledCollapse
           defaultActiveKey={activeFilterPanelKeys}
           onChange={key => {

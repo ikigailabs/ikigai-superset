@@ -30,10 +30,10 @@ import {
 import { refreshChart } from 'src/components/Chart/chartAction';
 import { CustomHtmlContainer } from '@ikigailabs/custom-html';
 import { updateDataMask } from 'src/dataMask/actions';
+import Loading from 'src/components/Loading';
 import getFiltersList from './util/getFiltersList';
 import { useFilters } from '../nativeFilters/FilterBar/state';
 import { getSelectExtraFormData } from '../../../filters/utils';
-import Loading from 'src/components/Loading';
 
 /*
 Old Iframe src URL format: 
@@ -594,8 +594,8 @@ class IkiDynamicMarkdown extends React.PureComponent {
               <div
                 data-test="dashboard-markdown-editor"
                 className={cx(
-                  this.state.markdownSource === undefined
-                    ? 'dashboard-component-ikirunpipeline'
+                  editorMode === 'edit'
+                    ? 'dashboard-component-dynamic-markdown'
                     : 'dashboard-component',
                   isEditing && 'dashboard-component--editing',
                 )}
@@ -616,7 +616,7 @@ class IkiDynamicMarkdown extends React.PureComponent {
                   onResize={onResize}
                   onResizeStop={onResizeStop}
                   editMode={isFocused ? false : editMode}
-                  isDynamicMarkdown={true}
+                  isDynamicMarkdown
                 >
                   <div
                     ref={dragSourceRef}
@@ -681,9 +681,9 @@ const IkiDynamicMarkdownHOC = props => {
         const mode = val?.mode;
         const type = val?.type;
         const value = val?.value;
-        let from = '',
-          to = '',
-          range = '';
+        let from = '';
+        let to = '';
+        let range = '';
         if (type === 'date-picker') {
           const addFormat =
             mode === 'year' ? 'y' : mode === 'month' ? 'M' : 'd';
