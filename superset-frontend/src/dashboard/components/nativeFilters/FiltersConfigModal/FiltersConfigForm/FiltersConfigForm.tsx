@@ -428,9 +428,7 @@ const FiltersConfigForm = (
   console.log('hasDataset', hasDataset);
 
   const datasetId =
-    formFilter?.dataset?.value ??
-    filterToEdit?.targets[0]?.datasetId ??
-    mostUsedDataset(loadedDatasets, charts);
+    formFilter?.dataset?.value ?? filterToEdit?.targets[0]?.datasetId;
   console.log('datasetId', datasetId);
 
   const { controlItems = {}, mainControlItems = {} } = formFilter
@@ -857,6 +855,7 @@ const FiltersConfigForm = (
     initialDatasetValue,
     appDatasources,
     filterToEdit,
+    datasetDetails,
   );
   return (
     <StyledTabs
@@ -938,7 +937,7 @@ const FiltersConfigForm = (
           </FilterTypeInfo>
         )}
         {(hasDataset && initialDatasetValue) ||
-          (hasDataset && !datasetDetails && (
+          (hasDataset && !datasetId && (
             <StyledRowContainer>
               {showDataset || loadedDatasets ? (
                 <StyledFormItem
