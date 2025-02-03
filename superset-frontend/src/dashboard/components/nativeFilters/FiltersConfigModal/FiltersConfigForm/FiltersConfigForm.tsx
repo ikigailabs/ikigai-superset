@@ -792,12 +792,12 @@ const FiltersConfigForm = (
     let temp_selectedDataset: any;
     if (hasFilledDataset && filterToEdit) {
       if (appDatasources) {
-        /* if (!showDataset?.table_name || !Array.isArray(appDatasources)) {
-      return undefined;
-    } */
+        if (!showDataset?.table_name || !Array.isArray(appDatasources)) {
+          return undefined;
+        }
 
         const matchingDatasource = appDatasources.find(
-          (datasource: any) => datasource?.full_id === showDataset.table_name,
+          (datasource: any) => datasource?.full_id === showDataset?.table_name,
         );
         console.log('matchingDatasource', matchingDatasource);
         if (matchingDatasource?.name) {
