@@ -16,7 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useCallback, useMemo, ReactNode } from 'react';
+import React, {
+  useCallback,
+  useMemo,
+  ReactNode,
+  useEffect,
+  useState,
+} from 'react';
 import rison from 'rison';
 import { t, JsonResponse } from '@superset-ui/core';
 import { AsyncSelect } from 'src/components';
@@ -43,9 +49,15 @@ import { mockedCharts } from './__mock_charts';
 interface DatasetSelectProps {
   onChange: (value: { label: string; value: number }) => void;
   value?: { label: string; value: number };
+  datasetId?: number;
 }
 
-const DatasetSelect = ({ onChange, value }: DatasetSelectProps) => {
+const DatasetSelect = ({ onChange, value, datasetId }: DatasetSelectProps) => {
+  const [selectedDataset, setSelectedDataset] = useState<any>({
+    customLabel: undefined,
+    label: undefined,
+    value: undefined,
+  });
   const getErrorMessage = useCallback(
     ({ error, message }: ClientErrorObject) => {
       let errorText = message || error || t('An error has occurred');
@@ -57,13 +69,61 @@ const DatasetSelect = ({ onChange, value }: DatasetSelectProps) => {
     [],
   );
 
-  const appDatasources = useSelector<RootState, number>(
+  const appDatasources = useSelector<RootState, any>(
     state => state.dashboardState.appDatasources,
   );
   const dashboardLayout = useSelector<RootState, DashboardLayout>(
     state => state.dashboardLayout.present,
   );
   const charts = useSelector<RootState, ChartsState>(({ charts }) => charts);
+
+  useEffect(() => {
+    let chartName = '';
+    let datasetName = '';
+    let temp_selectedOption: any = { ...selectedDataset };
+    if (datasetId) {
+      const temp_charts = mockedCharts;
+      if (temp_charts) {
+        Object.keys(temp_charts).forEach((c: any) => {
+          console.log('c123', c, temp_charts[c]);
+          const temp_datasource = temp_charts[c]
+            ? temp_charts[c]?.form_data?.datasource
+            : '';
+          console.log('temp_datasource', temp_datasource);
+          const temp_datasource_arr: any = temp_datasource.split('__');
+          console.log('temp_datasource_arr', temp_datasource_arr);
+          if (temp_datasource_arr[0]) {
+            const datasource_id = temp_datasource_arr[0];
+            console.log('datasource_id123', datasource_id, datasetId);
+            if (datasource_id.toString() === datasetId.toString()) {
+              chartName = temp_charts[c]?.name;
+              temp_selectedOption = {
+                customLabel: undefined,
+                label: chartName,
+                value: parseInt(datasource_id, 10),
+              };
+            }
+          }
+        });
+      }
+    }
+    console.log('temp_selectedOption', temp_selectedOption);
+    setSelectedDataset(temp_selectedOption);
+    /* if (appDatasources) {
+      const chartMatced: any = appDatasources.filter(
+        (appD: any) => appD.superset_chart_id === chartId.toString(),
+      );
+      if (chartMatced[0]) {
+        datasetName = chartMatced[0]?.dataset?.name;
+      }
+    }
+    if (datasetName) {
+      chartName = datasetName;
+    } else {
+      chartName = sliceName;
+    } */
+    console.log('chartName', chartName);
+  }, [datasetId]);
 
   function getDropdownOptions(
     dashboardLayout: any,
@@ -219,7 +279,9 @@ const DatasetSelect = ({ onChange, value }: DatasetSelectProps) => {
       charts,
       // mockedCharts,
       appDatasources,
+      // mockedDatasources,
     );
+    console.log('list', list, 'datasetId', datasetId);
     return {
       data: list,
       totalCount: list?.length,
@@ -271,10 +333,13 @@ const DatasetSelect = ({ onChange, value }: DatasetSelectProps) => {
       }); */
   };
 
+  console.log('SELECT props: ', value, datasetId);
+
   return (
     <AsyncSelect
       ariaLabel={t('Dataset')}
       value={value}
+      // value={selectedDataset}
       options={loadDatasetOptions}
       onChange={onChange}
       notFoundContent={t('No compatible datasets found')}
@@ -283,8 +348,10 @@ const DatasetSelect = ({ onChange, value }: DatasetSelectProps) => {
   );
 };
 
-const MemoizedSelect = (props: DatasetSelectProps) =>
+const MemoizedSelect = (props: DatasetSelectProps) => {
+  console.log('props', props);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  useMemo(() => <DatasetSelect {...props} />, []);
+  return useMemo(() => <DatasetSelect {...props} />, []);
+};
 
 export default MemoizedSelect;
