@@ -20,6 +20,8 @@ import React, { ReactNode } from 'react';
 import rison from 'rison';
 import querystring from 'query-string';
 import {
+  isFeatureEnabled,
+  FeatureFlag,
   isDefined,
   JsonResponse,
   styled,
@@ -63,6 +65,13 @@ const bootstrapData = getBootstrapData();
 const denyList: string[] = (
   bootstrapData.common.conf.VIZ_TYPE_DENYLIST || []
 ).concat(Object.values(FilterPlugins));
+
+if (
+  isFeatureEnabled(FeatureFlag.DashboardNativeFilters) &&
+  !denyList.includes('filter_box')
+) {
+  denyList.push('filter_box');
+}
 
 const StyledContainer = styled.div`
   ${({ theme }) => `

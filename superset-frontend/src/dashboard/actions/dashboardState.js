@@ -61,7 +61,11 @@ import {
   SAVE_CHART_CONFIG_COMPLETE,
 } from './dashboardInfo';
 import { fetchDatasourceMetadata } from './datasources';
-import { updateDirectPathToFilter } from './dashboardFilters';
+import {
+  addFilter,
+  removeFilter,
+  updateDirectPathToFilter,
+} from './dashboardFilters';
 import { SET_FILTER_CONFIG_COMPLETE } from './nativeFilters';
 import getOverwriteItems from '../util/getOverwriteItems';
 
@@ -550,7 +554,7 @@ export function showBuilderPane() {
   return { type: SHOW_BUILDER_PANE };
 }
 
-export function addSliceToDashboard(id) {
+export function addSliceToDashboard(id, component) {
   return (dispatch, getState) => {
     const { sliceEntities } = getState();
     const selectedSlice = sliceEntities.slices[id];
@@ -576,6 +580,9 @@ export function addSliceToDashboard(id) {
       // dispatch(fetchDatasourceMetadata(form_data.datasource)),
     ]).then(() => {
       dispatch(addSlice(selectedSlice));
+      if (selectedSlice && selectedSlice.viz_type === 'filter_box') {
+        dispatch(addFilter(id, component, selectedSlice.form_data));
+      }
     });
   };
 }

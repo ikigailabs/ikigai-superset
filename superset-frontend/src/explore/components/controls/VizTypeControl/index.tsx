@@ -52,7 +52,7 @@ const denyList: string[] = (
 const metadataRegistry = getChartMetadataRegistry();
 
 if (
-  isFeatureEnabled(FeatureFlag.DASHBOARD_NATIVE_FILTERS) &&
+  isFeatureEnabled(FeatureFlag.DashboardNativeFilters) &&
   !denyList.includes('filter_box')
 ) {
   denyList.push('filter_box');
