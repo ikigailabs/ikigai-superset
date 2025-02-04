@@ -17,6 +17,7 @@ import { MarkdownEditor } from 'src/components/AsyncAceEditor';
 
 import DeleteComponentButton from 'src/dashboard/components/DeleteComponentButton';
 import DragDroppable from 'src/dashboard/components/dnd/DragDroppable';
+import Modal from 'src/components/Modal';
 import ResizableContainer from 'src/dashboard/components/resizable/ResizableContainer';
 import MarkdownModeDropdown from 'src/dashboard/components/menu/MarkdownModeDropdown';
 import WithPopoverMenu from 'src/dashboard/components/menu/WithPopoverMenu';
@@ -417,7 +418,87 @@ class IkiDynamicMarkdown extends React.PureComponent {
     }
   }
 
-  renderIframe() {
+  onDataFilter(filterName, columnName, filterValue, filterType) {
+    console.log('onDataFilter', filterName, columnName, filterValue);
+    this.props?.updateFilter(filterName, '-', filterValue, filterType);
+  }
+
+  onReloadCharts(chartIds) {
+    console.log('onReloadCharts', chartIds);
+    this.refreshCharts(chartIds);
+  }
+
+  onSelectCustomMarkdown(custom_markdown_id) {
+    console.log('onSelectCustomMarkdown', custom_markdown_id);
+    if (custom_markdown_id) {
+      this.setState(
+        {
+          customMarkdownId: custom_markdown_id,
+        },
+        () => {
+          const markdownSource = `<span id='custom-markdown-span-${this.props.component.id}' data-customhtmlid='${custom_markdown_id}' />`;
+          this.handleUpdateSource(markdownSource, true);
+        },
+      );
+    }
+  }
+
+  onDraggingInsideCustomHtml(dragging) {
+    // console.log('onDraggingInsideCustomHtml', dragging);
+    this.setState({
+      innerDragging: dragging,
+    });
+  }
+
+  refreshCharts(charts) {
+    console.log('refreshCharts', charts);
+    if (charts) {
+      charts.forEach(chartId => {
+        this.refreshChart(chartId, this.state.dashboardId, false);
+      });
+    }
+  }
+
+  refreshChart(chartId, dashboardId, isCached) {
+    console.log('refreshChart', chartId, dashboardId);
+    this.props.logEvent(LOG_ACTIONS_FORCE_REFRESH_CHART, {
+      slice_id: chartId,
+      is_cached: isCached,
+    });
+    return this.props.refreshChart(chartId, true, dashboardId);
+  }
+
+  renderEditMode() {
+    return (
+      <>
+        <button>Test open</button>
+        <Modal
+          // css={''}
+          show={true}
+          // onHide={onHideModal ?? (() => null)}
+          title={'Test'}
+          // footer={<ModalFooter formData={drilledFormData} />}
+          responsive
+          resizable
+          /* resizableConfig={{
+                minHeight: theme.gridUnit * 128,
+                minWidth: theme.gridUnit * 128,
+                defaultSize: {
+                  width: 'auto',
+                  height: '80vh',
+                },
+              }} */
+          draggable
+          destroyOnClose
+          maskClosable={false}
+        >
+          Test123
+        </Modal>
+      </>
+    );
+  }
+
+  renderPreviewMode() {
     const {
       markdownSource,
       hasError,
@@ -481,64 +562,6 @@ class IkiDynamicMarkdown extends React.PureComponent {
     );
   }
 
-  onDataFilter(filterName, columnName, filterValue, filterType) {
-    console.log('onDataFilter', filterName, columnName, filterValue);
-    this.props?.updateFilter(filterName, '-', filterValue, filterType);
-  }
-
-  onReloadCharts(chartIds) {
-    console.log('onReloadCharts', chartIds);
-    this.refreshCharts(chartIds);
-  }
-
-  onSelectCustomMarkdown(custom_markdown_id) {
-    console.log('onSelectCustomMarkdown', custom_markdown_id);
-    if (custom_markdown_id) {
-      this.setState(
-        {
-          customMarkdownId: custom_markdown_id,
-        },
-        () => {
-          const markdownSource = `<span id='custom-markdown-span-${this.props.component.id}' data-customhtmlid='${custom_markdown_id}' />`;
-          this.handleUpdateSource(markdownSource, true);
-        },
-      );
-    }
-  }
-
-  onDraggingInsideCustomHtml(dragging) {
-    // console.log('onDraggingInsideCustomHtml', dragging);
-    this.setState({
-      innerDragging: dragging,
-    });
-  }
-
-  refreshCharts(charts) {
-    console.log('refreshCharts', charts);
-    if (charts) {
-      charts.forEach(chartId => {
-        this.refreshChart(chartId, this.state.dashboardId, false);
-      });
-    }
-  }
-
-  refreshChart(chartId, dashboardId, isCached) {
-    console.log('refreshChart', chartId, dashboardId);
-    this.props.logEvent(LOG_ACTIONS_FORCE_REFRESH_CHART, {
-      slice_id: chartId,
-      is_cached: isCached,
-    });
-    return this.props.refreshChart(chartId, true, dashboardId);
-  }
-
-  renderEditMode() {
-    return this.renderIframe();
-  }
-
-  renderPreviewMode() {
-    return this.renderIframe();
-  }
-
   render() {
     const { isFocused, editorMode, innerDragging } = this.state;
     const isEditing = editorMode === 'edit';
@@ -564,75 +587,7 @@ class IkiDynamicMarkdown extends React.PureComponent {
         ? parentComponent.meta.width || GRID_MIN_COLUMN_COUNT
         : component.meta.width || GRID_MIN_COLUMN_COUNT;
 
-    return (
-      <>
-        <DragDroppable
-          component={component}
-          parentComponent={parentComponent}
-          orientation={parentComponent.type === ROW_TYPE ? 'column' : 'row'}
-          index={index}
-          depth={depth}
-          onDrop={handleComponentDrop}
-          // disableDragDrop={isFocused}
-          disableDragDrop={innerDragging || isFocused}
-          // disableDragDrop={true}
-          editMode={editMode}
-        >
-          {({ dropIndicatorProps, dragSourceRef }) => (
-            <WithPopoverMenu
-              onChangeFocus={this.handleChangeFocus}
-              menuItems={[
-                <MarkdownModeDropdown
-                  id={`${component.id}-mode`}
-                  value={this.state.editorMode}
-                  onChange={this.handleChangeEditorMode}
-                />,
-                <DeleteComponentButton onDelete={this.handleDeleteComponent} />,
-              ]}
-              editMode={editMode}
-            >
-              <div
-                data-test="dashboard-markdown-editor"
-                className={cx(
-                  editorMode === 'edit'
-                    ? 'dashboard-component-dynamic-markdown'
-                    : 'dashboard-component',
-                  isEditing && 'dashboard-component--editing',
-                )}
-                id={component.id}
-              >
-                <ResizableContainer
-                  id={component.id}
-                  adjustableWidth={parentComponent.type === ROW_TYPE}
-                  adjustableHeight
-                  widthStep={columnWidth}
-                  widthMultiple={widthMultiple}
-                  heightStep={GRID_BASE_UNIT}
-                  heightMultiple={component.meta.height}
-                  minWidthMultiple={GRID_MIN_COLUMN_COUNT}
-                  minHeightMultiple={GRID_MIN_ROW_UNITS}
-                  maxWidthMultiple={availableColumnCount + widthMultiple}
-                  onResizeStart={this.handleResizeStart}
-                  onResize={onResize}
-                  onResizeStop={onResizeStop}
-                  editMode={isFocused ? false : editMode}
-                  isDynamicMarkdown
-                >
-                  <div
-                    ref={dragSourceRef}
-                    className="dashboard-component-inner"
-                    data-test="dashboard-component-chart-holder"
-                  >
-                    {this.renderPreviewMode()}
-                  </div>
-                </ResizableContainer>
-              </div>
-              {dropIndicatorProps && <div {...dropIndicatorProps} />}
-            </WithPopoverMenu>
-          )}
-        </DragDroppable>
-      </>
-    );
+    return <>{editMode ? this.renderEditMode() : this.renderPreviewMode()}</>;
   }
 }
 
