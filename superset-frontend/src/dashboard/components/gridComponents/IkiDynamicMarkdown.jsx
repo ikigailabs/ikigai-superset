@@ -96,6 +96,7 @@ class IkiDynamicMarkdown extends React.PureComponent {
       customMarkdownIsReady: false, // if data from parent window is received (project_id, etc)
       componentSetupData: null,
       supersetFilters: null,
+      modalOpen: false,
     };
     this.renderStartTime = Logger.getTimestamp();
 
@@ -469,30 +470,100 @@ class IkiDynamicMarkdown extends React.PureComponent {
   }
 
   renderEditMode() {
+    const {
+      markdownSource,
+      hasError,
+      // customMarkdownId,
+      customMarkdownIsReady,
+      componentSetupData,
+      editorMode,
+      supersetFilters,
+      modalOpen,
+    } = this.state;
+    console.log(
+      'customMarkdownIsReady',
+      customMarkdownIsReady,
+      componentSetupData,
+    );
+    const { editMode, charts, ikigaiOrigin } = this.props;
+    const customMarkdownId = this.getCustomHtmlIdFromMarkdownSource();
+
     return (
       <>
-        <button>Test open</button>
+        <button
+          onClick={() =>
+            this.setState({
+              modalOpen: true,
+            })
+          }
+        >
+          Custom Component
+        </button>
         <Modal
-          // css={''}
-          show={true}
-          // onHide={onHideModal ?? (() => null)}
+          // css={{ width: '90%' }}
+          show={modalOpen}
+          onHide={() =>
+            this.setState({
+              modalOpen: false,
+            })
+          }
           title={'Test'}
           // footer={<ModalFooter formData={drilledFormData} />}
           responsive
           resizable
-          /* resizableConfig={{
-                minHeight: theme.gridUnit * 128,
-                minWidth: theme.gridUnit * 128,
-                defaultSize: {
-                  width: 'auto',
-                  height: '80vh',
-                },
-              }} */
+          resizableConfig={{
+            // minHeight: '480px',
+            minWidth: '80%',
+            defaultSize: {
+              width: '95%',
+              height: '80vh',
+            },
+          }}
           draggable
           destroyOnClose
           maskClosable={false}
+          maxWidth="90%"
         >
-          Test123
+          {customMarkdownIsReady ? (
+            <>
+              <CustomHtmlContainer
+                appId={componentSetupData?.appId}
+                componentId={customMarkdownId}
+                mode={editMode ? 'edit' : 'preview'}
+                parent="superset"
+                urlRoot={ikigaiOrigin}
+                apiBaseUrl={componentSetupData?.apiBaseUrl}
+                supersetUrl=""
+                userEmail={componentSetupData?.userEmail}
+                token={componentSetupData?.token}
+                supersetFilters={supersetFilters}
+                supersetCharts={charts}
+                onDrag={dragging => this.onDraggingInsideCustomHtml(dragging)}
+                onSelectCustomMarkdown={custom_markdown_id =>
+                  this.onSelectCustomMarkdown(custom_markdown_id)
+                }
+                onSupersetDataFilter={(
+                  filterName,
+                  columnName,
+                  filterValue,
+                  filterType,
+                ) =>
+                  this.onDataFilter(
+                    filterName,
+                    columnName,
+                    filterValue,
+                    filterType,
+                  )
+                }
+                onReloadCharts={chart_ids => this.onReloadCharts(chart_ids)}
+              />
+            </>
+          ) : (
+            <div style={{ minHeight: '120px', minWidth: '120px' }}>
+              <Loading />
+              <span>Loading...</span>
+            </div>
+          )}
         </Modal>
       </>
     );
