@@ -38,7 +38,7 @@ from superset.daos.dashboard import DashboardDAO
 from superset.dashboards.schemas import ImportV1DashboardSchema
 from superset.databases.schemas import ImportV1DatabaseSchema
 from superset.datasets.schemas import ImportV1DatasetSchema
-from superset.migrations.shared.native_filters import migrate_dashboard
+# from superset.migrations.shared.native_filters import migrate_dashboard
 from superset.models.dashboard import Dashboard, dashboard_slices
 
 
@@ -151,12 +151,3 @@ class ImportDashboardsCommand(ImportModelsCommand):
             for (dashboard_id, chart_id) in dashboard_chart_ids
         ]
         db.session.execute(dashboard_slices.insert(), values)
-
-        # Migrate any filter-box charts to native dashboard filters.
-        for dashboard in dashboards:
-            migrate_dashboard(dashboard)
-
-        # Remove all obsolete filter-box charts.
-        for chart in charts:
-            if chart.viz_type == "filter_box":
-                db.session.delete(chart)

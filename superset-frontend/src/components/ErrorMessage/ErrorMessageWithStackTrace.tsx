@@ -50,6 +50,7 @@ export default function ErrorMessageWithStackTrace({
 }: Props) {
   // Check if a custom error message component was registered for this message
   if (error) {
+    console.log('error', error);
     const ErrorMessageComponent = getErrorMessageComponentRegistry().get(
       error.error_type,
     );

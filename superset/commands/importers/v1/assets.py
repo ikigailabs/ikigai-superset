@@ -41,7 +41,7 @@ from superset.commands.query.importers.v1.utils import import_saved_query
 from superset.dashboards.schemas import ImportV1DashboardSchema
 from superset.databases.schemas import ImportV1DatabaseSchema
 from superset.datasets.schemas import ImportV1DatasetSchema
-from superset.migrations.shared.native_filters import migrate_dashboard
+# from superset.migrations.shared.native_filters import migrate_dashboard
 from superset.models.dashboard import dashboard_slices
 from superset.queries.saved_queries.schemas import ImportV1SavedQuerySchema
 
@@ -145,14 +145,6 @@ class ImportAssetsCommand(BaseCommand):
                     )
                 )
                 db.session.execute(insert(dashboard_slices).values(dashboard_chart_ids))
-
-                # Migrate any filter-box charts to native dashboard filters.
-                migrate_dashboard(dashboard)
-
-        # Remove all obsolete filter-box charts.
-        for chart in charts:
-            if chart.viz_type == "filter_box":
-                db.session.delete(chart)
 
     def run(self) -> None:
         self.validate()

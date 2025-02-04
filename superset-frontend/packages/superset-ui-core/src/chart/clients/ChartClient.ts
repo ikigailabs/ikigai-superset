@@ -102,8 +102,10 @@ export default class ChartClient {
     const { viz_type: visType } = formData;
     const metaDataRegistry = getChartMetadataRegistry();
     const buildQueryRegistry = getChartBuildQueryRegistry();
+    console.log('metaDataRegistry', metaDataRegistry);
 
     if (metaDataRegistry.has(visType)) {
+      console.log('visType', visType);
       const { useLegacyApi } = metaDataRegistry.get(visType)!;
       const buildQuery =
         (await buildQueryRegistry.get(visType)) ?? (() => formData);

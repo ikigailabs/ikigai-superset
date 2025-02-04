@@ -102,6 +102,13 @@ class ChartDataProvider extends React.PureComponent<
       datasourceRequestOptions,
       queryRequestOptions,
     } = this.props;
+    console.log(
+      'loadDatasource',
+      loadDatasource,
+      formDataRequestOptions,
+      datasourceRequestOptions,
+      queryRequestOptions,
+    );
 
     this.setState({ status: 'loading' }, () => {
       try {

@@ -39,6 +39,8 @@ import { URL_PARAMS } from 'src/constants';
 import SliceHeader from '../SliceHeader';
 import MissingChart from '../MissingChart';
 import { slicePropShape, chartPropShape } from '../../util/propShapes';
+import { isFilterBox } from '../../util/activeDashboardFilters';
+import getFilterValuesByFilterId from '../../util/getFilterValuesByFilterId';
 
 const propTypes = {
   id: PropTypes.number.isRequired,
@@ -97,6 +99,7 @@ const SHOULD_UPDATE_ON_PROP_CHANGES = Object.keys(propTypes).filter(
   prop =>
     prop !== 'width' && prop !== 'height' && prop !== 'isComponentVisible',
 );
+const OVERFLOWABLE_VIZ_TYPES = new Set(['filter_box']);
 const DEFAULT_HEADER_HEIGHT = 22;
 
 const ChartWrapper = styled.div`
@@ -295,6 +298,7 @@ class Chart extends React.Component {
   onExploreChart = async clickEvent => {
     const isOpenInNewTab =
       clickEvent.shiftKey || clickEvent.ctrlKey || clickEvent.metaKey;
+    console.log('isOpenInNewTab', isOpenInNewTab);
     try {
       const lastTabId = window.localStorage.getItem('last_tab_id');
       const nextTabId = lastTabId
@@ -421,7 +425,14 @@ class Chart extends React.Component {
     const cachedDttm =
       // eslint-disable-next-line camelcase
       queriesResponse?.map(({ cached_dttm }) => cached_dttm) || [];
-    const initialValues = {};
+    const isOverflowable = OVERFLOWABLE_VIZ_TYPES.has(slice.viz_type);
+    const initialValues = isFilterBox(id)
+      ? getFilterValuesByFilterId({
+          activeFilters: filters,
+          filterId: id,
+        })
+      : {};
+    // const initialValues = {};
 
     return (
       <SliceContainer
@@ -484,7 +495,12 @@ class Chart extends React.Component {
           />
         )}
 
-        <ChartWrapper className={cx('dashboard-chart')}>
+        <ChartWrapper
+          className={cx(
+            'dashboard-chart',
+            isOverflowable && 'dashboard-chart--overflowable',
+          )}
+        >
           {isLoading && (
             <ChartOverlay
               style={{

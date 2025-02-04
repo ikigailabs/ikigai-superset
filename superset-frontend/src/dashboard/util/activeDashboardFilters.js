@@ -25,6 +25,7 @@ import {
 import { CHART_TYPE } from './componentTypes';
 import { DASHBOARD_FILTER_SCOPE_GLOBAL } from '../reducers/dashboardFilters';
 
+let allFilterBoxChartIds = [];
 let activeFilters = {};
 let appliedFilterValuesByChart = {};
 let allComponents = {};
@@ -34,15 +35,30 @@ export function getActiveFilters() {
   return activeFilters;
 }
 
+// currently filter_box is a chart,
+// when selecting filter scopes, they have to be out pulled out in a few places.
+// after we make filter_box a dashboard build-in component, will not need this check anymore.
+export function isFilterBox(chartId) {
+  return allFilterBoxChartIds.includes(chartId);
+}
+
 // this function is to find all filter values applied to a chart,
 // it goes through all active filters and their scopes.
 // return: { [column]: array of selected values }
-export function getAppliedFilterValues(chartId, filters) {
+export function getAppliedFilterValues(chartId, filters = []) {
+  console.log(
+    'chartId',
+    chartId,
+    filters,
+    activeFilters,
+    appliedFilterValuesByChart,
+  );
   // use cached data if possible
   if (!(chartId in appliedFilterValuesByChart)) {
     const applicableFilters = Object.entries(filters || activeFilters).filter(
       ([, { scope: chartIds }]) => chartIds.includes(chartId),
     );
+    console.log('applicableFilters', applicableFilters);
     appliedFilterValuesByChart[chartId] = flow(
       keyBy(
         ([filterKey]) => getChartIdAndColumnFromFilterKey(filterKey).column,
@@ -50,7 +66,41 @@ export function getAppliedFilterValues(chartId, filters) {
       mapValues(([, { values }]) => values),
     )(applicableFilters);
   }
+  console.log('appliedFilterValuesByChart', appliedFilterValuesByChart);
   return appliedFilterValuesByChart[chartId];
+}
+
+// Legacy - getChartIdsInFilterBoxScope is used only by
+// components and functions related to filter box
+// Please use src/dashboard/util/getChartIdsInFilterScope instead
+export function getChartIdsInFilterBoxScope({ filterScope }) {
+  function traverse(chartIds = [], component = {}, immuneChartIds = []) {
+    if (!component) {
+      return;
+    }
+
+    if (
+      component.type === CHART_TYPE &&
+      component.meta &&
+      component.meta.chartId &&
+      !immuneChartIds.includes(component.meta.chartId)
+    ) {
+      chartIds.push(component.meta.chartId);
+    } else if (component.children) {
+      component.children.forEach(child =>
+        traverse(chartIds, allComponents[child], immuneChartIds),
+      );
+    }
+  }
+
+  const chartIds = [];
+  const { scope: scopeComponentIds, immune: immuneChartIds } =
+    filterScope || DASHBOARD_FILTER_SCOPE_GLOBAL;
+  scopeComponentIds.forEach(componentId =>
+    traverse(chartIds, allComponents[componentId], immuneChartIds),
+  );
+
+  return chartIds;
 }
 
 /**
@@ -91,6 +141,10 @@ export function getChartIdsInFilterScope({ filterScope }) {
 // values: array of selected values
 // scope: array of chartIds that applicable to the filter field.
 export function buildActiveFilters({ dashboardFilters = {}, components = {} }) {
+  allFilterBoxChartIds = Object.values(dashboardFilters).map(
+    filter => filter.chartId,
+  );
+
   // clear cache
   if (!isEmpty(components)) {
     allComponents = components;
@@ -107,13 +161,17 @@ export function buildActiveFilters({ dashboardFilters = {}, components = {} }) {
           : columns[column] !== undefined
       ) {
         // remove filter itself
+        const scope2 = getChartIdsInFilterBoxScope({
+          filterScope: scopes[column],
+        }).filter(id => chartId !== id);
         const scope = getChartIdsInFilterScope({
           filterScope: scopes[column],
         }).filter(id => chartId !== id);
+        const scope0 = scope2 ? scope2 : scope;
 
         nonEmptyFilters[getDashboardFilterKey({ chartId, column })] = {
           values: columns[column],
-          scope,
+          scope0,
         };
       }
     });

@@ -69,6 +69,7 @@ export function parseErrorJson(responseObject: JsonObject): ClientErrorObject {
     }
   }
   if (error.stack) {
+    console.log('error', error);
     error = {
       ...error,
       error:

@@ -76,10 +76,6 @@ def upgrade():
     for dashboard in paginated_update(session.query(Dashboard)):
         migrate_dashboard(dashboard)
 
-    # Delete the obsolete filter-box charts.
-    session.query(Slice).filter(Slice.viz_type == "filter_box").delete()
-    session.commit()
-
 
 def downgrade():
     pass

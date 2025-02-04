@@ -128,6 +128,7 @@ const StyledFilterContainer = styled.div`
 class FilterBox extends React.PureComponent {
   constructor(props) {
     super(props);
+    console.log('props', props);
     this.state = {
       selectedValues: props.origSelectedValues,
       // this flag is used by non-instant filter, to make the apply button enabled/disabled
@@ -265,6 +266,7 @@ class FilterBox extends React.PureComponent {
           ]
         : null,
     };
+    console.log('loadOptions', input, formData);
 
     const { json } = await SupersetClient.get({
       url: getExploreUrl({
@@ -273,6 +275,7 @@ class FilterBox extends React.PureComponent {
         method: 'GET',
       }),
     });
+    console.log('json', json);
     const options = (json?.data?.[key] || []).filter(x => x.id);
     if (!options || options.length === 0) {
       return [];

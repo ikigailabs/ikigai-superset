@@ -30,6 +30,7 @@ export enum LocalStorageKeys {
    * TODO: Update all local storage keys to follow the new pattern. This is a breaking change,
    * and therefore should be done in a major release.
    */
+  FilterBoxTransitionSnoozedAt = 'filter_box_transition_snoozed_at',
   Database = 'db',
   ChartSplitSizes = 'chart_split_sizes',
   ControlsWidth = 'controls_width',
@@ -59,6 +60,7 @@ export enum LocalStorageKeys {
 
 export type LocalStorageValues = {
   db: object | null;
+  filter_box_transition_snoozed_at: Record<number, number>;
   chart_split_sizes: [number, number];
   controls_width: number;
   datasource_width: number;

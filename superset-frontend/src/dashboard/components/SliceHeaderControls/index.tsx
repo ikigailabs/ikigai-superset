@@ -514,7 +514,7 @@ const SliceHeaderControls = (props: SliceHeaderControlsPropsWithRouter) => {
         </Menu.SubMenu>
       )}
 
-      {props.supersetCanCSV && (
+      {props.slice.viz_type !== 'filter_box' && props.supersetCanCSV && (
         <Menu.SubMenu title={t('Download')}>
           <Menu.Item
             key={MENU_KEYS.EXPORT_CSV}
@@ -529,7 +529,8 @@ const SliceHeaderControls = (props: SliceHeaderControlsPropsWithRouter) => {
             {t('Export to Excel')}
           </Menu.Item>
 
-          {isFeatureEnabled(FeatureFlag.AllowFullCsvExport) &&
+          {props.slice.viz_type !== 'filter_box' &&
+            isFeatureEnabled(FeatureFlag.AllowFullCsvExport) &&
             props.supersetCanCSV &&
             isTable && (
               <>
