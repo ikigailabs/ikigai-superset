@@ -79,6 +79,23 @@ const defaultProps = {};
 
 const MARKDOWN_ERROR_MESSAGE = t('This component has an error.');
 
+const editBtnCss = {
+  background: '#f2f3ff',
+  border: '1px solid #7822ff',
+  borderRadius: '4px',
+  outline: 'none',
+  fontSize: '14px',
+  fontFamily: 'Inter, sans-serif',
+  color: '#7822ff',
+  fontWeight: 500,
+  minHeight: '32px',
+  display: 'inline-flex',
+  alignItems: 'center',
+  margin: '1px',
+  padding: '4px 16px',
+  borderRadius: '4px',
+};
+
 class IkiDynamicMarkdown extends React.PureComponent {
   constructor(props) {
     super(props);
@@ -274,7 +291,8 @@ class IkiDynamicMarkdown extends React.PureComponent {
    */
   getCustomHtmlIdFromMarkdownSource() {
     const { markdownSource } = this.state;
-    let customMarkdownIdFromSource = '';
+    let customMarkdownIdFromSource = '',
+      customMarkdownNameFromSource = '';
     if (markdownSource) {
       const iframeWrapper = document.createElement('div');
       iframeWrapper.innerHTML = markdownSource;
@@ -284,11 +302,16 @@ class IkiDynamicMarkdown extends React.PureComponent {
       // console.log('spanFound', spanFound, iframeWrapper);
       if (spanFound) {
         const customMarkdownId = spanFound.dataset.customhtmlid;
+        const customMarkdownName = spanFound.dataset.customhtmlname;
         // console.log('customMarkdownId', customMarkdownId);
         customMarkdownIdFromSource = customMarkdownId;
+        customMarkdownNameFromSource = customMarkdownName;
       }
     }
-    return customMarkdownIdFromSource;
+    return {
+      id: customMarkdownIdFromSource,
+      name: customMarkdownNameFromSource,
+    };
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -429,15 +452,15 @@ class IkiDynamicMarkdown extends React.PureComponent {
     this.refreshCharts(chartIds);
   }
 
-  onSelectCustomMarkdown(custom_markdown_id) {
-    console.log('onSelectCustomMarkdown', custom_markdown_id);
+  onSelectCustomMarkdown(custom_markdown_id, name) {
+    console.log('onSelectCustomMarkdown', custom_markdown_id, name);
     if (custom_markdown_id) {
       this.setState(
         {
           customMarkdownId: custom_markdown_id,
         },
         () => {
-          const markdownSource = `<span id='custom-markdown-span-${this.props.component.id}' data-customhtmlid='${custom_markdown_id}' />`;
+          const markdownSource = `<span id='custom-markdown-span-${this.props.component.id}' data-customhtmlid='${custom_markdown_id}' data-customhtmlname='${name}' />`;
           this.handleUpdateSource(markdownSource, true);
         },
       );
@@ -486,18 +509,48 @@ class IkiDynamicMarkdown extends React.PureComponent {
       componentSetupData,
     );
     const { editMode, charts, ikigaiOrigin } = this.props;
-    const customMarkdownId = this.getCustomHtmlIdFromMarkdownSource();
+    const customMarkdownObj = this.getCustomHtmlIdFromMarkdownSource();
+    const customMarkdownId = customMarkdownObj?.id;
+    const customMarkdownName = customMarkdownObj?.name; // 'TestName';
 
     return (
       <>
         <button
+          style={editBtnCss}
           onClick={() =>
             this.setState({
               modalOpen: true,
             })
           }
         >
-          Custom Component
+          <i className="fa fa-cogs" style={{ marginRight: '11px' }} />
+          <div
+            style={{
+              display: 'inline-flex',
+              flexDirection: 'column',
+              textAlign: 'left',
+            }}
+          >
+            <div
+              style={{
+                fontWeight: '400',
+                opacity: customMarkdownName ? '0.8' : '1',
+              }}
+            >
+              Custom Component
+            </div>
+            {customMarkdownName && (
+              <div
+                style={{
+                  fontWeight: '600',
+                  fontSize: '12px',
+                  marginTop: '-2px',
+                }}
+              >
+                {customMarkdownName}
+              </div>
+            )}
+          </div>
         </button>
         <Modal
           // css={{ width: '90%' }}
@@ -507,25 +560,29 @@ class IkiDynamicMarkdown extends React.PureComponent {
               modalOpen: false,
             })
           }
-          title={'Test'}
-          // footer={<ModalFooter formData={drilledFormData} />}
+          title={<div style={{ fontWeight: 600 }}>Custom Component Editor</div>}
+          footer={null}
+          hideFooter={true}
           responsive
           resizable
           resizableConfig={{
-            // minHeight: '480px',
+            minHeight: '480px',
             minWidth: '80%',
             defaultSize: {
-              width: '95%',
-              height: '80vh',
+              width: '90%',
+              height: '90vh',
             },
           }}
           draggable
           destroyOnClose
           maskClosable={false}
           maxWidth="90%"
+          minHeight="90%"
         >
           {customMarkdownIsReady ? (
-            <>
+            <div
+              style={{ position: 'relative', width: '100%', height: '100%' }}
+            >
               <CustomHtmlContainer
                 appId={componentSetupData?.appId}
                 componentId={customMarkdownId}
@@ -539,8 +596,8 @@ class IkiDynamicMarkdown extends React.PureComponent {
                 supersetFilters={supersetFilters}
                 supersetCharts={charts}
                 onDrag={dragging => this.onDraggingInsideCustomHtml(dragging)}
-                onSelectCustomMarkdown={custom_markdown_id =>
-                  this.onSelectCustomMarkdown(custom_markdown_id)
+                onSelectCustomMarkdown={(custom_markdown_id, name) =>
+                  this.onSelectCustomMarkdown(custom_markdown_id, name)
                 }
                 onSupersetDataFilter={(
                   filterName,
@@ -557,7 +614,7 @@ class IkiDynamicMarkdown extends React.PureComponent {
                 }
                 onReloadCharts={chart_ids => this.onReloadCharts(chart_ids)}
               />
-            </>
+            </div>
           ) : (
             <div style={{ minHeight: '120px', minWidth: '120px' }}>
               <Loading />
@@ -585,7 +642,8 @@ class IkiDynamicMarkdown extends React.PureComponent {
       componentSetupData,
     );
     const { editMode, charts, ikigaiOrigin } = this.props;
-    const customMarkdownId = this.getCustomHtmlIdFromMarkdownSource();
+    const customMarkdownObj = this.getCustomHtmlIdFromMarkdownSource();
+    const customMarkdownId = customMarkdownObj?.id;
 
     return (
       <>
