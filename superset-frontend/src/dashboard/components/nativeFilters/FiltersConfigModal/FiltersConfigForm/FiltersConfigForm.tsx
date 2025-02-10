@@ -360,10 +360,10 @@ const FiltersConfigForm = (
   const dashboardId = useSelector<RootState, number>(
     state => state.dashboardInfo.id,
   );
-  const appDatasources = useSelector<RootState, number>(
+  const appDatasources = useSelector<RootState, any>(
     state => state.dashboardState.appDatasources,
   );
-  const allDatasets = useSelector<RootState, number>(
+  const allDatasets = useSelector<RootState, any>(
     state => state.dashboardState.allDatasets,
   );
   const dashboardLayout = useSelector<RootState, DashboardLayout>(
@@ -398,12 +398,12 @@ const FiltersConfigForm = (
     // @ts-ignore
     .filter(([, { value }]) => value.behaviors?.includes(Behavior.NativeFilter))
     .map(([key]) => key);
-  console.log('nativeFilterVizTypes', nativeFilterVizTypes, nativeFilterItems);
+  // console.log('nativeFilterVizTypes', nativeFilterVizTypes, nativeFilterItems);
 
   const loadedDatasets = useSelector<RootState, DatasourcesState>(
     ({ datasources }) => datasources,
   );
-  console.log('loadedDatasets', loadedDatasets, appDatasources);
+  // console.log('loadedDatasets', loadedDatasets, appDatasources);
 
   const doLoadedDatasetsHaveTemporalColumns = useMemo(
     () =>
@@ -425,11 +425,10 @@ const FiltersConfigForm = (
     // @ts-ignore
     !!nativeFilterItems[formFilter?.filterType]?.value?.datasourceCount;
 
-  console.log('hasDataset', hasDataset);
-
   const datasetId =
-    formFilter?.dataset?.value ?? filterToEdit?.targets[0]?.datasetId;
-  console.log('datasetId', datasetId);
+    formFilter?.dataset?.value ??
+    filterToEdit?.targets[0]?.datasetId ??
+    mostUsedDataset(loadedDatasets, charts);
 
   const { controlItems = {}, mainControlItems = {} } = formFilter
     ? getControlItemsMap({
@@ -448,7 +447,7 @@ const FiltersConfigForm = (
   console.log('hasColumn', hasColumn);
 
   const nativeFilterItem = nativeFilterItems[formFilter?.filterType] ?? {};
-  console.log('nativeFilterItem', nativeFilterItem);
+  // console.log('nativeFilterItem', nativeFilterItem);
   // @ts-ignore
   const enableNoResults = !!nativeFilterItem.value?.enableNoResults;
 
@@ -457,6 +456,7 @@ const FiltersConfigForm = (
 
   const hasFilledDataset =
     !hasDataset || (datasetId && (formFilter?.column || !hasColumn));
+  // console.log('hasDataset', hasDataset, 'hasFilledDataset', hasFilledDataset);
 
   const hasAdditionalFilters = FILTERS_WITH_ADHOC_FILTERS.includes(
     formFilter?.filterType,
@@ -524,6 +524,7 @@ const FiltersConfigForm = (
           if (isFeatureEnabled(FeatureFlag.GlobalAsyncQueries)) {
             // deal with getChartDataRequest transforming the response data
             const result = 'result' in json ? json.result[0] : json;
+            console.log('result', result);
 
             if (response.status === 200) {
               setNativeFilterFieldValuesWrapper({
@@ -578,9 +579,6 @@ const FiltersConfigForm = (
   const showDataset =
     !datasetId || datasetDetails || formFilter?.dataset?.label;
 
-  console.log('showDataset', showDataset);
-  console.log('hasDataset', hasDataset);
-
   const formChanged = useCallback(() => {
     form.setFields([
       {
@@ -626,6 +624,7 @@ const FiltersConfigForm = (
     !hasDataset ||
     (!isDataDirty && hasFilledDataset) ||
     !mainControlItems.groupby;
+  // console.log('showDefaultValue', showDefaultValue);
 
   const onSortChanged = (value: boolean | undefined) => {
     const previous = form.getFieldValue('filters')?.[filterId].controlValues;
@@ -711,14 +710,17 @@ const FiltersConfigForm = (
         })}`,
       })
         .then((response: JsonResponse) => {
+          console.log('response1', response);
           setMetrics(response.json?.result?.metrics);
           const dataset = response.json?.result;
           // modify the response to fit structure expected by AdhocFilterControl
           dataset.type = dataset.datasource_type;
           dataset.filter_select = true;
+          console.log('dataset', dataset);
           setDatasetDetails(dataset);
         })
         .catch((response: SupersetApiError) => {
+          console.log('response2', response);
           addDangerToast(response.message);
         });
     }
@@ -786,6 +788,62 @@ const FiltersConfigForm = (
     return <RemovedFilter onClick={() => restoreFilter(filterId)} />;
   }
 
+  const initialDatasetValue = useMemo(() => {
+    let temp_selectedDataset: any;
+    if (hasFilledDataset && filterToEdit) {
+      if (appDatasources) {
+        if (!showDataset?.table_name || !Array.isArray(appDatasources)) {
+          return undefined;
+        }
+
+        const matchingDatasource = appDatasources.find(
+          (datasource: any) => datasource?.full_id === showDataset?.table_name,
+        );
+        console.log('matchingDatasource', matchingDatasource);
+        if (matchingDatasource?.name) {
+          temp_selectedDataset = {
+            label: matchingDatasource.name,
+            value: filterToEdit?.targets?.[0]?.datasetId,
+          };
+        }
+      } else if (showDataset?.table_name) {
+        temp_selectedDataset = {
+          label: showDataset?.table_name,
+          value: showDataset?.id,
+        };
+      }
+    } else {
+      temp_selectedDataset = undefined;
+    }
+
+    console.log('temp_selectedDataset', temp_selectedDataset);
+
+    return temp_selectedDataset;
+  }, [hasFilledDataset, filterToEdit, appDatasources, showDataset]);
+
+  console.log(
+    'datasetId',
+    datasetId,
+    'datasetDetails',
+    datasetDetails,
+    'showDataset',
+    showDataset,
+    'formFilter?.dataset?.label',
+    formFilter?.dataset?.label,
+    'filterToEdit',
+    filterToEdit,
+    'hasDataset',
+    hasDataset,
+    'hasFilledDataset',
+    hasFilledDataset,
+    'initialDatasetValue',
+    initialDatasetValue,
+  );
+
+  if (isRemoved) {
+    return <RemovedFilter onClick={() => restoreFilter(filterId)} />;
+  }
+
   const timeColumn = (
     <StyledRowFormItem
       name={['filters', filterId, 'granularity_sqla']}
@@ -822,41 +880,6 @@ const FiltersConfigForm = (
     </StyledRowFormItem>
   );
 
-  const initialDatasetValue = useMemo(() => {
-    if (!showDataset?.table_name || !Array.isArray(appDatasources)) {
-      return undefined;
-    }
-
-    const matchingDatasource = appDatasources.find(
-      (datasource: any) => datasource?.full_id === showDataset.table_name,
-    );
-
-    if (showDataset?.table_name && !matchingDatasource?.name) {
-      return {
-        label: showDataset?.table_name,
-        value: showDataset?.id,
-      };
-    }
-
-    if (!matchingDatasource?.name) {
-      return undefined;
-    }
-
-    console.log('matchingDatasource', matchingDatasource);
-
-    return {
-      label: matchingDatasource.name,
-      value: filterToEdit?.targets?.[0]?.datasetId,
-    };
-  }, [appDatasources, showDataset, filterToEdit]);
-
-  console.info(
-    'initialDataset: ',
-    initialDatasetValue,
-    appDatasources,
-    filterToEdit,
-    datasetDetails,
-  );
   return (
     <StyledTabs
       activeKey={activeTabKey}
@@ -936,47 +959,60 @@ const FiltersConfigForm = (
           filters to have this dashboard filter impact those charts.`)}
           </FilterTypeInfo>
         )}
-        {(hasDataset && initialDatasetValue) ||
-          (hasDataset && !datasetId && (
-            <StyledRowContainer>
-              {showDataset || loadedDatasets ? (
-                <StyledFormItem
-                  name={['filters', filterId, 'dataset']}
-                  label={<StyledLabel>{t('Dataset')}</StyledLabel>}
-                  initialValue={initialDatasetValue}
-                  preserve
-                  rules={[
-                    { required: !isRemoved, message: t('Dataset is required') },
-                  ]}
-                  {...getFiltersConfigModalTestId('datasource-input')}
-                >
-                  <DatasetSelect
-                    onChange={(value: { label: string; value: number }) => {
-                      // We need to reset the column when the dataset has changed
-                      if (value.value !== datasetId) {
-                        setNativeFilterFieldValues(form, filterId, {
-                          dataset: value,
-                          defaultDataMask: null,
-                          column: null,
-                        });
+        {hasDataset && (
+          <StyledRowContainer>
+            {showDataset ? (
+              <StyledFormItem
+                name={['filters', filterId, 'dataset']}
+                label={<StyledLabel>{t('Dataset')}</StyledLabel>}
+                initialValue={initialDatasetValue}
+                /* initialValue={
+                  showDataset?.table_name
+                    ? {
+                        label: showDataset.table_name,
+                        value: showDataset.id,
                       }
-                      forceUpdate();
-                    }}
-                  />
-                </StyledFormItem>
-              ) : (
-                <StyledFormItem
-                  label={<StyledLabel>{t('Dataset')}</StyledLabel>}
-                >
-                  <Loading position="inline-centered" />
-                </StyledFormItem>
+                    : undefined
+                } */
+                rules={[
+                  { required: !isRemoved, message: t('Dataset is required') },
+                ]}
+                {...getFiltersConfigModalTestId('datasource-input')}
+              >
+                <DatasetSelect
+                  onChange={(value: { label: string; value: number }) => {
+                    // We need to reset the column when the dataset has changed
+                    if (value.value !== datasetId) {
+                      setNativeFilterFieldValues(form, filterId, {
+                        dataset: value,
+                        defaultDataMask: null,
+                        column: null,
+                      });
+                    }
+                    forceUpdate();
+                  }}
+                  /* value={
+                    datasetDetails
+                      ? {
+                          label: datasetDetails?.table_name,
+                          value: datasetDetails?.id,
+                        }
+                      : undefined
+                  } */
+                  datasetId={datasetId}
+                />
+              </StyledFormItem>
+            ) : (
+              <StyledFormItem label={<StyledLabel>{t('Dataset')}</StyledLabel>}>
+                <Loading position="inline-centered" />
+              </StyledFormItem>
+            )}
+            {hasDataset &&
+              Object.keys(mainControlItems).map(
+                key => mainControlItems[key].element,
               )}
-              {hasDataset &&
-                Object.keys(mainControlItems).map(
-                  key => mainControlItems[key].element,
-                )}
-            </StyledRowContainer>
-          ))}
+          </StyledRowContainer>
+        )}
         <StyledCollapse
           defaultActiveKey={activeFilterPanelKeys}
           onChange={key => {

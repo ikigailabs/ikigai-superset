@@ -18,7 +18,7 @@
  */
 import React, { FC } from 'react';
 import DraggableNewComponent from './DraggableNewComponent';
-import { DYNAMIC_TYPE } from '../../../util/componentTypes';
+import { IKI_DYNAMIC_MARKDOWN_TYPE } from '../../../util/componentTypes';
 import { NEW_DYNAMIC_COMPONENT } from '../../../util/constants';
 import { DashboardComponentsRegistryMetadata } from '../../../../visualizations/dashboardComponents/DashboardComponentsRegistry';
 
@@ -33,7 +33,7 @@ const DraggableNewDynamicComponent: FC<DraggableNewDynamicComponent> = ({
 }) => (
   <DraggableNewComponent
     id={NEW_DYNAMIC_COMPONENT}
-    type={DYNAMIC_TYPE}
+    type={IKI_DYNAMIC_MARKDOWN_TYPE}
     label={metadata.name}
     meta={{ metadata, componentKey }}
     className={`fa fa-${metadata.iconName}`}
