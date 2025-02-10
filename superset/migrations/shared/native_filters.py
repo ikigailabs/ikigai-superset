@@ -292,6 +292,12 @@ def migrate_dashboard(dashboard: Dashboard) -> None:
             slc.id: slc for slc in dashboard.slices if slc.viz_type == "filter_box"
         }
 
+        print("Dashboard ID", dashboard.id)
+        print("Dashboard Title", dashboard.dashboard_title)
+        print("Filter Boxes", filter_boxes_by_id)
+        print("Intial JSON Metdata", dashboard.json_metadata)
+        print("Intial Position Metdata", dashboard.position_json)
+
         # Convert the legacy filter configurations to native filters.
         native_filter_configuration = json_metadata.setdefault(
             "native_filter_configuration",
@@ -309,6 +315,8 @@ def migrate_dashboard(dashboard: Dashboard) -> None:
         # Remove the legacy filter configuration.
         for key in ["default_filters", "filter_scopes"]:
             json_metadata.pop(key, None)
+        
+        print("JSON Metdata after popping default_filters, filter_scopes", dashboard.json_metadata)
 
         # Replace the filter-box charts with markdown elements.
         for key, value in list(position_json.items()):  # Immutable iteration
@@ -318,6 +326,8 @@ def migrate_dashboard(dashboard: Dashboard) -> None:
                 and (meta := value.get("meta"))
                 and meta["chartId"] in filter_boxes_by_id
             ):
+                print(f"Updating Slice-ID {meta["chartId"]} to a Markdown element")
+
                 slc = filter_boxes_by_id[meta["chartId"]]
                 mapping[key] = key.replace("CHART-", "MARKDOWN-")
 
@@ -333,6 +343,8 @@ def migrate_dashboard(dashboard: Dashboard) -> None:
 
                 position_json[mapping[key]] = value
                 del position_json[key]
+        
+        print("Position JSON after coverting to Markdown", dashboard.position_json)
 
         # Replace the relevant CHART- references.
         for value in position_json.values():
@@ -343,12 +355,19 @@ def migrate_dashboard(dashboard: Dashboard) -> None:
                             if key in mapping:
                                 value[relation][idx] = mapping[key]
 
+        print("Dashboard Slices Prior to Removal", dashboard.slices)
+        
         # Remove the filter-box charts from the dashboard/slice mapping.
         dashboard.slices = [
             slc for slc in dashboard.slices if slc.viz_type != "filter_box"
         ]
 
+        print("Dashboard Slices After Removal", dashboard.slices)
+
         dashboard.json_metadata = json.dumps(json_metadata)
         dashboard.position_json = json.dumps(position_json)
+
+        print("Final Dashboard Json Metadata", dashboard.json_metadata)
+        print("Final Dashboard Position Metadata", dashboard.json_metadata)
     except Exception:  # pylint: disable=broad-except
         print(f"Unable to upgrade {str(dashboard)}")
