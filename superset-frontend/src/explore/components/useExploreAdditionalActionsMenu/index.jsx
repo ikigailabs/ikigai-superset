@@ -304,11 +304,11 @@ export const useExploreAdditionalActionsMenu = (
     () => (
       <Menu onClick={handleMenuClick} selectable={false} {...rest}>
         <>
-          {slice && (
+          {/* {slice && (
             <Menu.Item key={MENU_KEYS.EDIT_PROPERTIES}>
               {t('Edit chart properties')}
             </Menu.Item>
-          )}
+          )} */}
           <Menu.SubMenu
             title={t('On dashboards')}
             key={MENU_KEYS.DASHBOARDS_ADDED_TO}
