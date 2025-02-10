@@ -573,7 +573,7 @@ class IkiDynamicMarkdown extends React.PureComponent {
               height: '90vh',
             },
           }}
-          draggable
+          draggable={false}
           destroyOnClose
           maskClosable={false}
           maxWidth="90%"
