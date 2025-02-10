@@ -262,6 +262,11 @@ class IkiDynamicMarkdown extends React.PureComponent {
       const { editMode } = this.props;
       const iframe = '';
       const iframeSrc = '';
+      console.info(
+        'handleBackwardCompatibility',
+        this.props.ikigaiOrigin,
+        markdownSource,
+      );
       if (this.props.ikigaiOrigin) {
         if (markdownSource) {
           const iframeWrapper = document.createElement('div');
