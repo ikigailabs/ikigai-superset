@@ -326,7 +326,8 @@ def migrate_dashboard(dashboard: Dashboard) -> None:
                 and (meta := value.get("meta"))
                 and meta["chartId"] in filter_boxes_by_id
             ):
-                print(f"Updating Slice-ID {meta["chartId"]} to a Markdown element")
+                chartID = meta["chartId"]
+                print(f"Updating Slice-ID {chartID} to a Markdown element")
 
                 slc = filter_boxes_by_id[meta["chartId"]]
                 mapping[key] = key.replace("CHART-", "MARKDOWN-")
