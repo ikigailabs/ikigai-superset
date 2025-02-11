@@ -293,10 +293,14 @@ def migrate_dashboard(dashboard: Dashboard) -> None:
         }
 
         print("Dashboard ID", dashboard.id)
-        print("Dashboard Title", dashboard.dashboard_title)
+        # print("Dashboard Title", dashboard.dashboard_title)
         print("Filter Boxes", filter_boxes_by_id)
-        print("Intial JSON Metdata", dashboard.json_metadata)
-        print("Intial Position Metdata", dashboard.position_json)
+
+        if dashboard.json_metadata:
+            print("Intial JSON Metdata", dashboard.json_metadata)
+
+        if dashboard.position_json:
+            print("Intial Position Metdata", dashboard.position_json)
 
         # Convert the legacy filter configurations to native filters.
         native_filter_configuration = json_metadata.setdefault(
@@ -370,5 +374,6 @@ def migrate_dashboard(dashboard: Dashboard) -> None:
 
         print("Final Dashboard Json Metadata", dashboard.json_metadata)
         print("Final Dashboard Position Metadata", dashboard.json_metadata)
-    except Exception:  # pylint: disable=broad-except
+    except Exception as e:  # pylint: disable=broad-except
         print(f"Unable to upgrade {str(dashboard)}")
+        print("Error", e)
