@@ -980,7 +980,11 @@ const FiltersConfigForm = (
                 {...getFiltersConfigModalTestId('datasource-input')}
               >
                 <DatasetSelect
-                  onChange={(value: { label: string; value: number }) => {
+                  onChange={(value: {
+                    label: string;
+                    value: number;
+                    datasetId: string;
+                  }) => {
                     // We need to reset the column when the dataset has changed
                     if (value.value !== datasetId) {
                       setNativeFilterFieldValues(form, filterId, {

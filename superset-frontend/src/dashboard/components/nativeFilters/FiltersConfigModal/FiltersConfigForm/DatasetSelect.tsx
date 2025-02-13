@@ -141,18 +141,25 @@ const DatasetSelect = ({ onChange, value, datasetId }: DatasetSelectProps) => {
           const sliceName = layoutObject?.meta?.sliceName;
           let chartName = '';
           let datasetName = '';
+          let datasetId = '';
           if (appDatasources) {
-            const chartMatced: any = appDatasources.filter(
+            const chartMatched: any = appDatasources.filter(
               (appD: any) => appD.superset_chart_id === chartId.toString(),
             );
-            if (chartMatced[0]) {
-              datasetName = chartMatced[0]?.dataset?.name;
+            if (chartMatched[0]) {
+              datasetName = chartMatched[0]?.dataset?.name;
+              datasetId = chartMatched[0]?.dataset?.dataset_id;
             }
           }
           if (datasetName) {
             chartName = datasetName;
           } else {
             chartName = sliceName;
+            // If we cant get Dataset Id with superset_chart_id, use slice name (dataset name) to get the chartMatched
+            // We can use slice name (dataset name) to find the dataset id b/c a project can only have one dataset of a given name
+            datasetId = appDatasources.filter(
+              (appD: any) => appD.dataset?.name === sliceName,
+            )?.[0]?.dataset?.dataset_id;
           }
           const temp_datasource = charts[chartId]
             ? charts[chartId]?.form_data?.datasource
@@ -164,6 +171,7 @@ const DatasetSelect = ({ onChange, value, datasetId }: DatasetSelectProps) => {
               selectOptionsObj = {
                 ...selectOptionsObj,
                 [datasource_id]: {
+                  datasetId: datasetId || '',
                   customLabel: undefined,
                   label: chartName,
                   value: parseInt(datasource_id, 10),
