@@ -54,6 +54,7 @@ const propTypes = {
   dashboardLayout: PropTypes.object,
   charts: PropTypes.object,
   datasources: PropTypes.object,
+  chartsData: PropTypes.object,
 
   // from redux
   logEvent: PropTypes.func.isRequired,
@@ -149,13 +150,16 @@ class IkiDynamicMarkdown extends React.PureComponent {
   }
 
   static getDerivedStateFromProps(nextProps, state) {
-    const { filters, charts, datasources, dashboardLayout } = nextProps;
-    if (filters && charts && datasources && dashboardLayout) {
+    const { filters, charts, datasources, dashboardLayout, chartsData } =
+      nextProps;
+    console.log('chartsData', chartsData);
+    if ((filters && charts && datasources && dashboardLayout, chartsData)) {
       const supersetFilters = getFiltersList(
         nextProps?.filters,
         charts,
         datasources,
         dashboardLayout?.present,
+        chartsData,
       );
       // console.log('supersetFilters!!!', supersetFilters);
       return {

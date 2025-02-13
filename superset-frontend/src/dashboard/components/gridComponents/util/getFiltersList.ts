@@ -3,8 +3,16 @@ function getFiltersList(
   charts: object,
   datasources: object,
   dashboardLayout: any,
+  chartsData: any,
 ) {
-  // console.log('getFiltersList', filters, charts, datasources, dashboardLayout);
+  console.log(
+    'getFiltersList',
+    filters,
+    charts,
+    datasources,
+    dashboardLayout,
+    chartsData,
+  );
   const supersetFilters: any[] = [];
   const tempCharts: any = { ...charts };
   if (dashboardLayout && Object.keys(dashboardLayout).length > 0) {
@@ -19,6 +27,7 @@ function getFiltersList(
       }
     });
   }
+  console.log('tempCharts', tempCharts);
   if (filters && dashboardLayout && Object.keys(dashboardLayout).length > 0) {
     Object.keys(filters).forEach((filterId: string, filterIndex: number) => {
       // console.log('filter', filters[filterId]);
@@ -28,6 +37,21 @@ function getFiltersList(
       if (chartsInScope) {
         chartsInScope.forEach((chartId: string) => {
           if (tempCharts[chartId]) {
+            if (chartsData) {
+              const numericChartId: number = parseInt(chartId, 10);
+              let foundChartData: any = null;
+              Object.keys(chartsData).forEach((chart: any) => {
+                if (chartsData[chart].chartsInScope.includes(numericChartId)) {
+                  foundChartData = chartsData[chart];
+                }
+              });
+              console.log('numericChartId', numericChartId, foundChartData);
+              tempCharts[chartId].chartData = foundChartData.data;
+              /* if (tempCharts[chartId].queriesResponse[0]) {
+                tempCharts[chartId].queriesResponse[0].data =
+                  foundChartData.data;
+              } */
+            }
             filterCharts = {
               ...filterCharts,
               [chartId]: tempCharts[chartId],
@@ -40,6 +64,7 @@ function getFiltersList(
       }
     });
   }
+  console.log('tempCharts2', tempCharts, supersetFilters);
   // console.log('filters', filters);
   return supersetFilters;
 }

@@ -26,6 +26,7 @@ import {
 } from '../actions/dashboardLayout';
 import {
   setAppDatasources,
+  setChartsData,
   setDirectPathToChild,
   setEditMode,
   setSupersetUrl,
@@ -48,6 +49,7 @@ function mapDispatchToProps(dispatch) {
       setEditMode,
       setSupersetUrl,
       setAppDatasources,
+      setChartsData,
     },
     dispatch,
   );

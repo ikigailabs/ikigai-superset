@@ -117,6 +117,7 @@ export type DashboardState = {
   ikigaiOrigin: string;
   appDatasources: any;
   allDatasets: any;
+  chartsData: any;
 };
 export type DashboardInfo = {
   id: number;

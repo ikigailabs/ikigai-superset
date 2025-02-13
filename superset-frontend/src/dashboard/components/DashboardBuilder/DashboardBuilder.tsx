@@ -60,6 +60,7 @@ import {
 } from 'src/dashboard/types';
 import {
   setAppDatasources,
+  setChartsData,
   setDirectPathToChild,
   setEditMode,
   setSupersetUrl,
@@ -96,6 +97,7 @@ import DashboardContainer from './DashboardContainer';
 import { useNativeFilters } from './state';
 import DashboardWrapper from './DashboardWrapper';
 import '../../stylesheets/dashboard.less';
+import { getChartDataRequest } from 'src/components/Chart/chartAction';
 
 type DashboardBuilderProps = {};
 
@@ -402,6 +404,10 @@ const DashboardBuilder: FC<DashboardBuilderProps> = () => {
   const dashboardLayout = useSelector<RootState, DashboardLayout>(
     state => state.dashboardLayout.present,
   );
+  const dashboardCharts: any = useSelector<RootState>(state => state.charts);
+  const dashboardFilters = useSelector(
+    (state: RootState) => state.nativeFilters?.filters,
+  );
   const editMode = useSelector<RootState, boolean>(
     state => state.dashboardState.editMode,
   );
@@ -465,6 +471,7 @@ const DashboardBuilder: FC<DashboardBuilderProps> = () => {
     isReport;
 
   const [barTopOffset, setBarTopOffset] = useState(0);
+  const [isChartDataLoading, setIsChartDataLoading] = useState(false);
 
   useEffect(() => {
     setBarTopOffset(headerRef.current?.getBoundingClientRect()?.height || 0);
@@ -675,6 +682,93 @@ const DashboardBuilder: FC<DashboardBuilderProps> = () => {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ikigaiOrigin]);
+
+  async function loadChartsData(filterChart: any) {
+    console.log('loadChartsData', filterChart);
+    if (filterChart && Object.keys(filterChart).length > 0) {
+      let chartsData: any = null;
+      for (let i = 0; i < Object.keys(filterChart).length; i += 1) {
+        console.log('filterChart', filterChart, i, filterChart[i]);
+        // eslint-disable-next-line no-await-in-loop
+        const { json } = await getChartDataRequest({
+          formData: {
+            datasource: filterChart[i]?.datasource,
+            viz_type: 'custom',
+            groupby: [`${filterChart[i]?.columnName}`],
+          },
+          force: true,
+        });
+        console.log('json', json);
+        if (json?.result[0].data) {
+          const tempData: any = json?.result[0].data;
+          chartsData = {
+            ...chartsData,
+            [filterChart[i].filterId]: {
+              data: tempData,
+              chartsInScope: filterChart[i]?.chartsInScope,
+            },
+          };
+        }
+      }
+      setIsChartDataLoading(false);
+      console.log('chartsData', chartsData);
+      if (chartsData) {
+        dispatch(setChartsData(chartsData));
+      }
+    }
+  }
+
+  useEffect(() => {
+    console.log(
+      'dL in DashboardBuilder: ',
+      dashboardLayout,
+      dashboardCharts,
+      dashboardFilters,
+    );
+    let onlyCharts: any = null;
+    if (dashboardLayout) {
+      setIsChartDataLoading(true);
+      Object.keys(dashboardLayout).forEach((layoutId: any) => {
+        const layoutObject: any = dashboardLayout[layoutId];
+        if (layoutObject?.type === 'CHART') {
+          const chartId = dashboardLayout[layoutId]?.meta?.chartId;
+          onlyCharts = {
+            ...onlyCharts,
+            [chartId]: dashboardCharts[chartId]
+              ? dashboardCharts[chartId]
+              : null,
+          };
+        }
+      });
+      console.log('onlyCharts', onlyCharts);
+      let chartsInfoPerFilter: any = [];
+      Object.keys(dashboardFilters).forEach((filterId: any) => {
+        const colName: any =
+          dashboardFilters[filterId]?.targets?.[0]?.column?.name;
+        const chartsInScope: any = dashboardFilters[filterId]?.chartsInScope;
+        if (colName && chartsInScope) {
+          chartsInScope.forEach((chartId: string | number) => {
+            if (onlyCharts[chartId]) {
+              const chartFormData = onlyCharts[chartId]?.form_data;
+              const chartDatasource = chartFormData?.datasource;
+              chartsInfoPerFilter = [
+                ...chartsInfoPerFilter,
+                {
+                  filterId,
+                  chartsInScope,
+                  columnName: chartFormData?.groupby ? colName : '',
+                  datasource: chartDatasource,
+                },
+              ];
+            }
+          });
+        }
+      });
+      console.log('chartsInfoPerFilter', chartsInfoPerFilter);
+      loadChartsData(chartsInfoPerFilter);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dashboardLayout]);
 
   return (
     <DashboardWrapper>

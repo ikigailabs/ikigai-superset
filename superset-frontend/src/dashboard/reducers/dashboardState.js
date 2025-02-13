@@ -47,6 +47,7 @@ import {
   SAVE_DASHBOARD_STARTED,
   SAVE_DASHBOARD_FINISHED,
   SET_APP_DATASOURCES,
+  SET_CHARTS_DATA,
 } from '../actions/dashboardState';
 import { HYDRATE_DASHBOARD } from '../actions/hydrate';
 
@@ -266,6 +267,15 @@ export default function dashboardStateReducer(state = {}, action) {
         ...state,
         appDatasources,
         allDatasets,
+      };
+    },
+    [SET_CHARTS_DATA]() {
+      console.log('SET_CHARTS_DATA', action);
+      const { chartsData } = action;
+
+      return {
+        ...state,
+        chartsData,
       };
     },
   };

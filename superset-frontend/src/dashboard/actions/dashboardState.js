@@ -662,3 +662,9 @@ export function setAppDatasources(appDatasources, allDatasets) {
   console.log('setAppDatasources', appDatasources, allDatasets);
   return { type: SET_APP_DATASOURCES, appDatasources, allDatasets };
 }
+
+export const SET_CHARTS_DATA = 'SET_CHARTS_DATA';
+export function setChartsData(chartsData) {
+  console.log('setChartsData', chartsData);
+  return { type: SET_CHARTS_DATA, chartsData };
+}

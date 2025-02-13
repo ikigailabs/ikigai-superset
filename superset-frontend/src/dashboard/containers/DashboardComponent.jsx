@@ -62,6 +62,7 @@ const propTypes = {
   supersetUrl: PropTypes.string,
   appDatasources: PropTypes.any,
   allDatasets: PropTypes.any,
+  chartsData: PropTypes.any,
 };
 
 const defaultProps = {
@@ -87,6 +88,7 @@ function mapStateToProps(
     fullSizeChartId: dashboardState.fullSizeChartId,
     appDatasources: dashboardState.appDatasources,
     allDatasets: dashboardState.allDatasets,
+    chartsData: dashboardState.chartsData,
   };
 
   // rows and columns need more data about their child dimensions
