@@ -33,6 +33,7 @@ import { CustomHtmlContainer } from '@ikigailabs/custom-html';
 import { updateDataMask } from 'src/dataMask/actions';
 import Loading from 'src/components/Loading';
 import getFiltersList from './util/getFiltersList';
+import getDatasetTableId from './util/getDatasetTableId';
 import { useFilters } from '../nativeFilters/FilterBar/state';
 import { getSelectExtraFormData } from '../../../filters/utils';
 
@@ -459,9 +460,9 @@ class IkiDynamicMarkdown extends React.PureComponent {
     this.props?.updateFilter(filterName, '-', filterValue, filterType);
   }
 
-  onReloadCharts(chartIds) {
-    console.log('onReloadCharts', chartIds);
-    this.refreshCharts(chartIds);
+  onReloadCharts(chartIds, tableNames) {
+    console.log('onReloadCharts', chartIds, tableNames);
+    this.refreshCharts(chartIds, tableNames);
   }
 
   onSelectCustomMarkdown(custom_markdown_id, name) {
@@ -486,12 +487,24 @@ class IkiDynamicMarkdown extends React.PureComponent {
     });
   }
 
-  refreshCharts(charts) {
-    console.log('refreshCharts', charts);
+  refreshCharts(charts, tables) {
+    console.log('refreshCharts', charts, tables);
     if (charts) {
       charts.forEach(chartId => {
         this.refreshChart(chartId, this.state.dashboardId, false);
       });
+    }
+    if (tables) {
+      const dashboardLayout = this.props.dashboardLayout?.present;
+      console.log('dashboardLayout', dashboardLayout);
+      if (dashboardLayout && Object.keys(dashboardLayout).length > 0) {
+        tables.forEach(tableName => {
+          const tableId = getDatasetTableId(tableName, dashboardLayout);
+          if (tableId) {
+            this.refreshChart(tableId, this.state.dashboardId, false);
+          }
+        });
+      }
     }
   }
 
@@ -622,7 +635,9 @@ class IkiDynamicMarkdown extends React.PureComponent {
                     filterType,
                   )
                 }
-                onReloadCharts={chart_ids => this.onReloadCharts(chart_ids)}
+                onReloadCharts={(chart_ids, table_names) =>
+                  this.onReloadCharts(chart_ids, table_names)
+                }
               />
             </div>
           ) : (
@@ -686,7 +701,9 @@ class IkiDynamicMarkdown extends React.PureComponent {
                   filterType,
                 )
               }
-              onReloadCharts={chart_ids => this.onReloadCharts(chart_ids)}
+              onReloadCharts={(chart_ids, table_names) =>
+                this.onReloadCharts(chart_ids, table_names)
+              }
             />
           </>
         ) : (
