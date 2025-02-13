@@ -316,7 +316,7 @@ class IkiDynamicMarkdown extends React.PureComponent {
 
   // eslint-disable-next-line class-methods-use-this
   handleMessagesListener(event) {
-    console.log('event.origin', event.origin, this.props.ikigaiOrigin);
+    // console.log('event.origin', event.origin, this.props.ikigaiOrigin);
     if (event.origin === this.props.ikigaiOrigin) {
       const messageObject = JSON.parse(event.data);
       // console.log('messageObject', messageObject);
@@ -333,11 +333,11 @@ class IkiDynamicMarkdown extends React.PureComponent {
         }
 
         if (messageObject.info === 'top-window-to-superset/sending-data') {
-          console.log(
+          /* console.log(
             'top-window-to-superset/sending-data',
             'messageData',
             messageData,
-          );
+          ); */
           if (!this.state?.customMarkdownIsReady) {
             this.setState({
               customMarkdownIsReady: true,
@@ -573,7 +573,7 @@ class IkiDynamicMarkdown extends React.PureComponent {
               height: '90vh',
             },
           }}
-          draggable
+          draggable={false}
           destroyOnClose
           maskClosable={false}
           maxWidth="90%"
@@ -708,7 +708,7 @@ class IkiDynamicMarkdown extends React.PureComponent {
       editMode,
     } = this.props;
 
-    console.log('editorMode state', editorMode, 'editMode props', editMode);
+    // console.log('editorMode state', editorMode, 'editMode props', editMode);
 
     // inherit the size of parent columns
     const widthMultiple =
