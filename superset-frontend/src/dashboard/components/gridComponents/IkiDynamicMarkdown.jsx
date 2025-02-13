@@ -110,6 +110,7 @@ class IkiDynamicMarkdown extends React.PureComponent {
       dashboardId: null,
       innerDragging: false,
       customMarkdownId: '',
+      customMarkdownName: '',
       customMarkdownIsReady: false, // if data from parent window is received (project_id, etc)
       componentSetupData: null,
       supersetFilters: null,
@@ -262,6 +263,11 @@ class IkiDynamicMarkdown extends React.PureComponent {
       const { editMode } = this.props;
       const iframe = '';
       const iframeSrc = '';
+      console.info(
+        'handleBackwardCompatibility',
+        this.props.ikigaiOrigin,
+        markdownSource,
+      );
       if (this.props.ikigaiOrigin) {
         if (markdownSource) {
           const iframeWrapper = document.createElement('div');
@@ -308,10 +314,16 @@ class IkiDynamicMarkdown extends React.PureComponent {
         customMarkdownNameFromSource = customMarkdownName;
       }
     }
-    return {
-      id: customMarkdownIdFromSource,
-      name: customMarkdownNameFromSource,
-    };
+
+    this.setState({
+      customMarkdownId: customMarkdownIdFromSource,
+      customMarkdownName: customMarkdownNameFromSource,
+    });
+
+    // return {
+    //   id: customMarkdownIdFromSource,
+    //   name: customMarkdownNameFromSource,
+    // };
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -496,7 +508,8 @@ class IkiDynamicMarkdown extends React.PureComponent {
     const {
       markdownSource,
       hasError,
-      // customMarkdownId,
+      customMarkdownId,
+      customMarkdownName,
       customMarkdownIsReady,
       componentSetupData,
       editorMode,
@@ -509,9 +522,6 @@ class IkiDynamicMarkdown extends React.PureComponent {
       componentSetupData,
     );
     const { editMode, charts, ikigaiOrigin } = this.props;
-    const customMarkdownObj = this.getCustomHtmlIdFromMarkdownSource();
-    const customMarkdownId = customMarkdownObj?.id;
-    const customMarkdownName = customMarkdownObj?.name; // 'TestName';
 
     return (
       <>
@@ -630,7 +640,8 @@ class IkiDynamicMarkdown extends React.PureComponent {
     const {
       markdownSource,
       hasError,
-      // customMarkdownId,
+      customMarkdownId,
+      customMarkdownName,
       customMarkdownIsReady,
       componentSetupData,
       editorMode,
@@ -642,9 +653,6 @@ class IkiDynamicMarkdown extends React.PureComponent {
       componentSetupData,
     );
     const { editMode, charts, ikigaiOrigin } = this.props;
-    const customMarkdownObj = this.getCustomHtmlIdFromMarkdownSource();
-    const customMarkdownId = customMarkdownObj?.id;
-
     return (
       <>
         {customMarkdownIsReady ? (
