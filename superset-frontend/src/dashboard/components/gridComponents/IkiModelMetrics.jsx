@@ -162,9 +162,7 @@ class IkiModelMetrics extends React.PureComponent {
   // eslint-disable-next-line class-methods-use-this
   handleIncomingWindowMsg() {
     window.addEventListener('message', event => {
-      // console.log('event.origin', event.origin, this.props.ikigaiOrigin);
       if (event.origin === this.props.ikigaiOrigin) {
-        // if (event.origin === 'http://localhost:3000') {
         const messageObject = JSON.parse(event.data);
         if (messageObject.info && messageObject.dataType) {
           const { dataType } = messageObject;
@@ -361,7 +359,6 @@ class IkiModelMetrics extends React.PureComponent {
           ? iframeSrcUrl.searchParams.get('dataset_id')
           : '';
         const newIframeSrc = `${ikigaiOrigin}/widget/model-metrics?mode=${paramMode}&dataset_id=${paramDatasetId}&alias_id=${paramAliasId}`;
-        // console.log('iframe', newIframeSrcUrl, iframeHtml);
         iframeSrc = newIframeSrc;
       } else {
         iframeSrc = `${ikigaiOrigin}/widget/model-metrics?mode=edit`;
@@ -399,7 +396,6 @@ class IkiModelMetrics extends React.PureComponent {
 
   render() {
     const { isFocused, editorMode } = this.state;
-    // const { isFocused } = this.state;
 
     const {
       component,

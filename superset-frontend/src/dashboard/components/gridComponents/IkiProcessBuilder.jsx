@@ -20,8 +20,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import cx from 'classnames';
-// import JSONCrush from 'jsoncrush';
-// eslint-disable-next-line import/no-extraneous-dependencies
 import LZString from 'lz-string';
 
 import { t, SafeMarkdown } from '@superset-ui/core';
@@ -189,9 +187,7 @@ class IkiProcessBuilder extends React.PureComponent {
       MarkdownEditor.preload();
     }
 
-    // console.log('componentDidUpdate', prevProps.editMode, this.props.editMode);
     if (prevProps.editMode && !this.props.editMode) {
-      // console.log('from edit to preview');
       if (
         document.getElementById(
           `ikiprocessdiagram-widget-${this.props.component.id}`,
@@ -202,17 +198,11 @@ class IkiProcessBuilder extends React.PureComponent {
             `ikiprocessdiagram-widget-${this.props.component.id}`,
           ).src,
         );
-        // const widgetUrlQuery = new URLSearchParams(widgetUrl);
         const definitionData = document.getElementById(
           `ikiprocessdiagram-widget-${this.props.component.id}`,
         ).dataset.definition;
-        // console.log('definitionData 1', definitionData, widgetUrl);
         widgetUrl.searchParams.set('mode', 'preview');
         widgetUrl.searchParams.set('data', definitionData);
-        // widgetUrlQuery.set('mode', 'preview');
-        // widgetUrlQuery.set('data', definitionData);
-        // widgetUrl.search = widgetUrlQuery.toString();
-        // console.log('widgetUrl', widgetUrl);
         const iframeSrc =
           this.props.ikigaiOrigin + widgetUrl.pathname + widgetUrl.search;
         const tempIframe = `<iframe
@@ -224,9 +214,7 @@ class IkiProcessBuilder extends React.PureComponent {
                             data-definition="${definitionData}"
                           ></iframe>`;
         this.handleSaveAndResetComponent(tempIframe);
-      }
     } else if (!prevProps.editMode && this.props.editMode) {
-      // console.log('from preview to edit');
       if (
         document.getElementById(
           `ikiprocessdiagram-widget-${this.props.component.id}`,
@@ -240,7 +228,6 @@ class IkiProcessBuilder extends React.PureComponent {
         const definitionData = document.getElementById(
           `ikiprocessdiagram-widget-${this.props.component.id}`,
         ).dataset.definition;
-        // console.log('definitionData 2', definitionData);
         widgetUrl.searchParams.set('mode', 'edit');
         widgetUrl.searchParams.set('data', definitionData);
         const iframeSrc =
@@ -270,11 +257,8 @@ class IkiProcessBuilder extends React.PureComponent {
 
   // eslint-disable-next-line class-methods-use-this
   handleIncomingWindowMsg() {
-    // console.log('this.props.ikigaiOrigin', this.props.ikigaiOrigin);
     window.addEventListener('message', event => {
-      // console.log('origin', event.origin, this.props.ikigaiOrigin);
       if (event.origin === this.props.ikigaiOrigin) {
-        // console.log('process diagram received 1: ', event.data);
         const messageObject = JSON.parse(event.data);
         if (messageObject.info && messageObject.dataType) {
           const { dataType, scId } = messageObject;
@@ -284,7 +268,6 @@ class IkiProcessBuilder extends React.PureComponent {
           } else {
             messageData = messageObject.data;
           }
-          // console.log('messageData', messageData);
           if (messageObject.info === 'widget-to-superset/edit') {
             if (
               document.getElementById(
@@ -298,26 +281,16 @@ class IkiProcessBuilder extends React.PureComponent {
               );
               const widgetUrlMode = widgetUrl.searchParams.get('mode');
               const widgetSCId = widgetUrl.searchParams.get('scid');
-              // widgetUrl.searchParams.set('mode', 'edit');
-              /* console.log(
-                'widgetUrlMode',
-                widgetUrlMode,
-                'scId',
-                scId,
-                widgetSCId,
-              ); */
+
               if (widgetUrlMode === 'edit' && scId === widgetSCId) {
                 const infoString = JSON.stringify(messageData);
                 const infoStringCompresed =
                   LZString.compressToEncodedURIComponent(infoString);
-                // console.log('infoStringCompresed', infoStringCompresed);
-                // widgetUrl.searchParams.set('data', infoStringCompresed);
-                // console.log('widgetUrl', widgetUrl);
+
                 const iframeSrc =
                   this.props.ikigaiOrigin +
                   widgetUrl.pathname +
                   widgetUrl.search;
-                // console.log('iframeSrc', iframeSrc);
                 const tempIframe = `<iframe
                           id="ikiprocessdiagram-widget-${this.props.component.id}"
                           name="process-diagram-${timestamp}"
@@ -327,9 +300,6 @@ class IkiProcessBuilder extends React.PureComponent {
                           data-definition="${infoStringCompresed}"
                         ></iframe>`;
                 this.handleIkiProcessBuilderChange(tempIframe);
-                /* document.getElementById(
-                  `ikiprocessdiagram-widget-${this.props.component.id}`,
-                ).dataset.definition = infoStringCompresed; */
               }
             }
           }
@@ -339,7 +309,6 @@ class IkiProcessBuilder extends React.PureComponent {
   }
 
   handleSaveAndResetComponent(nextValue) {
-    // console.log('handleSaveAndResetComponent', nextValue);
     this.setState({
       markdownSource: nextValue,
     });
@@ -372,7 +341,6 @@ class IkiProcessBuilder extends React.PureComponent {
   }
 
   handleChangeEditorMode(mode) {
-    // console.log('handleChangeEditorMode', mode);
     const nextState = {
       ...this.state,
       editorMode: mode,
@@ -387,11 +355,7 @@ class IkiProcessBuilder extends React.PureComponent {
 
   updateMarkdownContent() {
     const { updateComponents, component } = this.props;
-    /* console.log(
-      'updateMarkdownContent',
-      component.meta.code,
-      this.state.markdownSource,
-    ); */
+
     if (component.meta.code !== this.state.markdownSource) {
       updateComponents({
         [component.id]: {
@@ -406,7 +370,6 @@ class IkiProcessBuilder extends React.PureComponent {
   }
 
   handleMarkdownChange(nextValue) {
-    // console.log('handleMarkdownChange', nextValue);
     this.setState({
       markdownSource: nextValue,
     });
@@ -428,7 +391,6 @@ class IkiProcessBuilder extends React.PureComponent {
   }
 
   handleIkiProcessBuilderChange(nextValue) {
-    // console.log('handleIkiTableChange', nextValue);
     this.setState({
       markdownSource: nextValue,
     });
@@ -454,7 +416,6 @@ class IkiProcessBuilder extends React.PureComponent {
     let iframeData = '';
     if (ikigaiOrigin) {
       if (markdownSource) {
-        // iframe = markdownSource;
         const iframeWrapper = document.createElement('div');
         iframeWrapper.innerHTML = markdownSource;
         const iframeHtml = iframeWrapper.firstChild;
@@ -464,26 +425,9 @@ class IkiProcessBuilder extends React.PureComponent {
         } else {
           iframeSrcUrl.searchParams.set('mode', 'edit');
         }
-        /* iframeData = iframeSrcUrl.searchParams.get('data');
-        if (!iframeData) {
-          iframeData = iframeHtml.dataset.definition;
-        } */
+
         iframeData = iframeHtml.dataset.definition;
-        /* const hostname = iframeSrcUrl.href.toString().split('ikigailabs.io')[0];
-        if (hostname.includes('localhost') || hostname.includes('dev')) {
-          // iframeHtml.src = iframeSrcUrl.href.toString();
-          iframeSrc = iframeSrcUrl.href.toString();
-        } else {
-          const srcUrl = `${dashURL}${
-            iframeSrcUrl.href.toString().split('.ikigailabs.io')[1]
-          }`;
-          // iframeHtml.src = srcUrl;
-          iframeSrc = srcUrl;
-        } */
-
         iframeSrc = ikigaiOrigin + iframeSrcUrl.pathname + iframeSrcUrl.search;
-
-        // console.log('iframe', iframeSrcUrl, iframeHtml, iframeData);
       } else {
         iframeSrc = `${ikigaiOrigin}/widget/diagram/builder?v=1&run_flow_times=${timestamp}&mode=edit&scid=${this.props.component.id}`;
       }
@@ -512,7 +456,6 @@ class IkiProcessBuilder extends React.PureComponent {
 
   render() {
     const { isFocused, editorMode } = this.state;
-    // const { isFocused } = this.state;
 
     const {
       component,
@@ -534,9 +477,6 @@ class IkiProcessBuilder extends React.PureComponent {
         : component.meta.width || GRID_MIN_COLUMN_COUNT;
 
     const isEditing = editorMode === 'edit';
-    // const isEditing = false;
-
-    // console.log('editMode', editMode, isEditing);
 
     return (
       <DragDroppable
@@ -591,10 +531,7 @@ class IkiProcessBuilder extends React.PureComponent {
                   className="dashboard-component-ikiprocessbuilder dashboard-component-inner"
                   data-test="dashboard-component-chart-holder"
                 >
-                  {
-                    // editMode && isEditing
-                    editMode ? this.renderEditMode() : this.renderPreviewMode()
-                  }
+                  {editMode ? this.renderEditMode() : this.renderPreviewMode()}
                 </div>
               </ResizableContainer>
             </div>

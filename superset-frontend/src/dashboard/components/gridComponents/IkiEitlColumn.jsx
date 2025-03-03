@@ -198,17 +198,13 @@ class IkiEitlColumn extends React.PureComponent {
   handleIncomingWindowMsg() {
     window.addEventListener('message', event => {
       if (event.origin === this.props.ikigaiOrigin) {
-        console.log('event', event);
-        // if (event.origin === 'http://localhost:3000') {
         const messageObject = JSON.parse(event.data);
-        console.log('messageObject', messageObject);
         if (messageObject.info && messageObject.dataType) {
           const { dataType } = messageObject;
 
           let messageData;
           let widgetUrl;
           let widgetUrlQuery;
-          // let widgetUrlQueryMode;
 
           if (dataType === 'object') {
             messageData = JSON.parse(messageObject.data);
@@ -231,8 +227,6 @@ class IkiEitlColumn extends React.PureComponent {
           }
 
           if (messageObject.info === 'eitlc-to-superset/sending-setup-data') {
-            console.log('messageData', messageData);
-            console.log('messageObject', messageObject);
             widgetUrlQuery = new URLSearchParams(widgetUrl.search);
             widgetUrlQuery.set('mode', 'preview');
             widgetUrlQuery.set('pipeline_id', messageData.pipeline_id);
@@ -247,7 +241,6 @@ class IkiEitlColumn extends React.PureComponent {
               ),
             );
             widgetUrl.search = widgetUrlQuery.toString();
-            console.log('widgetUrl', widgetUrl);
             const tempIframe = `<iframe
                       id="ikieitlcolumn-widget-${this.props.component.id}"
                       name="eitl-column-component"
@@ -260,7 +253,6 @@ class IkiEitlColumn extends React.PureComponent {
           } else if (
             messageObject.info === 'top-window-to-widget/sending-project-id'
           ) {
-            console.log('received project id from top window', messageData);
             const projectId = messageData;
             widgetUrlQuery = new URLSearchParams(widgetUrl.search);
             widgetUrlQuery.set('project_id', projectId);

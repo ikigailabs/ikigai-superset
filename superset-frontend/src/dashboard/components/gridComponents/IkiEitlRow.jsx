@@ -196,10 +196,7 @@ class IkiEitlRow extends React.PureComponent {
   handleIncomingWindowMsg() {
     window.addEventListener('message', event => {
       if (event.origin === this.props.ikigaiOrigin) {
-        console.log('event', event);
-        // if (event.origin === 'http://localhost:3000') {
         const messageObject = JSON.parse(event.data);
-        console.log('messageObject', messageObject);
         if (messageObject.info && messageObject.dataType) {
           const { dataType } = messageObject;
 
@@ -230,7 +227,6 @@ class IkiEitlRow extends React.PureComponent {
           if (messageObject.info === 'eitlr-to-superset/sending-model-data') {
             widgetUrlQuery = new URLSearchParams(widgetUrl.search);
             widgetUrlQuery.set('mode', 'preview');
-            console.log('widgetUrlQuery before', widgetUrlQuery.toString());
             widgetUrlQuery.set(
               'pipeline',
               Buffer.from(JSON.stringify(messageData.pipeline)).toString(
@@ -247,9 +243,7 @@ class IkiEitlRow extends React.PureComponent {
                 'base64',
               ),
             );
-            console.log('widgetUrlQuery after', widgetUrlQuery.toString());
             widgetUrl.search = widgetUrlQuery.toString();
-            console.log('widgetUrl', widgetUrl);
             const tempIframe = `<iframe
                       id="ikieitlrow-widget-${this.props.component.id}"
                       name="eitl-row-component"

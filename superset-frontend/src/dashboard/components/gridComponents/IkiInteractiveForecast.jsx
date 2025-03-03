@@ -29,16 +29,11 @@
  */
 import React from 'react';
 import PropTypes from 'prop-types';
-// import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import cx from 'classnames';
 
 import { t, SafeMarkdown } from '@superset-ui/core';
-import {
-  Logger,
-  LOG_ACTIONS_RENDER_CHART,
-  //   LOG_ACTIONS_FORCE_REFRESH_CHART,
-} from 'src/logger/LogUtils';
+import { Logger, LOG_ACTIONS_RENDER_CHART } from 'src/logger/LogUtils';
 import { MarkdownEditor } from 'src/components/AsyncAceEditor';
 
 import DeleteComponentButton from 'src/dashboard/components/DeleteComponentButton';
@@ -186,15 +181,9 @@ class IkiInteractiveForecast extends React.PureComponent {
   // eslint-disable-next-line class-methods-use-this
   handleIncomingWindowMsg() {
     window.addEventListener('message', event => {
-      console.log('event.origin props', event.origin, this.props.ikigaiOrigin);
       if (event.origin === this.props.ikigaiOrigin) {
-        // if (event.origin === 'http://localhost:3000') {
         const messageObject = JSON.parse(event.data);
-        console.log(
-          'event.origin props messageObject editMode',
-          messageObject,
-          this.props.editMode,
-        );
+
         if (messageObject.info && messageObject.dataType) {
           const { dataType } = messageObject;
           let messageData;
@@ -207,7 +196,6 @@ class IkiInteractiveForecast extends React.PureComponent {
           } else {
             messageData = messageObject.data;
           }
-          console.log('Onboarding project', messageData);
           if (
             document.getElementById(
               `ikiinteractiveforecast-widget-${this.props.component.id}`,
@@ -351,13 +339,10 @@ class IkiInteractiveForecast extends React.PureComponent {
   renderIframe() {
     const { markdownSource, hasError } = this.state;
     const { ikigaiOrigin } = this.props;
-    // const ikigaiOrigin = 'http://localhost:3000';
     let iframe = '';
     let iframeSrc = '';
     if (ikigaiOrigin) {
-      console.log('MarkdownSource', markdownSource);
       if (markdownSource) {
-        // iframe = markdownSource;
         const iframeWrapper = document.createElement('div');
         iframeWrapper.innerHTML = markdownSource;
         const iframeHtml = iframeWrapper.firstChild;
@@ -383,7 +368,6 @@ class IkiInteractiveForecast extends React.PureComponent {
           ? iframeSrcUrl.searchParams.get('metrics_type')
           : '';
         const newIframeSrc = `${ikigaiOrigin}/widget/interactive-forecast-chart?mode=${paramMode}&dataset_id=${datasetId}&datetime_column=${datetimeColumn}&data_series=${dataSeries}&dimensions_column=${dimensionsColumn}&metrics_type=${metricsType}`;
-        // console.log('iframe', newIframeSrcUrl, iframeHtml);
         iframeSrc = newIframeSrc;
       } else {
         iframeSrc = `${ikigaiOrigin}/widget/interactive-forecast-chart?mode=edit`;
@@ -412,7 +396,6 @@ class IkiInteractiveForecast extends React.PureComponent {
 
   render() {
     const { isFocused, editorMode } = this.state;
-    // const { isFocused } = this.state;
 
     const {
       component,
@@ -434,7 +417,6 @@ class IkiInteractiveForecast extends React.PureComponent {
         : component.meta.width || GRID_MIN_COLUMN_COUNT;
 
     const isEditing = editorMode === 'edit';
-    // const isEditing = false;
 
     return (
       <DragDroppable
@@ -489,12 +471,9 @@ class IkiInteractiveForecast extends React.PureComponent {
                   className="dashboard-component-inner dashboard-interactiveforecast"
                   data-test="dashboard-component-chart-holder"
                 >
-                  {
-                    // editMode && isEditing
-                    editMode && isEditing
-                      ? this.renderEditMode()
-                      : this.renderPreviewMode()
-                  }
+                  {editMode && isEditing
+                    ? this.renderEditMode()
+                    : this.renderPreviewMode()}
                 </div>
               </ResizableContainer>
             </div>

@@ -263,28 +263,18 @@ class Markdown extends React.PureComponent {
     const { hasError, markdownSource } = this.state;
     const { ikigaiOrigin } = this.props;
     let markdown = markdownSource;
-    // console.log('renderPreviewMode', markdownSource);
     if (markdown && ikigaiOrigin) {
       const foundWidget = markdown.includes('/widget/');
-      // console.log('foundWidget', foundWidget);
       if (foundWidget) {
         const iframeWrapper = document.createElement('div');
         iframeWrapper.innerHTML = markdown;
-        // console.log('iframeWrapper', iframeWrapper);
         const iframeHtml = iframeWrapper.getElementsByTagName('iframe')[0];
-        // console.log('iframeHtml', iframeHtml);
         const iframeSrcUrl = new URL(iframeHtml.src);
-        // console.log('iframeSrcUrl', iframeSrcUrl);
         const newIframeSrc = `${ikigaiOrigin}${iframeSrcUrl.pathname}${iframeSrcUrl.search}`;
-        // console.log('newIframeSrc', newIframeSrc);
-        // iframeHtml.setAttribute('src', newIframeSrc);
-        // console.log('iframeHtml2', iframeHtml);
         iframeWrapper
           .getElementsByTagName('iframe')[0]
           .setAttribute('src', newIframeSrc);
-        // console.log('iframeWrapper2', iframeWrapper);
         markdown = iframeWrapper.innerHTML;
-        // console.log('markdown', markdown);
       }
     }
 
