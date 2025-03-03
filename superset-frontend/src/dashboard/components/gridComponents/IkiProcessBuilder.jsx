@@ -214,6 +214,7 @@ class IkiProcessBuilder extends React.PureComponent {
                             data-definition="${definitionData}"
                           ></iframe>`;
         this.handleSaveAndResetComponent(tempIframe);
+      }
     } else if (!prevProps.editMode && this.props.editMode) {
       if (
         document.getElementById(
