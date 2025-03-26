@@ -233,7 +233,6 @@ export default function dashboardStateReducer(state = {}, action) {
           ikigaiOrigin = ikigaiURL ? ikigaiURL.origin : '';
         }
       }
-
       return {
         ...state,
         supersetUrl,
