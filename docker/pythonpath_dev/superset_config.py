@@ -114,5 +114,5 @@ except ImportError:
     logger.info("Using default Docker config...")
 
 # Allow superset cookies to be stored in the context of Ikigai and localhost
-SESSION_COOKIE_SAMESITE = None  # One of [None, 'None', 'Lax', 'Strict']
-# SESSION_COOKIE_SECURE = True  # Prevent cookie from being transmitted over non-tls?
+SESSION_COOKIE_SAMESITE = 'None'  # One of [None, 'None', 'Lax', 'Strict']
+SESSION_COOKIE_SECURE = True  # Prevent cookie from being transmitted over non-tls?
