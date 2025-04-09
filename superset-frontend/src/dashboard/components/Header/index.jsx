@@ -166,7 +166,6 @@ const discardBtnStyle = theme => css`
 class Header extends React.PureComponent {
   static discardChanges(ikigaiOrigin, supersetUrl) {
     const url = new URL(window.location.href);
-    const originalUrl = url.origin + url.pathname;
 
     if (supersetUrl) {
       window.location.replace(supersetUrl.toString());
