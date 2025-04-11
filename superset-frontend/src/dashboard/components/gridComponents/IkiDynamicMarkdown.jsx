@@ -28,6 +28,7 @@ import {
 } from 'src/dashboard/util/constants';
 import { refreshChart } from 'src/components/Chart/chartAction';
 import { isEqual } from 'lodash';
+import { ContextService } from 'src/service/context-service/context-service';
 
 const propTypes = {
   id: PropTypes.string.isRequired,
@@ -75,7 +76,7 @@ class IkiDynamicMarkdown extends React.PureComponent {
       editorMode: 'preview',
       undoLength: props.undoLength,
       redoLength: props.redoLength,
-      projectId: '',
+      projectId: ContextService.projectId,
       dashboardId: null,
     };
     this.renderStartTime = Logger.getTimestamp();
@@ -223,7 +224,7 @@ class IkiDynamicMarkdown extends React.PureComponent {
               ).src,
             );
           } else {
-            widgetUrl = `${this.props.ikigaiOrigin}/widget//widget/custom?mode=edit&parent=superset`;
+            widgetUrl = `${this.props.ikigaiOrigin}/widget/custom?mode=edit&project_id=${this.state.projectId}`;
           }
 
           if (
@@ -231,9 +232,8 @@ class IkiDynamicMarkdown extends React.PureComponent {
           ) {
             if (messageData.scid === this.props.component.id) {
               widgetUrlQuery = new URLSearchParams(widgetUrl);
+              widgetUrlQuery.set('project_id', this.state.projectId);
               widgetUrlQuery.set('mode', 'preview');
-              widgetUrlQuery.set('parent', 'superset');
-              widgetUrlQuery.set('project_id', messageData.projectId);
               widgetUrlQuery.set('component_id', messageData.componentId);
               widgetUrl.search = widgetUrlQuery.toString();
               const tempIframe = `<iframe
@@ -409,6 +409,8 @@ class IkiDynamicMarkdown extends React.PureComponent {
   renderIframe() {
     const { markdownSource, hasError } = this.state;
     const { ikigaiOrigin, editMode } = this.props;
+    const dashboardMode = editMode ? 'edit' : 'preview';
+
     let iframe = '';
     let iframeSrc = '';
     if (ikigaiOrigin) {
@@ -418,14 +420,11 @@ class IkiDynamicMarkdown extends React.PureComponent {
         iframeWrapper.innerHTML = markdownSource;
         const iframeHtml = iframeWrapper.firstChild;
         const iframeSrcUrl = new URL(iframeHtml.src);
-        iframeSrcUrl.searchParams.set(
-          'dashboard_mode',
-          editMode ? 'edit' : 'preview',
-        );
+        iframeSrcUrl.searchParams.set('dashboard_mode', dashboardMode);
         iframeSrcUrl.searchParams.set('scid', this.props.component.id);
         iframeSrc = ikigaiOrigin + iframeSrcUrl.pathname + iframeSrcUrl.search;
       } else {
-        iframeSrc = `${ikigaiOrigin}/widget/custom?mode=edit&parent=superset&scid=${this.props.component.id}`;
+        iframeSrc = `${ikigaiOrigin}/widget/custom?project_id=${this.state.projectId}&scid=${this.props.component.id}&mode=edit&dashboard_mode=${dashboardMode}`;
       }
       iframe = `<iframe
                   id="ikidynamicmarkdown-widget-${this.props.component.id}"
