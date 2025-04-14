@@ -89,6 +89,8 @@ const propTypes = {
   lastModifiedTime: PropTypes.number.isRequired,
   ikigaiOrigin: PropTypes.string,
   supersetUrl: PropTypes.string,
+  filterboxMigrationState: PropTypes.string,
+  user: PropTypes.object,
 
   // redux
   onRefresh: PropTypes.func.isRequired,
