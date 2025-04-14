@@ -29,6 +29,13 @@ import {
 import { refreshChart } from 'src/components/Chart/chartAction';
 import { isEqual } from 'lodash';
 import { ContextService } from 'src/service/context-service/context-service';
+import { withRouter } from 'react-router-dom';
+import {
+  CURRENT_VERSION,
+  migrate,
+} from 'src/migrations/dynamic-markdown/migration-runner';
+
+const { topLevelOrigin, projectId } = ContextService;
 
 const propTypes = {
   id: PropTypes.string.isRequired,
@@ -38,14 +45,12 @@ const propTypes = {
   index: PropTypes.number.isRequired,
   depth: PropTypes.number.isRequired,
   editMode: PropTypes.bool.isRequired,
-  ikigaiOrigin: PropTypes.string,
   dashboardLayout: PropTypes.object,
+  match: PropTypes.object.isRequired,
 
   // from redux
   logEvent: PropTypes.func.isRequired,
   addDangerToast: PropTypes.func.isRequired,
-  undoLength: PropTypes.number.isRequired,
-  redoLength: PropTypes.number.isRequired,
 
   // grid related
   availableColumnCount: PropTypes.number.isRequired,
@@ -69,33 +74,20 @@ const MARKDOWN_ERROR_MESSAGE = t('This component has an error.');
 class IkiDynamicMarkdown extends React.PureComponent {
   constructor(props) {
     super(props);
+
     this.state = {
       isFocused: false,
-      markdownSource: props.component.meta.code,
       editor: null,
       editorMode: 'preview',
-      undoLength: props.undoLength,
-      redoLength: props.redoLength,
-      projectId: ContextService.projectId,
-      dashboardId: null,
+      meta: migrate(props.component.meta),
     };
     this.renderStartTime = Logger.getTimestamp();
 
-    this.handleChangeFocus = this.handleChangeFocus.bind(this);
     this.handleChangeEditorMode = this.handleChangeEditorMode.bind(this);
-    this.handleMarkdownChange = this.handleMarkdownChange.bind(this);
     this.handleDeleteComponent = this.handleDeleteComponent.bind(this);
-    this.handleResizeStart = this.handleResizeStart.bind(this);
-    this.setEditor = this.setEditor.bind(this);
   }
 
   componentDidMount() {
-    this.setState({
-      dashboardId: parseInt(
-        window.location.pathname.split('/dashboard/')[1].split('/')[0],
-        10,
-      ),
-    });
     this.props.logEvent(LOG_ACTIONS_RENDER_CHART, {
       viz_type: 'markdown',
       start_offset: this.renderStartTime,
@@ -103,44 +95,6 @@ class IkiDynamicMarkdown extends React.PureComponent {
       duration: Logger.getTimestamp() - this.renderStartTime,
     });
     this.handleIncomingWindowMsg();
-  }
-
-  static getDerivedStateFromProps(nextProps, state) {
-    const { hasError, editorMode, markdownSource, undoLength, redoLength } =
-      state;
-    const {
-      component: nextComponent,
-      undoLength: nextUndoLength,
-      redoLength: nextRedoLength,
-    } = nextProps;
-    // user click undo or redo ?
-    if (nextUndoLength !== undoLength || nextRedoLength !== redoLength) {
-      return {
-        ...state,
-        undoLength: nextUndoLength,
-        redoLength: nextRedoLength,
-        markdownSource: nextComponent.meta.code,
-        hasError: false,
-      };
-    }
-    if (
-      !hasError &&
-      editorMode === 'preview' &&
-      nextComponent.meta.code !== markdownSource
-    ) {
-      return {
-        ...state,
-        markdownSource: nextComponent.meta.code,
-      };
-    }
-
-    return state;
-  }
-
-  static getDerivedStateFromError() {
-    return {
-      hasError: true,
-    };
   }
 
   componentDidUpdate(prevProps) {
@@ -151,24 +105,7 @@ class IkiDynamicMarkdown extends React.PureComponent {
     ) {
       this.state.editor.resize(true);
     }
-    // pre-load AceEditor when entering edit mode
-    if (this.props.editMode) {
-      MarkdownEditor.preload();
-    }
-    if (this.props.editMode && this.props.editMode !== prevProps.editMode) {
-      setTimeout(() => {
-        this.handleChangeEditorMode('edit');
-      }, 500);
-    } else if (
-      !this.props.editMode &&
-      this.props.editMode !== prevProps.editMode
-    ) {
-      setTimeout(() => {
-        this.handleChangeEditorMode('preview');
-      }, 500);
-    }
 
-    // Send post message of new present dashboard layout to custom markdown
     if (
       !isEqual(
         prevProps.dashboardLayout.present,
@@ -189,10 +126,9 @@ class IkiDynamicMarkdown extends React.PureComponent {
     }
   }
 
-  // eslint-disable-next-line class-methods-use-this
   handleIncomingWindowMsg() {
     window.addEventListener('message', event => {
-      if (event.origin === this.props.ikigaiOrigin) {
+      if (event.origin === topLevelOrigin) {
         const messageObject = JSON.parse(event.data);
         if (messageObject.info && messageObject.dataType) {
           const { dataType } = messageObject;
@@ -224,26 +160,15 @@ class IkiDynamicMarkdown extends React.PureComponent {
               ).src,
             );
           } else {
-            widgetUrl = `${this.props.ikigaiOrigin}/widget/custom?mode=edit&project_id=${this.state.projectId}`;
+            widgetUrl = `${topLevelOrigin}/widget/custom?mode=edit&project_id=${projectId}`;
           }
 
           if (
             messageObject.info === 'widget-to-superset/dynamic-markdown-setup'
           ) {
             if (messageData.scid === this.props.component.id) {
-              widgetUrlQuery = new URLSearchParams(widgetUrl);
-              widgetUrlQuery.set('project_id', this.state.projectId);
-              widgetUrlQuery.set('mode', 'preview');
-              widgetUrlQuery.set('component_id', messageData.componentId);
-              widgetUrl.search = widgetUrlQuery.toString();
-              const tempIframe = `<iframe
-                                  id="ikiinteractiveforecast-widget-${this.props.component.id}"
-                                  name="ikiinteractiveforecast"
-                                  src="${widgetUrl}"
-                                  title="Hero Section Component"
-                                  style="min-height: 100%;"
-                              />`;
-              this.handleIkiRunPipelineChange(tempIframe, true);
+              const customElementId = messageData.componentId;
+              this.setCustomElementId(customElementId);
             }
           } else if (
             messageObject.info ===
@@ -258,7 +183,6 @@ class IkiDynamicMarkdown extends React.PureComponent {
   }
 
   sendDashboardLayoutToMarkdown() {
-    const { ikigaiOrigin } = this.props;
     const iframes = document.querySelectorAll('iframe');
     const crossWindowMessage = {
       info: 'widget-to-parent/send-dashboard-layout',
@@ -271,7 +195,7 @@ class IkiDynamicMarkdown extends React.PureComponent {
 
     iframes.forEach(iframe => {
       if (!iframe.name.includes('dynamic-markdown')) return;
-      iframe.contentWindow.postMessage(crossBrowserInfoString, ikigaiOrigin);
+      iframe.contentWindow.postMessage(crossBrowserInfoString, topLevelOrigin);
     });
   }
 
@@ -298,7 +222,7 @@ class IkiDynamicMarkdown extends React.PureComponent {
             });
           }
           if (findChartEle) {
-            this.refreshChart(findChartEle, this.state.dashboardId, false);
+            this.refreshChart(findChartEle, props.match.params.idOrSlug, false);
           }
         });
       }
@@ -313,42 +237,6 @@ class IkiDynamicMarkdown extends React.PureComponent {
     return this.props.refreshChart(chartId, true, dashboardId);
   }
 
-  handleIkiRunPipelineChange(nextValue, saveToDashboard) {
-    this.setState(
-      {
-        markdownSource: nextValue,
-      },
-      () => {
-        const { updateComponents, component } = this.props;
-        if (saveToDashboard) {
-          updateComponents({
-            [component.id]: {
-              ...component,
-              meta: {
-                ...component.meta,
-                code: nextValue,
-              },
-            },
-          });
-        }
-      },
-    );
-  }
-
-  setEditor(editor) {
-    editor.getSession().setUseWrapMode(true);
-    this.setState({
-      editor,
-    });
-  }
-
-  handleChangeFocus(nextFocus) {
-    const nextFocused = !!nextFocus;
-    const nextEditMode = nextFocused ? 'edit' : 'preview';
-    this.setState(() => ({ isFocused: nextFocused }));
-    this.handleChangeEditorMode(nextEditMode);
-  }
-
   handleChangeEditorMode(mode) {
     const nextState = {
       ...this.state,
@@ -356,38 +244,21 @@ class IkiDynamicMarkdown extends React.PureComponent {
     };
 
     this.setState(nextState);
-    let widgetUrl;
-    const widgetUrlQuery = new URLSearchParams(widgetUrl.search);
-    // widgetUrlQuery.set('mode', mode);
-    widgetUrl.search = widgetUrlQuery.toString();
-    const tempIframe = `<iframe
-                      id="ikidynamicmarkdown-widget-${this.props.component.id}"
-                      name="dynamic-markdown-${timestamp}"
-                      src="${widgetUrl}"
-                      title="Custom Component"
-                      style="min-height: 100%;"
-                    />`;
-    this.handleIkiRunPipelineChange(tempIframe, true);
   }
 
-  updateMarkdownContent() {
+  setCustomElementId(customElementId) {
     const { updateComponents, component } = this.props;
-    if (component.meta.code !== this.state.markdownSource) {
-      updateComponents({
-        [component.id]: {
-          ...component,
-          meta: {
-            ...component.meta,
-            code: this.state.markdownSource,
-          },
-        },
-      });
-    }
-  }
 
-  handleMarkdownChange(nextValue) {
-    this.setState({
-      markdownSource: nextValue,
+    updateComponents({
+      [component.id]: {
+        ...component,
+        meta: {
+          height: 50,
+          width: 12,
+          version: CURRENT_VERSION,
+          custom_element_id: customElementId,
+        },
+      },
     });
   }
 
@@ -396,55 +267,22 @@ class IkiDynamicMarkdown extends React.PureComponent {
     deleteComponent(id, parentId);
   }
 
-  handleResizeStart(e) {
-    const { editorMode } = this.state;
-    const { editMode, onResizeStart } = this.props;
-    const isEditing = editorMode === 'edit';
-    onResizeStart(e);
-    if (editMode && isEditing) {
-      this.updateMarkdownContent();
-    }
-  }
-
   renderIframe() {
-    const { markdownSource, hasError } = this.state;
-    const { ikigaiOrigin, editMode } = this.props;
+    const { hasError } = this.state;
+    const { editMode } = this.props;
     const dashboardMode = editMode ? 'edit' : 'preview';
 
-    let iframe = '';
-    let iframeSrc = '';
-    if (ikigaiOrigin) {
-      if (markdownSource) {
-        // iframe = markdownSource;
-        const iframeWrapper = document.createElement('div');
-        iframeWrapper.innerHTML = markdownSource;
-        const iframeHtml = iframeWrapper.firstChild;
-        const iframeSrcUrl = new URL(iframeHtml.src);
-        iframeSrcUrl.searchParams.set('dashboard_mode', dashboardMode);
-        iframeSrcUrl.searchParams.set('scid', this.props.component.id);
-        iframeSrc = ikigaiOrigin + iframeSrcUrl.pathname + iframeSrcUrl.search;
-      } else {
-        iframeSrc = `${ikigaiOrigin}/widget/custom?project_id=${this.state.projectId}&scid=${this.props.component.id}&mode=edit&dashboard_mode=${dashboardMode}`;
-      }
-      iframe = `<iframe
-                  id="ikidynamicmarkdown-widget-${this.props.component.id}"
-                  name="dynamic-markdown-${timestamp}"
-                  src="${iframeSrc}"
-                  title="Custom Component"
-                  style="height:100%;"
-                />`;
-    } else {
-      iframe = '';
-    }
-    return <SafeMarkdown source={hasError ? MARKDOWN_ERROR_MESSAGE : iframe} />;
-  }
+    const src = `${topLevelOrigin}/widget/custom?project_id=${projectId}&scid=${this.props.component.id}&mode=edit&dashboard_mode=${dashboardMode}&custom_element_id=${this.state.meta.custom_element_id}`;
 
-  renderEditMode() {
-    return this.renderIframe();
-  }
-
-  renderPreviewMode() {
-    return this.renderIframe();
+    return (
+      <iframe
+        id="ikidynamicmarkdown-widget-${this.props.component.id}"
+        name={`dynamic-markdown-${timestamp}`}
+        src={`${src}`}
+        title="Custom Element"
+        style={{ height: '100%' }}
+      />
+    );
   }
 
   render() {
@@ -460,11 +298,11 @@ class IkiDynamicMarkdown extends React.PureComponent {
       columnWidth,
       onResize,
       onResizeStop,
+      onResizeStart,
       handleComponentDrop,
       editMode,
     } = this.props;
 
-    // inherit the size of parent columns
     const widthMultiple =
       parentComponent.type === COLUMN_TYPE
         ? parentComponent.meta.width || GRID_MIN_COLUMN_COUNT
@@ -497,9 +335,7 @@ class IkiDynamicMarkdown extends React.PureComponent {
             <div
               data-test="dashboard-markdown-editor"
               className={cx(
-                this.state.markdownSource === undefined
-                  ? 'dashboard-component-ikirunpipeline'
-                  : 'dashboard-component',
+                'dashboard-component-ikirunpipeline',
                 isEditing && 'dashboard-component--editing',
               )}
               id={component.id}
@@ -515,7 +351,7 @@ class IkiDynamicMarkdown extends React.PureComponent {
                 minWidthMultiple={GRID_MIN_COLUMN_COUNT}
                 minHeightMultiple={GRID_MIN_ROW_UNITS}
                 maxWidthMultiple={availableColumnCount + widthMultiple}
-                onResizeStart={this.handleResizeStart}
+                onResizeStart={onResizeStart}
                 onResize={onResize}
                 onResizeStop={onResizeStop}
                 editMode={isFocused ? false : editMode}
@@ -525,7 +361,7 @@ class IkiDynamicMarkdown extends React.PureComponent {
                   className="dashboard-component-inner"
                   data-test="dashboard-component-chart-holder"
                 >
-                  {this.renderPreviewMode()}
+                  {this.renderIframe()}
                 </div>
               </ResizableContainer>
             </div>
@@ -542,10 +378,7 @@ IkiDynamicMarkdown.defaultProps = defaultProps;
 
 function mapStateToProps(state) {
   return {
-    undoLength: state.dashboardLayout.past.length,
-    redoLength: state.dashboardLayout.future.length,
     dashboardLayout: state.dashboardLayout,
-    ikigaiOrigin: state?.dashboardState?.ikigaiOrigin,
   };
 }
 function mapDispatchToProps(dispatch) {
@@ -556,4 +389,8 @@ function mapDispatchToProps(dispatch) {
     dispatch,
   );
 }
-export default connect(mapStateToProps, mapDispatchToProps)(IkiDynamicMarkdown);
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(withRouter(IkiDynamicMarkdown));

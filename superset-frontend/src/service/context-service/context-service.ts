@@ -9,19 +9,30 @@ type CallbackFn = (payload: any) => void;
 export class ContextServiceClass {
   public readonly projectId: string;
 
-  private thisWindow: Window;
-  private callbacksMap = new Map<string, Set<CallbackFn>>();
+  private readonly thisWindow: Window;
+  private readonly callbacksMap = new Map<string, Set<CallbackFn>>();
+
+  public readonly topLevelOrigin: string;
 
   constructor(thisWindow: Window) {
     this.thisWindow = thisWindow;
 
     const urlParams = new URLSearchParams(thisWindow.location.search);
-    const pid = urlParams.get('project_id');
-    if (!pid) {
+    const projectId = urlParams.get('project_id');
+    const dashUrl = urlParams.get('dash_url');
+
+    if (!projectId) {
       console.error('project_id query param must be truthy!');
-      throw new Error('Missing project_id');
+      throw new Error();
     }
-    this.projectId = pid;
+
+    if (!dashUrl) {
+      console.error('dahs_url query param just be truthy!');
+      throw new Error();
+    }
+
+    this.projectId = projectId;
+    this.topLevelOrigin = new URL(dashUrl).origin;
 
     this.thisWindow.addEventListener('message', this.onMessage);
   }
