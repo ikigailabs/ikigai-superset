@@ -17,7 +17,7 @@ export function migrate(meta: Readonly<Required<BaseMeta>>) {
     width: metaV0.width,
     height: metaV0.height,
     version: 1,
-    custom_element_id: extractComponentId(metaV0.code),
+    customElementId: extractComponentId(metaV0.code),
   };
 
   return metaV1;

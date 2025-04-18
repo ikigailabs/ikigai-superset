@@ -79,7 +79,6 @@ class IkiDynamicMarkdown extends React.PureComponent {
       isFocused: false,
       editor: null,
       editorMode: 'preview',
-      meta: migrate(props.component.meta),
     };
     this.renderStartTime = Logger.getTimestamp();
 
@@ -100,7 +99,7 @@ class IkiDynamicMarkdown extends React.PureComponent {
   componentDidUpdate(prevProps) {
     if (
       this.state.editor &&
-      (prevProps.component.meta.width !== this.props.component.meta.width ||
+      (prevProps.component.meta.width !== this.getMeta().width ||
         prevProps.columnWidth !== this.props.columnWidth)
     ) {
       this.state.editor.resize(true);
@@ -249,14 +248,19 @@ class IkiDynamicMarkdown extends React.PureComponent {
   setCustomElementId(customElementId) {
     const { updateComponents, component } = this.props;
 
+    if (customElementId.slice(1, 2) !== '_') {
+      console.warn(
+        "Setting customElementId to a non-aliased value! I hope you know what you're doing...",
+      );
+    }
+
     updateComponents({
       [component.id]: {
         ...component,
         meta: {
-          height: 50,
-          width: 12,
+          ...component.meta,
           version: CURRENT_VERSION,
-          custom_element_id: customElementId,
+          customElementId: customElementId,
         },
       },
     });
@@ -267,12 +271,22 @@ class IkiDynamicMarkdown extends React.PureComponent {
     deleteComponent(id, parentId);
   }
 
+  /**
+   * Utility function to ensure that the meta object being used is always
+   * migrated to current version prior to read/write.
+   */
+  getMeta() {
+    return migrate(this.props.component.meta);
+  }
+
   renderIframe() {
     const { hasError } = this.state;
-    const { editMode } = this.props;
+    const { editMode, component } = this.props;
     const dashboardMode = editMode ? 'edit' : 'preview';
+    const supersetComponentId = this.props.component.id;
+    const customElementId = this.getMeta().customElementId || '';
 
-    const src = `${topLevelOrigin}/widget/custom?project_id=${projectId}&scid=${this.props.component.id}&mode=edit&dashboard_mode=${dashboardMode}&custom_element_id=${this.state.meta.custom_element_id}`;
+    const src = `${topLevelOrigin}/widget/custom?project_id=${projectId}&scid=${supersetComponentId}&mode=edit&dashboard_mode=${dashboardMode}&custom_element_id=${customElementId}`;
 
     return (
       <iframe
@@ -306,7 +320,7 @@ class IkiDynamicMarkdown extends React.PureComponent {
     const widthMultiple =
       parentComponent.type === COLUMN_TYPE
         ? parentComponent.meta.width || GRID_MIN_COLUMN_COUNT
-        : component.meta.width || GRID_MIN_COLUMN_COUNT;
+        : this.getMeta().width || GRID_MIN_COLUMN_COUNT;
 
     return (
       <DragDroppable
@@ -347,7 +361,7 @@ class IkiDynamicMarkdown extends React.PureComponent {
                 widthStep={columnWidth}
                 widthMultiple={widthMultiple}
                 heightStep={GRID_BASE_UNIT}
-                heightMultiple={component.meta.height}
+                heightMultiple={this.getMeta().height}
                 minWidthMultiple={GRID_MIN_COLUMN_COUNT}
                 minHeightMultiple={GRID_MIN_ROW_UNITS}
                 maxWidthMultiple={availableColumnCount + widthMultiple}
@@ -372,6 +386,8 @@ class IkiDynamicMarkdown extends React.PureComponent {
     );
   }
 }
+
+class IFrameComponent extends React.PureComponent {}
 
 IkiDynamicMarkdown.propTypes = propTypes;
 IkiDynamicMarkdown.defaultProps = defaultProps;
