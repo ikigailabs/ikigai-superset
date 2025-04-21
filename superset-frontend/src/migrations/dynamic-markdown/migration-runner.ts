@@ -8,11 +8,12 @@ export const CURRENT_VERSION = 1;
 const migrations = [migrateV0ToV1];
 
 export function migrate(meta: BaseMeta) {
-  if (isNewUnsavedMetaObject(meta)) return meta; // Fresh meta object, no migration needed
-  if (meta.version === undefined) meta.version = 0; // Saved, unversioned (v0) meta object
+  const newMeta = { ...meta };
+  if (isNewUnsavedMetaObject(newMeta)) return newMeta; // Fresh meta object, no migration needed
+  if (newMeta.version === undefined) newMeta.version = 0; // Saved, unversioned (v0) meta object
 
-  let upgradedMeta = { ...meta } as Required<BaseMeta>;
-  for (let i = meta.version; i < CURRENT_VERSION; i++) {
+  let upgradedMeta = { ...newMeta } as Required<BaseMeta>;
+  for (let i = newMeta.version; i < CURRENT_VERSION; i += 1) {
     upgradedMeta = migrations[i]({ ...upgradedMeta });
   }
 
@@ -20,5 +21,8 @@ export function migrate(meta: BaseMeta) {
 }
 
 function isNewUnsavedMetaObject(meta: BaseMeta) {
-  return !Object.hasOwn(meta, 'version') && !Object.hasOwn(meta, 'code');
+  return (
+    !Object.prototype.hasOwnProperty.call(meta, 'version') &&
+    !Object.prototype.hasOwnProperty.call(meta, 'code')
+  );
 }

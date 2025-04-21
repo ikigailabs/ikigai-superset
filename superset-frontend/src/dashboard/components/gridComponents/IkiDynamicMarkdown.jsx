@@ -260,7 +260,7 @@ class IkiDynamicMarkdown extends React.PureComponent {
         meta: {
           ...component.meta,
           version: CURRENT_VERSION,
-          customElementId: customElementId,
+          customElementId,
         },
       },
     });
@@ -290,7 +290,7 @@ class IkiDynamicMarkdown extends React.PureComponent {
 
     return (
       <iframe
-        id="ikidynamicmarkdown-widget-${this.props.component.id}"
+        id={`ikidynamicmarkdown-widget-${this.props.component.id}`}
         name={`dynamic-markdown-${timestamp}`}
         src={`${src}`}
         title="Custom Element"
@@ -386,8 +386,6 @@ class IkiDynamicMarkdown extends React.PureComponent {
     );
   }
 }
-
-class IFrameComponent extends React.PureComponent {}
 
 IkiDynamicMarkdown.propTypes = propTypes;
 IkiDynamicMarkdown.defaultProps = defaultProps;

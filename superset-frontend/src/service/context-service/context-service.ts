@@ -10,6 +10,7 @@ export class ContextServiceClass {
   public readonly projectId: string;
 
   private readonly thisWindow: Window;
+
   private readonly callbacksMap = new Map<string, Set<CallbackFn>>();
 
   public readonly topLevelOrigin: string;
@@ -84,9 +85,7 @@ export class ContextServiceClass {
     // Call any listeners for this message type
     const listeners = this.callbacksMap.get(type);
     if (listeners) {
-      for (const fn of listeners) {
-        fn(payload);
-      }
+      listeners.forEach(fn => fn(payload));
     }
 
     // Always respond if correlationId is provided, so the child can resolve its Promise
