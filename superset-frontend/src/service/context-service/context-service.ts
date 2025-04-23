@@ -1,19 +1,25 @@
 import { store } from 'src/views/store';
 import { CURRENT_VERSION } from 'src/migrations/dynamic-markdown/migration-runner';
 import { UPDATE_COMPONENTS } from 'src/dashboard/actions/dashboardLayout';
+import {
+  mapSupersetFiltersToPlatformSpec,
+  PlatformFilter,
+} from './map-superset-filters-to-platform-spec';
 
 import type { DashboardLayout } from 'src/dashboard/types';
-import { mapSupersetFiltersToPlatformSpec, type PlatformFilter } from './map-superset-filters-to-platform-spec';
+import { LOG_EVENT } from 'src/logger/actions';
+import { LOG_ACTIONS_FORCE_REFRESH_CHART } from 'src/logger/LogUtils';
+import { postChartFormData } from 'src/components/Chart/chartAction';
 
 export type IncomingMessagePayload = {
   setCustomElementAliasId: {
     supersetComponentId: string;
     customComponentAliasId: string;
   };
-  subscribeToDashboardLayout: DashboardLayout;
-  refreshCharts: void;
-  requestFilters: unknown;
-
+  notifyUpdateCharts: {
+    chartIds: string[];
+  };
+  requestFilters: void;
   getDashboardLayout: void;
 };
 
@@ -124,12 +130,80 @@ export class SupersetContextService {
         );
       }
       case 'requestFilters': {
-        return this.handleRequestFilters(event.source!);
+        return this.handleRequestFilters(event.source!, correlationId!);
+      }
+      case 'notifyUpdateCharts': {
+        return this.handleNotifyUpdateCharts(
+          event.source!,
+          correlationId!,
+          payload as any,
+        );
       }
     }
   };
 
-  private handleRequestFilters(source: MessageEventSource) {
+  private handleNotifyUpdateCharts(
+    source: MessageEventSource,
+    correlationId: string,
+    chartIds: string[],
+  ) {
+    const dashboardLayout = store.getState().dashboardLayout.present;
+
+    chartIds.forEach(chartId => {
+      let findChartEle = null;
+      Object.keys(dashboardLayout).forEach(ele => {
+        const supChartId = dashboardLayout[ele].meta?.chartId;
+        if (supChartId && supChartId.toString() === chartId) {
+          findChartEle = supChartId;
+        }
+      });
+
+      if (findChartEle) {
+        // log that we're force refreshing
+        store.dispatch({
+          type: LOG_EVENT,
+          payload: {
+            eventName: LOG_ACTIONS_FORCE_REFRESH_CHART,
+            eventData: {
+              slice_id: chartId,
+              is_cached: false,
+            },
+          },
+        });
+
+        const chart = (store.getState().charts || {})[chartId];
+        const timeout =
+          store.getState().dashboardInfo.common.conf.SUPERSET_WEBSERVER_TIMEOUT;
+
+        if (
+          !chart?.latestQueryFormData ||
+          Object.keys(chart?.latestQueryFormData).length === 0
+        ) {
+          return;
+        }
+        store.dispatch(
+          postChartFormData(
+            chart?.latestQueryFormData,
+            true,
+            timeout,
+            chart?.id,
+            store.getState().dashboardInfo.id,
+            (store.getState().dataMask as any)[chart.id].ownState,
+          ) as any,
+        );
+      }
+    });
+
+    source.postMessage(
+      { correlationId },
+      { targetOrigin: this.topLevelOrigin },
+    );
+  }
+
+  private handleRequestFilters(
+    source: MessageEventSource,
+    correlationId: string,
+  ) {
     const filterBoxFilters = store.getState().dashboardFilters;
     const filters = mapSupersetFiltersToPlatformSpec(filterBoxFilters);
 
@@ -139,6 +213,10 @@ export class SupersetContextService {
     };
 
     source.postMessage(message, { targetOrigin: this.topLevelOrigin });
+    source.postMessage(
+      { correlationId },
+      { targetOrigin: this.topLevelOrigin },
+    );
   }
 
   private handleGetDashboardLayout(
@@ -152,6 +230,7 @@ export class SupersetContextService {
       correlationId,
       payload: layout,
     };
+
     source.postMessage(reply, { targetOrigin: this.topLevelOrigin });
   }
 

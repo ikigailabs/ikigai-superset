@@ -1,6 +1,6 @@
 import React from 'react';
 
-export class IkiDynamicMarkdownIframe extends React.PureComponent<{
+export class IkiDynamicMarkdownIframe extends React.Component<{
   editMode: boolean;
   component: any;
   customElementId: string;

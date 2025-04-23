@@ -95,61 +95,6 @@ class IkiDynamicMarkdown extends React.PureComponent {
     }
   }
 
-  handleIncomingWindowMsg() {
-    window.addEventListener('message', event => {
-      if (event.origin === topLevelOrigin) {
-        const messageObject = JSON.parse(event.data);
-        if (messageObject.info && messageObject.dataType) {
-          if (
-            messageObject.info ===
-            'widget-to-superset/sending-charts-to-refresh'
-          ) {
-            const { matchedChartIds } = messageData;
-            this.refreshCharts(matchedChartIds);
-          }
-        }
-      }
-    });
-  }
-
-  refreshCharts(selectedCharts) {
-    let chartIds = [];
-    if (!Array.isArray(selectedCharts)) {
-      chartIds = selectedCharts.split();
-    } else {
-      chartIds = selectedCharts;
-    }
-    if (chartIds) {
-      const layoutElements = this.props.dashboardLayout?.present
-        ? this.props.dashboardLayout?.present
-        : null;
-      if (chartIds) {
-        chartIds.forEach(chartId => {
-          let findChartEle = null;
-          if (layoutElements) {
-            Object.keys(layoutElements).forEach(ele => {
-              const supChartId = layoutElements[ele].meta?.chartId;
-              if (supChartId && supChartId.toString() === chartId) {
-                findChartEle = supChartId;
-              }
-            });
-          }
-          if (findChartEle) {
-            this.refreshChart(findChartEle, props.match.params.idOrSlug, false);
-          }
-        });
-      }
-    }
-  }
-
-  refreshChart(chartId, dashboardId, isCached) {
-    this.props.logEvent(LOG_ACTIONS_FORCE_REFRESH_CHART, {
-      slice_id: chartId,
-      is_cached: isCached,
-    });
-    return this.props.refreshChart(chartId, true, dashboardId);
-  }
-
   handleDeleteComponent() {
     const { deleteComponent, id, parentId } = this.props;
     deleteComponent(id, parentId);
