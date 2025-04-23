@@ -3,6 +3,7 @@ import { CURRENT_VERSION } from 'src/migrations/dynamic-markdown/migration-runne
 import { UPDATE_COMPONENTS } from 'src/dashboard/actions/dashboardLayout';
 
 import type { DashboardLayout } from 'src/dashboard/types';
+import { mapSupersetFiltersToPlatformSpec, type PlatformFilter } from './map-superset-filters-to-platform-spec';
 
 export type IncomingMessagePayload = {
   setCustomElementAliasId: {
@@ -29,6 +30,7 @@ export type IncomingMessage<
 type OutgoingMessagePayload = {
   dashboardLayoutUpdated: DashboardLayout;
   editModeUpdated: boolean;
+  filtersUpdated: PlatformFilter[];
 };
 
 type OutgoingMessageType = keyof OutgoingMessagePayload;
@@ -81,6 +83,18 @@ export class SupersetContextService {
     this.sendMessageToCustomElements(message);
   }
 
+  public sendFilters() {
+    const filterBoxFilters = store.getState().dashboardFilters;
+    const filters = mapSupersetFiltersToPlatformSpec(filterBoxFilters);
+
+    const message: OutgoingMessage = {
+      type: 'filtersUpdated',
+      payload: filters,
+    };
+
+    this.sendMessageToCustomElements(message);
+  }
+
   private sendMessageToCustomElements(message: OutgoingMessage) {
     // This is a pretty ugly way of sending data to child iframes
     const iframes = document.querySelectorAll('iframe');
@@ -109,8 +123,23 @@ export class SupersetContextService {
           payload,
         );
       }
+      case 'requestFilters': {
+        return this.handleRequestFilters(event.source!);
+      }
     }
   };
+
+  private handleRequestFilters(source: MessageEventSource) {
+    const filterBoxFilters = store.getState().dashboardFilters;
+    const filters = mapSupersetFiltersToPlatformSpec(filterBoxFilters);
+
+    const message: OutgoingMessage = {
+      type: 'filtersUpdated',
+      payload: filters,
+    };
+
+    source.postMessage(message, { targetOrigin: this.topLevelOrigin });
+  }
 
   private handleGetDashboardLayout(
     source: MessageEventSource,
@@ -118,7 +147,7 @@ export class SupersetContextService {
   ) {
     if (!correlationId) return;
     const layout = store.getState().dashboardLayout.present;
-    const reply: OutgoingMessage<'dashboardLayoutUpdated'> = {
+    const reply: OutgoingMessage = {
       type: 'dashboardLayoutUpdated',
       correlationId,
       payload: layout,

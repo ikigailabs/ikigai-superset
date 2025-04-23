@@ -23,7 +23,6 @@ import { debounce } from 'lodash';
 import { connect } from 'react-redux';
 import { max as d3Max } from 'd3-array';
 import { AsyncCreatableSelect, CreatableSelect } from 'src/components/Select';
-// import Button from 'src/components/Button';
 import {
   css,
   styled,
@@ -52,6 +51,7 @@ import {
   TIME_FILTER_LABELS,
   TIME_FILTER_MAP,
 } from 'src/explore/constants';
+import { ContextService } from 'src/service/context-service/context-service';
 
 // a shortcut to a map key, used by many components
 export const TIME_RANGE = TIME_FILTER_MAP.time_range;
@@ -143,21 +143,11 @@ class FilterBox extends React.PureComponent {
   }
 
   componentDidMount() {
-    this.handleIncomingWindowMsg();
+    ContextService.sendFilters();
   }
 
-  handleIncomingWindowMsg() {
-    window.addEventListener('message', event => {
-      if (event.origin !== this.props.ikigaiOrigin) return;
-
-      const messageObject = JSON.parse(event.data);
-
-      if (
-        messageObject.info === 'widget-to-superset/sending-filter-hook-mounted'
-      ) {
-        this.sendFilterToDynamicMarkdown();
-      }
-    });
+  componentWillUnmount() {
+    ContextService.sendFilters();
   }
 
   onFilterMenuOpen(column) {
@@ -310,33 +300,6 @@ class FilterBox extends React.PureComponent {
       });
     }
     return this.transformOptions(options, this.getKnownMax(key, options));
-  }
-
-  /**
-   * Post message with updated filters to all Dynamic Markdown instances within
-   * the dashboard
-   */
-  sendFilterToDynamicMarkdown() {
-    // ikigaiOrigin does not exist in chart view
-    const origin = this.props.ikigaiOrigin || '';
-
-    const crossWindowMessage = {
-      info: 'widget-to-parent/send-global-filter',
-      dataType: 'object',
-      data: {
-        filters: this.state.selectedValues,
-        filtersFields: this.props.filtersFields,
-        chartId: this.props?.chartId,
-      },
-    };
-
-    const iframes = document.querySelectorAll('iframe');
-    const crossBrowserInfoString = JSON.stringify(crossWindowMessage);
-
-    iframes.forEach(iframe => {
-      if (!iframe.name.includes('dynamic-markdown')) return;
-      iframe.contentWindow.postMessage(crossBrowserInfoString, origin);
-    });
   }
 
   renderDateFilter() {
@@ -522,18 +485,7 @@ class FilterBox extends React.PureComponent {
         />
         <div style={{ width, height, overflow: 'auto' }}>
           {this.renderDateFilter()}
-          {/* {this.renderDatasourceFilters()} */}
           {this.renderFilters()}
-          {/* {!instantFiltering && (
-            <Button
-              buttonSize="small"
-              buttonStyle="primary"
-              onClick={this.clickApply.bind(this)}
-              disabled={!this.state.hasChanged}
-            >
-              {t('Apply')}
-            </Button>
-          )} */}
         </div>
       </>
     );
