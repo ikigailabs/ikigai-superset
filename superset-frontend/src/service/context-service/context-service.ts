@@ -1,19 +1,50 @@
-interface IpcMessage {
-  type: string;
+import { store } from 'src/views/store';
+import { CURRENT_VERSION } from 'src/migrations/dynamic-markdown/migration-runner';
+import { UPDATE_COMPONENTS } from 'src/dashboard/actions/dashboardLayout';
+
+import type { DashboardLayout } from 'src/dashboard/types';
+
+export type IncomingMessagePayload = {
+  setCustomElementAliasId: {
+    supersetComponentId: string;
+    customComponentAliasId: string;
+  };
+  subscribeToDashboardLayout: DashboardLayout;
+  refreshCharts: void;
+  requestFilters: unknown;
+
+  getDashboardLayout: void;
+};
+
+export type IncomingMessageType = keyof IncomingMessagePayload;
+
+export type IncomingMessage<
+  K extends IncomingMessageType = IncomingMessageType,
+> = {
+  type: K;
   correlationId?: string;
-  payload?: any;
-}
+  payload?: IncomingMessagePayload[K];
+};
 
-type CallbackFn = (payload: any) => void;
+type OutgoingMessagePayload = {
+  dashboardLayoutUpdated: DashboardLayout;
+  editModeUpdated: boolean;
+};
 
-export class ContextServiceClass {
+type OutgoingMessageType = keyof OutgoingMessagePayload;
+
+type OutgoingMessage<K extends OutgoingMessageType = OutgoingMessageType> = {
+  type: K;
+  correlationId?: string;
+  payload: OutgoingMessagePayload[K];
+};
+
+export class SupersetContextService {
   public readonly projectId: string;
 
-  private readonly thisWindow: Window;
-
-  private readonly callbacksMap = new Map<string, Set<CallbackFn>>();
-
   public readonly topLevelOrigin: string;
+
+  private readonly thisWindow: Window;
 
   constructor(thisWindow: Window) {
     this.thisWindow = thisWindow;
@@ -22,15 +53,8 @@ export class ContextServiceClass {
     const projectId = urlParams.get('project_id');
     const dashUrl = urlParams.get('dash_url');
 
-    if (!projectId) {
-      console.error('project_id query param must be truthy!');
-      throw new Error();
-    }
-
-    if (!dashUrl) {
-      console.error('dahs_url query param just be truthy!');
-      throw new Error();
-    }
+    if (!projectId) throw new Error('project_id query param must be truthy!');
+    if (!dashUrl) throw new Error('dash_url query param must be truthy!');
 
     this.projectId = projectId;
     this.topLevelOrigin = new URL(dashUrl).origin;
@@ -38,69 +62,100 @@ export class ContextServiceClass {
     this.thisWindow.addEventListener('message', this.onMessage);
   }
 
-  public subscribeToSetCustomElementAliasId(cb: CallbackFn): () => void {
-    return this.subscribe('setCustomElementAliasId', cb);
-  }
-
-  public subscribeToGetDashboardLayout(cb: CallbackFn): () => void {
-    return this.subscribe('getDashboardLayout', cb);
-  }
-
-  public subscribeToRefreshCharts(cb: CallbackFn): () => void {
-    return this.subscribe('refreshCharts', cb);
-  }
-
-  public subscribeToRequestFilters(cb: CallbackFn): () => void {
-    return this.subscribe('requestFilters', cb);
-  }
-
-  private subscribe(type: string, cb: CallbackFn): () => void {
-    const setOfCallbacks = this.callbacksMap.get(type) || new Set();
-    setOfCallbacks.add(cb);
-    this.callbacksMap.set(type, setOfCallbacks);
-
-    return () => {
-      const stored = this.callbacksMap.get(type);
-      if (stored) {
-        stored.delete(cb);
-        if (stored.size === 0) {
-          this.callbacksMap.delete(type);
-        }
-      }
+  public sendDashboardLayout() {
+    const layout = store.getState().dashboardLayout.present;
+    const message: OutgoingMessage = {
+      type: 'dashboardLayoutUpdated',
+      payload: layout,
     };
+
+    this.sendMessageToCustomElements(message);
   }
 
-  private onMessage = (event: MessageEvent) => {
-    const { type, correlationId, payload } = (event.data || {}) as IpcMessage;
+  public sendEditMode(editMode: boolean) {
+    const message: OutgoingMessage = {
+      type: 'editModeUpdated',
+      payload: editMode,
+    };
+
+    this.sendMessageToCustomElements(message);
+  }
+
+  private sendMessageToCustomElements(message: OutgoingMessage) {
+    // This is a pretty ugly way of sending data to child iframes
+    const iframes = document.querySelectorAll('iframe');
+    iframes.forEach((iframe: HTMLIFrameElement) => {
+      if (!iframe.name.includes('dynamic-markdown')) return;
+      iframe.contentWindow!.postMessage(message, this.topLevelOrigin);
+    });
+  }
+
+  private onMessage = <K extends IncomingMessageType>(
+    event: MessageEvent<IncomingMessage<K>>,
+  ) => {
+    if (event.origin !== this.topLevelOrigin) return;
+
+    const { type, correlationId, payload } = event.data ?? {};
     if (!type) return;
 
-    console.debug(
-      `[SupersetContextService] received: ${JSON.stringify({
-        type,
-        correlationId,
-        payload,
-      })}`,
-    );
-
-    // Call any listeners for this message type
-    const listeners = this.callbacksMap.get(type);
-    if (listeners) {
-      listeners.forEach(fn => fn(payload));
-    }
-
-    // Always respond if correlationId is provided, so the child can resolve its Promise
-    if (correlationId) {
-      const message = {
-        correlationId,
-        payload: {}, // or some real data if needed
-        type: '', // indicates it's a response
-      };
-      console.debug(
-        `[SupersetContextService] sending response: ${JSON.stringify(message)}`,
-      );
-      event.source?.postMessage(message);
+    switch (type) {
+      case 'getDashboardLayout': {
+        return this.handleGetDashboardLayout(event.source!, correlationId!);
+      }
+      case 'setCustomElementAliasId': {
+        return this.handleSetCustomElementAliasId(
+          event.source!,
+          correlationId!,
+          payload,
+        );
+      }
     }
   };
+
+  private handleGetDashboardLayout(
+    source: MessageEventSource,
+    correlationId: string,
+  ) {
+    if (!correlationId) return;
+    const layout = store.getState().dashboardLayout.present;
+    const reply: OutgoingMessage<'dashboardLayoutUpdated'> = {
+      type: 'dashboardLayoutUpdated',
+      correlationId,
+      payload: layout,
+    };
+    source.postMessage(reply, { targetOrigin: this.topLevelOrigin });
+  }
+
+  private handleSetCustomElementAliasId(
+    source: MessageEventSource,
+    correlationId: string,
+    payload: any,
+  ) {
+    const { supersetComponentId, customComponentAliasId } = payload;
+    const components = store.getState().dashboardLayout.present;
+
+    store.dispatch({
+      type: UPDATE_COMPONENTS,
+      payload: {
+        nextComponents: {
+          [supersetComponentId]: {
+            ...components[supersetComponentId],
+            meta: {
+              ...components[supersetComponentId].meta,
+              version: CURRENT_VERSION,
+              customElementId: customComponentAliasId,
+            },
+          },
+        },
+      },
+    });
+
+    // send acknoledgement
+    source.postMessage(
+      { correlationId },
+      { targetOrigin: this.topLevelOrigin },
+    );
+  }
 }
 
-export const ContextService = new ContextServiceClass(window);
+export const ContextService = new SupersetContextService(window);
