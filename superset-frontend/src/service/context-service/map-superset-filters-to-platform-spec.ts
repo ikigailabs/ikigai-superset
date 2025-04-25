@@ -50,11 +50,9 @@ function mapFilterFields(columns: DashboardFilter['columns']) {
 export function mapSupersetFiltersToPlatformSpec(
   dashboardFilters: DashboardFilters,
 ): PlatformFilter[] {
-  return Object.entries(dashboardFilters).map(([chartId, dashFilter]) => {
-    return {
-      filters: dashFilter.columns,
-      filterFields: mapFilterFields(dashFilter.columns),
-      chartId,
-    };
-  });
+  return Object.entries(dashboardFilters).map(([chartId, dashFilter]) => ({
+    filters: dashFilter.columns,
+    filterFields: mapFilterFields(dashFilter.columns),
+    chartId,
+  }));
 }

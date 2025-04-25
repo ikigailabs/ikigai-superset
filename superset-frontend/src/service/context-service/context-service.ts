@@ -1,15 +1,15 @@
 import { store } from 'src/views/store';
 import { CURRENT_VERSION } from 'src/migrations/dynamic-markdown/migration-runner';
 import { UPDATE_COMPONENTS } from 'src/dashboard/actions/dashboardLayout';
-import {
-  mapSupersetFiltersToPlatformSpec,
-  PlatformFilter,
-} from './map-superset-filters-to-platform-spec';
 
 import type { DashboardLayout } from 'src/dashboard/types';
 import { LOG_EVENT } from 'src/logger/actions';
 import { LOG_ACTIONS_FORCE_REFRESH_CHART } from 'src/logger/LogUtils';
 import { postChartFormData } from 'src/components/Chart/chartAction';
+import {
+  mapSupersetFiltersToPlatformSpec,
+  PlatformFilter,
+} from './map-superset-filters-to-platform-spec';
 
 export type IncomingMessagePayload = {
   setCustomElementAliasId: {
@@ -120,24 +120,31 @@ export class SupersetContextService {
 
     switch (type) {
       case 'getDashboardLayout': {
-        return this.handleGetDashboardLayout(event.source!, correlationId!);
+        this.handleGetDashboardLayout(event.source!, correlationId!);
+        break;
       }
       case 'setCustomElementAliasId': {
-        return this.handleSetCustomElementAliasId(
+        this.handleSetCustomElementAliasId(
           event.source!,
           correlationId!,
           payload,
         );
+        break;
       }
       case 'requestFilters': {
-        return this.handleRequestFilters(event.source!, correlationId!);
+        this.handleRequestFilters(event.source!, correlationId!);
+        break;
       }
       case 'notifyUpdateCharts': {
-        return this.handleNotifyUpdateCharts(
+        this.handleNotifyUpdateCharts(
           event.source!,
           correlationId!,
           payload as any,
         );
+        break;
+      }
+      default: {
+        // no-op
       }
     }
   };
