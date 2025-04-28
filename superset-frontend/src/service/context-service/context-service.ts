@@ -102,7 +102,8 @@ export class SupersetContextService {
     // This is a pretty ugly way of sending data to child iframes
     const iframes = document.querySelectorAll('iframe');
     iframes.forEach((iframe: HTMLIFrameElement) => {
-      if (!iframe.name.includes('dynamic-markdown')) return;
+      if (!iframe.name.includes('dynamic-markdown') || !this.topLevelOrigin)
+        return;
       iframe.contentWindow!.postMessage(message, this.topLevelOrigin);
     });
   }
