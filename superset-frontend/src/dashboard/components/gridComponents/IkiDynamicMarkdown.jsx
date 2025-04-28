@@ -22,8 +22,6 @@ import { withRouter } from 'react-router-dom';
 import { migrate } from 'src/migrations/dynamic-markdown/migration-runner';
 import { IkiDynamicMarkdownIframe } from './IkiDynamicMarkdownIframe';
 
-const { topLevelOrigin, projectId } = ContextService;
-
 const propTypes = {
   id: PropTypes.string.isRequired,
   parentId: PropTypes.string.isRequired,
@@ -162,8 +160,6 @@ class IkiDynamicMarkdown extends React.PureComponent {
                     component={component}
                     customElementId={this.getMeta().customElementId || ''}
                     editMode={editMode}
-                    projectId={projectId}
-                    topLevelOrigin={topLevelOrigin}
                   />
                 </div>
               </ResizableContainer>

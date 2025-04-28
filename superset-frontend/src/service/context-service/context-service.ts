@@ -48,9 +48,9 @@ type OutgoingMessage<K extends OutgoingMessageType = OutgoingMessageType> = {
 };
 
 export class SupersetContextService {
-  public readonly projectId: string;
+  public readonly projectId?: string;
 
-  public readonly topLevelOrigin: string;
+  public readonly topLevelOrigin?: string;
 
   private readonly thisWindow: Window;
 
@@ -61,11 +61,8 @@ export class SupersetContextService {
     const projectId = urlParams.get('project_id');
     const dashUrl = urlParams.get('dash_url');
 
-    if (!projectId) throw new Error('project_id query param must be truthy!');
-    if (!dashUrl) throw new Error('dash_url query param must be truthy!');
-
-    this.projectId = projectId;
-    this.topLevelOrigin = new URL(dashUrl).origin;
+    this.projectId = projectId || undefined;
+    this.topLevelOrigin = dashUrl ? new URL(dashUrl).origin : undefined;
 
     this.thisWindow.addEventListener('message', this.onMessage);
   }
