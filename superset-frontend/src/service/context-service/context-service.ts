@@ -1,52 +1,21 @@
-import { store } from 'src/views/store';
 import { CURRENT_VERSION } from 'src/migrations/dynamic-markdown/migration-runner';
 import { UPDATE_COMPONENTS } from 'src/dashboard/actions/dashboardLayout';
-
-import type { DashboardLayout } from 'src/dashboard/types';
 import { LOG_EVENT } from 'src/logger/actions';
 import { LOG_ACTIONS_FORCE_REFRESH_CHART } from 'src/logger/LogUtils';
 import { postChartFormData } from 'src/components/Chart/chartAction';
-import {
-  mapSupersetFiltersToPlatformSpec,
-  PlatformFilter,
-} from './map-superset-filters-to-platform-spec';
+import { mapSupersetFiltersToPlatformSpec } from './map-superset-filters-to-platform-spec';
 
-export type IncomingMessagePayload = {
-  setCustomElementAliasId: {
-    supersetComponentId: string;
-    customComponentAliasId: string;
-  };
-  notifyUpdateCharts: {
-    chartIds: string[];
-  };
-  requestFilters: void;
-  getDashboardLayout: void;
-};
+import type { OutgoingMessage } from './outgoing-message';
+import type { IncomingMessageType, IncomingMessage } from './incoming-message';
 
-export type IncomingMessageType = keyof IncomingMessagePayload;
-
-export type IncomingMessage<
-  K extends IncomingMessageType = IncomingMessageType,
-> = {
-  type: K;
-  correlationId?: string;
-  payload?: IncomingMessagePayload[K];
-};
-
-type OutgoingMessagePayload = {
-  dashboardLayoutUpdated: DashboardLayout;
-  editModeUpdated: boolean;
-  filtersUpdated: PlatformFilter[];
-};
-
-type OutgoingMessageType = keyof OutgoingMessagePayload;
-
-type OutgoingMessage<K extends OutgoingMessageType = OutgoingMessageType> = {
-  type: K;
-  correlationId?: string;
-  payload: OutgoingMessagePayload[K];
-};
-
+/**
+ * Manages communication in between same-window processes. Reads init data passed
+ * from the top-level process and communicates with lower levels processes if any.
+ *
+ * There are several dynamic imports of the redux store; these are required
+ * because loading the chart view will fail to load. The reason is uncldear but it
+ * appears to be related to hydration and/or circular dependencies.
+ */
 export class SupersetContextService {
   public readonly projectId?: string;
 
@@ -67,7 +36,8 @@ export class SupersetContextService {
     this.thisWindow.addEventListener('message', this.onMessage);
   }
 
-  public sendDashboardLayout() {
+  public async sendDashboardLayout() {
+    const { store } = await import('src/views/store');
     const layout = store.getState().dashboardLayout.present;
     const message: OutgoingMessage = {
       type: 'dashboardLayoutUpdated',
@@ -86,7 +56,8 @@ export class SupersetContextService {
     this.sendMessageToCustomElements(message);
   }
 
-  public sendFilters() {
+  public async sendFilters() {
+    const { store } = await import('src/views/store');
     const filterBoxFilters = store.getState().dashboardFilters;
     const filters = mapSupersetFiltersToPlatformSpec(filterBoxFilters);
 
@@ -147,11 +118,12 @@ export class SupersetContextService {
     }
   };
 
-  private handleNotifyUpdateCharts(
+  private async handleNotifyUpdateCharts(
     source: MessageEventSource,
     correlationId: string,
     chartIds: string[],
   ) {
+    const { store } = await import('src/views/store');
     const dashboardLayout = store.getState().dashboardLayout.present;
 
     chartIds.forEach(chartId => {
@@ -205,10 +177,11 @@ export class SupersetContextService {
     );
   }
 
-  private handleRequestFilters(
+  private async handleRequestFilters(
     source: MessageEventSource,
     correlationId: string,
   ) {
+    const { store } = await import('src/views/store');
     const filterBoxFilters = store.getState().dashboardFilters;
     const filters = mapSupersetFiltersToPlatformSpec(filterBoxFilters);
 
@@ -224,11 +197,12 @@ export class SupersetContextService {
     );
   }
 
-  private handleGetDashboardLayout(
+  private async handleGetDashboardLayout(
     source: MessageEventSource,
     correlationId: string,
   ) {
     if (!correlationId) return;
+    const { store } = await import('src/views/store');
     const layout = store.getState().dashboardLayout.present;
     const reply: OutgoingMessage = {
       type: 'dashboardLayoutUpdated',
@@ -239,11 +213,12 @@ export class SupersetContextService {
     source.postMessage(reply, { targetOrigin: this.topLevelOrigin });
   }
 
-  private handleSetCustomElementAliasId(
+  private async handleSetCustomElementAliasId(
     source: MessageEventSource,
     correlationId: string,
     payload: any,
   ) {
+    const { store } = await import('src/views/store');
     const { supersetComponentId, customComponentAliasId } = payload;
     const components = store.getState().dashboardLayout.present;
 
