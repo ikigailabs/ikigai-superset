@@ -165,7 +165,7 @@ export class SupersetContextService {
             timeout,
             chart?.id,
             store.getState().dashboardInfo.id,
-            (store.getState().dataMask as any)[chart.id].ownState,
+            (store.getState().dataMask as any)[chart.id]?.ownState,
           ) as any,
         );
       }
