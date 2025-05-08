@@ -46,12 +46,12 @@ const propTypes = {
   useEmptyDragPreview: PropTypes.bool,
 
   // from react-dnd
-  isDragging: PropTypes.bool.isRequired,
-  isDraggingOver: PropTypes.bool.isRequired,
-  isDraggingOverShallow: PropTypes.bool.isRequired,
-  droppableRef: PropTypes.func.isRequired,
-  dragSourceRef: PropTypes.func.isRequired,
-  dragPreviewRef: PropTypes.func.isRequired,
+  isDragging: PropTypes.bool,
+  isDraggingOver: PropTypes.bool,
+  isDraggingOverShallow: PropTypes.bool,
+  droppableRef: PropTypes.func,
+  dragSourceRef: PropTypes.func,
+  dragPreviewRef: PropTypes.func,
 };
 
 const defaultProps = {

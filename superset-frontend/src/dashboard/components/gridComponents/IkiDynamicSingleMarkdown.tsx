@@ -1,54 +1,29 @@
-import React, {
-  ComponentType,
-  CSSProperties,
-  FC,
-  ReactNode,
-  useEffect,
-  useState,
-} from 'react';
+import React, { useState } from 'react';
+import { SafeMarkdown } from '@superset-ui/core';
 import PropTypes from 'prop-types';
-import { bindActionCreators } from 'redux';
-import { connect } from 'react-redux';
 import cx from 'classnames';
 
-import { t, SafeMarkdown } from '@superset-ui/core';
-import {
-  Logger,
-  LOG_ACTIONS_RENDER_CHART,
-  LOG_ACTIONS_FORCE_REFRESH_CHART,
-} from 'src/logger/LogUtils';
-import { MarkdownEditor } from 'src/components/AsyncAceEditor';
-
 import DeleteComponentButton from 'src/dashboard/components/DeleteComponentButton';
-import DragDroppable from 'src/dashboard/components/dnd/DragDroppable';
-import ResizableContainer from 'src/dashboard/components/resizable/ResizableContainer';
 import MarkdownModeDropdown from 'src/dashboard/components/menu/MarkdownModeDropdown';
 import WithPopoverMenu from 'src/dashboard/components/menu/WithPopoverMenu';
-import { componentShape } from 'src/dashboard/util/propShapes';
-import { ROW_TYPE, COLUMN_TYPE } from 'src/dashboard/util/componentTypes';
+import ResizableContainer from 'src/dashboard/components/resizable/ResizableContainer';
 import {
+  GRID_BASE_UNIT,
   GRID_MIN_COLUMN_COUNT,
   GRID_MIN_ROW_UNITS,
-  GRID_BASE_UNIT,
-} from 'src/dashboard/util/constants';
-import { refreshChart } from 'src/components/Chart/chartAction';
-import { isEqual } from 'lodash';
-import { CustomMarkdown } from '../BuilderComponentPane/builderComponentTypes';
+} from '../../util/constants';
+
+import { editorModes, orientations } from '../../constants';
 import {
   DashboardLayout,
   EditorMode,
   LayoutItem,
-  Orientation,
-} from 'src/dashboard/types';
-import { editorModes, orientations } from 'src/dashboard/constants';
+  LayoutItemWithCustomMarkdown,
+} from '../../types';
+import { COLUMN_TYPE, ROW_TYPE } from '../../util/componentTypes';
+import DragDroppable from '../dnd/DragDroppable';
 
 const timestamp = new Date().getTime().toString();
-
-type LayoutItemWithCustomMarkdown = LayoutItem & {
-  meta: LayoutItem['meta'] & {
-    customMarkdown: CustomMarkdown;
-  };
-};
 
 type PropTypes = {
   id: string;
@@ -79,36 +54,6 @@ type PropTypes = {
   handleComponentDrop: (dropResult: any) => void;
   updateComponents: (nextComponents: Record<string, any>) => void;
 };
-
-export type DragDroppableProps = {
-  children: (args: {
-    dropIndicatorProps?: any;
-    dragSourceRef: (instance: HTMLDivElement | null) => void;
-  }) => ReactNode;
-  className?: string;
-  component: LayoutItemWithCustomMarkdown;
-  parentComponent?: LayoutItem;
-  depth: number;
-  disableDragDrop?: boolean;
-  orientation?: Orientation;
-  index: number;
-  style?: CSSProperties;
-  onDrop?: (dropResult: any) => void;
-  editMode: boolean;
-  useEmptyDragPreview?: boolean;
-
-  // from react-dnd
-  isDragging: boolean;
-  isDraggingOver: boolean;
-  isDraggingOverShallow: boolean;
-  droppableRef: (instance: HTMLDivElement | null) => void;
-  dragSourceRef: (instance: HTMLDivElement | null) => void;
-  dragPreviewRef: (instance: HTMLDivElement | null) => void;
-};
-
-const TypedDragDroppable: FC<Partial<DragDroppableProps>> = props => (
-  <DragDroppable {...(props as DragDroppableProps)} />
-);
 
 const IkiDynamicSingleMarkdown = (props: PropTypes) => {
   const {
@@ -143,6 +88,9 @@ const IkiDynamicSingleMarkdown = (props: PropTypes) => {
     parentComponent.type === COLUMN_TYPE
       ? parentComponent.meta.width || GRID_MIN_COLUMN_COUNT
       : component.meta.width || GRID_MIN_COLUMN_COUNT;
+
+  const orientation =
+    parentComponent.type === ROW_TYPE ? orientations.COLUMN : orientations.ROW;
 
   const [isFocused, setIsFocused] = useState(false);
   const [editorMode, setEditorMode] = useState<EditorMode>(editorModes.PREVIEW);
@@ -198,18 +146,14 @@ const IkiDynamicSingleMarkdown = (props: PropTypes) => {
   }
 
   return (
-    <TypedDragDroppable
+    <DragDroppable
       index={index}
       depth={depth}
       editMode={editMode}
       component={component}
       parentComponent={parentComponent}
       disableDragDrop={isFocused}
-      orientation={
-        parentComponent.type === ROW_TYPE
-          ? orientations.COLUMN
-          : orientations.ROW
-      }
+      orientation={orientation}
       onDrop={handleComponentDrop}
     >
       {({ dropIndicatorProps, dragSourceRef }) => (
@@ -261,7 +205,7 @@ const IkiDynamicSingleMarkdown = (props: PropTypes) => {
           {dropIndicatorProps && <div {...dropIndicatorProps} />}
         </WithPopoverMenu>
       )}
-    </TypedDragDroppable>
+    </DragDroppable>
   );
 };
 
