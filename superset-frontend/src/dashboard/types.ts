@@ -30,6 +30,7 @@ import componentTypes from 'src/dashboard/util/componentTypes';
 
 import { User } from 'src/types/bootstrapTypes';
 import { ChartState } from '../explore/types';
+import { editorModes, orientations } from './constants';
 
 export { Dashboard } from 'src/types/Dashboard';
 
@@ -160,3 +161,7 @@ export type EmbeddedDashboard = {
   dashboard_id: string;
   allowed_domains: string[];
 };
+
+export type Orientation = typeof orientations[keyof typeof orientations];
+
+export type EditorMode = typeof editorModes[keyof typeof editorModes];

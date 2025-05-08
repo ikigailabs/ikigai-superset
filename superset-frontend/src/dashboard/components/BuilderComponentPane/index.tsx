@@ -172,6 +172,8 @@ const BuilderComponentPane: React.FC<BCPProps> = ({
                           />
                         ))}
 
+                        <NewDyanmicMarkdown />
+
                         {/* <NewDyanmicMarkdown />
                         <NewIkiTable />
                         <NewIkiProcessBuilder />
