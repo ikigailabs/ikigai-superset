@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { SafeMarkdown } from '@superset-ui/core';
 import PropTypes from 'prop-types';
 import cx from 'classnames';
@@ -15,10 +16,10 @@ import {
 
 import { editorModes, orientations } from '../../constants';
 import {
-  DashboardLayout,
   EditorMode,
   LayoutItem,
   LayoutItemWithCustomMarkdown,
+  RootState,
 } from '../../types';
 import { COLUMN_TYPE, ROW_TYPE } from '../../util/componentTypes';
 import DragDroppable from '../dnd/DragDroppable';
@@ -34,7 +35,6 @@ type PropTypes = {
   depth: number;
   editMode: boolean;
   ikigaiOrigin?: string;
-  dashboardLayout?: DashboardLayout;
 
   // from redux
   logEvent: (eventName: string, payload?: Record<string, any>) => void;
@@ -92,30 +92,43 @@ const IkiDynamicSingleMarkdown = (props: PropTypes) => {
   const orientation =
     parentComponent.type === ROW_TYPE ? orientations.COLUMN : orientations.ROW;
 
+  const dashboardLayout = useSelector(
+    (state: RootState) => state.dashboardLayout,
+  );
+
   const [isFocused, setIsFocused] = useState(false);
   const [editorMode, setEditorMode] = useState<EditorMode>(editorModes.PREVIEW);
 
   function handleChangeEditorMode(newEditorMode: EditorMode) {
     setEditorMode(newEditorMode);
+  }
 
-    // TODO
-    // let widgetUrl;
-    // const widgetUrlQuery = new URLSearchParams(widgetUrl.search);
-    // // widgetUrlQuery.set('mode', mode);
-    // widgetUrl.search = widgetUrlQuery.toString();
-    // const tempIframe = `<iframe
-    //                   id="ikidynamicmarkdown-widget-${this.props.component.id}"
-    //                   name="dynamic-markdown-${timestamp}"
-    //                   src="${widgetUrl}"
-    //                   title="Custom Component"
-    //                   style="min-height: 100%;"
-    //                 />`;
-    // this.handleIkiRunPipelineChange(tempIframe, true);
+  function sendDashboardLayoutToMarkdown() {
+    if (!ikigaiOrigin || !dashboardLayout) return;
+
+    const iframes = document.querySelectorAll('iframe');
+
+    const crossWindowMessage = {
+      info: 'widget-to-parent/send-dashboard-layout',
+      dataType: 'object',
+      data: {
+        dashboardLayout: dashboardLayout.present,
+      },
+    };
+
+    const crossBrowserInfoString = JSON.stringify(crossWindowMessage);
+
+    iframes.forEach(iframe => {
+      if (!iframe.name.includes('dynamic-markdown')) return;
+      if (!iframe.contentWindow) return;
+
+      iframe.contentWindow.postMessage(crossBrowserInfoString, ikigaiOrigin);
+    });
   }
 
   function handleChangeFocus(isFocused: boolean) {
     setIsFocused(isFocused);
-    handleChangeEditorMode(isFocused ? 'edit' : 'preview');
+    handleChangeEditorMode(isFocused ? editorModes.EDIT : editorModes.PREVIEW);
   }
 
   function handleDeleteComponent() {
@@ -145,6 +158,10 @@ const IkiDynamicSingleMarkdown = (props: PropTypes) => {
     return <SafeMarkdown source={iframeString} />;
   }
 
+  useEffect(() => {
+    sendDashboardLayoutToMarkdown();
+  }, []);
+
   return (
     <DragDroppable
       index={index}
@@ -159,6 +176,7 @@ const IkiDynamicSingleMarkdown = (props: PropTypes) => {
       {({ dropIndicatorProps, dragSourceRef }) => (
         <WithPopoverMenu
           onChangeFocus={handleChangeFocus}
+          editMode={editMode}
           menuItems={[
             <MarkdownModeDropdown
               id={`${component.id}-mode`}
@@ -167,7 +185,6 @@ const IkiDynamicSingleMarkdown = (props: PropTypes) => {
             />,
             <DeleteComponentButton onDelete={handleDeleteComponent} />,
           ]}
-          editMode={editMode}
         >
           <div
             id={component.id}

@@ -86,6 +86,8 @@ class IkiDynamicMarkdown extends React.PureComponent {
     this.handleDeleteComponent = this.handleDeleteComponent.bind(this);
     this.handleResizeStart = this.handleResizeStart.bind(this);
     this.setEditor = this.setEditor.bind(this);
+
+    console.log('IkiDynamicMarkdown', this.props.dashboardLayout);
   }
 
   componentDidMount() {
@@ -437,7 +439,23 @@ class IkiDynamicMarkdown extends React.PureComponent {
     } else {
       iframe = '';
     }
-    return <SafeMarkdown source={hasError ? MARKDOWN_ERROR_MESSAGE : iframe} />;
+
+    const url = new URL('/widget/custom', ikigaiOrigin);
+
+    url.searchParams.set('project_id', '2wmRZW1dlNxvhWsLvetizalcRrw');
+    url.searchParams.set('scid', 'IKI_DYNAMIC_MARKDOWN-B_-21sQuVUv');
+    url.searchParams.set('mode', 'edit');
+    url.searchParams.set('dashboard_mode', 'edit');
+    url.searchParams.set('custom_element_id', '');
+
+    const iframeString = `<iframe
+      id="ikidynamicmarkdown-widget-${this.props.component.id}"
+      name="dynamic-markdown-${timestamp}"
+      src="${url.toString()}"
+      title="Custom Component"
+      style="height:100%;"
+    />`;
+    return <SafeMarkdown source={iframeString} />;
   }
 
   renderEditMode() {

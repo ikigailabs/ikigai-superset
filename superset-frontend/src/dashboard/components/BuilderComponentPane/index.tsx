@@ -27,6 +27,7 @@ import { t, styled } from '@superset-ui/core';
 
 import SliceAdder from 'src/dashboard/containers/SliceAdder';
 import dashboardComponents from 'src/visualizations/presets/dashboardComponents';
+import type { CustomMarkdowns } from '../../types';
 import NewColumn from '../gridComponents/new/layout/NewColumn';
 import NewDivider from '../gridComponents/new/layout/NewDivider';
 import NewHeader from '../gridComponents/new/layout/NewHeader';
@@ -48,7 +49,6 @@ import NewIkiDatasetDownload from '../gridComponents/new/components/NewIkiDatase
 import NewExternalDatasets from '../gridComponents/new/components/NewExternalDatasets';
 import NewForecast from '../gridComponents/new/components/NewForecast';
 import NewForecastModule from '../gridComponents/new/components/NewForecastModule';
-import type { CustomMarkdowns } from './builderComponentTypes';
 
 export interface BCPProps {
   isStandalone: boolean;
