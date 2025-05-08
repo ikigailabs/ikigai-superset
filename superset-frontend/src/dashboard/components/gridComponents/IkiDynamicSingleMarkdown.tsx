@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { SafeMarkdown } from '@superset-ui/core';
 import PropTypes from 'prop-types';
 import cx from 'classnames';
 
+import { refreshChart } from 'src/components/Chart/chartAction';
 import DeleteComponentButton from 'src/dashboard/components/DeleteComponentButton';
 import MarkdownModeDropdown from 'src/dashboard/components/menu/MarkdownModeDropdown';
 import WithPopoverMenu from 'src/dashboard/components/menu/WithPopoverMenu';
@@ -23,6 +24,8 @@ import {
 } from '../../types';
 import { COLUMN_TYPE, ROW_TYPE } from '../../util/componentTypes';
 import DragDroppable from '../dnd/DragDroppable';
+import { LOG_ACTIONS_FORCE_REFRESH_CHART } from '../../../logger/LogUtils';
+import { logEvent } from '../../../logger/actions';
 
 const timestamp = new Date().getTime().toString();
 
@@ -55,7 +58,21 @@ type PropTypes = {
   updateComponents: (nextComponents: Record<string, any>) => void;
 };
 
+const pathParts = window.location.pathname.split('/');
+const dashboardIndex = pathParts.indexOf('dashboard');
+const supersetDashboardId =
+  dashboardIndex !== -1 ? parseInt(pathParts[dashboardIndex + 1], 10) : null;
+
 const IkiDynamicSingleMarkdown = (props: PropTypes) => {
+  const dispatch = useDispatch();
+
+  const dashboardLayout = useSelector(
+    (state: RootState) => state.dashboardLayout,
+  );
+
+  const [isFocused, setIsFocused] = useState(false);
+  const [editorMode, setEditorMode] = useState<EditorMode>(editorModes.PREVIEW);
+
   const {
     id,
     parentId,
@@ -91,13 +108,6 @@ const IkiDynamicSingleMarkdown = (props: PropTypes) => {
 
   const orientation =
     parentComponent.type === ROW_TYPE ? orientations.COLUMN : orientations.ROW;
-
-  const dashboardLayout = useSelector(
-    (state: RootState) => state.dashboardLayout,
-  );
-
-  const [isFocused, setIsFocused] = useState(false);
-  const [editorMode, setEditorMode] = useState<EditorMode>(editorModes.PREVIEW);
 
   function handleChangeEditorMode(newEditorMode: EditorMode) {
     setEditorMode(newEditorMode);
@@ -158,9 +168,58 @@ const IkiDynamicSingleMarkdown = (props: PropTypes) => {
     return <SafeMarkdown source={iframeString} />;
   }
 
+  function handleRefreshChart(chartId: any, dashboardId: any, isCached: any) {
+    logEvent(LOG_ACTIONS_FORCE_REFRESH_CHART, {
+      slice_id: chartId,
+      is_cached: isCached,
+    });
+
+    dispatch(refreshChart(chartId, true, dashboardId));
+  }
+
+  function refreshCharts(selectedCharts: any) {
+    const chartIds = !Array.isArray(selectedCharts)
+      ? selectedCharts.split()
+      : selectedCharts;
+
+    if (!chartIds) return;
+
+    const layoutElements = dashboardLayout.present;
+
+    chartIds.forEach((chartId: string) => {
+      Object.keys(layoutElements).forEach(ele => {
+        const supChartId = layoutElements[ele].meta?.chartId;
+
+        if (supChartId && String(supChartId) === String(chartId)) {
+          handleRefreshChart(supChartId, supersetDashboardId, false);
+        }
+      });
+    });
+  }
+
   useEffect(() => {
     sendDashboardLayoutToMarkdown();
   }, []);
+
+  useEffect(() => {
+    function handleMessage(event: MessageEvent) {
+      if (event.origin !== ikigaiOrigin) return;
+
+      const message = event.data;
+
+      switch (message.type) {
+        case 'notifyUpdateCharts':
+          refreshCharts(message.payload);
+          break;
+
+        default:
+          break;
+      }
+    }
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [ikigaiOrigin]);
 
   return (
     <DragDroppable
