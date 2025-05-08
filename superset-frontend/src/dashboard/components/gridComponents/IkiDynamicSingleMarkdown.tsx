@@ -40,7 +40,7 @@ import {
   LayoutItem,
   Orientation,
 } from 'src/dashboard/types';
-import { editorModes } from 'src/dashboard/constants';
+import { editorModes, orientations } from 'src/dashboard/constants';
 
 const timestamp = new Date().getTime().toString();
 
@@ -131,7 +131,12 @@ const IkiDynamicSingleMarkdown = (props: PropTypes) => {
   } = props;
 
   const {
-    meta: { customMarkdown },
+    meta: {
+      customMarkdown: {
+        custom_markdown_id: customMarkdownId,
+        project_id: projectId,
+      },
+    },
   } = component;
 
   const widthMultiple =
@@ -170,45 +175,43 @@ const IkiDynamicSingleMarkdown = (props: PropTypes) => {
   }
 
   function CustomComponentIframe() {
-    let iframe = '';
+    if (!ikigaiOrigin) return null;
 
-    if (ikigaiOrigin) {
-      // if (markdownSource) {
-      //   // iframe = markdownSource;
-      //   const iframeWrapper = document.createElement('div');
-      //   iframeWrapper.innerHTML = markdownSource;
-      //   const iframeHtml = iframeWrapper.firstChild;
-      //   const iframeSrcUrl = new URL(iframeHtml.src);
-      //   iframeSrcUrl.searchParams.set(
-      //     'dashboard_mode',
-      //     editMode ? 'edit' : 'preview',
-      //   );
-      //   iframeSrcUrl.searchParams.set('scid', this.props.component.id);
-      //   iframeSrc = ikigaiOrigin + iframeSrcUrl.pathname + iframeSrcUrl.search;
-      // } else {
-      //   iframeSrc = `${ikigaiOrigin}/widget/custom?mode=edit&parent=superset&scid=${this.props.component.id}`;
-      // }
-      const iframeSource = `${ikigaiOrigin}/widget/custom?mode=edit&parent=superset&scid=${component.id}`;
+    const url = new URL('/widget/custom', ikigaiOrigin);
 
-      iframe = `<iframe
-                  id="ikidynamicmarkdown-widget-${component.id}"
-                  name="dynamic-markdown-${timestamp}"
-                  src="${iframeSource}"
-                  title="Custom Component"
-                  style="height:100%;"
-                />`;
-    } else {
-      iframe = '';
-    }
+    const params = {
+      project_id: projectId,
+      mode: 'preview',
+      dashboard_mode: 'preview',
+      parent: 'superset',
+      scid: component.id,
+      custom_element_id: customMarkdownId,
+    };
 
-    return <SafeMarkdown source={iframe} />;
+    Object.entries(params).forEach(([key, value]) => {
+      url.searchParams.set(key, value);
+    });
+
+    const iframeString = `<iframe
+      id="ikidynamicmarkdown-widget-${component.id}"
+      name="dynamic-markdown-${timestamp}"
+      src="${url.toString()}"
+      title="Custom Component"
+      style="height:100%;"
+    />`;
+
+    return <SafeMarkdown source={iframeString} />;
   }
 
   return (
     <TypedDragDroppable
       component={component}
       parentComponent={parentComponent}
-      orientation={parentComponent.type === ROW_TYPE ? 'column' : 'row'}
+      orientation={
+        parentComponent.type === ROW_TYPE
+          ? orientations.COLUMN
+          : orientations.ROW
+      }
       index={index}
       depth={depth}
       onDrop={handleComponentDrop}
