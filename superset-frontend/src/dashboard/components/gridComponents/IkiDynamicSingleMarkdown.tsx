@@ -42,6 +42,8 @@ import {
 } from 'src/dashboard/types';
 import { editorModes } from 'src/dashboard/constants';
 
+const timestamp = new Date().getTime().toString();
+
 type LayoutItemWithCustomMarkdown = LayoutItem & {
   meta: LayoutItem['meta'] & {
     customMarkdown: CustomMarkdown;
@@ -119,6 +121,7 @@ const IkiDynamicSingleMarkdown = (props: PropTypes) => {
     editMode,
     columnWidth,
     availableColumnCount,
+    ikigaiOrigin,
 
     handleComponentDrop,
     deleteComponent,
@@ -126,6 +129,10 @@ const IkiDynamicSingleMarkdown = (props: PropTypes) => {
     onResizeStart,
     onResizeStop,
   } = props;
+
+  const {
+    meta: { customMarkdown },
+  } = component;
 
   const widthMultiple =
     parentComponent.type === COLUMN_TYPE
@@ -137,8 +144,6 @@ const IkiDynamicSingleMarkdown = (props: PropTypes) => {
 
   function handleChangeEditorMode(newEditorMode: EditorMode) {
     setEditorMode(newEditorMode);
-
-    console.log('handleChangeEditorMode', newEditorMode);
 
     // TODO
     // let widgetUrl;
@@ -162,6 +167,41 @@ const IkiDynamicSingleMarkdown = (props: PropTypes) => {
 
   function handleDeleteComponent() {
     deleteComponent(id, parentId);
+  }
+
+  function CustomComponentIframe() {
+    let iframe = '';
+
+    if (ikigaiOrigin) {
+      // if (markdownSource) {
+      //   // iframe = markdownSource;
+      //   const iframeWrapper = document.createElement('div');
+      //   iframeWrapper.innerHTML = markdownSource;
+      //   const iframeHtml = iframeWrapper.firstChild;
+      //   const iframeSrcUrl = new URL(iframeHtml.src);
+      //   iframeSrcUrl.searchParams.set(
+      //     'dashboard_mode',
+      //     editMode ? 'edit' : 'preview',
+      //   );
+      //   iframeSrcUrl.searchParams.set('scid', this.props.component.id);
+      //   iframeSrc = ikigaiOrigin + iframeSrcUrl.pathname + iframeSrcUrl.search;
+      // } else {
+      //   iframeSrc = `${ikigaiOrigin}/widget/custom?mode=edit&parent=superset&scid=${this.props.component.id}`;
+      // }
+      const iframeSource = `${ikigaiOrigin}/widget/custom?mode=edit&parent=superset&scid=${component.id}`;
+
+      iframe = `<iframe
+                  id="ikidynamicmarkdown-widget-${component.id}"
+                  name="dynamic-markdown-${timestamp}"
+                  src="${iframeSource}"
+                  title="Custom Component"
+                  style="height:100%;"
+                />`;
+    } else {
+      iframe = '';
+    }
+
+    return <SafeMarkdown source={iframe} />;
   }
 
   return (
@@ -192,6 +232,7 @@ const IkiDynamicSingleMarkdown = (props: PropTypes) => {
             id={component.id}
             data-test="dashboard-markdown-editor"
             className={cx(
+              'dashboard-component-ikirunpipeline',
               editorMode === editorModes.EDIT && 'dashboard-component--editing',
             )}
           >
@@ -216,7 +257,7 @@ const IkiDynamicSingleMarkdown = (props: PropTypes) => {
                 className="dashboard-component-inner"
                 data-test="dashboard-component-chart-holder"
               >
-                {component.meta.customMarkdown.name}
+                <CustomComponentIframe />
               </div>
             </ResizableContainer>
           </div>
