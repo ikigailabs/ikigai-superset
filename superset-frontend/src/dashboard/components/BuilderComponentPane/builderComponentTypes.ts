@@ -3,12 +3,18 @@ export type CustomMarkdown = {
   name: string;
   project_id: string;
   definition: any;
-  directory: {
-    directory_id: string;
-    type: 'custom_markdown';
-  };
+  directory: CustomMarkdownDirectory;
   created_at: string;
   modified_at: string;
 };
 
 export type CustomMarkdowns = CustomMarkdown[];
+
+export type CustomMarkdownDirectory = {
+  directory_id: string;
+  name: string;
+  type: 'CUSTOM_MARKDOWN';
+  project_id: string;
+  parent_id: string;
+  size: string;
+};
