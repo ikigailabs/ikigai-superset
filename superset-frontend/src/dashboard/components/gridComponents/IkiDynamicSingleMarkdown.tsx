@@ -179,18 +179,12 @@ const IkiDynamicSingleMarkdown = (props: PropTypes) => {
 
     const url = new URL('/widget/custom', ikigaiOrigin);
 
-    const params = {
-      project_id: projectId,
-      mode: 'preview',
-      dashboard_mode: 'preview',
-      parent: 'superset',
-      scid: component.id,
-      custom_element_id: customMarkdownId,
-    };
-
-    Object.entries(params).forEach(([key, value]) => {
-      url.searchParams.set(key, value);
-    });
+    url.searchParams.set('project_id', projectId);
+    url.searchParams.set('mode', 'preview');
+    url.searchParams.set('dashboard_mode', 'preview');
+    url.searchParams.set('parent', 'superset');
+    url.searchParams.set('scid', component.id);
+    url.searchParams.set('custom_element_id', customMarkdownId);
 
     const iframeString = `<iframe
       id="ikidynamicmarkdown-widget-${component.id}"
