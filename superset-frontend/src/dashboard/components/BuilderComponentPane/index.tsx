@@ -40,7 +40,7 @@ import NewIkiRunPipeline from '../gridComponents/new/components/NewIkiRunPipelin
 import NewDeepCast from '../gridComponents/new/components/NewDeepCast';
 import NewIkiEitlRow from '../gridComponents/new/components/NewIkiEitlRow';
 import NewIkiEitlColumn from '../gridComponents/new/components/NewIkiEitlColumn';
-import NewDynamicMarkdownList from '../gridComponents/new/components/NewDynamicMarkdownList';
+import NewDynamicSingleMarkdown from '../gridComponents/new/components/NewDynamicSingleMarkdown';
 import NewDyanmicMarkdown from '../gridComponents/new/components/NewDynamicMarkdown';
 // import NewIkiExplainability from '../gridComponents/new/NewIkiExplainability';
 import NewIkiModelMetrics from '../gridComponents/new/NewIkiModelMetrics';
@@ -165,7 +165,7 @@ const BuilderComponentPane: React.FC<BCPProps> = ({
                       </Tabs.TabPane>
                       <Tabs.TabPane key={2} tab={t('Components')}>
                         {customMarkdowns.map(customMarkdown => (
-                          <NewDynamicMarkdownList
+                          <NewDynamicSingleMarkdown
                             key={customMarkdown.custom_markdown_id}
                             customMarkdown={customMarkdown}
                           />

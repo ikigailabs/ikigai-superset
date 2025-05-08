@@ -18,7 +18,7 @@
  */
 import React from 'react';
 import { t } from '@superset-ui/core';
-import { IKI_DYNAMIC_MARKDOWN_LIST_TYPE } from '../../../../util/componentTypes';
+import { IKI_DYNAMIC_SINGLE_MARKDOWN_TYPE } from '../../../../util/componentTypes';
 import { NEW_DYNAMIC_COMPONENT } from '../../../../util/constants';
 import DraggableNewComponent from '../DraggableNewComponent';
 
@@ -26,9 +26,9 @@ export default function DraggableNewDivider({ customMarkdown }) {
   return (
     <DraggableNewComponent
       id={NEW_DYNAMIC_COMPONENT}
-      type={IKI_DYNAMIC_MARKDOWN_LIST_TYPE}
-      label={t(`Custom Component ${customMarkdown.custom_markdown_id}`)}
-      description="Individual custom component"
+      type={IKI_DYNAMIC_SINGLE_MARKDOWN_TYPE}
+      label={t(customMarkdown.name)}
+      description="Custom component"
       className="fa fa-mouse-pointer"
       meta={{ customMarkdown }}
     />
