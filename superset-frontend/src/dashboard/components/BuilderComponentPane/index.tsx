@@ -96,8 +96,8 @@ const BuilderComponentPane: React.FC<BCPProps> = ({
 
   useEffect(() => {
     const message = {
-      info: 'superset-to-platform/custom-markdowns',
-      payload: 'request-custom-markdowns',
+      type: 'requestCustomMarkdowns',
+      payload: null,
     };
 
     window.parent.postMessage(message, ikigaiOrigin);
@@ -109,9 +109,8 @@ const BuilderComponentPane: React.FC<BCPProps> = ({
 
       const message = event.data;
 
-      switch (message.info) {
-        case 'platform-to-superset/custom-markdowns':
-          console.log('Received message:', message.payload);
+      switch (message.type) {
+        case 'sendCustomMarkdowns':
           setCustomMarkdowns(message.payload);
           break;
 

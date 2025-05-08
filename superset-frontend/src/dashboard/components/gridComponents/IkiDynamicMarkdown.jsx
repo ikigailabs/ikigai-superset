@@ -86,8 +86,6 @@ class IkiDynamicMarkdown extends React.PureComponent {
     this.handleDeleteComponent = this.handleDeleteComponent.bind(this);
     this.handleResizeStart = this.handleResizeStart.bind(this);
     this.setEditor = this.setEditor.bind(this);
-
-    console.log('IkiDynamicMarkdown', this.props.dashboardLayout);
   }
 
   componentDidMount() {
