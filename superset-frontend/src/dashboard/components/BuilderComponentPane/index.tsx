@@ -17,7 +17,7 @@
  * under the License.
  */
 /* eslint-env browser */
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import Tabs from 'src/components/Tabs';
 import { StickyContainer, Sticky } from 'react-sticky';
@@ -48,6 +48,7 @@ import NewIkiDatasetDownload from '../gridComponents/new/components/NewIkiDatase
 import NewExternalDatasets from '../gridComponents/new/components/NewExternalDatasets';
 import NewForecast from '../gridComponents/new/components/NewForecast';
 import NewForecastModule from '../gridComponents/new/components/NewForecastModule';
+import type { CustomMarkdowns } from './builderComponentTypes';
 
 export interface BCPProps {
   isStandalone: boolean;
@@ -87,7 +88,7 @@ const BuilderComponentPane: React.FC<BCPProps> = ({
   isStandalone,
   topOffset = 0,
 }) => {
-  const [customMarkdowns, setCustomMarkdowns] = React.useState<any[]>([]);
+  const [customMarkdowns, setCustomMarkdowns] = useState<CustomMarkdowns>([]);
 
   const ikigaiOrigin = useSelector(
     (state: any) => state.dashboardState?.ikigaiOrigin,

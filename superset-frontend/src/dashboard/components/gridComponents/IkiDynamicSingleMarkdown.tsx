@@ -26,8 +26,17 @@ import {
 } from 'src/dashboard/util/constants';
 import { refreshChart } from 'src/components/Chart/chartAction';
 import { isEqual } from 'lodash';
+import { CustomMarkdown } from '../BuilderComponentPane/builderComponentTypes';
 
-const IkiDynamicSingleMarkdown = ({ component }) => {
+type PropTypes = {
+  component: {
+    meta: {
+      customMarkdown: CustomMarkdown;
+    };
+  };
+};
+
+const IkiDynamicSingleMarkdown = ({ component }: PropTypes) => {
   const { customMarkdown } = component.meta;
 
   return <div>{customMarkdown.name}</div>;

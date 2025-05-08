@@ -21,8 +21,13 @@ import { t } from '@superset-ui/core';
 import { IKI_DYNAMIC_SINGLE_MARKDOWN_TYPE } from '../../../../util/componentTypes';
 import { NEW_DYNAMIC_COMPONENT } from '../../../../util/constants';
 import DraggableNewComponent from '../DraggableNewComponent';
+import type { CustomMarkdown } from '../../../BuilderComponentPane/builderComponentTypes';
 
-export default function DraggableNewDivider({ customMarkdown }) {
+type PropTypes = {
+  customMarkdown: CustomMarkdown;
+};
+
+export default function DraggableNewDivider({ customMarkdown }: PropTypes) {
   return (
     <DraggableNewComponent
       id={NEW_DYNAMIC_COMPONENT}
