@@ -199,26 +199,26 @@ const IkiDynamicSingleMarkdown = (props: PropTypes) => {
 
   return (
     <TypedDragDroppable
+      index={index}
+      depth={depth}
+      editMode={editMode}
       component={component}
       parentComponent={parentComponent}
+      disableDragDrop={isFocused}
       orientation={
         parentComponent.type === ROW_TYPE
           ? orientations.COLUMN
           : orientations.ROW
       }
-      index={index}
-      depth={depth}
       onDrop={handleComponentDrop}
-      disableDragDrop={isFocused}
-      editMode={editMode}
     >
       {({ dropIndicatorProps, dragSourceRef }) => (
         <WithPopoverMenu
           onChangeFocus={handleChangeFocus}
           menuItems={[
             <MarkdownModeDropdown
-              id="id"
-              value="preview"
+              id={`${component.id}-mode`}
+              value={editorMode}
               onChange={handleChangeEditorMode}
             />,
             <DeleteComponentButton onDelete={handleDeleteComponent} />,
@@ -235,7 +235,7 @@ const IkiDynamicSingleMarkdown = (props: PropTypes) => {
           >
             <ResizableContainer
               id={component.id}
-              adjustableWidth
+              adjustableWidth={parentComponent.type === ROW_TYPE}
               adjustableHeight
               widthStep={columnWidth}
               widthMultiple={widthMultiple}
