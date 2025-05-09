@@ -4,7 +4,7 @@ import { SearchOutlined } from '@ant-design/icons';
 import { Input } from 'src/components/Input';
 import { styled } from '@superset-ui/core';
 
-import type { CustomMarkdowns } from 'src/dashboard/types';
+import type { CustomMarkdown, CustomMarkdowns } from 'src/dashboard/types';
 import Collapse from 'src/components/Collapse';
 import { Title } from 'src/dashboard/components/FiltersBadge/Styles';
 import dashboardComponents from 'src/visualizations/presets/dashboardComponents';
@@ -26,8 +26,8 @@ import NewDynamicComponent from '../gridComponents/new/NewDynamicComponent';
 
 type PropTypes = {
   customMarkdowns: CustomMarkdowns;
-  handleEditMarkdown: (id: string) => void;
-  handleDeleteMarkdown: (id: string) => void;
+  handleEditMarkdown: (customMarkdown: CustomMarkdown) => void;
+  handleDeleteMarkdown: (customMarkdown: CustomMarkdown) => void;
 };
 
 const Controls = styled.div`

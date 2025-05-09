@@ -36,7 +36,7 @@ const propTypes = {
   label: PropTypes.string.isRequired,
   className: PropTypes.string,
   demandApp: PropTypes.bool,
-  customComponent: PropTypes.bool,
+  isCustomComponent: PropTypes.bool,
   handleEditMarkdown: PropTypes.func,
   handleDeleteMarkdown: PropTypes.func,
 };
@@ -56,8 +56,9 @@ export default class DraggableNewComponent extends React.PureComponent {
       description,
       demandApp,
 
-      // for custom components (including meta.dropdown)
-      customComponent,
+      // for individual custom components
+      // (including meta.customMarkdown)
+      isCustomComponent,
       handleEditMarkdown,
       handleDeleteMarkdown,
     } = this.props;
@@ -90,18 +91,14 @@ export default class DraggableNewComponent extends React.PureComponent {
               <div className="new-component-description">{description}</div>
             </div>
 
-            {customComponent && meta.customMarkdown && (
+            {isCustomComponent && meta.customMarkdown && (
               <Dropdown
                 trigger={['click']}
                 overlay={
                   <Menu style={{ padding: 0 }}>
                     <Menu.Item
                       style={{ padding: '10px 14px' }}
-                      onClick={() =>
-                        handleEditMarkdown(
-                          meta.customMarkdown.custom_markdown_id,
-                        )
-                      }
+                      onClick={() => handleEditMarkdown(meta.customMarkdown)}
                     >
                       <EditOutlined />
                       <span>Edit</span>
@@ -109,11 +106,7 @@ export default class DraggableNewComponent extends React.PureComponent {
 
                     <Menu.Item
                       style={{ padding: '10px 14px' }}
-                      onClick={() =>
-                        handleDeleteMarkdown(
-                          meta.customMarkdown.custom_markdown_id,
-                        )
-                      }
+                      onClick={() => handleDeleteMarkdown(meta.customMarkdown)}
                     >
                       <DeleteOutlined />
                       <span>Delete</span>

@@ -17,39 +17,21 @@
  * under the License.
  */
 /* eslint-env browser */
-import React, { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
+import React from 'react';
 import Tabs from 'src/components/Tabs';
 import { StickyContainer, Sticky } from 'react-sticky';
 import { ParentSize } from '@vx/responsive';
 
 import { t, styled } from '@superset-ui/core';
-
-import { ContextService } from 'src/service/context-service/context-service';
 import SliceAdder from 'src/dashboard/containers/SliceAdder';
-import dashboardComponents from 'src/visualizations/presets/dashboardComponents';
-import type { CustomMarkdowns, RootState } from '../../types';
 import NewColumn from '../gridComponents/new/layout/NewColumn';
 import NewDivider from '../gridComponents/new/layout/NewDivider';
 import NewHeader from '../gridComponents/new/layout/NewHeader';
 import NewRow from '../gridComponents/new/layout/NewRow';
 import NewTabs from '../gridComponents/new/layout/NewTabs';
 import NewMarkdown from '../gridComponents/new/layout/NewMarkdown';
-import NewDynamicComponent from '../gridComponents/new/NewDynamicComponent';
-import NewIkiTable from '../gridComponents/new/components/NewIkiTable';
-import NewIkiProcessBuilder from '../gridComponents/new/components/NewIkiProcessBuilder';
-import NewIkiRunPipeline from '../gridComponents/new/components/NewIkiRunPipeline';
-import NewDeepCast from '../gridComponents/new/components/NewDeepCast';
-import NewIkiEitlRow from '../gridComponents/new/components/NewIkiEitlRow';
-import NewIkiEitlColumn from '../gridComponents/new/components/NewIkiEitlColumn';
-import NewDynamicSingleMarkdown from '../gridComponents/new/components/NewDynamicSingleMarkdown';
-import NewDynamicMarkdown from '../gridComponents/new/components/NewDynamicMarkdown';
-import NewIkiModelMetrics from '../gridComponents/new/NewIkiModelMetrics';
-import NewIkiDatasetDownload from '../gridComponents/new/components/NewIkiDatasetDownload';
-import NewExternalDatasets from '../gridComponents/new/components/NewExternalDatasets';
-import NewForecast from '../gridComponents/new/components/NewForecast';
-import NewForecastModule from '../gridComponents/new/components/NewForecastModule';
 import { CustomComponentsTab } from './CustomComponentsTab';
+import { usePlatformSupersetSync } from './usePlatformSupersetSync';
 
 export interface BCPProps {
   isStandalone: boolean;
@@ -85,52 +67,17 @@ const DashboardBuilderSidepane = styled.div<{
   }
 `;
 
-const { topLevelOrigin } = ContextService;
-
 const BuilderComponentPane: React.FC<BCPProps> = ({
   isStandalone,
   topOffset = 0,
 }) => {
-  const [customMarkdowns, setCustomMarkdowns] = useState<CustomMarkdowns>([]);
-
-  if (!topLevelOrigin) throw new Error('dash_url query param must be truthy!');
-
-  useEffect(() => {
-    const message = {
-      type: 'requestCustomMarkdowns',
-      payload: null,
-    };
-
-    window.parent.postMessage(message, topLevelOrigin);
-  }, []);
-
-  useEffect(() => {
-    function handleMessage(event: MessageEvent) {
-      if (event.origin !== topLevelOrigin) return;
-
-      const message = event.data;
-
-      switch (message.type) {
-        case 'sendCustomMarkdowns':
-          setCustomMarkdowns(message.payload);
-          break;
-
-        default:
-          break;
-      }
-    }
-
-    window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
-  }, []);
-
-  function handleEditMarkdown(id: string) {
-    console.log('handleEditMarkdown', id);
-  }
-
-  function handleDeleteMarkdown(id: string) {
-    console.log('handleDeleteMarkdown', id);
-  }
+  // hook unfortunately needs to be here so that it gets called immediately
+  // after the side bar mounts. Cant put it in CustomComponentsTab because
+  // it would be called after the tab mounts, which is too late
+  const {
+    state: { customMarkdowns },
+    actions: { handleEditMarkdown, handleDeleteMarkdown },
+  } = usePlatformSupersetSync();
 
   return (
     <DashboardBuilderSidepane
