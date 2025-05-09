@@ -23,6 +23,7 @@ import cx from 'classnames';
 import DragDroppable from '../../dnd/DragDroppable';
 import { NEW_COMPONENTS_SOURCE_ID } from '../../../util/constants';
 import { NEW_COMPONENT_SOURCE_TYPE } from '../../../util/componentTypes';
+import { EllipsisOutlined } from '@ant-design/icons';
 
 const propTypes = {
   id: PropTypes.string.isRequired,
@@ -30,16 +31,30 @@ const propTypes = {
   label: PropTypes.string.isRequired,
   className: PropTypes.string,
   demandApp: PropTypes.bool,
+  customComponent: PropTypes.bool,
 };
 
 const defaultProps = {
   className: null,
 };
 
+const menuItems = [
+  { label: 'Item 1', key: 'item-1' },
+  { label: 'Item 2', key: 'item-2' },
+];
+
 export default class DraggableNewComponent extends React.PureComponent {
   render() {
-    const { label, id, type, className, meta, description, demandApp } =
-      this.props;
+    const {
+      label,
+      id,
+      type,
+      className,
+      meta,
+      description,
+      demandApp,
+      customComponent,
+    } = this.props;
     return (
       <DragDroppable
         component={{ type, id, meta }}
@@ -67,6 +82,12 @@ export default class DraggableNewComponent extends React.PureComponent {
               </div>
               <div className="new-component-description">{description}</div>
             </div>
+
+            {customComponent && (
+              <button className="new-component-ellipsis">
+                <EllipsisOutlined rotate={90} style={{ fontSize: 16 }} />
+              </button>
+            )}
           </div>
         )}
       </DragDroppable>

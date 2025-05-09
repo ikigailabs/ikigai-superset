@@ -36,6 +36,7 @@ export default function DraggableNewDivider({ customMarkdown }: PropTypes) {
       description="Custom component"
       className="fa fa-mouse-pointer"
       meta={{ customMarkdown }}
+      customComponent
     />
   );
 }
