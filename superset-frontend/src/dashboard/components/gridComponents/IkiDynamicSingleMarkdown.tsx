@@ -2,7 +2,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
 import { SafeMarkdown } from '@superset-ui/core';
 import PropTypes from 'prop-types';
 import cx from 'classnames';
@@ -23,7 +22,6 @@ import {
   EditorMode,
   LayoutItem,
   LayoutItemWithCustomMarkdown,
-  RootState,
 } from '../../types';
 import { COLUMN_TYPE, ROW_TYPE } from '../../util/componentTypes';
 import DragDroppable from '../dnd/DragDroppable';
