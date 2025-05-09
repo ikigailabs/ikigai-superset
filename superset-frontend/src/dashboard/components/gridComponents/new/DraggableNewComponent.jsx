@@ -37,25 +37,13 @@ const propTypes = {
   className: PropTypes.string,
   demandApp: PropTypes.bool,
   customComponent: PropTypes.bool,
+  handleEditMarkdown: PropTypes.func,
+  handleDeleteMarkdown: PropTypes.func,
 };
 
 const defaultProps = {
   className: null,
 };
-
-const menu = (
-  <Menu style={{ padding: 0 }}>
-    <Menu.Item style={{ padding: '10px 14px' }}>
-      <EditOutlined />
-      <span>Edit</span>
-    </Menu.Item>
-
-    <Menu.Item style={{ padding: '10px 14px' }}>
-      <DeleteOutlined />
-      <span>Delete</span>
-    </Menu.Item>
-  </Menu>
-);
 
 export default class DraggableNewComponent extends React.PureComponent {
   render() {
@@ -67,8 +55,13 @@ export default class DraggableNewComponent extends React.PureComponent {
       meta,
       description,
       demandApp,
+
+      // for custom components (including meta.dropdown)
       customComponent,
+      handleEditMarkdown,
+      handleDeleteMarkdown,
     } = this.props;
+
     return (
       <DragDroppable
         component={{ type, id, meta }}
@@ -97,8 +90,37 @@ export default class DraggableNewComponent extends React.PureComponent {
               <div className="new-component-description">{description}</div>
             </div>
 
-            {customComponent && (
-              <Dropdown overlay={menu} trigger={['click']}>
+            {customComponent && meta.customMarkdown && (
+              <Dropdown
+                trigger={['click']}
+                overlay={
+                  <Menu style={{ padding: 0 }}>
+                    <Menu.Item
+                      style={{ padding: '10px 14px' }}
+                      onClick={() =>
+                        handleEditMarkdown(
+                          meta.customMarkdown.custom_markdown_id,
+                        )
+                      }
+                    >
+                      <EditOutlined />
+                      <span>Edit</span>
+                    </Menu.Item>
+
+                    <Menu.Item
+                      style={{ padding: '10px 14px' }}
+                      onClick={() =>
+                        handleDeleteMarkdown(
+                          meta.customMarkdown.custom_markdown_id,
+                        )
+                      }
+                    >
+                      <DeleteOutlined />
+                      <span>Delete</span>
+                    </Menu.Item>
+                  </Menu>
+                }
+              >
                 <button className="new-component-ellipsis">
                   <EllipsisOutlined rotate={90} style={{ fontSize: 16 }} />
                 </button>

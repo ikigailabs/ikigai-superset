@@ -124,6 +124,14 @@ const BuilderComponentPane: React.FC<BCPProps> = ({
     return () => window.removeEventListener('message', handleMessage);
   }, []);
 
+  function handleEditMarkdown(id: string) {
+    console.log('handleEditMarkdown', id);
+  }
+
+  function handleDeleteMarkdown(id: string) {
+    console.log('handleDeleteMarkdown', id);
+  }
+
   return (
     <DashboardBuilderSidepane
       topOffset={topOffset}
@@ -168,6 +176,8 @@ const BuilderComponentPane: React.FC<BCPProps> = ({
                       <Tabs.TabPane key={2} tab={t('Components')}>
                         <CustomComponentsTab
                           customMarkdowns={customMarkdowns}
+                          handleEditMarkdown={handleEditMarkdown}
+                          handleDeleteMarkdown={handleDeleteMarkdown}
                         />
                       </Tabs.TabPane>
 

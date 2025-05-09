@@ -26,6 +26,8 @@ import NewDynamicComponent from '../gridComponents/new/NewDynamicComponent';
 
 type PropTypes = {
   customMarkdowns: CustomMarkdowns;
+  handleEditMarkdown: (id: string) => void;
+  handleDeleteMarkdown: (id: string) => void;
 };
 
 const Controls = styled.div`
@@ -34,7 +36,11 @@ const Controls = styled.div`
   padding-bottom: ${({ theme }) => theme.gridUnit * 4}px;
 `;
 
-export function CustomComponentsTab({ customMarkdowns }: PropTypes) {
+export function CustomComponentsTab({
+  customMarkdowns,
+  handleEditMarkdown,
+  handleDeleteMarkdown,
+}: PropTypes) {
   const [searchTerm, setSearchTerm] = useState('');
 
   const handleSearch = (value: string) => {
@@ -77,6 +83,8 @@ export function CustomComponentsTab({ customMarkdowns }: PropTypes) {
             <NewDynamicSingleMarkdown
               key={customMarkdown.custom_markdown_id}
               customMarkdown={customMarkdown}
+              handleEditMarkdown={handleEditMarkdown}
+              handleDeleteMarkdown={handleDeleteMarkdown}
             />
           ))}
 
