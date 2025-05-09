@@ -163,9 +163,9 @@ const IkiDynamicSingleMarkdown = ({
 
     const iframes = document.querySelectorAll('iframe');
 
-    const crossWindowMessage = {
-      type: message.type,
-      correlationId: message.correlationId,
+    const crossWindowMessage: IpcMessage = {
+      type: message.type ?? '',
+      correlationId: message.correlationId ?? '',
       payload: dashboardLayout.present,
     };
 
