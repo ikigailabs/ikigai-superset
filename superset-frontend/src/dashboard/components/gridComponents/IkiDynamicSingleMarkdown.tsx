@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
+/* eslint-disable react-hooks/exhaustive-deps */
+
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { SafeMarkdown } from '@superset-ui/core';
@@ -15,9 +18,10 @@ import {
   GRID_MIN_ROW_UNITS,
 } from '../../util/constants';
 
-import { editorModes, orientations } from '../../constants';
+import { DYNAMIC_MARKDOWN, editorModes, orientations } from '../../constants';
 import {
   EditorMode,
+  IpcMessage,
   LayoutItem,
   LayoutItemWithCustomMarkdown,
   RootState,
@@ -37,7 +41,6 @@ type PropTypes = {
   index: number;
   depth: number;
   editMode: boolean;
-  ikigaiOrigin?: string;
 
   // from redux
   logEvent: (eventName: string, payload?: Record<string, any>) => void;
@@ -58,39 +61,39 @@ type PropTypes = {
   updateComponents: (nextComponents: Record<string, any>) => void;
 };
 
-const pathParts = window.location.pathname.split('/');
-const dashboardIndex = pathParts.indexOf('dashboard');
+const paths = window.location.pathname.split('/');
+const dashboardIndex = paths.indexOf('dashboard');
 const supersetDashboardId =
-  dashboardIndex !== -1 ? parseInt(pathParts[dashboardIndex + 1], 10) : null;
+  dashboardIndex !== -1 ? parseInt(paths[dashboardIndex + 1], 10) : null;
 
-const IkiDynamicSingleMarkdown = (props: PropTypes) => {
+const IkiDynamicSingleMarkdown = ({
+  id,
+  parentId,
+  index,
+  component,
+  parentComponent,
+  depth,
+  editMode,
+  columnWidth,
+  availableColumnCount,
+  handleComponentDrop,
+  deleteComponent,
+  onResize,
+  onResizeStart,
+  onResizeStop,
+}: PropTypes) => {
   const dispatch = useDispatch();
 
   const dashboardLayout = useSelector(
     (state: RootState) => state.dashboardLayout,
   );
 
+  const ikigaiOrigin = useSelector(
+    (state: RootState) => state.dashboardState.ikigaiOrigin,
+  );
+
   const [isFocused, setIsFocused] = useState(false);
   const [editorMode, setEditorMode] = useState<EditorMode>(editorModes.PREVIEW);
-
-  const {
-    id,
-    parentId,
-    index,
-    component,
-    parentComponent,
-    depth,
-    editMode,
-    columnWidth,
-    availableColumnCount,
-    ikigaiOrigin,
-
-    handleComponentDrop,
-    deleteComponent,
-    onResize,
-    onResizeStart,
-    onResizeStop,
-  } = props;
 
   const {
     meta: {
@@ -109,30 +112,49 @@ const IkiDynamicSingleMarkdown = (props: PropTypes) => {
   const orientation =
     parentComponent.type === ROW_TYPE ? orientations.COLUMN : orientations.ROW;
 
+  useEffect(() => {
+    function handleMessage(event: MessageEvent) {
+      if (event.origin !== ikigaiOrigin) return;
+
+      const message = event.data as Partial<IpcMessage>;
+
+      switch (message.type) {
+        case 'notifyUpdateCharts':
+          refreshCharts(message.payload);
+          break;
+
+        case 'getDashboardLayout':
+          sendDashboardLayoutToMarkdown(message);
+          break;
+
+        default:
+          break;
+      }
+    }
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, []);
+
   function handleChangeEditorMode(newEditorMode: EditorMode) {
     setEditorMode(newEditorMode);
   }
 
-  function sendDashboardLayoutToMarkdown() {
-    if (!ikigaiOrigin || !dashboardLayout) return;
+  function sendDashboardLayoutToMarkdown(message: Partial<IpcMessage>) {
+    if (!dashboardLayout) return;
 
     const iframes = document.querySelectorAll('iframe');
 
     const crossWindowMessage = {
-      info: 'widget-to-parent/send-dashboard-layout',
-      dataType: 'object',
-      data: {
-        dashboardLayout: dashboardLayout.present,
-      },
+      type: message.type,
+      correlationId: message.correlationId,
+      payload: dashboardLayout.present,
     };
 
-    const crossBrowserInfoString = JSON.stringify(crossWindowMessage);
-
     iframes.forEach(iframe => {
-      if (!iframe.name.includes('dynamic-markdown')) return;
+      if (!iframe.name.includes(DYNAMIC_MARKDOWN)) return;
       if (!iframe.contentWindow) return;
-
-      iframe.contentWindow.postMessage(crossBrowserInfoString, ikigaiOrigin);
+      iframe.contentWindow.postMessage(crossWindowMessage, ikigaiOrigin);
     });
   }
 
@@ -146,8 +168,6 @@ const IkiDynamicSingleMarkdown = (props: PropTypes) => {
   }
 
   function CustomComponentIframe() {
-    if (!ikigaiOrigin) return null;
-
     const url = new URL('/widget/custom', ikigaiOrigin);
 
     url.searchParams.set('project_id', projectId);
@@ -159,7 +179,7 @@ const IkiDynamicSingleMarkdown = (props: PropTypes) => {
 
     const iframeString = `<iframe
       id="ikidynamicmarkdown-widget-${component.id}"
-      name="dynamic-markdown-${timestamp}"
+      name="${DYNAMIC_MARKDOWN}-${timestamp}"
       src="${url.toString()}"
       title="Custom Component"
       style="height:100%;"
@@ -168,58 +188,24 @@ const IkiDynamicSingleMarkdown = (props: PropTypes) => {
     return <SafeMarkdown source={iframeString} />;
   }
 
-  function handleRefreshChart(chartId: any, dashboardId: any, isCached: any) {
-    logEvent(LOG_ACTIONS_FORCE_REFRESH_CHART, {
-      slice_id: chartId,
-      is_cached: isCached,
-    });
-
-    dispatch(refreshChart(chartId, true, dashboardId));
-  }
-
-  function refreshCharts(selectedCharts: any) {
-    const chartIds = !Array.isArray(selectedCharts)
-      ? selectedCharts.split()
-      : selectedCharts;
-
-    if (!chartIds) return;
-
+  function refreshCharts(selectedChartIds: string[]) {
     const layoutElements = dashboardLayout.present;
 
-    chartIds.forEach((chartId: string) => {
+    selectedChartIds.forEach(chartId => {
       Object.keys(layoutElements).forEach(ele => {
         const supChartId = layoutElements[ele].meta?.chartId;
 
-        if (supChartId && String(supChartId) === String(chartId)) {
-          handleRefreshChart(supChartId, supersetDashboardId, false);
+        if (supChartId && String(supChartId) === chartId) {
+          logEvent(LOG_ACTIONS_FORCE_REFRESH_CHART, {
+            slice_id: chartId,
+            is_cached: false,
+          });
+
+          dispatch(refreshChart(chartId, true, supersetDashboardId));
         }
       });
     });
   }
-
-  useEffect(() => {
-    sendDashboardLayoutToMarkdown();
-  }, []);
-
-  useEffect(() => {
-    function handleMessage(event: MessageEvent) {
-      if (event.origin !== ikigaiOrigin) return;
-
-      const message = event.data;
-
-      switch (message.type) {
-        case 'notifyUpdateCharts':
-          refreshCharts(message.payload);
-          break;
-
-        default:
-          break;
-      }
-    }
-
-    window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
-  }, [ikigaiOrigin]);
 
   return (
     <DragDroppable

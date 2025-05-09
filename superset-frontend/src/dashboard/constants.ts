@@ -50,3 +50,5 @@ export const orientations = {
   COLUMN: 'column',
   ROW: 'row',
 } as const;
+
+export const DYNAMIC_MARKDOWN = 'dynamic-markdown';

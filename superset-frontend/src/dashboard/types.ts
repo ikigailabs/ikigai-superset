@@ -192,3 +192,9 @@ export type CustomMarkdownDirectory = {
 export type Orientation = typeof orientations[keyof typeof orientations];
 
 export type EditorMode = typeof editorModes[keyof typeof editorModes];
+
+export type IpcMessage = {
+  type: string;
+  correlationId: string;
+  payload?: any;
+};
