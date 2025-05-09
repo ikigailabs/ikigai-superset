@@ -120,11 +120,11 @@ const IkiDynamicSingleMarkdown = ({
 
       switch (message.type) {
         case 'notifyUpdateCharts':
-          refreshCharts(message.payload);
+          handleRefreshCharts(message.payload);
           break;
 
         case 'getDashboardLayout':
-          sendDashboardLayoutToMarkdown(message);
+          handleSendDashboardLayout(message);
           break;
 
         default:
@@ -136,11 +136,29 @@ const IkiDynamicSingleMarkdown = ({
     return () => window.removeEventListener('message', handleMessage);
   }, []);
 
-  function handleChangeEditorMode(newEditorMode: EditorMode) {
-    setEditorMode(newEditorMode);
+  function handleRefreshCharts(selectedChartIds: string[]) {
+    const layoutElements = dashboardLayout.present;
+
+    // for testing chart refresh since we can't import charts from platform
+    // selectedChartIds = [...selectedChartIds, '1179'];
+
+    selectedChartIds.forEach(chartId => {
+      Object.keys(layoutElements).forEach(ele => {
+        const supChartId = layoutElements[ele].meta?.chartId;
+
+        if (supChartId && String(supChartId) === chartId) {
+          logEvent(LOG_ACTIONS_FORCE_REFRESH_CHART, {
+            slice_id: chartId,
+            is_cached: false,
+          });
+
+          dispatch(refreshChart(chartId, true, supersetDashboardId));
+        }
+      });
+    });
   }
 
-  function sendDashboardLayoutToMarkdown(message: Partial<IpcMessage>) {
+  function handleSendDashboardLayout(message: Partial<IpcMessage>) {
     if (!dashboardLayout) return;
 
     const iframes = document.querySelectorAll('iframe');
@@ -156,6 +174,10 @@ const IkiDynamicSingleMarkdown = ({
       if (!iframe.contentWindow) return;
       iframe.contentWindow.postMessage(crossWindowMessage, ikigaiOrigin);
     });
+  }
+
+  function handleChangeEditorMode(newEditorMode: EditorMode) {
+    setEditorMode(newEditorMode);
   }
 
   function handleChangeFocus(isFocused: boolean) {
@@ -186,25 +208,6 @@ const IkiDynamicSingleMarkdown = ({
     />`;
 
     return <SafeMarkdown source={iframeString} />;
-  }
-
-  function refreshCharts(selectedChartIds: string[]) {
-    const layoutElements = dashboardLayout.present;
-
-    selectedChartIds.forEach(chartId => {
-      Object.keys(layoutElements).forEach(ele => {
-        const supChartId = layoutElements[ele].meta?.chartId;
-
-        if (supChartId && String(supChartId) === chartId) {
-          logEvent(LOG_ACTIONS_FORCE_REFRESH_CHART, {
-            slice_id: chartId,
-            is_cached: false,
-          });
-
-          dispatch(refreshChart(chartId, true, supersetDashboardId));
-        }
-      });
-    });
   }
 
   return (
