@@ -42,7 +42,7 @@ import NewDeepCast from '../gridComponents/new/components/NewDeepCast';
 import NewIkiEitlRow from '../gridComponents/new/components/NewIkiEitlRow';
 import NewIkiEitlColumn from '../gridComponents/new/components/NewIkiEitlColumn';
 import NewDynamicSingleMarkdown from '../gridComponents/new/components/NewDynamicSingleMarkdown';
-import NewDyanmicMarkdown from '../gridComponents/new/components/NewDynamicMarkdown';
+import NewDynamicMarkdown from '../gridComponents/new/components/NewDynamicMarkdown';
 // import NewIkiExplainability from '../gridComponents/new/NewIkiExplainability';
 import NewIkiModelMetrics from '../gridComponents/new/NewIkiModelMetrics';
 import NewIkiDatasetDownload from '../gridComponents/new/components/NewIkiDatasetDownload';
@@ -171,7 +171,7 @@ const BuilderComponentPane: React.FC<BCPProps> = ({
                           />
                         ))}
 
-                        <NewDyanmicMarkdown />
+                        <NewDynamicMarkdown />
 
                         {/* <NewDyanmicMarkdown />
                         <NewIkiTable />
