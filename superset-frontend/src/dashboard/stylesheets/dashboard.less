@@ -2295,6 +2295,18 @@ a[role='menuitem'] .dot {
   bottom: 5px;
 }
 
+/* Collapse */
+
+.legacy-components > .ant-collapse-content > .ant-collapse-content-box {
+  padding: 0px;
+}
+
+.ant-collapse > .ant-collapse-item > .ant-collapse-header {
+  padding-left: 59px;
+  font-weight: 900;
+  color: #626262;
+}
+
 /* Buttons */
 
 .button-container .ant-btn {
@@ -2353,25 +2365,6 @@ a[role='menuitem'] .dot {
 }
 
 /* Inputs */
-
-input {
-  border: 1px solid var(--borderColor) !important;
-  border-radius: 4px !important;
-  box-shadow: 0 0 0 transparent !important;
-  transition: all 0.2s ease;
-}
-
-input:hover {
-  border: 1px solid var(--borderColorHoverInput) !important;
-  box-shadow: 0 0 0 transparent !important;
-  transition: all 0.2s ease;
-}
-
-input:focus {
-  border: 1px solid var(--primaryColor) !important;
-  box-shadow: 0 0 0 transparent !important;
-  transition: all 0.2s ease;
-}
 
 .editable-title input[type='text'] {
   padding: 6px 8px !important;
@@ -2647,6 +2640,7 @@ a:hover {
   border: none !important;
   width: 40px;
   height: 40px;
+  aspect-ratio: 1/1;
 }
 
 .ant-tabs-tabpane .new-component .new-component-placeholder::before {

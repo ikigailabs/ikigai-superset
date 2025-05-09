@@ -79,8 +79,7 @@ const DEFAULT_CELL_HEIGHT = 112;
 const Controls = styled.div`
   display: flex;
   flex-direction: row;
-  padding: ${({ theme }) => theme.gridUnit * 3}px;
-  padding-top: ${({ theme }) => theme.gridUnit * 4}px;
+  padding-bottom: ${({ theme }) => theme.gridUnit * 4}px;
 `;
 
 const StyledSelect = styled(Select)`

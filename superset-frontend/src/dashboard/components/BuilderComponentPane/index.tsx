@@ -49,6 +49,7 @@ import NewIkiDatasetDownload from '../gridComponents/new/components/NewIkiDatase
 import NewExternalDatasets from '../gridComponents/new/components/NewExternalDatasets';
 import NewForecast from '../gridComponents/new/components/NewForecast';
 import NewForecastModule from '../gridComponents/new/components/NewForecastModule';
+import { CustomComponentsTab } from './CustomComponentsTab';
 
 export interface BCPProps {
   isStandalone: boolean;
@@ -100,7 +101,7 @@ const BuilderComponentPane: React.FC<BCPProps> = ({
       payload: null,
     };
 
-    window.parent.postMessage(message, topLevelOrigin!);
+    window.parent.postMessage(message, topLevelOrigin);
   }, []);
 
   useEffect(() => {
@@ -163,39 +164,13 @@ const BuilderComponentPane: React.FC<BCPProps> = ({
                         <NewMarkdown />
                         <NewDivider />
                       </Tabs.TabPane>
+
                       <Tabs.TabPane key={2} tab={t('Components')}>
-                        {customMarkdowns.map(customMarkdown => (
-                          <NewDynamicSingleMarkdown
-                            key={customMarkdown.custom_markdown_id}
-                            customMarkdown={customMarkdown}
-                          />
-                        ))}
-
-                        <NewDynamicMarkdown />
-
-                        {/* <NewDyanmicMarkdown />
-                        <NewIkiTable />
-                        <NewIkiProcessBuilder />
-                        <NewIkiRunPipeline />
-                        <NewDeepCast />
-                        <NewIkiEitlRow />
-                        <NewIkiEitlColumn />
-                        <NewForecastModule />
-                        <NewIkiDatasetDownload />
-                        <NewIkiModelMetrics />
-                        <NewExternalDatasets />
-                        <NewForecast /> */}
-
-                        {/* <NewIkiExplainability /> */}
-                        {dashboardComponents
-                          .getAll()
-                          .map(({ key: componentKey, metadata }) => (
-                            <NewDynamicComponent
-                              metadata={metadata}
-                              componentKey={componentKey}
-                            />
-                          ))}
+                        <CustomComponentsTab
+                          customMarkdowns={customMarkdowns}
+                        />
                       </Tabs.TabPane>
+
                       <Tabs.TabPane
                         key={3}
                         tab={t('Charts')}
