@@ -18,10 +18,10 @@
  */
 import React from 'react';
 import { t } from '@superset-ui/core';
+import type { CustomMarkdown } from '../../../../types';
 import { IKI_DYNAMIC_SINGLE_MARKDOWN_TYPE } from '../../../../util/componentTypes';
 import { NEW_DYNAMIC_COMPONENT } from '../../../../util/constants';
 import DraggableNewComponent from '../DraggableNewComponent';
-import type { CustomMarkdown } from '../../../BuilderComponentPane/builderComponentTypes';
 
 type PropTypes = {
   customMarkdown: CustomMarkdown;

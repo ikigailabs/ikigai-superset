@@ -27,7 +27,7 @@ import { t, styled } from '@superset-ui/core';
 
 import SliceAdder from 'src/dashboard/containers/SliceAdder';
 import dashboardComponents from 'src/visualizations/presets/dashboardComponents';
-import type { CustomMarkdowns } from '../../types';
+import type { CustomMarkdowns, RootState } from '../../types';
 import NewColumn from '../gridComponents/new/layout/NewColumn';
 import NewDivider from '../gridComponents/new/layout/NewDivider';
 import NewHeader from '../gridComponents/new/layout/NewHeader';
@@ -91,7 +91,7 @@ const BuilderComponentPane: React.FC<BCPProps> = ({
   const [customMarkdowns, setCustomMarkdowns] = useState<CustomMarkdowns>([]);
 
   const ikigaiOrigin = useSelector(
-    (state: any) => state.dashboardState?.ikigaiOrigin,
+    (state: RootState) => state.dashboardState.ikigaiOrigin,
   );
 
   useEffect(() => {
