@@ -25,6 +25,7 @@ import { ParentSize } from '@vx/responsive';
 
 import { t, styled } from '@superset-ui/core';
 
+import { ContextService } from 'src/service/context-service/context-service';
 import SliceAdder from 'src/dashboard/containers/SliceAdder';
 import dashboardComponents from 'src/visualizations/presets/dashboardComponents';
 import type { CustomMarkdowns, RootState } from '../../types';
@@ -43,7 +44,6 @@ import NewIkiEitlRow from '../gridComponents/new/components/NewIkiEitlRow';
 import NewIkiEitlColumn from '../gridComponents/new/components/NewIkiEitlColumn';
 import NewDynamicSingleMarkdown from '../gridComponents/new/components/NewDynamicSingleMarkdown';
 import NewDynamicMarkdown from '../gridComponents/new/components/NewDynamicMarkdown';
-// import NewIkiExplainability from '../gridComponents/new/NewIkiExplainability';
 import NewIkiModelMetrics from '../gridComponents/new/NewIkiModelMetrics';
 import NewIkiDatasetDownload from '../gridComponents/new/components/NewIkiDatasetDownload';
 import NewExternalDatasets from '../gridComponents/new/components/NewExternalDatasets';
@@ -84,15 +84,15 @@ const DashboardBuilderSidepane = styled.div<{
   }
 `;
 
+const { topLevelOrigin } = ContextService;
+
 const BuilderComponentPane: React.FC<BCPProps> = ({
   isStandalone,
   topOffset = 0,
 }) => {
   const [customMarkdowns, setCustomMarkdowns] = useState<CustomMarkdowns>([]);
 
-  const ikigaiOrigin = useSelector(
-    (state: RootState) => state.dashboardState.ikigaiOrigin,
-  );
+  if (!topLevelOrigin) throw new Error('dash_url query param must be truthy!');
 
   useEffect(() => {
     const message = {
@@ -100,12 +100,12 @@ const BuilderComponentPane: React.FC<BCPProps> = ({
       payload: null,
     };
 
-    window.parent.postMessage(message, ikigaiOrigin);
-  }, [ikigaiOrigin]);
+    window.parent.postMessage(message, topLevelOrigin!);
+  }, []);
 
   useEffect(() => {
     function handleMessage(event: MessageEvent) {
-      if (event.origin !== ikigaiOrigin) return;
+      if (event.origin !== topLevelOrigin) return;
 
       const message = event.data;
 
@@ -121,7 +121,7 @@ const BuilderComponentPane: React.FC<BCPProps> = ({
 
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
-  }, [ikigaiOrigin]);
+  }, []);
 
   return (
     <DashboardBuilderSidepane
