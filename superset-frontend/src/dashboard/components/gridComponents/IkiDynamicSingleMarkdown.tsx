@@ -58,7 +58,7 @@ type PropTypes = {
   updateComponents: (nextComponents: Record<string, any>) => void;
 };
 
-const { projectId } = ContextService;
+const { projectId, topLevelOrigin } = ContextService;
 
 const IkiDynamicSingleMarkdown = ({
   id,
@@ -76,10 +76,6 @@ const IkiDynamicSingleMarkdown = ({
   onResizeStart,
   onResizeStop,
 }: PropTypes) => {
-  const ikigaiOrigin = useSelector(
-    (state: RootState) => state.dashboardState.ikigaiOrigin,
-  );
-
   const [isFocused, setIsFocused] = useState(false);
   const [editorMode, setEditorMode] = useState<EditorMode>(editorModes.PREVIEW);
 
@@ -115,7 +111,7 @@ const IkiDynamicSingleMarkdown = ({
   }
 
   function CustomComponentIframe() {
-    const url = new URL('/widget/custom', ikigaiOrigin);
+    const url = new URL('/widget/custom', topLevelOrigin);
 
     if (!projectId) throw new Error('project_id query param must be truthy!');
 
