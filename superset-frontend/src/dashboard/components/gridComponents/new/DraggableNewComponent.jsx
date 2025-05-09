@@ -23,7 +23,12 @@ import cx from 'classnames';
 import DragDroppable from '../../dnd/DragDroppable';
 import { NEW_COMPONENTS_SOURCE_ID } from '../../../util/constants';
 import { NEW_COMPONENT_SOURCE_TYPE } from '../../../util/componentTypes';
-import { EllipsisOutlined } from '@ant-design/icons';
+import {
+  DeleteOutlined,
+  EllipsisOutlined,
+  EditOutlined,
+} from '@ant-design/icons';
+import { Dropdown, Menu } from 'antd';
 
 const propTypes = {
   id: PropTypes.string.isRequired,
@@ -38,10 +43,19 @@ const defaultProps = {
   className: null,
 };
 
-const menuItems = [
-  { label: 'Item 1', key: 'item-1' },
-  { label: 'Item 2', key: 'item-2' },
-];
+const menu = (
+  <Menu style={{ padding: 0 }}>
+    <Menu.Item style={{ padding: '10px 14px' }}>
+      <EditOutlined />
+      <span>Edit</span>
+    </Menu.Item>
+
+    <Menu.Item style={{ padding: '10px 14px' }}>
+      <DeleteOutlined />
+      <span>Delete</span>
+    </Menu.Item>
+  </Menu>
+);
 
 export default class DraggableNewComponent extends React.PureComponent {
   render() {
@@ -84,9 +98,11 @@ export default class DraggableNewComponent extends React.PureComponent {
             </div>
 
             {customComponent && (
-              <button className="new-component-ellipsis">
-                <EllipsisOutlined rotate={90} style={{ fontSize: 16 }} />
-              </button>
+              <Dropdown overlay={menu} trigger={['click']}>
+                <button className="new-component-ellipsis">
+                  <EllipsisOutlined rotate={90} style={{ fontSize: 16 }} />
+                </button>
+              </Dropdown>
             )}
           </div>
         )}
