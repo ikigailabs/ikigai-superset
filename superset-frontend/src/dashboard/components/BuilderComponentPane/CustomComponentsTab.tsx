@@ -1,13 +1,16 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+
 import { Space } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import { Input } from 'src/components/Input';
 import { styled } from '@superset-ui/core';
 
-import type { CustomMarkdown, CustomMarkdowns } from 'src/dashboard/types';
+import { RootState } from 'src/dashboard/types';
 import Collapse from 'src/components/Collapse';
 import { Title } from 'src/dashboard/components/FiltersBadge/Styles';
 import dashboardComponents from 'src/visualizations/presets/dashboardComponents';
+import { ContextService } from 'src/service/context-service/context-service';
 
 import NewDynamicMarkdown from '../gridComponents/new/components/NewDynamicMarkdown';
 import NewDynamicSingleMarkdown from '../gridComponents/new/components/NewDynamicSingleMarkdown';
@@ -24,32 +27,24 @@ import NewExternalDatasets from '../gridComponents/new/components/NewExternalDat
 import NewForecast from '../gridComponents/new/components/NewForecast';
 import NewDynamicComponent from '../gridComponents/new/NewDynamicComponent';
 
-type PropTypes = {
-  customMarkdowns: CustomMarkdowns;
-  handleEditMarkdown: (customMarkdown: CustomMarkdown) => void;
-  handleDeleteMarkdown: (customMarkdown: CustomMarkdown) => void;
-};
-
 const Controls = styled.div`
   display: flex;
   flex-direction: row;
   padding-bottom: ${({ theme }) => theme.gridUnit * 4}px;
 `;
 
-export function CustomComponentsTab({
-  customMarkdowns,
-  handleEditMarkdown,
-  handleDeleteMarkdown,
-}: PropTypes) {
+export function CustomComponentsTab() {
+  const customMarkdowns = useSelector(
+    (state: RootState) => state.dashboardState.customMarkdowns,
+  );
+
   const [searchTerm, setSearchTerm] = useState('');
 
-  const handleSearch = (value: string) => {
-    setSearchTerm(value);
-  };
+  useEffect(() => ContextService.requestCustomMarkdowns(), []);
 
-  const filteredCustomMarkdowns = customMarkdowns.filter(md =>
-    md.name.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
+  function handleSearch(value: string) {
+    setSearchTerm(value);
+  }
 
   return (
     <div
@@ -79,14 +74,20 @@ export function CustomComponentsTab({
         }}
       >
         <div>
-          {filteredCustomMarkdowns.map(customMarkdown => (
-            <NewDynamicSingleMarkdown
-              key={customMarkdown.custom_markdown_id}
-              customMarkdown={customMarkdown}
-              handleEditMarkdown={handleEditMarkdown}
-              handleDeleteMarkdown={handleDeleteMarkdown}
-            />
-          ))}
+          {!customMarkdowns ? (
+            <span>Loading</span>
+          ) : (
+            customMarkdowns
+              .filter(md =>
+                md.name.toLowerCase().includes(searchTerm.toLowerCase()),
+              )
+              .map(customMarkdown => (
+                <NewDynamicSingleMarkdown
+                  key={customMarkdown.custom_markdown_id}
+                  customMarkdown={customMarkdown}
+                />
+              ))
+          )}
 
           <Collapse bordered={false} ghost>
             <Collapse.Panel

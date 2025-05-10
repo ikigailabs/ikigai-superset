@@ -29,6 +29,7 @@ import {
   EditOutlined,
 } from '@ant-design/icons';
 import { Dropdown, Menu } from 'antd';
+import { ContextService } from 'src/service/context-service/context-service';
 
 const propTypes = {
   id: PropTypes.string.isRequired,
@@ -37,8 +38,6 @@ const propTypes = {
   className: PropTypes.string,
   demandApp: PropTypes.bool,
   isCustomComponent: PropTypes.bool,
-  handleEditMarkdown: PropTypes.func,
-  handleDeleteMarkdown: PropTypes.func,
 };
 
 const defaultProps = {
@@ -59,8 +58,6 @@ export default class DraggableNewComponent extends React.PureComponent {
       // for individual custom components
       // (including meta.customMarkdown)
       isCustomComponent,
-      handleEditMarkdown,
-      handleDeleteMarkdown,
     } = this.props;
 
     return (
@@ -98,7 +95,9 @@ export default class DraggableNewComponent extends React.PureComponent {
                   <Menu style={{ padding: 0 }}>
                     <Menu.Item
                       style={{ padding: '10px 14px' }}
-                      onClick={() => handleEditMarkdown(meta.customMarkdown)}
+                      onClick={() =>
+                        ContextService.editCustomMarkdown(meta.customMarkdown)
+                      }
                     >
                       <EditOutlined />
                       <span>Edit</span>
@@ -106,7 +105,9 @@ export default class DraggableNewComponent extends React.PureComponent {
 
                     <Menu.Item
                       style={{ padding: '10px 14px' }}
-                      onClick={() => handleDeleteMarkdown(meta.customMarkdown)}
+                      onClick={() =>
+                        ContextService.deleteCustomMarkdown(meta.customMarkdown)
+                      }
                     >
                       <DeleteOutlined />
                       <span>Delete</span>

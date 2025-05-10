@@ -68,6 +68,7 @@ export type DashboardState = {
   hasUnsavedChanges: boolean;
   ikigaiOrigin: string;
   supersetUrl: string;
+  customMarkdowns: CustomMarkdowns;
 };
 export type DashboardInfo = {
   id: number;
