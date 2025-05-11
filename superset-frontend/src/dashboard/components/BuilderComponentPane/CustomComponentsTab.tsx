@@ -59,7 +59,8 @@ export function CustomComponentsTab() {
           placeholder="Search..."
           suffix={<SearchOutlined />}
           value={searchTerm}
-          onChange={e => handleSearch(e.target.value)}
+          onChange={e => setSearchTerm(e.target.value)}
+          disabled={!customMarkdowns}
         />
       </Controls>
 
