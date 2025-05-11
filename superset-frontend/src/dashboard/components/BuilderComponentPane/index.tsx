@@ -24,13 +24,8 @@ import { t, styled } from '@superset-ui/core';
 
 import Tabs from 'src/components/Tabs';
 import SliceAdder from 'src/dashboard/containers/SliceAdder';
-import NewColumn from '../gridComponents/new/layout/NewColumn';
-import NewDivider from '../gridComponents/new/layout/NewDivider';
-import NewHeader from '../gridComponents/new/layout/NewHeader';
-import NewRow from '../gridComponents/new/layout/NewRow';
-import NewTabs from '../gridComponents/new/layout/NewTabs';
-import NewMarkdown from '../gridComponents/new/layout/NewMarkdown';
 import { ComponentsTab } from './ComponentsTab/ComponentsTab';
+import { LayoutTab } from './LayoutTab/LayoutTab';
 
 export interface BCPProps {
   isStandalone: boolean;
@@ -98,28 +93,15 @@ const BuilderComponentPane: React.FC<BCPProps> = ({
                     className="tabs-components"
                     data-test="dashboard-builder-component-pane-tabs-navigation"
                   >
-                    <Tabs.TabPane
-                      key={1}
-                      tab={t('Layout')}
-                      className="sidepane-padding"
-                    >
-                      <NewTabs />
-                      <NewRow />
-                      <NewColumn />
-                      <NewHeader />
-                      <NewMarkdown />
-                      <NewDivider />
+                    <Tabs.TabPane key={1} tab={t('Layout')}>
+                      <LayoutTab />
                     </Tabs.TabPane>
 
                     <Tabs.TabPane key={2} tab={t('Components')}>
                       <ComponentsTab />
                     </Tabs.TabPane>
 
-                    <Tabs.TabPane
-                      key={3}
-                      tab={t('Charts')}
-                      className="tab-charts"
-                    >
+                    <Tabs.TabPane key={3} tab={t('Charts')}>
                       <SliceAdder
                         height={
                           height + (isSticky ? SUPERSET_HEADER_HEIGHT : 0)
