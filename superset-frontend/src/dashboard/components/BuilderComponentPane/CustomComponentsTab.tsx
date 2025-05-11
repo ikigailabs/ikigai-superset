@@ -110,7 +110,7 @@ export function CustomComponentsTab() {
           onClick={() => ContextService.createCustomMarkdown()}
           className="create-custom-markdown-button"
         >
-          <PlusOutlined />
+          <span>Create</span>
         </Button>
       </div>
     );
