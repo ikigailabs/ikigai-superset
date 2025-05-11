@@ -35,48 +35,45 @@ export function CustomMarkdowns({ searchTerm }: PropTypes) {
 
   return (
     <>
-      {customMarkdowns
-        .filter(md => md.name.toLowerCase().includes(searchTerm.toLowerCase()))
-        .map(customMarkdown => {
-          const isAdded = addedCustomMarkdowns.includes(
-            customMarkdown.custom_markdown_id,
-          );
+      {customMarkdowns.map(cm => {
+        const isAdded = addedCustomMarkdowns.includes(cm.custom_markdown_id);
 
-          return (
-            <div
-              key={customMarkdown.custom_markdown_id}
-              className="custom-markdown-container"
-            >
-              <NewDynamicSingleMarkdown
-                customMarkdown={customMarkdown}
-                disableDragDrop={isAdded}
-              />
+        const isVisible = cm.name
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase());
 
-              {isAdded && <div className="added-tag">Added</div>}
+        return (
+          <div
+            key={cm.custom_markdown_id}
+            className="custom-markdown-container"
+            style={{ display: isVisible ? 'block' : 'none' }}
+          >
+            <NewDynamicSingleMarkdown
+              customMarkdown={cm}
+              disableDragDrop={isAdded}
+            />
 
-              <Button
-                type="default"
-                shape="circle"
-                icon={<EditOutlined />}
-                className="edit-custom-markdown-button"
-                onClick={() =>
-                  ContextService.editCustomMarkdown(customMarkdown)
-                }
-              />
+            {isAdded && <div className="added-tag">Added</div>}
 
-              <Button
-                type="default"
-                shape="circle"
-                danger
-                icon={<DeleteOutlined />}
-                className="delete-custom-markdown-button"
-                onClick={() =>
-                  ContextService.deleteCustomMarkdown(customMarkdown)
-                }
-              />
-            </div>
-          );
-        })}
+            <Button
+              type="default"
+              shape="circle"
+              icon={<EditOutlined />}
+              className="edit-custom-markdown-button"
+              onClick={() => ContextService.editCustomMarkdown(cm)}
+            />
+
+            <Button
+              type="default"
+              shape="circle"
+              danger
+              icon={<DeleteOutlined />}
+              className="delete-custom-markdown-button"
+              onClick={() => ContextService.deleteCustomMarkdown(cm)}
+            />
+          </div>
+        );
+      })}
     </>
   );
 }
