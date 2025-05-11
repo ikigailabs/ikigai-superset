@@ -886,7 +886,6 @@ td.rdtYear:hover {
   width: 374px;
   right: 0;
   height: 100%;
-  height: calc(100% - 118px);
   box-shadow: -4px 0 4px 0 rgba(0, 0, 0, 0.1);
 }
 .dashboard-builder-sidepane .slider-container {
@@ -2195,15 +2194,14 @@ a[role='menuitem'] .dot {
 
 .dashboard-builder-sidepane .viewport {
   position: fixed;
-  top: 98px !important;
-  padding: 0 24px;
+  top: 68px !important;
   box-shadow: 0 0 0 transparent !important;
   border-left: 1px solid #eee;
   background-color: #fff;
 }
 
 .dashboard-builder-sidepane .viewport #tabs-panel-2 {
-  height: calc(100vh - 200px);
+  height: calc(100vh);
   overflow: auto;
 }
 
@@ -2295,10 +2293,38 @@ a[role='menuitem'] .dot {
   bottom: 5px;
 }
 
-/* Collapse */
+/* Custom Component Tab */
+
+.sidepane-padding {
+  padding: 0 16px !important;
+}
+
+.tabs-components .ant-tabs-tab {
+  margin: 0
+}
+
+.custom-components-container {
+  height: 100%;
+  overflow-y: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.controls-container {
+  display: flex;
+  flex-direction:row;
+  margin-bottom: 16px
+}
+
+.custom-components-content {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  padding-bottom: 50px;
+}
 
 .legacy-components > .ant-collapse-content > .ant-collapse-content-box {
-  padding: 0px;
+  padding: 0;
 }
 
 .ant-collapse > .ant-collapse-item > .ant-collapse-header {

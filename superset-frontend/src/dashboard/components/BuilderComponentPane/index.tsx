@@ -45,7 +45,6 @@ const SIDEPANE_FILTERBAR_HEIGHT = 56;
 
 const BuilderComponentPaneTabs = styled(Tabs)`
   line-height: inherit;
-  margin-top: ${({ theme }) => theme.gridUnit * 2}px;
 `;
 
 const DashboardBuilderSidepane = styled.div<{
@@ -100,7 +99,11 @@ const BuilderComponentPane: React.FC<BCPProps> = ({
                     className="tabs-components"
                     data-test="dashboard-builder-component-pane-tabs-navigation"
                   >
-                    <Tabs.TabPane key={1} tab={t('Layout')}>
+                    <Tabs.TabPane
+                      key={1}
+                      tab={t('Layout')}
+                      className="sidepane-padding"
+                    >
                       <NewTabs />
                       <NewRow />
                       <NewColumn />

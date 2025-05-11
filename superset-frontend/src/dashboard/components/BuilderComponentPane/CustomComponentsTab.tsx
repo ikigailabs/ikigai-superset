@@ -4,7 +4,6 @@ import { useSelector } from 'react-redux';
 import { Space } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import { Input } from 'src/components/Input';
-import { styled } from '@superset-ui/core';
 
 import { RootState } from 'src/dashboard/types';
 import Collapse from 'src/components/Collapse';
@@ -12,8 +11,8 @@ import { Title } from 'src/dashboard/components/FiltersBadge/Styles';
 import dashboardComponents from 'src/visualizations/presets/dashboardComponents';
 import { ContextService } from 'src/service/context-service/context-service';
 
-import NewDynamicMarkdown from '../gridComponents/new/components/NewDynamicMarkdown';
 import NewDynamicSingleMarkdown from '../gridComponents/new/components/NewDynamicSingleMarkdown';
+import NewDynamicMarkdown from '../gridComponents/new/components/NewDynamicMarkdown';
 import NewIkiTable from '../gridComponents/new/components/NewIkiTable';
 import NewIkiProcessBuilder from '../gridComponents/new/components/NewIkiProcessBuilder';
 import NewIkiRunPipeline from '../gridComponents/new/components/NewIkiRunPipeline';
@@ -27,12 +26,6 @@ import NewExternalDatasets from '../gridComponents/new/components/NewExternalDat
 import NewForecast from '../gridComponents/new/components/NewForecast';
 import NewDynamicComponent from '../gridComponents/new/NewDynamicComponent';
 
-const Controls = styled.div`
-  display: flex;
-  flex-direction: row;
-  padding-bottom: ${({ theme }) => theme.gridUnit * 4}px;
-`;
-
 export function CustomComponentsTab() {
   const customMarkdowns = useSelector(
     (state: RootState) => state.dashboardState.customMarkdowns,
@@ -43,14 +36,8 @@ export function CustomComponentsTab() {
   useEffect(() => ContextService.requestCustomMarkdowns(), []);
 
   return (
-    <div
-      style={{
-        height: '100%',
-        maxHeight: '110%',
-        overflowY: 'hidden',
-      }}
-    >
-      <Controls>
+    <div className="custom-components-container">
+      <div className="controls-container sidepane-padding">
         <Input
           placeholder="Search..."
           suffix={<SearchOutlined />}
@@ -58,17 +45,12 @@ export function CustomComponentsTab() {
           onChange={e => setSearchTerm(e.target.value)}
           disabled={!customMarkdowns}
         />
-      </Controls>
+      </div>
 
       <Space
+        className="custom-components-content sidepane-padding"
         direction="vertical"
         size="middle"
-        style={{
-          width: '100%',
-          height: '100%',
-          overflowY: 'auto',
-          paddingBottom: '50px',
-        }}
       >
         <div>
           {!customMarkdowns ? (
