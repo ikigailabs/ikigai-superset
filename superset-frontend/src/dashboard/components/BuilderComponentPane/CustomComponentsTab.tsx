@@ -42,10 +42,6 @@ export function CustomComponentsTab() {
 
   useEffect(() => ContextService.requestCustomMarkdowns(), []);
 
-  function handleSearch(value: string) {
-    setSearchTerm(value);
-  }
-
   return (
     <div
       style={{
