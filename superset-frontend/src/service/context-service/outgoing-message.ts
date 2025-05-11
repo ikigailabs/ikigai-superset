@@ -6,6 +6,7 @@ type OutgoingMessagePayload = {
   editModeUpdated: boolean;
   filtersUpdated: PlatformFilter[];
   customMarkdownsRequested: null;
+  createCustomMarkdownRequested: null;
   editCustomMarkdownRequested: CustomMarkdown;
   deleteCustomMarkdownRequested: CustomMarkdown;
 };

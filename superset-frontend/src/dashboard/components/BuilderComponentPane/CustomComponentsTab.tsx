@@ -4,11 +4,11 @@ import { useSelector } from 'react-redux';
 import { SearchOutlined } from '@ant-design/icons';
 import { Input } from 'src/components/Input';
 import Button from '../../../components/Button';
-
 import Collapse from 'src/components/Collapse';
 import { RootState } from 'src/dashboard/types';
 import { Title } from 'src/dashboard/components/FiltersBadge/Styles';
 import dashboardComponents from 'src/visualizations/presets/dashboardComponents';
+import { ContextService } from 'src/service/context-service/context-service';
 
 import NewDynamicSingleMarkdown from '../gridComponents/new/components/NewDynamicSingleMarkdown';
 import NewDynamicMarkdown from '../gridComponents/new/components/NewDynamicMarkdown';
@@ -31,7 +31,7 @@ export function CustomComponentsTab() {
   );
 
   const [searchTerm, setSearchTerm] = useState('');
-  const [activeKeys, setActiveKeys] = useState<string[]>([]);
+  const [activeKeys, setActiveKeys] = useState(['']);
 
   function CustomMarkdowns() {
     if (!customMarkdowns) return <></>;
@@ -39,7 +39,12 @@ export function CustomComponentsTab() {
     if (customMarkdowns.length === 0) {
       return (
         <div className="create-custom-markdown-container">
-          <Button type="primary">Create component</Button>
+          <Button
+            type="primary"
+            onClick={() => ContextService.createCustomMarkdown()}
+          >
+            Create component
+          </Button>
         </div>
       );
     }

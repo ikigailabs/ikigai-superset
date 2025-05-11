@@ -80,6 +80,15 @@ export class SupersetContextService {
     this.sendMessageToPlatform(message);
   }
 
+  public createCustomMarkdown() {
+    const message: OutgoingMessage = {
+      type: 'createCustomMarkdownRequested',
+      payload: null,
+    };
+
+    this.sendMessageToPlatform(message);
+  }
+
   public editCustomMarkdown(customMarkdown: CustomMarkdown) {
     const message: OutgoingMessage = {
       type: 'editCustomMarkdownRequested',
