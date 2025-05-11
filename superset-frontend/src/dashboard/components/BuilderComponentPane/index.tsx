@@ -22,7 +22,6 @@ import { StickyContainer, Sticky } from 'react-sticky';
 import { ParentSize } from '@vx/responsive';
 import { t, styled } from '@superset-ui/core';
 
-import { ContextService } from 'src/service/context-service/context-service';
 import Tabs from 'src/components/Tabs';
 import SliceAdder from 'src/dashboard/containers/SliceAdder';
 import NewColumn from '../gridComponents/new/layout/NewColumn';
@@ -31,7 +30,7 @@ import NewHeader from '../gridComponents/new/layout/NewHeader';
 import NewRow from '../gridComponents/new/layout/NewRow';
 import NewTabs from '../gridComponents/new/layout/NewTabs';
 import NewMarkdown from '../gridComponents/new/layout/NewMarkdown';
-import { CustomComponentsTab } from './CustomComponentsTab';
+import { ComponentsTab } from './ComponentsTab/ComponentsTab';
 
 export interface BCPProps {
   isStandalone: boolean;
@@ -113,7 +112,7 @@ const BuilderComponentPane: React.FC<BCPProps> = ({
                     </Tabs.TabPane>
 
                     <Tabs.TabPane key={2} tab={t('Components')}>
-                      <CustomComponentsTab />
+                      <ComponentsTab />
                     </Tabs.TabPane>
 
                     <Tabs.TabPane
