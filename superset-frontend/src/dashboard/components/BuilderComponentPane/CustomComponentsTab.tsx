@@ -1,7 +1,13 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 
-import { SearchOutlined } from '@ant-design/icons';
+import {
+  DeleteOutlined,
+  EditOutlined,
+  SearchOutlined,
+} from '@ant-design/icons';
+import { IKI_DYNAMIC_SINGLE_MARKDOWN_TYPE } from 'src/dashboard/util/componentTypes';
+import { Button as AntButton } from 'antd';
 import { Input } from 'src/components/Input';
 import Button from '../../../components/Button';
 import Collapse from 'src/components/Collapse';
@@ -30,6 +36,18 @@ export function CustomComponentsTab() {
     (state: RootState) => state.dashboardState.customMarkdowns,
   );
 
+  const dashboardLayout = useSelector(
+    (state: RootState) => state.dashboardLayout,
+  );
+
+  const addedCustomMarkdowns = Object.entries(dashboardLayout.present).flatMap(
+    ([key, value]) =>
+      key.includes(IKI_DYNAMIC_SINGLE_MARKDOWN_TYPE) &&
+      value.meta.customMarkdown
+        ? [value.meta.customMarkdown.custom_markdown_id]
+        : [],
+  );
+
   const [searchTerm, setSearchTerm] = useState('');
   const [activeKeys, setActiveKeys] = useState(['']);
 
@@ -42,12 +60,46 @@ export function CustomComponentsTab() {
           .filter(md =>
             md.name.toLowerCase().includes(searchTerm.toLowerCase()),
           )
-          .map(customMarkdown => (
-            <NewDynamicSingleMarkdown
-              key={customMarkdown.custom_markdown_id}
-              customMarkdown={customMarkdown}
-            />
-          ))}
+          .map(customMarkdown => {
+            const isAdded = addedCustomMarkdowns.includes(
+              customMarkdown.custom_markdown_id,
+            );
+
+            return (
+              <div
+                key={customMarkdown.custom_markdown_id}
+                className="custom-markdown-container"
+              >
+                <NewDynamicSingleMarkdown
+                  customMarkdown={customMarkdown}
+                  disableDragDrop={isAdded}
+                />
+
+                {isAdded && <div className="added-tag">Added</div>}
+
+                <AntButton
+                  type="default"
+                  shape="circle"
+                  icon={<EditOutlined />}
+                  className="edit-custom-markdown-button"
+                  onClick={() =>
+                    ContextService.editCustomMarkdown(customMarkdown)
+                  }
+                />
+
+                <AntButton
+                  type="default"
+                  shape="circle"
+                  danger
+                  icon={<DeleteOutlined />}
+                  className="delete-custom-markdown-button"
+                  onClick={() =>
+                    ContextService.deleteCustomMarkdown(customMarkdown)
+                  }
+                />
+              </div>
+            );
+          })}
       </>
     );
   }

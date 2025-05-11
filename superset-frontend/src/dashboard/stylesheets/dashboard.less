@@ -1981,9 +1981,7 @@ a[role='menuitem'] .dot {
   background: #fff;
   cursor: move;
 }
-.new-component:not(.static):hover {
-  background: #f7f7f7;
-}
+
 .new-component-placeholder {
   position: relative;
   background: #f7f7f7;
@@ -2346,6 +2344,73 @@ a[role='menuitem'] .dot {
   padding-bottom: 30px !important;
 }
 
+.custom-markdown-container {
+  position: relative;
+}
+
+.custom-markdown-container:hover .new-component:not(.static):not(.disable-hover) {
+  background-color: #e8e8e8b7;
+}
+
+.markdown-action-button() {
+  opacity: 0;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 5px;
+  width: 20px;
+  aspect-ratio: 1 / 1;
+  cursor: pointer;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.edit-custom-markdown-button {
+  .markdown-action-button();
+  right: 50px;
+}
+
+.delete-custom-markdown-button {
+  .markdown-action-button();
+  right: 10px;
+}
+
+.custom-markdown-container:hover .edit-custom-markdown-button,
+.custom-markdown-container:hover .delete-custom-markdown-button {
+  opacity: 1;
+}
+
+.added-tag {
+  position: absolute;
+  top: 50%;
+  right: 16px;
+  height: 25px;
+  transform: translateY(-50%);
+  width: auto !important;
+  border-radius: 4px;
+  background: #666666;
+  color: #fff;
+  text-transform: uppercase;
+  font-size: 12px;
+  line-height: 1;
+  padding: 4px 8px;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+  opacity: 1;
+}
+
+.custom-markdown-container:hover .added-tag {
+  opacity: 0;
+}
+
+
 .legacy-components {
   width: 100%;
   padding: 0;
@@ -2678,40 +2743,6 @@ a:hover {
   margin-right: 10px;
   letter-spacing: 0.8px;
   font-weight: 200;
-}
-
-.new-component-ellipsis {
-  all: unset;
-
-  opacity: 0;
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  right: 10px;
-  padding: 5px;
-  width: 20px;
-  aspect-ratio: 1/1;
-  cursor: pointer;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-}
-
-.new-component:hover .new-component-ellipsis {
-  opacity: 1;
-}
-
-.new-component-ellipsis:hover {
-  background: #cececeb7;
-}
-
-.ant-tabs-tabpane .new-component:hover {
-  background: var(--secondaryColor);
-  border: 1px solid #fff;
-  color: var(--primaryColor);
-  transition: all 0.2s ease;
 }
 
 .ant-tabs-tabpane .new-component .new-component-placeholder {

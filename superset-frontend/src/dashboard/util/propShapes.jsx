@@ -20,6 +20,7 @@ import PropTypes from 'prop-types';
 import componentTypes from './componentTypes';
 import backgroundStyleOptions from './backgroundStyleOptions';
 import headerStyleOptions from './headerStyleOptions';
+import { CustomMarkdownPropType } from '../types';
 
 export const componentShape = PropTypes.shape({
   id: PropTypes.string.isRequired,
@@ -39,6 +40,9 @@ export const componentShape = PropTypes.shape({
 
     // Chart
     chartId: PropTypes.number,
+
+    // Custom Markdown
+    customMarkdown: PropTypes.arrayOf(CustomMarkdownPropType),
   }),
 });
 

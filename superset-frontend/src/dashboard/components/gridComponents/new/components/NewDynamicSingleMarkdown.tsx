@@ -25,9 +25,13 @@ import DraggableNewComponent from '../DraggableNewComponent';
 
 type PropTypes = {
   customMarkdown: CustomMarkdown;
+  disableDragDrop?: boolean;
 };
 
-export default function DraggableNewDivider({ customMarkdown }: PropTypes) {
+export default function DraggableNewDivider({
+  customMarkdown,
+  disableDragDrop = false,
+}: PropTypes) {
   return (
     <DraggableNewComponent
       id={NEW_DYNAMIC_COMPONENT}
@@ -37,6 +41,7 @@ export default function DraggableNewDivider({ customMarkdown }: PropTypes) {
       className="fa fa-mouse-pointer"
       meta={{ customMarkdown }}
       isCustomComponent
+      disableDragDrop={disableDragDrop}
     />
   );
 }

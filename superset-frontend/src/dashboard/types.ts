@@ -27,6 +27,7 @@ import {
 import { Dataset } from '@superset-ui/chart-controls';
 import { chart } from 'src/components/Chart/chartReducer';
 import componentTypes from 'src/dashboard/util/componentTypes';
+import PropTypes from 'prop-types';
 
 import { User } from 'src/types/bootstrapTypes';
 import { ChartState } from '../explore/types';
@@ -137,6 +138,7 @@ export type LayoutItem = {
     text?: string;
     uuid: string;
     width: number;
+    customMarkdown?: CustomMarkdown;
   };
 };
 
@@ -189,6 +191,25 @@ export type CustomMarkdownDirectory = {
   parent_id: string;
   size: string;
 };
+
+export const CustomMarkdownDirectoryPropType = PropTypes.shape({
+  directory_id: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
+  type: PropTypes.oneOf(['CUSTOM_MARKDOWN']).isRequired,
+  project_id: PropTypes.string.isRequired,
+  parent_id: PropTypes.string.isRequired,
+  size: PropTypes.string.isRequired,
+});
+
+export const CustomMarkdownPropType = PropTypes.shape({
+  custom_markdown_id: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
+  project_id: PropTypes.string.isRequired,
+  definition: PropTypes.any,
+  directory: CustomMarkdownDirectoryPropType.isRequired,
+  created_at: PropTypes.string.isRequired,
+  modified_at: PropTypes.string.isRequired,
+});
 
 export type Orientation = typeof orientations[keyof typeof orientations];
 

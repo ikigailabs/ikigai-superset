@@ -23,13 +23,6 @@ import cx from 'classnames';
 import DragDroppable from '../../dnd/DragDroppable';
 import { NEW_COMPONENTS_SOURCE_ID } from '../../../util/constants';
 import { NEW_COMPONENT_SOURCE_TYPE } from '../../../util/componentTypes';
-import {
-  DeleteOutlined,
-  EllipsisOutlined,
-  EditOutlined,
-} from '@ant-design/icons';
-import { Dropdown, Menu } from 'antd';
-import { ContextService } from 'src/service/context-service/context-service';
 
 const propTypes = {
   id: PropTypes.string.isRequired,
@@ -37,7 +30,7 @@ const propTypes = {
   label: PropTypes.string.isRequired,
   className: PropTypes.string,
   demandApp: PropTypes.bool,
-  isCustomComponent: PropTypes.bool,
+  disableDragDrop: PropTypes.bool,
 };
 
 const defaultProps = {
@@ -54,10 +47,7 @@ export default class DraggableNewComponent extends React.PureComponent {
       meta,
       description,
       demandApp,
-
-      // for individual custom components
-      // (including meta.customMarkdown)
-      isCustomComponent,
+      disableDragDrop = false,
     } = this.props;
 
     return (
@@ -70,12 +60,15 @@ export default class DraggableNewComponent extends React.PureComponent {
         index={0}
         depth={0}
         editMode
+        disableDragDrop={disableDragDrop}
       >
         {({ dragSourceRef }) => (
           <div
             ref={dragSourceRef}
-            className="new-component"
             data-test="new-component"
+            className={cx('new-component', {
+              'disable-hover': disableDragDrop,
+            })}
           >
             <div className={cx('new-component-placeholder', className)} />
             <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -87,39 +80,6 @@ export default class DraggableNewComponent extends React.PureComponent {
               </div>
               <div className="new-component-description">{description}</div>
             </div>
-
-            {isCustomComponent && meta.customMarkdown && (
-              <Dropdown
-                trigger={['click']}
-                overlay={
-                  <Menu style={{ padding: 0 }}>
-                    <Menu.Item
-                      style={{ padding: '10px 14px' }}
-                      onClick={() =>
-                        ContextService.editCustomMarkdown(meta.customMarkdown)
-                      }
-                    >
-                      <EditOutlined />
-                      <span>Edit</span>
-                    </Menu.Item>
-
-                    <Menu.Item
-                      style={{ padding: '10px 14px' }}
-                      onClick={() =>
-                        ContextService.deleteCustomMarkdown(meta.customMarkdown)
-                      }
-                    >
-                      <DeleteOutlined />
-                      <span>Delete</span>
-                    </Menu.Item>
-                  </Menu>
-                }
-              >
-                <button className="new-component-ellipsis">
-                  <EllipsisOutlined rotate={90} style={{ fontSize: 16 }} />
-                </button>
-              </Dropdown>
-            )}
           </div>
         )}
       </DragDroppable>
