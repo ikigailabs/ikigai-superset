@@ -53,29 +53,23 @@ export function CustomComponentsTab() {
         size="middle"
       >
         <div>
-          {!customMarkdowns ? (
-            <span>Loading</span>
-          ) : (
-            customMarkdowns
-              .filter(md =>
-                md.name.toLowerCase().includes(searchTerm.toLowerCase()),
-              )
-              .map(customMarkdown => (
-                <NewDynamicSingleMarkdown
-                  key={customMarkdown.custom_markdown_id}
-                  customMarkdown={customMarkdown}
-                />
-              ))
-          )}
+          {!customMarkdowns
+            ? null
+            : customMarkdowns
+                .filter(md =>
+                  md.name.toLowerCase().includes(searchTerm.toLowerCase()),
+                )
+                .map(customMarkdown => (
+                  <NewDynamicSingleMarkdown
+                    key={customMarkdown.custom_markdown_id}
+                    customMarkdown={customMarkdown}
+                  />
+                ))}
 
           <Collapse bordered={false} ghost>
             <Collapse.Panel
               key="legacy-components"
               className="legacy-components"
-              style={{
-                padding: '0px',
-                width: '100%',
-              }}
               header={
                 <Title bold color="#626262">
                   <span>Legacy Components</span>
