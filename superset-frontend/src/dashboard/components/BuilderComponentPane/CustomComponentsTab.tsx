@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 
-import { PlusOutlined, SearchOutlined } from '@ant-design/icons';
+import { SearchOutlined } from '@ant-design/icons';
 import { Input } from 'src/components/Input';
 import Button from '../../../components/Button';
 import Collapse from 'src/components/Collapse';
