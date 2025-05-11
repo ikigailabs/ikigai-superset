@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 
-import { Space } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import { Input } from 'src/components/Input';
 
-import { RootState } from 'src/dashboard/types';
 import Collapse from 'src/components/Collapse';
+import { RootState } from 'src/dashboard/types';
 import { Title } from 'src/dashboard/components/FiltersBadge/Styles';
 import dashboardComponents from 'src/visualizations/presets/dashboardComponents';
 import { ContextService } from 'src/service/context-service/context-service';
@@ -32,8 +31,71 @@ export function CustomComponentsTab() {
   );
 
   const [searchTerm, setSearchTerm] = useState('');
+  const [activeKeys, setActiveKeys] = useState<string[]>([]);
 
   useEffect(() => ContextService.requestCustomMarkdowns(), []);
+
+  function CustomMarkdowns() {
+    if (!customMarkdowns) return <></>;
+
+    return (
+      <>
+        {customMarkdowns
+          .filter(md =>
+            md.name.toLowerCase().includes(searchTerm.toLowerCase()),
+          )
+          .map(customMarkdown => (
+            <NewDynamicSingleMarkdown
+              key={customMarkdown.custom_markdown_id}
+              customMarkdown={customMarkdown}
+            />
+          ))}
+      </>
+    );
+  }
+
+  function LegacyComponents() {
+    return (
+      <Collapse
+        bordered={false}
+        ghost
+        activeKey={activeKeys}
+        onChange={keys => setActiveKeys(Array.isArray(keys) ? keys : [keys])}
+      >
+        <Collapse.Panel
+          key="legacy-components"
+          className="legacy-components"
+          header={
+            <Title bold color="#626262">
+              <span>Legacy Components</span>
+            </Title>
+          }
+        >
+          <NewDynamicMarkdown />
+          <NewIkiTable />
+          <NewIkiProcessBuilder />
+          <NewIkiRunPipeline />
+          <NewDeepCast />
+          <NewIkiEitlRow />
+          <NewIkiEitlColumn />
+          <NewForecastModule />
+          <NewIkiDatasetDownload />
+          <NewIkiModelMetrics />
+          <NewExternalDatasets />
+          <NewForecast />
+          {/* <NewIkiExplainability /> */}
+          {dashboardComponents
+            .getAll()
+            .map(({ key: componentKey, metadata }) => (
+              <NewDynamicComponent
+                metadata={metadata}
+                componentKey={componentKey}
+              />
+            ))}
+        </Collapse.Panel>
+      </Collapse>
+    );
+  }
 
   return (
     <div className="custom-components-container">
@@ -47,60 +109,10 @@ export function CustomComponentsTab() {
         />
       </div>
 
-      <Space
-        className="custom-components-content sidepane-padding"
-        direction="vertical"
-        size="middle"
-      >
-        <div>
-          {!customMarkdowns
-            ? null
-            : customMarkdowns
-                .filter(md =>
-                  md.name.toLowerCase().includes(searchTerm.toLowerCase()),
-                )
-                .map(customMarkdown => (
-                  <NewDynamicSingleMarkdown
-                    key={customMarkdown.custom_markdown_id}
-                    customMarkdown={customMarkdown}
-                  />
-                ))}
-
-          <Collapse bordered={false} ghost>
-            <Collapse.Panel
-              key="legacy-components"
-              className="legacy-components"
-              header={
-                <Title bold color="#626262">
-                  <span>Legacy Components</span>
-                </Title>
-              }
-            >
-              <NewDynamicMarkdown />
-              <NewIkiTable />
-              <NewIkiProcessBuilder />
-              <NewIkiRunPipeline />
-              <NewDeepCast />
-              <NewIkiEitlRow />
-              <NewIkiEitlColumn />
-              <NewForecastModule />
-              <NewIkiDatasetDownload />
-              <NewIkiModelMetrics />
-              <NewExternalDatasets />
-              <NewForecast />
-              {/* <NewIkiExplainability /> */}
-              {dashboardComponents
-                .getAll()
-                .map(({ key: componentKey, metadata }) => (
-                  <NewDynamicComponent
-                    metadata={metadata}
-                    componentKey={componentKey}
-                  />
-                ))}
-            </Collapse.Panel>
-          </Collapse>
-        </div>
-      </Space>
+      <div className="custom-components-content sidepane-padding">
+        <CustomMarkdowns />
+        <LegacyComponents />
+      </div>
     </div>
   );
 }
