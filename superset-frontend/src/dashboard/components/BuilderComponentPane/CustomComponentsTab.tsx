@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 
-import { SearchOutlined } from '@ant-design/icons';
+import { PlusOutlined, SearchOutlined } from '@ant-design/icons';
 import { Input } from 'src/components/Input';
 import Button from '../../../components/Button';
 import Collapse from 'src/components/Collapse';
@@ -35,19 +35,6 @@ export function CustomComponentsTab() {
 
   function CustomMarkdowns() {
     if (!customMarkdowns) return <></>;
-
-    if (customMarkdowns.length === 0) {
-      return (
-        <div className="create-custom-markdown-container">
-          <Button
-            type="primary"
-            onClick={() => ContextService.createCustomMarkdown()}
-          >
-            Create component
-          </Button>
-        </div>
-      );
-    }
 
     return (
       <>
@@ -108,26 +95,30 @@ export function CustomComponentsTab() {
     );
   }
 
-  function InputSearch() {
+  function Controls() {
     return (
-      <>
-        {customMarkdowns && customMarkdowns.length !== 0 && (
-          <div className="controls-container sidepane-padding">
-            <Input
-              placeholder="Search..."
-              suffix={<SearchOutlined />}
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-            />
-          </div>
-        )}
-      </>
+      <div className="controls-container sidepane-padding">
+        <Input
+          placeholder="Search..."
+          suffix={<SearchOutlined />}
+          value={searchTerm}
+          onChange={e => setSearchTerm(e.target.value)}
+        />
+
+        <Button
+          type="primary"
+          onClick={() => ContextService.createCustomMarkdown()}
+          className="create-custom-markdown-button"
+        >
+          <PlusOutlined />
+        </Button>
+      </div>
     );
   }
 
   return (
     <div className="custom-components-container">
-      <InputSearch />
+      <Controls />
 
       <div className="custom-components-content sidepane-padding">
         <CustomMarkdowns />
