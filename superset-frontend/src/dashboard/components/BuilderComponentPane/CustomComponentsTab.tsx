@@ -1,14 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 
 import { SearchOutlined } from '@ant-design/icons';
 import { Input } from 'src/components/Input';
+import Button from '../../../components/Button';
 
 import Collapse from 'src/components/Collapse';
 import { RootState } from 'src/dashboard/types';
 import { Title } from 'src/dashboard/components/FiltersBadge/Styles';
 import dashboardComponents from 'src/visualizations/presets/dashboardComponents';
-import { ContextService } from 'src/service/context-service/context-service';
 
 import NewDynamicSingleMarkdown from '../gridComponents/new/components/NewDynamicSingleMarkdown';
 import NewDynamicMarkdown from '../gridComponents/new/components/NewDynamicMarkdown';
@@ -33,10 +33,16 @@ export function CustomComponentsTab() {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeKeys, setActiveKeys] = useState<string[]>([]);
 
-  useEffect(() => ContextService.requestCustomMarkdowns(), []);
-
   function CustomMarkdowns() {
     if (!customMarkdowns) return <></>;
+
+    if (customMarkdowns.length === 0) {
+      return (
+        <div className="create-custom-markdown-container">
+          <Button type="primary">Create component</Button>
+        </div>
+      );
+    }
 
     return (
       <>
@@ -100,13 +106,14 @@ export function CustomComponentsTab() {
   return (
     <div className="custom-components-container">
       <div className="controls-container sidepane-padding">
-        <Input
-          placeholder="Search..."
-          suffix={<SearchOutlined />}
-          value={searchTerm}
-          onChange={e => setSearchTerm(e.target.value)}
-          disabled={!customMarkdowns}
-        />
+        {customMarkdowns && customMarkdowns.length !== 0 && (
+          <Input
+            placeholder="Search..."
+            suffix={<SearchOutlined />}
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+          />
+        )}
       </div>
 
       <div className="custom-components-content sidepane-padding">
