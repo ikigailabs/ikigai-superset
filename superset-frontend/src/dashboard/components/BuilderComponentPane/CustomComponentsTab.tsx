@@ -103,18 +103,26 @@ export function CustomComponentsTab() {
     );
   }
 
+  function InputSearch() {
+    return (
+      <>
+        {customMarkdowns && customMarkdowns.length !== 0 && (
+          <div className="controls-container sidepane-padding">
+            <Input
+              placeholder="Search..."
+              suffix={<SearchOutlined />}
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+            />
+          </div>
+        )}
+      </>
+    );
+  }
+
   return (
     <div className="custom-components-container">
-      <div className="controls-container sidepane-padding">
-        {customMarkdowns && customMarkdowns.length !== 0 && (
-          <Input
-            placeholder="Search..."
-            suffix={<SearchOutlined />}
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-          />
-        )}
-      </div>
+      <InputSearch />
 
       <div className="custom-components-content sidepane-padding">
         <CustomMarkdowns />
