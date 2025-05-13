@@ -21,30 +21,39 @@ export type DashboardFilter = {
 export type DashboardFilters = Record<string, DashboardFilter>;
 
 type PlatformFilterField = {
-  column: string;
+  key: string;
+  value: any;
   label: string;
   multiple: boolean;
 };
 
+type PlatformFilterFields = Record<string, PlatformFilterField>;
+
 export type PlatformFilter = {
   filters: Record<string, string[] | string>;
-  filterFields: PlatformFilterField[];
+  filterFields: PlatformFilterFields;
   chartId: string;
 };
 
-function mapFilterFields(columns: DashboardFilter['columns']) {
-  return Object.entries(columns).map(([key, columnValue]) => {
-    const isMultiple =
-      typeof columnValue === 'string' ? false : columnValue.length > 1;
+function mapFilterFields(dashboardFilter: DashboardFilter) {
+  const filterFieldMap: Record<string, PlatformFilterField> = Object.entries(
+    dashboardFilter['columns'],
+  ).reduce((acc, [key, filter]) => {
+    const isMultiple = typeof filter === 'string' ? false : filter?.length > 1;
 
-    const filterField: PlatformFilterField = {
-      column: key,
-      label: key,
+    const label = dashboardFilter['labels'][key];
+
+    acc[label] = {
+      key,
+      value: filter,
+      label,
       multiple: isMultiple,
     };
 
-    return filterField;
-  });
+    return acc;
+  }, {});
+
+  return filterFieldMap;
 }
 
 export function mapSupersetFiltersToPlatformSpec(
@@ -52,7 +61,7 @@ export function mapSupersetFiltersToPlatformSpec(
 ): PlatformFilter[] {
   return Object.entries(dashboardFilters).map(([chartId, dashFilter]) => ({
     filters: dashFilter.columns,
-    filterFields: mapFilterFields(dashFilter.columns),
+    filterFields: mapFilterFields(dashFilter),
     chartId,
   }));
 }
