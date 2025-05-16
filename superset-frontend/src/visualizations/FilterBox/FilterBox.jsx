@@ -222,7 +222,7 @@ class FilterBox extends React.PureComponent {
           this.props.onChange({ [fltr]: vals }, false);
         }
         this.clickApply();
-        this.sendFilterToDynamicMarkdown();
+        ContextService.sendFilters();
       },
     );
   }
