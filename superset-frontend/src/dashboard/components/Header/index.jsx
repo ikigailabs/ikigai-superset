@@ -38,7 +38,6 @@ import PublishedStatus from 'src/dashboard/components/PublishedStatus';
 import UndoRedoKeyListeners from 'src/dashboard/components/UndoRedoKeyListeners';
 import PropertiesModal from 'src/dashboard/components/PropertiesModal';
 import { chartPropShape } from 'src/dashboard/util/propShapes';
-import { UserWithPermissionsAndRoles } from 'src/types/bootstrapTypes';
 import {
   UNDO_LIMIT,
   SAVE_TYPE_OVERWRITE,
@@ -58,7 +57,6 @@ const propTypes = {
   addSuccessToast: PropTypes.func.isRequired,
   addDangerToast: PropTypes.func.isRequired,
   addWarningToast: PropTypes.func.isRequired,
-  user: UserWithPermissionsAndRoles,
   dashboardInfo: PropTypes.object.isRequired,
   dashboardTitle: PropTypes.string.isRequired,
   dataMask: PropTypes.object.isRequired,
@@ -89,6 +87,8 @@ const propTypes = {
   lastModifiedTime: PropTypes.number.isRequired,
   ikigaiOrigin: PropTypes.string,
   supersetUrl: PropTypes.string,
+  filterboxMigrationState: PropTypes.string,
+  user: PropTypes.object,
 
   // redux
   onRefresh: PropTypes.func.isRequired,
@@ -166,13 +166,7 @@ const discardBtnStyle = theme => css`
 class Header extends React.PureComponent {
   static discardChanges(ikigaiOrigin, supersetUrl) {
     const url = new URL(window.location.href);
-    const originalUrl = url.origin + url.pathname;
-    console.log('Discard - url', url, originalUrl, ikigaiOrigin, supersetUrl);
 
-    // url.searchParams.delete('edit');
-    // window.location.assign(url);
-    // window.location.href = url.toString();
-    // window.location.replace(originalUrl);
     if (supersetUrl) {
       window.location.replace(supersetUrl.toString());
     } else {

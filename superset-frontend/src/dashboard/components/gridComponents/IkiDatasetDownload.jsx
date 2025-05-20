@@ -158,19 +158,6 @@ class IkiDatasetDownload extends React.PureComponent {
       this.props.editMode !== prevProps.editMode
     ) {
       this.handleChangeEditorMode('preview');
-      // setTimeout(() => {
-      //   const iframe = document.getElementById(
-      //     `ikidatasetdownload-widget-${this.props.component.id}`,
-      //   );
-      //   if (iframe && iframe !== undefined) {
-      //     iframe.contentWindow.postMessage(
-      //       JSON.stringify({
-      //         data: 'superset-to-widget/confirm-pipeline-selection',
-      //       }),
-      //       this.props.ikigaiOrigin,
-      //     );
-      //   }
-      // }, 500);
     }
   }
 

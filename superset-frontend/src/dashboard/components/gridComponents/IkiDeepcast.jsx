@@ -181,7 +181,6 @@ class IkiDeepcast extends React.PureComponent {
   // eslint-disable-next-line class-methods-use-this
   handleIncomingWindowMsg() {
     window.addEventListener('message', event => {
-      // console.log('event.origin', event.origin, this.props.ikigaiOrigin);
       if (event.origin === this.props.ikigaiOrigin) {
         const messageObject = JSON.parse(event.data);
         if (messageObject.info && messageObject.dataType) {
@@ -241,14 +240,6 @@ class IkiDeepcast extends React.PureComponent {
     this.setState({
       editor,
     });
-  }
-
-  handleChangeFocus(nextFocus) {
-    console.log(nextFocus);
-    // const nextFocused = !!nextFocus;
-    // const nextEditMode = nextFocused ? 'edit' : 'preview';
-    // this.setState(() => ({ isFocused: nextFocused }));
-    // this.handleChangeEditorMode(nextEditMode);
   }
 
   handleChangeEditorMode(mode) {
@@ -339,9 +330,7 @@ class IkiDeepcast extends React.PureComponent {
         const paramMode = iframeSrcUrl.searchParams.get('mode')
           ? iframeSrcUrl.searchParams.get('mode')
           : '';
-        // const paramTimestamp = iframeSrcUrl.searchParams.get('run_flow_times')
-        //   ? iframeSrcUrl.searchParams.get('run_flow_times')
-        //   : timestamp;
+
         const paramPipelineId = iframeSrcUrl.searchParams.get('pipeline_id')
           ? iframeSrcUrl.searchParams.get('pipeline_id')
           : '';
@@ -350,12 +339,10 @@ class IkiDeepcast extends React.PureComponent {
           : '';
         const paramProjectId = iframeSrcUrl.searchParams.get('project_id');
         const newIframeSrc = `${ikigaiOrigin}/widget/deepcast?mode=${paramMode}&pipeline_id=${paramPipelineId}&alias_id=${paramAliasId}&project_id=${paramProjectId}`;
-        // console.log('iframe', newIframeSrcUrl, iframeHtml);
         iframeSrc = newIframeSrc;
       } else {
         iframeSrc = `${ikigaiOrigin}/widget/deepcast?mode=edit`;
       }
-      // console.log('iframeSrc', iframeSrc, markdownSource);
       iframe = `<iframe
                     id="ikideepcast-widget-${this.props.component.id}"
                     name="run-flow-component-${timestamp}"
@@ -380,7 +367,6 @@ class IkiDeepcast extends React.PureComponent {
 
   render() {
     const { isFocused, editorMode } = this.state;
-    // const { isFocused } = this.state;
 
     const {
       component,

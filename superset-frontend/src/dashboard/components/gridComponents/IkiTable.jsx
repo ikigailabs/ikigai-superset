@@ -95,8 +95,6 @@ class IkiTable extends React.PureComponent {
   }
 
   componentDidMount() {
-    // console.log('IkiTable componentDidMount', this.props, this.state);
-    // console.log('ref',document.referrer,'dash',dashURL,'win loc',window.location);
     this.props.logEvent(LOG_ACTIONS_RENDER_CHART, {
       viz_type: 'markdown',
       start_offset: this.renderStartTime,
@@ -172,7 +170,6 @@ class IkiTable extends React.PureComponent {
   handleIncomingWindowMsg() {
     window.addEventListener('message', event => {
       if (event.origin === this.props.ikigaiOrigin) {
-        // console.log('ikitable received 1: ', event.data);
         const messageObject = JSON.parse(event.data);
         if (messageObject.info && messageObject.dataType) {
           const { dataType } = messageObject;
@@ -267,8 +264,6 @@ class IkiTable extends React.PureComponent {
                 widgetUrl.searchParams.set('lookup_column', lookupColumn);
               }
 
-              // widgetUrl.search = widgetUrlQuery.toString();
-              // console.log('widgetUrl...', widgetUrl);
               const iframeSrc =
                 this.props.ikigaiOrigin + widgetUrl.pathname + widgetUrl.search;
               const tempIframe = `<iframe
@@ -316,11 +311,6 @@ class IkiTable extends React.PureComponent {
 
   updateMarkdownContent() {
     const { updateComponents, component } = this.props;
-    /* console.log(
-      'updateMarkdownContent',
-      component.meta.code,
-      this.state.markdownSource,
-    ); */
     if (component.meta.code !== this.state.markdownSource) {
       updateComponents({
         [component.id]: {
@@ -335,29 +325,17 @@ class IkiTable extends React.PureComponent {
   }
 
   handleMarkdownChange(nextValue) {
-    // console.log('handleMarkdownChange', nextValue);
     this.setState({
       markdownSource: nextValue,
     });
   }
 
   handleIkiTableChange(nextValue) {
-    // console.log('handleIkiTableChange', nextValue);
-    this.setState(
-      {
-        markdownSource: nextValue,
-      },
-      () => {
-        // this.handleMarkdownChange();
-        // this.updateMarkdownContent();
-      },
-    );
+    this.setState({
+      markdownSource: nextValue,
+    });
     const { updateComponents, component } = this.props;
-    /* console.log(
-      'updateMarkdownContent',
-      component.meta.code,
-      this.state.markdownSource,
-    ); */
+
     if (component.meta.code !== nextValue) {
       updateComponents({
         [component.id]: {
@@ -391,29 +369,14 @@ class IkiTable extends React.PureComponent {
     const { ikigaiOrigin } = this.props;
     let iframe = '';
     let iframeSrc = '';
-    console.log('ikigaiOrigin', ikigaiOrigin, 'markdownSource', markdownSource);
     if (ikigaiOrigin) {
       if (markdownSource) {
-        // iframe = markdownSource;
         const iframeWrapper = document.createElement('div');
         iframeWrapper.innerHTML = markdownSource;
         const iframeHtml = iframeWrapper.firstChild;
         const iframeSrcUrl = new URL(iframeHtml.src);
-        /* const hostname = iframeSrcUrl.href.toString().split('ikigailabs.io')[0];
-        if (hostname.includes('localhost') || hostname.includes('dev')) {
-          // iframeHtml.src = iframeSrcUrl.href.toString();
-          iframeSrc = iframeSrcUrl.href.toString();
-        } else {
-          const srcUrl = `${dashURL}${
-            iframeSrcUrl.href.toString().split('.ikigailabs.io')[1]
-          }`;
-          // iframeHtml.src = srcUrl;
-          iframeSrc = srcUrl;
-        } */
 
         iframeSrc = ikigaiOrigin + iframeSrcUrl.pathname + iframeSrcUrl.search;
-
-        console.log('iframe', iframeSrcUrl, iframeHtml, iframeSrc);
       } else {
         iframeSrc = `${ikigaiOrigin}/widget/dataset/table?v=1&editable_dataset_times=${timestamp}&mode=edit`;
       }
@@ -441,7 +404,6 @@ class IkiTable extends React.PureComponent {
 
   render() {
     const { isFocused, editorMode } = this.state;
-    // const { isFocused } = this.state;
 
     const {
       component,
@@ -463,9 +425,6 @@ class IkiTable extends React.PureComponent {
         : component.meta.width || GRID_MIN_COLUMN_COUNT;
 
     const isEditing = editorMode === 'edit';
-    // const isEditing = false;
-
-    // console.log('editMode', editMode, isEditing, markdownSource);
 
     return (
       <DragDroppable
@@ -520,12 +479,9 @@ class IkiTable extends React.PureComponent {
                   className="dashboard-component-inner"
                   data-test="dashboard-component-chart-holder"
                 >
-                  {
-                    // editMode && isEditing
-                    editMode && isEditing
-                      ? this.renderEditMode()
-                      : this.renderPreviewMode()
-                  }
+                  {editMode && isEditing
+                    ? this.renderEditMode()
+                    : this.renderPreviewMode()}
                 </div>
               </ResizableContainer>
             </div>
