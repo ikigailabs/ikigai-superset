@@ -2,7 +2,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import React, { useEffect, useState } from 'react';
-import { SafeMarkdown } from '@superset-ui/core';
 import PropTypes from 'prop-types';
 import cx from 'classnames';
 
@@ -17,7 +16,7 @@ import {
   GRID_MIN_ROW_UNITS,
 } from '../../util/constants';
 
-import { DYNAMIC_MARKDOWN, editorModes, orientations } from '../../constants';
+import { editorModes, orientations } from '../../constants';
 import {
   EditorMode,
   LayoutItem,
@@ -25,8 +24,7 @@ import {
 } from '../../types';
 import { COLUMN_TYPE, ROW_TYPE } from '../../util/componentTypes';
 import DragDroppable from '../dnd/DragDroppable';
-
-const timestamp = new Date().getTime().toString();
+import { IkiDynamicMarkdownIframe } from './IkiDynamicMarkdownIframe';
 
 type PropTypes = {
   id: string;
@@ -55,8 +53,6 @@ type PropTypes = {
   handleComponentDrop: (dropResult: any) => void;
   updateComponents: (nextComponents: Record<string, any>) => void;
 };
-
-const { projectId, topLevelOrigin } = ContextService;
 
 const IkiDynamicSingleMarkdown = ({
   id,
@@ -108,28 +104,8 @@ const IkiDynamicSingleMarkdown = ({
     deleteComponent(id, parentId);
   }
 
-  function CustomComponentIframe() {
-    const url = new URL('/widget/custom', topLevelOrigin);
-
-    if (!projectId) throw new Error('project_id query param must be truthy!');
-
-    url.searchParams.set('project_id', projectId);
-    url.searchParams.set('mode', 'preview');
-    url.searchParams.set('dashboard_mode', 'preview');
-    url.searchParams.set('parent', 'superset');
-    url.searchParams.set('scid', component.id);
-    url.searchParams.set('custom_element_id', customMarkdownId);
-
-    const iframeString = `<iframe
-      id="ikidynamicmarkdown-widget-${component.id}"
-      name="${DYNAMIC_MARKDOWN}-${timestamp}"
-      src="${url.toString()}"
-      title="Custom Component"
-      style="height:100%;"
-    />`;
-
-    return <SafeMarkdown source={iframeString} />;
-  }
+  if (!customMarkdownId)
+    throw new Error('custom_element_id parm must be truthy!');
 
   return (
     <DragDroppable
@@ -183,7 +159,11 @@ const IkiDynamicSingleMarkdown = ({
                 className="dashboard-component-inner"
                 data-test="dashboard-component-chart-holder"
               >
-                <CustomComponentIframe />
+                <IkiDynamicMarkdownIframe
+                  component={component}
+                  customElementId={customMarkdownId}
+                  editMode={false}
+                />
               </div>
             </ResizableContainer>
           </div>
