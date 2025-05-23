@@ -159,7 +159,6 @@ const IkiDynamicSingleMarkdown = ({
             id={component.id}
             data-test="dashboard-markdown-editor"
             className={cx(
-              'dashboard-component-ikirunpipeline',
               editorMode === editorModes.EDIT && 'dashboard-component--editing',
             )}
           >
