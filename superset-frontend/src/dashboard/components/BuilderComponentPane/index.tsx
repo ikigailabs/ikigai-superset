@@ -18,34 +18,14 @@
  */
 /* eslint-env browser */
 import React from 'react';
-import Tabs from 'src/components/Tabs';
 import { StickyContainer, Sticky } from 'react-sticky';
 import { ParentSize } from '@vx/responsive';
-
 import { t, styled } from '@superset-ui/core';
 
+import Tabs from 'src/components/Tabs';
 import SliceAdder from 'src/dashboard/containers/SliceAdder';
-import dashboardComponents from 'src/visualizations/presets/dashboardComponents';
-import NewColumn from '../gridComponents/new/layout/NewColumn';
-import NewDivider from '../gridComponents/new/layout/NewDivider';
-import NewHeader from '../gridComponents/new/layout/NewHeader';
-import NewRow from '../gridComponents/new/layout/NewRow';
-import NewTabs from '../gridComponents/new/layout/NewTabs';
-import NewMarkdown from '../gridComponents/new/layout/NewMarkdown';
-import NewDynamicComponent from '../gridComponents/new/NewDynamicComponent';
-import NewIkiTable from '../gridComponents/new/components/NewIkiTable';
-import NewIkiProcessBuilder from '../gridComponents/new/components/NewIkiProcessBuilder';
-import NewIkiRunPipeline from '../gridComponents/new/components/NewIkiRunPipeline';
-import NewDeepCast from '../gridComponents/new/components/NewDeepCast';
-import NewIkiEitlRow from '../gridComponents/new/components/NewIkiEitlRow';
-import NewIkiEitlColumn from '../gridComponents/new/components/NewIkiEitlColumn';
-import NewDyanmicMarkdown from '../gridComponents/new/components/NewDynamicMarkdown';
-// import NewIkiExplainability from '../gridComponents/new/NewIkiExplainability';
-import NewIkiModelMetrics from '../gridComponents/new/NewIkiModelMetrics';
-import NewIkiDatasetDownload from '../gridComponents/new/components/NewIkiDatasetDownload';
-import NewExternalDatasets from '../gridComponents/new/components/NewExternalDatasets';
-import NewForecast from '../gridComponents/new/components/NewForecast';
-import NewForecastModule from '../gridComponents/new/components/NewForecastModule';
+import { ComponentsTab } from './ComponentsTab/ComponentsTab';
+import { LayoutTab } from './LayoutTab/LayoutTab';
 
 export interface BCPProps {
   isStandalone: boolean;
@@ -59,7 +39,6 @@ const SIDEPANE_FILTERBAR_HEIGHT = 56;
 
 const BuilderComponentPaneTabs = styled(Tabs)`
   line-height: inherit;
-  margin-top: ${({ theme }) => theme.gridUnit * 2}px;
 `;
 
 const DashboardBuilderSidepane = styled.div<{
@@ -115,42 +94,14 @@ const BuilderComponentPane: React.FC<BCPProps> = ({
                     data-test="dashboard-builder-component-pane-tabs-navigation"
                   >
                     <Tabs.TabPane key={1} tab={t('Layout')}>
-                      <NewTabs />
-                      <NewRow />
-                      <NewColumn />
-                      <NewHeader />
-                      <NewMarkdown />
-                      <NewDivider />
+                      <LayoutTab />
                     </Tabs.TabPane>
-                    <Tabs.TabPane key={2} tab={t('Components')}>
-                      <NewDyanmicMarkdown />
-                      <NewIkiTable />
-                      <NewIkiProcessBuilder />
-                      <NewIkiRunPipeline />
-                      <NewDeepCast />
-                      <NewIkiEitlRow />
-                      <NewIkiEitlColumn />
-                      <NewForecastModule />
-                      <NewIkiDatasetDownload />
-                      <NewIkiModelMetrics />
-                      <NewExternalDatasets />
-                      <NewForecast />
 
-                      {/* <NewIkiExplainability /> */}
-                      {dashboardComponents
-                        .getAll()
-                        .map(({ key: componentKey, metadata }) => (
-                          <NewDynamicComponent
-                            metadata={metadata}
-                            componentKey={componentKey}
-                          />
-                        ))}
+                    <Tabs.TabPane key={2} tab={t('Components')}>
+                      <ComponentsTab />
                     </Tabs.TabPane>
-                    <Tabs.TabPane
-                      key={3}
-                      tab={t('Charts')}
-                      className="tab-charts"
-                    >
+
+                    <Tabs.TabPane key={3} tab={t('Charts')}>
                       <SliceAdder
                         height={
                           height + (isSticky ? SUPERSET_HEADER_HEIGHT : 0)

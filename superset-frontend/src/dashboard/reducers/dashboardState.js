@@ -44,6 +44,7 @@ import {
   ON_FILTERS_REFRESH_SUCCESS,
   SET_DATASETS_STATUS,
   SET_SUPERSET_URL,
+  SET_CUSTOM_MARKDOWNS,
 } from '../actions/dashboardState';
 import { HYDRATE_DASHBOARD } from '../actions/hydrate';
 
@@ -237,6 +238,15 @@ export default function dashboardStateReducer(state = {}, action) {
         ...state,
         supersetUrl,
         ikigaiOrigin,
+      };
+    },
+
+    [SET_CUSTOM_MARKDOWNS]() {
+      const { customMarkdowns } = action;
+
+      return {
+        ...state,
+        customMarkdowns,
       };
     },
   };

@@ -39,6 +39,7 @@ import {
   IKI_FORECAST_MODULE_TYPE,
   IKI_DATASET_DOWNLOAD_TYPE,
   IKI_DYNAMIC_MARKDOWN_TYPE,
+  IKI_DYNAMIC_SINGLE_MARKDOWN_TYPE,
 } from '../../util/componentTypes';
 
 import ChartHolder from './ChartHolder';
@@ -51,6 +52,7 @@ import Tab from './Tab';
 import TabsConnected from './Tabs';
 import DynamicComponent from './DynamicComponent';
 import IkiDynamicMarkdown from './IkiDynamicMarkdown';
+import IkiDynamicSingleMarkdown from './IkiDynamicSingleMarkdown';
 import IkiTable from './IkiTable';
 import IkiProcessBuilder from './IkiProcessBuilder';
 import IkiRunPipeline from './IkiRunPipeline';
@@ -97,6 +99,7 @@ export const componentLookup = {
   [TABS_TYPE]: TabsConnected,
   [DYNAMIC_TYPE]: DynamicComponent,
   [IKI_DYNAMIC_MARKDOWN_TYPE]: IkiDynamicMarkdown,
+  [IKI_DYNAMIC_SINGLE_MARKDOWN_TYPE]: IkiDynamicSingleMarkdown,
   [IKI_TABLE_TYPE]: IkiTable,
   [IKI_PROCESS_BUILDER_TYPE]: IkiProcessBuilder,
   [IKI_RUN_PIPELINE_TYPE]: IkiRunPipeline,

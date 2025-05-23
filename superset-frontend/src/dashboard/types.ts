@@ -27,9 +27,11 @@ import {
 import { Dataset } from '@superset-ui/chart-controls';
 import { chart } from 'src/components/Chart/chartReducer';
 import componentTypes from 'src/dashboard/util/componentTypes';
+import PropTypes from 'prop-types';
 
 import { User } from 'src/types/bootstrapTypes';
 import { ChartState } from '../explore/types';
+import { editorModes, orientations } from './constants';
 
 export { Dashboard } from 'src/types/Dashboard';
 
@@ -67,6 +69,7 @@ export type DashboardState = {
   hasUnsavedChanges: boolean;
   ikigaiOrigin: string;
   supersetUrl: string;
+  customMarkdowns: CustomMarkdowns;
 };
 export type DashboardInfo = {
   id: number;
@@ -135,6 +138,13 @@ export type LayoutItem = {
     text?: string;
     uuid: string;
     width: number;
+    customMarkdown?: CustomMarkdown;
+  };
+};
+
+export type LayoutItemWithCustomMarkdown = LayoutItem & {
+  meta: LayoutItem['meta'] & {
+    customMarkdown: CustomMarkdown;
   };
 };
 
@@ -160,3 +170,47 @@ export type EmbeddedDashboard = {
   dashboard_id: string;
   allowed_domains: string[];
 };
+
+export type CustomMarkdown = {
+  custom_markdown_id: string;
+  name: string;
+  project_id: string;
+  definition: any;
+  directory: CustomMarkdownDirectory;
+  created_at: string;
+  modified_at: string;
+};
+
+export type CustomMarkdowns = CustomMarkdown[];
+
+export type CustomMarkdownDirectory = {
+  directory_id: string;
+  name: string;
+  type: 'CUSTOM_MARKDOWN';
+  project_id: string;
+  parent_id: string;
+  size: string;
+};
+
+export const CustomMarkdownDirectoryPropType = PropTypes.shape({
+  directory_id: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
+  type: PropTypes.oneOf(['CUSTOM_MARKDOWN']).isRequired,
+  project_id: PropTypes.string.isRequired,
+  parent_id: PropTypes.string.isRequired,
+  size: PropTypes.string.isRequired,
+});
+
+export const CustomMarkdownPropType = PropTypes.shape({
+  custom_markdown_id: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
+  project_id: PropTypes.string.isRequired,
+  definition: PropTypes.any,
+  directory: CustomMarkdownDirectoryPropType.isRequired,
+  created_at: PropTypes.string.isRequired,
+  modified_at: PropTypes.string.isRequired,
+});
+
+export type Orientation = typeof orientations[keyof typeof orientations];
+
+export type EditorMode = typeof editorModes[keyof typeof editorModes];

@@ -30,6 +30,7 @@ const propTypes = {
   label: PropTypes.string.isRequired,
   className: PropTypes.string,
   demandApp: PropTypes.bool,
+  disableDragDrop: PropTypes.bool,
 };
 
 const defaultProps = {
@@ -38,8 +39,17 @@ const defaultProps = {
 
 export default class DraggableNewComponent extends React.PureComponent {
   render() {
-    const { label, id, type, className, meta, description, demandApp } =
-      this.props;
+    const {
+      label,
+      id,
+      type,
+      className,
+      meta,
+      description,
+      demandApp,
+      disableDragDrop = false,
+    } = this.props;
+
     return (
       <DragDroppable
         component={{ type, id, meta }}
@@ -50,12 +60,15 @@ export default class DraggableNewComponent extends React.PureComponent {
         index={0}
         depth={0}
         editMode
+        disableDragDrop={disableDragDrop}
       >
         {({ dragSourceRef }) => (
           <div
             ref={dragSourceRef}
-            className="new-component"
             data-test="new-component"
+            className={cx('new-component', {
+              'disable-hover': disableDragDrop,
+            })}
           >
             <div className={cx('new-component-placeholder', className)} />
             <div style={{ display: 'flex', flexDirection: 'column' }}>

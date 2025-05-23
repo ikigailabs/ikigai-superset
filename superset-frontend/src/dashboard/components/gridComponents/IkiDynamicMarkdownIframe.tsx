@@ -1,4 +1,5 @@
 import React from 'react';
+import { DYNAMIC_MARKDOWN } from 'src/dashboard/constants';
 import { ContextService } from 'src/service/context-service/context-service';
 
 const { projectId, topLevelOrigin } = ContextService;
@@ -26,7 +27,7 @@ export class IkiDynamicMarkdownIframe extends React.Component<{
     return (
       <iframe
         id={`ikidynamicmarkdown-widget-${component.id}`}
-        name={`dynamic-markdown-${component.id}`}
+        name={`${DYNAMIC_MARKDOWN}-${component.id}`}
         src={`${src}`}
         title="Custom Element"
         style={{ height: '100%' }}

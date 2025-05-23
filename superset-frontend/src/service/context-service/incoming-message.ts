@@ -1,3 +1,5 @@
+import type { CustomMarkdowns } from 'src/dashboard/types';
+
 type IncomingMessagePayload = {
   setCustomElementAliasId: {
     supersetComponentId: string;
@@ -8,6 +10,7 @@ type IncomingMessagePayload = {
   };
   requestFilters: void;
   getDashboardLayout: void;
+  sendCustomMarkdowns: CustomMarkdowns;
 };
 
 export type IncomingMessageType = keyof IncomingMessagePayload;
