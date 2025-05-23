@@ -73,6 +73,7 @@ import {
 import { shouldFocusTabs, getRootLevelTabsComponent } from './utils';
 import DashboardContainer from './DashboardContainer';
 import { useNativeFilters } from './state';
+import { ContextService } from '../../../service/context-service/context-service';
 
 type DashboardBuilderProps = {};
 
@@ -273,6 +274,8 @@ const DashboardBuilder: FC<DashboardBuilderProps> = () => {
     standaloneMode === DashboardStandaloneMode.HIDE_NAV_AND_TITLE ||
     isReport;
   const [barTopOffset, setBarTopOffset] = useState(0);
+
+  useEffect(() => ContextService.requestCustomMarkdowns(), []);
 
   useEffect(() => {
     setBarTopOffset(headerRef.current?.getBoundingClientRect()?.height || 0);

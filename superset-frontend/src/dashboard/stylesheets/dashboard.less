@@ -886,7 +886,6 @@ td.rdtYear:hover {
   width: 374px;
   right: 0;
   height: 100%;
-  height: calc(100% - 118px);
   box-shadow: -4px 0 4px 0 rgba(0, 0, 0, 0.1);
 }
 .dashboard-builder-sidepane .slider-container {
@@ -1985,9 +1984,7 @@ a[role='menuitem'] .dot {
   background: #fff;
   cursor: move;
 }
-.new-component:not(.static):hover {
-  background: #f7f7f7;
-}
+
 .new-component-placeholder {
   position: relative;
   background: #f7f7f7;
@@ -2227,15 +2224,14 @@ a[role='menuitem'] .dot {
 
 .dashboard-builder-sidepane .viewport {
   position: fixed;
-  top: 98px !important;
-  padding: 0 24px;
+  top: 68px !important;
   box-shadow: 0 0 0 transparent !important;
   border-left: 1px solid #eee;
   background-color: #fff;
 }
 
 .dashboard-builder-sidepane .viewport #tabs-panel-2 {
-  height: calc(100vh - 200px);
+  height: calc(100vh - 130px) !important;
   overflow: auto;
 }
 
@@ -2327,6 +2323,141 @@ a[role='menuitem'] .dot {
   bottom: 5px;
 }
 
+/* Custom Component Tab */
+
+.sidepane-padding {
+  padding: 0 16px !important;
+}
+
+.tabs-components .ant-tabs-tab {
+  margin: 0
+}
+
+.create-custom-markdown-container {
+  width: 100%;
+  padding: 16px !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.custom-components-container {
+  height: 100%;
+  overflow-y: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.controls-container {
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 16px
+}
+
+.create-custom-markdown-button {
+  margin-left: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+.create-custom-markdown-button span {
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: capitalize;
+}
+
+.custom-components-content {
+  width: 100%;
+  height: 100%;
+  max-height: 100%;
+  overflow-y: auto;
+  padding-bottom: 30px !important;
+}
+
+.custom-markdown-container {
+  position: relative;
+}
+
+.custom-markdown-container:hover .new-component:not(.static):not(.disable-hover) {
+  background-color: #e8e8e8b7;
+}
+
+.markdown-action-button() {
+  opacity: 0;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 5px;
+  width: 20px;
+  aspect-ratio: 1 / 1;
+  cursor: pointer;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.edit-custom-markdown-button {
+  .markdown-action-button();
+  right: 50px;
+}
+
+.delete-custom-markdown-button {
+  .markdown-action-button();
+  right: 10px;
+}
+
+.custom-markdown-container:hover .edit-custom-markdown-button,
+.custom-markdown-container:hover .delete-custom-markdown-button {
+  opacity: 1;
+}
+
+.added-tag {
+  position: absolute;
+  top: 50%;
+  right: 16px;
+  height: 25px;
+  transform: translateY(-50%);
+  width: auto !important;
+  border-radius: 4px;
+  background: #666666;
+  color: #fff;
+  text-transform: uppercase;
+  font-size: 12px;
+  line-height: 1;
+  padding: 4px 8px;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+  opacity: 1;
+}
+
+.custom-markdown-container:hover .added-tag {
+  opacity: 0;
+}
+
+
+.legacy-components {
+  width: 100%;
+  padding: 0;
+}
+
+.legacy-components > .ant-collapse-content > .ant-collapse-content-box {
+  padding: 0;
+}
+
+.ant-collapse > .ant-collapse-item > .ant-collapse-header {
+  padding-left: 59px;
+  font-weight: 900;
+  color: #626262;
+}
+
 /* Buttons */
 
 .button-container .ant-btn {
@@ -2385,25 +2516,6 @@ a[role='menuitem'] .dot {
 }
 
 /* Inputs */
-
-input {
-  border: 1px solid var(--borderColor) !important;
-  border-radius: 4px !important;
-  box-shadow: 0 0 0 transparent !important;
-  transition: all 0.2s ease;
-}
-
-input:hover {
-  border: 1px solid var(--borderColorHoverInput) !important;
-  box-shadow: 0 0 0 transparent !important;
-  transition: all 0.2s ease;
-}
-
-input:focus {
-  border: 1px solid var(--primaryColor) !important;
-  box-shadow: 0 0 0 transparent !important;
-  transition: all 0.2s ease;
-}
 
 .editable-title input[type='text'] {
   padding: 6px 8px !important;
@@ -2665,20 +2777,13 @@ a:hover {
   font-weight: 200;
 }
 
-.ant-tabs-tabpane .new-component:hover {
-  background: var(--secondaryColor);
-  border: 1px solid #fff;
-  color: var(--primaryColor);
-  transition: all 0.2s ease;
-}
-
 .ant-tabs-tabpane .new-component .new-component-placeholder {
-  // background: #f7f7f7 !important;
   background-color: #eee;
   border-radius: 4px;
   border: none !important;
   width: 40px;
   height: 40px;
+  aspect-ratio: 1/1;
 }
 
 .ant-tabs-tabpane .new-component .new-component-placeholder::before {

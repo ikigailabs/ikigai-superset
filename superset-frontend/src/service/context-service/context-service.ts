@@ -1,12 +1,14 @@
-import { CURRENT_VERSION } from 'src/migrations/dynamic-markdown/migration-runner';
+import { postChartFormData } from 'src/components/Chart/chartAction';
 import { UPDATE_COMPONENTS } from 'src/dashboard/actions/dashboardLayout';
+import { setCustomMarkdowns } from 'src/dashboard/actions/dashboardState';
+import type { CustomMarkdown, CustomMarkdowns } from 'src/dashboard/types';
 import { LOG_EVENT } from 'src/logger/actions';
 import { LOG_ACTIONS_FORCE_REFRESH_CHART } from 'src/logger/LogUtils';
-import { postChartFormData } from 'src/components/Chart/chartAction';
+import { CURRENT_VERSION } from 'src/migrations/dynamic-markdown/migration-runner';
 import { mapSupersetFiltersToPlatformSpec } from './map-superset-filters-to-platform-spec';
 
+import type { IncomingMessage, IncomingMessageType } from './incoming-message';
 import type { OutgoingMessage } from './outgoing-message';
-import type { IncomingMessageType, IncomingMessage } from './incoming-message';
 
 /**
  * Manages communication in between same-window processes. Reads init data passed
@@ -69,6 +71,48 @@ export class SupersetContextService {
     this.sendMessageToCustomElements(message);
   }
 
+  public requestCustomMarkdowns() {
+    const message: OutgoingMessage = {
+      type: 'customMarkdownsRequested',
+      payload: null,
+    };
+
+    this.sendMessageToPlatform(message);
+  }
+
+  public createCustomMarkdown() {
+    const message: OutgoingMessage = {
+      type: 'createCustomMarkdownRequested',
+      payload: null,
+    };
+
+    this.sendMessageToPlatform(message);
+  }
+
+  public editCustomMarkdown(customMarkdown: CustomMarkdown) {
+    const message: OutgoingMessage = {
+      type: 'editCustomMarkdownRequested',
+      payload: customMarkdown,
+    };
+
+    this.sendMessageToPlatform(message);
+  }
+
+  public deleteCustomMarkdown(customMarkdownToDelete: CustomMarkdown) {
+    const message: OutgoingMessage = {
+      type: 'deleteCustomMarkdownRequested',
+      payload: customMarkdownToDelete,
+    };
+
+    this.sendMessageToPlatform(message);
+  }
+
+  private sendMessageToPlatform(message: OutgoingMessage) {
+    if (!this.topLevelOrigin) throw new Error('topLevelOrigin is not set');
+
+    this.thisWindow.parent.postMessage(message, this.topLevelOrigin);
+  }
+
   private sendMessageToCustomElements(message: OutgoingMessage) {
     // This is a pretty ugly way of sending data to child iframes
     const iframes = document.querySelectorAll('iframe');
@@ -92,6 +136,7 @@ export class SupersetContextService {
         this.handleGetDashboardLayout(event.source!, correlationId!);
         break;
       }
+
       case 'setCustomElementAliasId': {
         this.handleSetCustomElementAliasId(
           event.source!,
@@ -100,10 +145,12 @@ export class SupersetContextService {
         );
         break;
       }
+
       case 'requestFilters': {
         this.handleRequestFilters(event.source!, correlationId!);
         break;
       }
+
       case 'notifyUpdateCharts': {
         this.handleNotifyUpdateCharts(
           event.source!,
@@ -112,6 +159,12 @@ export class SupersetContextService {
         );
         break;
       }
+
+      case 'sendCustomMarkdowns': {
+        this.handleSetCustomMarkdowns(payload as any);
+        break;
+      }
+
       default: {
         // no-op
       }
@@ -243,6 +296,12 @@ export class SupersetContextService {
       { correlationId },
       { targetOrigin: this.topLevelOrigin },
     );
+  }
+
+  private async handleSetCustomMarkdowns(payload: CustomMarkdowns) {
+    const { store } = await import('src/views/store');
+
+    store.dispatch(setCustomMarkdowns(payload));
   }
 }
 

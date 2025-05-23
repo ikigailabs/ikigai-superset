@@ -76,13 +76,6 @@ const SIDEPANE_HEADER_HEIGHT = 30;
 const SLICE_ADDER_CONTROL_HEIGHT = 64;
 const DEFAULT_CELL_HEIGHT = 112;
 
-const Controls = styled.div`
-  display: flex;
-  flex-direction: row;
-  padding: ${({ theme }) => theme.gridUnit * 3}px;
-  padding-top: ${({ theme }) => theme.gridUnit * 4}px;
-`;
-
 const StyledSelect = styled(Select)`
   margin-left: ${({ theme }) => theme.gridUnit * 2}px;
   min-width: 150px;
@@ -258,7 +251,7 @@ class SliceAdder extends React.Component {
             {t('Create new chart')}
           </NewChartButton>
         </NewChartButtonContainer> */}
-        <Controls>
+        <div className="controls-container sidepane-padding">
           <Input
             placeholder={t('Filter your charts')}
             className="search-input"
@@ -276,7 +269,7 @@ class SliceAdder extends React.Component {
             }))}
             placeholder={t('Sort by')}
           />
-        </Controls>
+        </div>
         {this.props.isLoading && <Loading />}
         {!this.props.isLoading && this.state.filteredSlices.length > 0 && (
           <List

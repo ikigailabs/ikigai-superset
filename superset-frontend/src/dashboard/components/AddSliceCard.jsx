@@ -48,9 +48,7 @@ const Styled = styled.div`
       border-radius: ${theme.gridUnit}px;
       background: ${theme.colors.grayscale.light5};
       padding: ${theme.gridUnit * 2}px;
-      margin: 0 ${theme.gridUnit * 3}px
-        ${theme.gridUnit * 3}px
-        ${theme.gridUnit * 3}px;
+      margin: 0 16px;
       position: relative;
       cursor: move;
       white-space: nowrap;

@@ -625,3 +625,8 @@ export const SET_SUPERSET_URL = 'SET_SUPERSET_URL';
 export function setSupersetUrl(supersetUrl) {
   return { type: SET_SUPERSET_URL, supersetUrl };
 }
+
+export const SET_CUSTOM_MARKDOWNS = 'SET_CUSTOM_MARKDOWNS';
+export function setCustomMarkdowns(customMarkdowns) {
+  return { type: SET_CUSTOM_MARKDOWNS, customMarkdowns };
+}
