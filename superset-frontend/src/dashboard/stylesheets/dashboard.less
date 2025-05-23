@@ -837,7 +837,7 @@ td.rdtYear:hover {
   flex-grow: 1;
   display: flex;
   flex-direction: column;
-  // padding-left: 20px;
+  margin-left: 0 !important;
 }
 .dashboard > .with-popover-menu > .popover-menu {
   left: 24px;
@@ -1478,6 +1478,8 @@ i.warning {
 }
 .grid-container > div:first-child {
   height: inherit !important;
+  width: calc(100% - 48px) !important;
+  margin: 0 auto;
 }
 .grid-content {
   display: flex;
@@ -1899,6 +1901,7 @@ a[role='menuitem'] .dot {
 .dashboard-component-divider {
   width: 100%;
   padding: 8px 0;
+  opacity: 0;
   background-color: transparent;
 }
 .dashboard-component-divider:after {
@@ -2119,9 +2122,44 @@ a[role='menuitem'] .dot {
 /*@import url('https://fonts.googleapis.com/css2?family=Karla&family=Mulish&display=swap');*/
 
 /* General */
+/* Top level  */
+.dashboard--editing .grid-container {
+  margin: 0 0 0 32px !important;
+}
+
+/* Dashboard grid */
+.grid-container {
+  padding: 0 !important;
+  margin: 0 !important;
+  max-width: 100% !important;
+  background-color: rgba(245, 247, 248, 1);
+}
+
+/* All dashboard components */
+.dashboard-component.dashboard-component {
+  box-shadow: none !important;
+}
+
+/* Custom Components */
+[id*='DYNAMIC'] .resizable-container {
+  padding: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Big # chart */
+.header-line {
+  font-weight: bold;
+  text-align: center;
+}
+
+/* Big # subheader text */
+.subheader-line {
+  text-align: center;
+  color: gray;
+}
 
 /* Scrollbars */
-
 * {
   scrollbar-width: thin;
   scroll-behavior: smooth;
@@ -2147,12 +2185,6 @@ a[role='menuitem'] .dot {
 }
 
 /* Dashboard */
-
-.dashboard {
-  background-color: var(--backgroundColor);
-  color: var(--txtColor);
-  font-family: 'Inter-Regular', sans-serif !important;
-}
 
 .dashboard > div > div {
   padding-bottom: 0 !important;
@@ -2184,7 +2216,7 @@ a[role='menuitem'] .dot {
 /* Content */
 
 .dashboard-content {
-  // margin-top: 30px;
+  background-color: #f5f7f8;
 }
 
 /* Sidepane / components slide in Sidebar */
@@ -2463,6 +2495,7 @@ a:hover {
 /* Grid */
 
 .dashboard-grid {
+  width: calc(100% - 48px) !important;
 }
 
 /*.dashboard-grid .grid-content .dragdroppable .dragdroppable-row {
@@ -2482,8 +2515,7 @@ a:hover {
 }
 
 .grid-row {
-  margin-top: 16px;
-  margin-bottom: 16px;
+  margin: 0;
 }
 
 /* Component */
@@ -2526,7 +2558,6 @@ a:hover {
 .dashboard-content
   .dashboard-grid
   .dashboard-component.dashboard-component-tabs {
-  background-color: transparent !important;
   box-shadow: none !important;
 }
 
@@ -2543,6 +2574,7 @@ a:hover {
 }
 
 .ant-tabs-nav-wrap {
+  padding-bottom: 3px;
 }
 
 .ant-tabs-nav-list {
