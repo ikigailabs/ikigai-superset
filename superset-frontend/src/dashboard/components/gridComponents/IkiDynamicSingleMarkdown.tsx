@@ -162,7 +162,7 @@ const IkiDynamicSingleMarkdown = ({
                 <IkiDynamicMarkdownIframe
                   component={component}
                   customElementId={customMarkdownId}
-                  editMode={false}
+                  editMode={editorMode === editorModes.EDIT}
                 />
               </div>
             </ResizableContainer>
