@@ -71,7 +71,9 @@ const IkiDynamicSingleMarkdown = ({
   onResizeStop,
 }: PropTypes) => {
   const [isFocused, setIsFocused] = useState(false);
-  const [editorMode, setEditorMode] = useState<EditorMode>(editorModes.PREVIEW);
+  const [editorMode, setEditorMode] = useState<EditorMode>(
+    editMode ? editorModes.EDIT : editorModes.PREVIEW,
+  );
 
   const {
     meta: {
@@ -91,6 +93,11 @@ const IkiDynamicSingleMarkdown = ({
     ContextService.sendDashboardLayout();
   }, []);
 
+  useEffect(() => {
+    ContextService.sendEditMode(editMode);
+    setEditorMode(editMode ? editorModes.EDIT : editorModes.PREVIEW);
+  }, [editMode]);
+
   function handleChangeEditorMode(newEditorMode: EditorMode) {
     setEditorMode(newEditorMode);
   }
@@ -106,6 +113,8 @@ const IkiDynamicSingleMarkdown = ({
 
   if (!customMarkdownId)
     throw new Error('custom_element_id parm must be truthy!');
+
+  console.info('editorMode', editorMode);
 
   return (
     <DragDroppable
