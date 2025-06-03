@@ -167,7 +167,6 @@ const IkiDynamicSingleMarkdown = ({
                 className="dashboard-component-inner"
                 data-test="dashboard-component-chart-holder"
               >
-
                 <IkiDynamicMarkdownIframe
                   component={component}
                   customElementId={customMarkdownId}
