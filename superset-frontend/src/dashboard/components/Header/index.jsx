@@ -614,6 +614,15 @@ class Header extends React.PureComponent {
                 />
               ) : (
                 <div css={actionButtonsStyle}>
+                  <Button
+                    buttonStyle="dashed"
+                    onClick={this.forceRefresh}
+                    data-test="refresh-dashboard-menu-item"
+                    aria-label={t('Refresh dashboard')}
+                  >
+                    <Icons.Refresh />
+                  </Button>
+
                   {userCanEdit && (
                     <Button
                       buttonStyle="secondary"
