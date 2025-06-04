@@ -241,7 +241,7 @@ class HeaderActionsDropdown extends React.PureComponent {
 
     return (
       <Menu selectable={false} data-test="header-actions-menu" {...rest}>
-        {!editMode && (
+        {/* {!editMode && (
           <Menu.Item
             key={MENU_KEYS.REFRESH_DASHBOARD}
             data-test="refresh-dashboard-menu-item"
@@ -250,8 +250,8 @@ class HeaderActionsDropdown extends React.PureComponent {
           >
             {t('Refresh dashboard')}
           </Menu.Item>
-        )}
-        {!editMode && (
+        )} */}
+        {/* {!editMode && (
           <Menu.Item
             key={MENU_KEYS.TOGGLE_FULLSCREEN}
             onClick={this.handleMenuClick}
@@ -260,7 +260,7 @@ class HeaderActionsDropdown extends React.PureComponent {
               ? t('Exit fullscreen')
               : t('Enter fullscreen')}
           </Menu.Item>
-        )}
+        )} */}
         {/* {editMode && (
           <Menu.Item
             key={MENU_KEYS.EDIT_PROPERTIES}
