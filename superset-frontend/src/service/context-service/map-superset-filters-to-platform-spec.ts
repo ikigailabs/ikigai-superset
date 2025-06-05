@@ -21,8 +21,8 @@ export type DashboardFilter = {
 export type DashboardFilters = Record<string, DashboardFilter>;
 
 type PlatformFilterField = {
-  column: string;
   label: string;
+  value: string | string[];
   multiple: boolean;
 };
 
@@ -32,14 +32,16 @@ export type PlatformFilter = {
   chartId: string;
 };
 
-function mapFilterFields(columns: DashboardFilter['columns']) {
+function mapFilterFields(
+  columns: DashboardFilter['columns'],
+  labels: DashboardFilter['labels'],
+) {
   return Object.entries(columns).map(([key, columnValue]) => {
     const isMultiple =
       typeof columnValue === 'string' ? false : columnValue.length > 1;
-
     const filterField: PlatformFilterField = {
-      column: key,
-      label: key,
+      label: labels[key],
+      value: columnValue,
       multiple: isMultiple,
     };
 
@@ -52,7 +54,7 @@ export function mapSupersetFiltersToPlatformSpec(
 ): PlatformFilter[] {
   return Object.entries(dashboardFilters).map(([chartId, dashFilter]) => ({
     filters: dashFilter.columns,
-    filterFields: mapFilterFields(dashFilter.columns),
+    filterFields: mapFilterFields(dashFilter.columns, dashFilter.labels),
     chartId,
   }));
 }
