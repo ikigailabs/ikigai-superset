@@ -13,7 +13,7 @@ export type DashboardFilter = {
   directPathToFilter: string[];
   isDateFilter: boolean;
   isInstantFilter: boolean;
-  columns: Record<string, string[] | string>;
+  columns: Record<string, string[]>;
   labels: Record<string, string>;
   scopes: Scopes;
 };
@@ -22,7 +22,7 @@ export type DashboardFilters = Record<string, DashboardFilter>;
 
 type PlatformFilterField = {
   label: string;
-  value: string | string[];
+  value: string[];
   multiple: boolean;
 };
 
@@ -36,13 +36,11 @@ function mapFilterFields(
   columns: DashboardFilter['columns'],
   labels: DashboardFilter['labels'],
 ) {
-  return Object.entries(columns).map(([key, columnValue]) => {
-    const isMultiple =
-      typeof columnValue === 'string' ? false : columnValue.length > 1;
+  return Object.entries(columns).map(([key, columnValue = []]) => {
     const filterField: PlatformFilterField = {
       label: labels[key],
       value: columnValue,
-      multiple: isMultiple,
+      multiple: columnValue.length > 1,
     };
 
     return filterField;
