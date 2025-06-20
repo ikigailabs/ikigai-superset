@@ -37,7 +37,7 @@ export default function DraggableNewDivider({
       id={NEW_DYNAMIC_COMPONENT}
       type={IKI_DYNAMIC_SINGLE_MARKDOWN_TYPE}
       label={t(customMarkdown.name)}
-      description="Custom component"
+      description="Custom Element"
       className="fa fa-mouse-pointer"
       meta={{ customMarkdown }}
       isCustomComponent

@@ -37,7 +37,7 @@ export class IkiDynamicMarkdownIframe extends React.Component<{
           id="ikidynamicmarkdown-widget-${component.id}"
           name="${DYNAMIC_MARKDOWN}-${timestamp}"
           src="${url.toString()}"
-          title="Custom Component"
+          title="Custom Element"
           style="height:100%;"
         />`;
 
