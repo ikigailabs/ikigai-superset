@@ -292,9 +292,11 @@ function ExploreViewContainer(props) {
   const onQuery = useCallback(() => {
     props.actions.setForceQuery(false);
     props.actions.triggerQuery(true, props.chart.id);
-    addHistory();
+
+    // commented out to resolve: https://ikigailabs.atlassian.net/browse/PR-932
+    // addHistory();
     setLastQueriedControls(props.controls);
-  }, [props.controls, addHistory, props.actions, props.chart.id]);
+  }, [props.controls, props.actions, props.chart.id]);
 
   const handleKeydown = useCallback(
     event => {
