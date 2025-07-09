@@ -32,13 +32,10 @@ export type PlatformFilter = {
   chartId: string;
 };
 
-function mapFilterFields(
-  columns: DashboardFilter['columns'],
-  labels: DashboardFilter['labels'],
-) {
+function mapFilterFields(columns: DashboardFilter['columns']) {
   return Object.entries(columns).map(([key, columnValue = []]) => {
     const filterField: PlatformFilterField = {
-      label: labels[key],
+      label: key,
       value: columnValue,
       multiple: columnValue.length > 1,
     };
@@ -52,7 +49,7 @@ export function mapSupersetFiltersToPlatformSpec(
 ): PlatformFilter[] {
   return Object.entries(dashboardFilters).map(([chartId, dashFilter]) => ({
     filters: dashFilter.columns,
-    filterFields: mapFilterFields(dashFilter.columns, dashFilter.labels),
+    filterFields: mapFilterFields(dashFilter.columns),
     chartId,
   }));
 }
