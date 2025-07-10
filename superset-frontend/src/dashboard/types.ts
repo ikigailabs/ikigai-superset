@@ -144,6 +144,7 @@ export type LayoutItem = {
 
 export type LayoutItemWithCustomMarkdown = LayoutItem & {
   meta: LayoutItem['meta'] & {
+    customElementId?: string;
     customMarkdown: CustomMarkdown;
   };
 };

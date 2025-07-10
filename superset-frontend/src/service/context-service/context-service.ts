@@ -107,6 +107,21 @@ export class SupersetContextService {
     this.sendMessageToPlatform(message);
   }
 
+  public requestCustomElementAliasId(
+    supersetComponentId: string,
+    customComponentId: string,
+  ) {
+    const message: OutgoingMessage = {
+      type: 'customElementAliasIdRequested',
+      payload: {
+        supersetComponentId,
+        customComponentId,
+      },
+    };
+
+    this.sendMessageToPlatform(message);
+  }
+
   private sendMessageToPlatform(message: OutgoingMessage) {
     if (!this.topLevelOrigin) throw new Error('topLevelOrigin is not set');
 

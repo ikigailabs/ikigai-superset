@@ -9,6 +9,10 @@ type OutgoingMessagePayload = {
   createCustomMarkdownRequested: null;
   editCustomMarkdownRequested: CustomMarkdown;
   deleteCustomMarkdownRequested: CustomMarkdown;
+  customElementAliasIdRequested: {
+    supersetComponentId: string;
+    customComponentId: string;
+  };
 };
 
 type OutgoingMessageType = keyof OutgoingMessagePayload;

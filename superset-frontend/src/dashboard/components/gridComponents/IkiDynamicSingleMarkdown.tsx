@@ -70,17 +70,16 @@ const IkiDynamicSingleMarkdown = ({
   onResizeStart,
   onResizeStop,
 }: PropTypes) => {
+  const { customMarkdown } = component.meta;
+  const { custom_markdown_id } = customMarkdown;
+
+  const [aliasId, setAliasId] = useState<string | null>(null);
+
   const [isFocused, setIsFocused] = useState(false);
 
   const [editorMode, setEditorMode] = useState<EditorMode>(
     editMode ? editorModes.EDIT : editorModes.PREVIEW,
   );
-
-  const {
-    meta: {
-      customMarkdown: { custom_markdown_id: customMarkdownId },
-    },
-  } = component;
 
   const widthMultiple =
     parentComponent.type === COLUMN_TYPE
@@ -92,12 +91,21 @@ const IkiDynamicSingleMarkdown = ({
 
   useEffect(() => {
     ContextService.sendDashboardLayout();
+    ContextService.requestCustomElementAliasId(
+      component.id, // supersetComponentId
+      custom_markdown_id,
+    );
   }, []);
 
   useEffect(() => {
     ContextService.sendEditMode(editMode);
     setEditorMode(editMode ? editorModes.EDIT : editorModes.PREVIEW);
   }, [editMode]);
+
+  useEffect(() => {
+    if (!component.meta.customElementId) return;
+    setAliasId(component.meta.customElementId);
+  }, [component.meta]);
 
   function handleChangeEditorMode(newEditorMode: EditorMode) {
     setEditorMode(newEditorMode);
@@ -112,8 +120,7 @@ const IkiDynamicSingleMarkdown = ({
     deleteComponent(id, parentId);
   }
 
-  if (!customMarkdownId)
-    throw new Error('custom_element_id parm must be truthy!');
+  if (!aliasId) return null;
 
   return (
     <DragDroppable
@@ -169,7 +176,7 @@ const IkiDynamicSingleMarkdown = ({
               >
                 <IkiDynamicMarkdownIframe
                   component={component}
-                  customElementId={customMarkdownId}
+                  customElementId={aliasId || ''}
                   editMode={editorMode === editorModes.EDIT}
                 />
               </div>
