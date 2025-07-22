@@ -71,6 +71,15 @@ export class SupersetContextService {
     this.sendMessageToCustomElements(message);
   }
 
+  public async sendDatasetsToRefresh(datasetAliasIds: string[]) {
+    const message: OutgoingMessage = {
+      type: 'elementsRefreshEvent',
+      payload: datasetAliasIds,
+    };
+    console.info('sendDatasetsToRefresh', message);
+    this.sendMessageToCustomElements(message);
+  }
+
   public requestCustomMarkdowns() {
     const message: OutgoingMessage = {
       type: 'customMarkdownsRequested',
@@ -134,6 +143,7 @@ export class SupersetContextService {
     iframes.forEach((iframe: HTMLIFrameElement) => {
       if (!iframe.name.includes('dynamic-markdown') || !this.topLevelOrigin)
         return;
+      console.info('sending ', message, ' to ', iframe);
       iframe.contentWindow!.postMessage(message, this.topLevelOrigin);
     });
   }
@@ -177,6 +187,11 @@ export class SupersetContextService {
 
       case 'sendCustomMarkdowns': {
         this.handleSetCustomMarkdowns(payload as any);
+        break;
+      }
+
+      case 'notifyElementsUpdateCharts': {
+        this.sendDatasetsToRefresh(payload as unknown as string[]);
         break;
       }
 

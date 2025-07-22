@@ -8,6 +8,9 @@ type IncomingMessagePayload = {
   notifyUpdateCharts: {
     chartIds: string[];
   };
+  notifyElementsUpdateCharts: {
+    datasetAliasIds: string[];
+  };
   requestFilters: void;
   getDashboardLayout: void;
   sendCustomMarkdowns: CustomMarkdowns;
