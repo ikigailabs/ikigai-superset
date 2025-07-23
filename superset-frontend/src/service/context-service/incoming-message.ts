@@ -8,7 +8,7 @@ type IncomingMessagePayload = {
   notifyUpdateCharts: {
     chartIds: string[];
   };
-  notifyElementsUpdateCharts: {
+  notifyUpdateCustomElementCharts: {
     datasetAliasIds: string[];
   };
   requestFilters: void;
