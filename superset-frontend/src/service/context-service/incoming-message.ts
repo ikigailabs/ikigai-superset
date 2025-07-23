@@ -5,7 +5,7 @@ type IncomingMessagePayload = {
     supersetComponentId: string;
     customComponentAliasId: string;
   };
-  notifyUpdateCharts: {
+  notifyUpdateSupersetCharts: {
     chartIds: string[];
   };
   notifyUpdateCustomElementCharts: {

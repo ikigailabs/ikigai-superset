@@ -174,8 +174,8 @@ export class SupersetContextService {
         break;
       }
 
-      case 'notifyUpdateCharts': {
-        this.handleNotifyUpdateCharts(
+      case 'notifyUpdateSupersetCharts': {
+        this.handleNotifyUpdateSupersetCharts(
           event.source!,
           correlationId!,
           payload as any,
@@ -199,7 +199,7 @@ export class SupersetContextService {
     }
   };
 
-  private async handleNotifyUpdateCharts(
+  private async handleNotifyUpdateSupersetCharts(
     source: MessageEventSource,
     correlationId: string,
     chartIds: string[],
