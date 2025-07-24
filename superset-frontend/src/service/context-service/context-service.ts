@@ -71,10 +71,14 @@ export class SupersetContextService {
     this.sendMessageToCustomElements(message);
   }
 
-  public sendDatasetsToRefresh(datasetAliasIds: string[]) {
+  public sendDatasetsToRefresh(
+    datasetAliasIds: string[],
+    correlationId: string,
+  ) {
     const message: OutgoingMessage = {
       type: 'elementsRefreshEvent',
       payload: datasetAliasIds,
+      correlationId,
     };
     this.sendMessageToCustomElements(message);
   }
@@ -189,7 +193,10 @@ export class SupersetContextService {
       }
 
       case 'notifyUpdateCustomElementCharts': {
-        this.sendDatasetsToRefresh(payload as unknown as string[]);
+        this.sendDatasetsToRefresh(
+          payload as unknown as string[],
+          correlationId!,
+        );
         break;
       }
 
