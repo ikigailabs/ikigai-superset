@@ -13,6 +13,7 @@ type OutgoingMessagePayload = {
     supersetComponentId: string;
     customComponentId: string;
   };
+  elementsRefreshEvent: string[];
 };
 
 type OutgoingMessageType = keyof OutgoingMessagePayload;
