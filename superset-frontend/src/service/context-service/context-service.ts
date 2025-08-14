@@ -71,6 +71,18 @@ export class SupersetContextService {
     this.sendMessageToCustomElements(message);
   }
 
+  public sendDatasetsToRefresh(
+    datasetAliasIds: string[],
+    correlationId: string,
+  ) {
+    const message: OutgoingMessage = {
+      type: 'elementsRefreshEvent',
+      payload: datasetAliasIds,
+      correlationId,
+    };
+    this.sendMessageToCustomElements(message);
+  }
+
   public requestCustomMarkdowns() {
     const message: OutgoingMessage = {
       type: 'customMarkdownsRequested',
@@ -166,8 +178,8 @@ export class SupersetContextService {
         break;
       }
 
-      case 'notifyUpdateCharts': {
-        this.handleNotifyUpdateCharts(
+      case 'notifyUpdateSupersetCharts': {
+        this.handleNotifyUpdateSupersetCharts(
           event.source!,
           correlationId!,
           payload as any,
@@ -180,13 +192,21 @@ export class SupersetContextService {
         break;
       }
 
+      case 'notifyUpdateCustomElementCharts': {
+        this.sendDatasetsToRefresh(
+          payload as unknown as string[],
+          correlationId!,
+        );
+        break;
+      }
+
       default: {
         // no-op
       }
     }
   };
 
-  private async handleNotifyUpdateCharts(
+  private async handleNotifyUpdateSupersetCharts(
     source: MessageEventSource,
     correlationId: string,
     chartIds: string[],
