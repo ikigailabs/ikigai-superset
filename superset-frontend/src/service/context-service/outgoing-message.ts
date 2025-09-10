@@ -14,6 +14,7 @@ type OutgoingMessagePayload = {
     customComponentId: string;
   };
   elementsRefreshEvent: string[];
+  refreshDashboardRequested: void;
 };
 
 type OutgoingMessageType = keyof OutgoingMessagePayload;
