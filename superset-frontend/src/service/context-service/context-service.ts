@@ -83,6 +83,14 @@ export class SupersetContextService {
     this.sendMessageToCustomElements(message);
   }
 
+  public refreshDashboard() {
+    const message: OutgoingMessage = {
+      type: 'refreshDashboardRequested',
+      payload: null,
+    };
+    this.sendMessageToPlatform(message);
+  }
+
   public requestCustomMarkdowns() {
     const message: OutgoingMessage = {
       type: 'customMarkdownsRequested',
