@@ -51,8 +51,8 @@ import findPermission from 'src/dashboard/util/findPermission';
 import { FILTER_BOX_MIGRATION_STATES } from 'src/explore/constants';
 import { PageHeaderWithActions } from 'src/components/PageHeaderWithActions';
 import { Dropdown } from 'src/components/Dropdown';
-import { DashboardEmbedModal } from '../DashboardEmbedControls';
 import { ContextService } from 'src/service/context-service/context-service';
+import { DashboardEmbedModal } from '../DashboardEmbedControls';
 
 const propTypes = {
   addSuccessToast: PropTypes.func.isRequired,
