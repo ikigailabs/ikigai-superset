@@ -117,3 +117,4 @@ except ImportError:
 # We need to use insecure cookies and no SameSite value in order for platform-ui and superset to play
 # nice when running on localhost. In remote environments, Secure == True and SameSite == 'None'
 # SESSION_COOKIE_SAMESITE = 'None'  # One of [None, 'None', 'Lax', 'Strict']
+SESSION_COOKIE_SECURE = False  # Prevent cookie from being transmitted over non-tls?
