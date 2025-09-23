@@ -1,13 +1,22 @@
 import { postChartFormData } from 'src/components/Chart/chartAction';
 import { UPDATE_COMPONENTS } from 'src/dashboard/actions/dashboardLayout';
 import { setCustomMarkdowns } from 'src/dashboard/actions/dashboardState';
-import type { CustomMarkdown, CustomMarkdowns } from 'src/dashboard/types';
+
 import { LOG_EVENT } from 'src/logger/actions';
 import { LOG_ACTIONS_FORCE_REFRESH_CHART } from 'src/logger/LogUtils';
 import { CURRENT_VERSION } from 'src/migrations/dynamic-markdown/migration-runner';
 import { mapSupersetFiltersToPlatformSpec } from './map-superset-filters-to-platform-spec';
 
-import type { IncomingMessage, IncomingMessageType } from './incoming-message';
+import { setFilterConfiguration } from 'src/dashboard/actions/nativeFilters';
+import { clearDataMask, updateDataMask } from 'src/dataMask/actions';
+import { type Filter, NativeFilterType } from '@superset-ui/core';
+
+import type {
+  UpsertDataMaskFilterParams,
+  UpsertNativeFilterParams,
+} from './types';
+import type { CustomMarkdown, CustomMarkdowns } from 'src/dashboard/types';
+import type { IncomingMessageUnion } from './incoming-message';
 import type { OutgoingMessage } from './outgoing-message';
 
 /**
@@ -158,15 +167,13 @@ export class SupersetContextService {
     });
   }
 
-  private onMessage = <K extends IncomingMessageType>(
-    event: MessageEvent<IncomingMessage<K>>,
-  ) => {
+  private onMessage = (event: MessageEvent<IncomingMessageUnion>) => {
     if (event.origin !== this.topLevelOrigin) return;
 
-    const { type, correlationId, payload } = event.data ?? {};
-    if (!type) return;
+    const { correlationId } = event.data ?? {};
+    if (!event.data.type) return;
 
-    switch (type) {
+    switch (event.data.type) {
       case 'getDashboardLayout': {
         this.handleGetDashboardLayout(event.source!, correlationId!);
         break;
@@ -176,7 +183,7 @@ export class SupersetContextService {
         this.handleSetCustomElementAliasId(
           event.source!,
           correlationId!,
-          payload,
+          event.data.payload!,
         );
         break;
       }
@@ -190,19 +197,47 @@ export class SupersetContextService {
         this.handleNotifyUpdateSupersetCharts(
           event.source!,
           correlationId!,
-          payload as any,
+          event.data.payload!.chartIds,
         );
         break;
       }
 
       case 'sendCustomMarkdowns': {
-        this.handleSetCustomMarkdowns(payload as any);
+        this.handleSetCustomMarkdowns(event.data.payload!);
         break;
       }
 
       case 'notifyUpdateCustomElementCharts': {
         this.sendDatasetsToRefresh(
-          payload as unknown as string[],
+          event.data.payload!.datasetAliasIds,
+          correlationId!,
+        );
+        break;
+      }
+
+      case 'upsertNativeFilter': {
+        this.upsertNativeFilter(
+          event.source!,
+          event.data.payload!,
+          correlationId!,
+        );
+        break;
+      }
+
+      case 'upsertDataMask': {
+        this.upsertDataMask(event.source!, event.data.payload!, correlationId!);
+        break;
+      }
+
+      case 'deleteDataMask': {
+        this.deleteDataMask(event.source!, event.data.payload!, correlationId!);
+        break;
+      }
+
+      case 'deleteNativeFilter': {
+        this.deleteNativeFilter(
+          event.source!,
+          event.data.payload!,
           correlationId!,
         );
         break;
@@ -213,6 +248,121 @@ export class SupersetContextService {
       }
     }
   };
+
+  private async deleteDataMask(
+    source: MessageEventSource,
+    payload: string,
+    correlationId: string,
+  ) {
+    const { store } = await import('src/views/store');
+    const dataMasks = store.getState().dataMask;
+
+    // TODO: Superset doesn't provide typing for dataMasks in v2.
+    // Once upgraded, revisit this line
+    if ((dataMasks as any)[payload]) {
+      store.dispatch(clearDataMask(payload));
+    }
+
+    // send acknoledgement
+    source.postMessage(
+      { correlationId },
+      { targetOrigin: this.topLevelOrigin },
+    );
+  }
+
+  private async deleteNativeFilter(
+    source: MessageEventSource,
+    payload: string,
+    correlationId: string,
+  ) {
+    const { store } = await import('src/views/store');
+
+    const nativeFilters = store.getState().nativeFilters;
+    const filtersClone = JSON.parse(JSON.stringify(nativeFilters.filters));
+    delete filtersClone.filters[payload];
+
+    const filterConfigThunk = setFilterConfiguration(filtersClone);
+    filterConfigThunk(store.dispatch, store.getState);
+
+    // send acknoledgement
+    source.postMessage(
+      { correlationId },
+      { targetOrigin: this.topLevelOrigin },
+    );
+  }
+
+  private async upsertNativeFilter(
+    source: MessageEventSource,
+    payload: UpsertNativeFilterParams,
+    correlationId: string,
+  ) {
+    const { store } = await import('src/views/store');
+
+    const filterObject: Filter = {
+      cascadeParentIds: [],
+      defaultDataMask: {},
+      id: payload.id,
+      name: payload.filterName,
+      scope: {
+        // no-op
+        rootPath: ['ROOT_ID'],
+        excluded: [],
+      },
+      filterType: 'value',
+      targets: [
+        {
+          datasetId: 0,
+          column: {
+            name: payload.columnName,
+          },
+        },
+      ], // if column is unset, empty array will do
+      controlValues: {}, // no-op
+      description: '', // no-op
+      type: NativeFilterType.NATIVE_FILTER, // no-op
+    };
+
+    const nativeFilters = Object.values(store.getState().nativeFilters.filters);
+    const filterConfigThunk = setFilterConfiguration([
+      ...nativeFilters,
+      filterObject,
+    ]);
+
+    filterConfigThunk(store.dispatch, store.getState);
+
+    // send acknoledgement
+    source.postMessage(
+      { correlationId },
+      { targetOrigin: this.topLevelOrigin },
+    );
+  }
+
+  private async upsertDataMask(
+    source: MessageEventSource,
+    payload: UpsertDataMaskFilterParams,
+    correlationId: string,
+  ) {
+    const { store } = await import('src/views/store');
+
+    store.dispatch(
+      updateDataMask(payload.filterId, {
+        extraFormData: {
+          filters: [
+            {
+              ...payload.opAndValue,
+              col: payload.columnName,
+            },
+          ],
+        },
+      }),
+    );
+
+    // send acknoledgement
+    source.postMessage(
+      { correlationId },
+      { targetOrigin: this.topLevelOrigin },
+    );
+  }
 
   private async handleNotifyUpdateSupersetCharts(
     source: MessageEventSource,
@@ -312,7 +462,10 @@ export class SupersetContextService {
   private async handleSetCustomElementAliasId(
     source: MessageEventSource,
     correlationId: string,
-    payload: any,
+    payload: {
+      supersetComponentId: string;
+      customComponentAliasId: string;
+    },
   ) {
     const { store } = await import('src/views/store');
     const { supersetComponentId, customComponentAliasId } = payload;
