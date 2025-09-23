@@ -1,5 +1,6 @@
 import type { CustomMarkdown, DashboardLayout } from 'src/dashboard/types';
 import type { PlatformFilter } from './map-superset-filters-to-platform-spec';
+import type { PlatformCompliantDataMask } from 'src/middleware/data-mask-sync';
 
 type OutgoingMessagePayload = {
   dashboardLayoutUpdated: DashboardLayout;
@@ -15,6 +16,7 @@ type OutgoingMessagePayload = {
   };
   elementsRefreshEvent: string[];
   refreshDashboardRequested: void;
+  sendDataMasks: PlatformCompliantDataMask[];
 };
 
 type OutgoingMessageType = keyof OutgoingMessagePayload;

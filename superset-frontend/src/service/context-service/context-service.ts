@@ -18,6 +18,7 @@ import type {
 import type { CustomMarkdown, CustomMarkdowns } from 'src/dashboard/types';
 import type { IncomingMessageUnion } from './incoming-message';
 import type { OutgoingMessage } from './outgoing-message';
+import type { PlatformCompliantDataMask } from 'src/middleware/data-mask-sync';
 
 /**
  * Manages communication in between same-window processes. Reads init data passed
@@ -78,6 +79,13 @@ export class SupersetContextService {
     };
 
     this.sendMessageToCustomElements(message);
+  }
+
+  public async sendDataMasks(dataMasks: PlatformCompliantDataMask[]) {
+    this.sendMessageToCustomElements({
+      payload: dataMasks,
+      type: 'sendDataMasks',
+    })
   }
 
   public sendDatasetsToRefresh(

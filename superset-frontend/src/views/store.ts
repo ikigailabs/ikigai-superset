@@ -36,6 +36,7 @@ import {
   BootstrapUser,
   UserWithPermissionsAndRoles,
 } from 'src/types/bootstrapTypes';
+import dataMaskSyncMiddleware from 'src/middleware/data-mask-sync';
 
 // Some reducers don't do anything, and redux is just used to reference the initial "state".
 // This may change later, as the client application takes on more responsibilities.
@@ -90,5 +91,8 @@ export const rootReducer = combineReducers({
 export const store = createStore(
   rootReducer,
   {},
-  compose(applyMiddleware(thunk, logger), initEnhancer(false)),
+  compose(
+    applyMiddleware(thunk, logger, dataMaskSyncMiddleware),
+    initEnhancer(false),
+  ),
 );
