@@ -277,11 +277,6 @@ const DashboardBuilder: FC<DashboardBuilderProps> = () => {
     isReport;
   const [barTopOffset, setBarTopOffset] = useState(0);
 
-  useEffect(() => {
-    dispatch(setFilterConfiguration([]));
-    dispatch(clearDataMaskState());
-  }, []);
-
   useEffect(() => ContextService.requestCustomMarkdowns(), []);
 
   useEffect(() => {
