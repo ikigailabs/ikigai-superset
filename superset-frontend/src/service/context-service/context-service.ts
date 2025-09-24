@@ -9,16 +9,21 @@ import { mapSupersetFiltersToPlatformSpec } from './map-superset-filters-to-plat
 
 import { setFilterConfiguration } from 'src/dashboard/actions/nativeFilters';
 import { clearDataMask, updateDataMask } from 'src/dataMask/actions';
-import { type Filter, NativeFilterType } from '@superset-ui/core';
+import { NativeFilterType } from '@superset-ui/core';
 
 import type {
   UpsertDataMaskFilterParams,
   UpsertNativeFilterParams,
 } from './types';
+import type { Filter } from '@superset-ui/core';
 import type { CustomMarkdown, CustomMarkdowns } from 'src/dashboard/types';
 import type { IncomingMessageUnion } from './incoming-message';
 import type { OutgoingMessage } from './outgoing-message';
 import type { PlatformCompliantDataMask } from 'src/middleware/data-mask-sync';
+import {
+  suggestionKeyDeleted,
+  suggestionKeyUpserted,
+} from 'src/middleware/suggestion-key-sync';
 
 /**
  * Manages communication in between same-window processes. Reads init data passed
@@ -85,7 +90,7 @@ export class SupersetContextService {
     this.sendMessageToCustomElements({
       payload: dataMasks,
       type: 'sendDataMasks',
-    })
+    });
   }
 
   public sendDatasetsToRefresh(
@@ -251,11 +256,61 @@ export class SupersetContextService {
         break;
       }
 
+      case 'upsertSuggestionKey': {
+        this.upsertSuggestionKey(
+          event.source!,
+          event.data.payload!,
+          correlationId!,
+        );
+        break;
+      }
+
+      case 'deleteSuggestionKey': {
+        this.deleteSuggestionKey(
+          event.source!,
+          event.data.payload!,
+          correlationId!,
+        );
+        break;
+      }
+
       default: {
         // no-op
       }
     }
   };
+
+  private async upsertSuggestionKey(
+    source: MessageEventSource,
+    payload: { suggestionKey: string; filterId: string },
+    correlationId: string,
+  ) {
+    const { store } = await import('src/views/store');
+
+    store.dispatch(suggestionKeyUpserted(payload));
+
+    // send acknoledgement
+    source.postMessage(
+      { correlationId },
+      { targetOrigin: this.topLevelOrigin },
+    );
+  }
+
+  private async deleteSuggestionKey(
+    source: MessageEventSource,
+    payload: string,
+    correlationId: string,
+  ) {
+    const { store } = await import('src/views/store');
+
+    store.dispatch(suggestionKeyDeleted(payload));
+
+    // send acknoledgement
+    source.postMessage(
+      { correlationId },
+      { targetOrigin: this.topLevelOrigin },
+    );
+  }
 
   private async deleteDataMask(
     source: MessageEventSource,
@@ -316,10 +371,9 @@ export class SupersetContextService {
         rootPath: ['ROOT_ID'],
         excluded: [],
       },
-      filterType: 'value',
+      filterType: 'filter_select',
       targets: [
         {
-          datasetId: 0,
           column: {
             name: payload.columnName,
           },

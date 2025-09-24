@@ -30,6 +30,11 @@ export type IncomingMessagePayload = {
   upsertDataMask: UpsertDataMaskFilterParams;
   deleteDataMask: string;
   deleteNativeFilter: string;
+  upsertSuggestionKey: {
+    filterId: string;
+    suggestionKey: string;
+  };
+  deleteSuggestionKey: string;
 };
 
 export type IncomingMessageType = keyof IncomingMessagePayload;
