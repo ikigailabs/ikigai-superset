@@ -1,10 +1,12 @@
 import { DataMask } from '@superset-ui/core';
 import { Middleware } from 'redux';
+import { SET_EDIT_MODE } from 'src/dashboard/actions/dashboardState';
 import { UPDATE_DATA_MASK } from 'src/dataMask/actions';
 import {
   SET_DATASOURCE,
   SET_DATASOURCES,
 } from 'src/explore/actions/exploreActions';
+import { SuggestionService } from 'src/service/suggestion-service';
 import { store } from 'src/views/store';
 
 type SuggestionKey = {
@@ -31,9 +33,10 @@ let suggestionKeys: SuggestionKey[] = [];
 const suggestionKeySyncMiddleware: Middleware = api => next => async action => {
   const result = next(action);
 
-  const resync = () => {
+  const resync = async () => {
     const rootState = api.getState() as ReturnType<typeof store.getState>;
     const dataMasks = Object.values(rootState.dataMask) as DataMask[];
+
     const relevantFilters = dataMasks
       .filter(dm => dm.extraFormData?.filters?.length)
       .flatMap(dm => dm.extraFormData!.filters!);
@@ -46,9 +49,9 @@ const suggestionKeySyncMiddleware: Middleware = api => next => async action => {
         suggestionKeys.some(sk => sk.suggestionKey === name),
       );
 
-      // Which filters apply to this datasource?
-      const filtersForDatasource = relevantFilters.filter(f =>
-        columnNames.includes(typeof f.col === 'string' ? f.col : f.col.label!),
+      // Which filters apply to this datasource? (match by column name)
+      const filtersForDatasource = relevantFilters.filter(
+        f => columnNames.includes(f.col as string), // you said QueryFormColumn will be a string by this point
       );
 
       return relevantKeys.map(key => ({
@@ -58,9 +61,8 @@ const suggestionKeySyncMiddleware: Middleware = api => next => async action => {
       }));
     });
 
-    // const suggestions = SuggestionService.fetchSuggestions(fetchCandidates);
-    // ContextService.sendSuggestions(suggestions);
-    console.log(fetchCandidates);
+    const suggestions = await SuggestionService.getSuggestions(fetchCandidates);
+    console.log(suggestions);
   };
 
   if (action.type === 'suggestionKeyUpserted') {
@@ -76,7 +78,9 @@ const suggestionKeySyncMiddleware: Middleware = api => next => async action => {
   // Covers initial datasources bootstrap, and addition of new datasources via
   // adding a chart to a dashboard.
   if (
-    [SET_DATASOURCES, SET_DATASOURCE, UPDATE_DATA_MASK].includes(action.type)
+    [SET_DATASOURCES, SET_DATASOURCE, UPDATE_DATA_MASK, SET_EDIT_MODE].includes(
+      action.type,
+    )
   ) {
     resync();
   }
