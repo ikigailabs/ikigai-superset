@@ -5,25 +5,11 @@ import { setCustomMarkdowns } from 'src/dashboard/actions/dashboardState';
 import { LOG_EVENT } from 'src/logger/actions';
 import { LOG_ACTIONS_FORCE_REFRESH_CHART } from 'src/logger/LogUtils';
 import { CURRENT_VERSION } from 'src/migrations/dynamic-markdown/migration-runner';
-import { mapSupersetFiltersToPlatformSpec } from './map-superset-filters-to-platform-spec';
 
-import { setFilterConfiguration } from 'src/dashboard/actions/nativeFilters';
-import { clearDataMask, updateDataMask } from 'src/dataMask/actions';
-import { NativeFilterType } from '@superset-ui/core';
-
-import type {
-  UpsertDataMaskFilterParams,
-  UpsertNativeFilterParams,
-} from './types';
-import type { Filter } from '@superset-ui/core';
 import type { CustomMarkdown, CustomMarkdowns } from 'src/dashboard/types';
 import type { IncomingMessageUnion } from './incoming-message';
 import type { OutgoingMessage } from './outgoing-message';
-import type { PlatformCompliantDataMask } from 'src/middleware/data-mask-sync';
-import {
-  suggestionKeyDeleted,
-  suggestionKeyUpserted,
-} from 'src/middleware/suggestion-key-sync';
+import type { PlatformFilter } from 'src/utils/filterUtils';
 
 /**
  * Manages communication in between same-window processes. Reads init data passed
@@ -73,23 +59,10 @@ export class SupersetContextService {
     this.sendMessageToCustomElements(message);
   }
 
-  public async sendFilters() {
-    const { store } = await import('src/views/store');
-    const filterBoxFilters = store.getState().dashboardFilters;
-    const filters = mapSupersetFiltersToPlatformSpec(filterBoxFilters);
-
-    const message: OutgoingMessage = {
-      type: 'filtersUpdated',
-      payload: filters,
-    };
-
-    this.sendMessageToCustomElements(message);
-  }
-
-  public async sendDataMasks(dataMasks: PlatformCompliantDataMask[]) {
+  public async sendFilters(filters: PlatformFilter[]) {
     this.sendMessageToCustomElements({
-      payload: dataMasks,
-      type: 'sendDataMasks',
+      payload: filters,
+      type: 'sendFilters',
     });
   }
 
@@ -201,11 +174,6 @@ export class SupersetContextService {
         break;
       }
 
-      case 'requestFilters': {
-        this.handleRequestFilters(event.source!, correlationId!);
-        break;
-      }
-
       case 'notifyUpdateSupersetCharts': {
         this.handleNotifyUpdateSupersetCharts(
           event.source!,
@@ -228,203 +196,11 @@ export class SupersetContextService {
         break;
       }
 
-      case 'upsertNativeFilter': {
-        this.upsertNativeFilter(
-          event.source!,
-          event.data.payload!,
-          correlationId!,
-        );
-        break;
-      }
-
-      case 'upsertDataMask': {
-        this.upsertDataMask(event.source!, event.data.payload!, correlationId!);
-        break;
-      }
-
-      case 'deleteDataMask': {
-        this.deleteDataMask(event.source!, event.data.payload!, correlationId!);
-        break;
-      }
-
-      case 'deleteNativeFilter': {
-        this.deleteNativeFilter(
-          event.source!,
-          event.data.payload!,
-          correlationId!,
-        );
-        break;
-      }
-
-      case 'upsertSuggestionKey': {
-        this.upsertSuggestionKey(
-          event.source!,
-          event.data.payload!,
-          correlationId!,
-        );
-        break;
-      }
-
-      case 'deleteSuggestionKey': {
-        this.deleteSuggestionKey(
-          event.source!,
-          event.data.payload!,
-          correlationId!,
-        );
-        break;
-      }
-
       default: {
         // no-op
       }
     }
   };
-
-  private async upsertSuggestionKey(
-    source: MessageEventSource,
-    payload: { suggestionKey: string; filterId: string },
-    correlationId: string,
-  ) {
-    const { store } = await import('src/views/store');
-
-    store.dispatch(suggestionKeyUpserted(payload));
-
-    // send acknoledgement
-    source.postMessage(
-      { correlationId },
-      { targetOrigin: this.topLevelOrigin },
-    );
-  }
-
-  private async deleteSuggestionKey(
-    source: MessageEventSource,
-    payload: string,
-    correlationId: string,
-  ) {
-    const { store } = await import('src/views/store');
-
-    store.dispatch(suggestionKeyDeleted(payload));
-
-    // send acknoledgement
-    source.postMessage(
-      { correlationId },
-      { targetOrigin: this.topLevelOrigin },
-    );
-  }
-
-  private async deleteDataMask(
-    source: MessageEventSource,
-    payload: string,
-    correlationId: string,
-  ) {
-    const { store } = await import('src/views/store');
-    const dataMasks = store.getState().dataMask;
-
-    // TODO: Superset doesn't provide typing for dataMasks in v2.
-    // Once upgraded, revisit this line
-    if ((dataMasks as any)[payload]) {
-      store.dispatch(clearDataMask(payload));
-    }
-
-    // send acknoledgement
-    source.postMessage(
-      { correlationId },
-      { targetOrigin: this.topLevelOrigin },
-    );
-  }
-
-  private async deleteNativeFilter(
-    source: MessageEventSource,
-    payload: string,
-    correlationId: string,
-  ) {
-    const { store } = await import('src/views/store');
-
-    const nativeFilters = store.getState().nativeFilters;
-    const filtersClone = JSON.parse(JSON.stringify(nativeFilters.filters));
-    delete filtersClone.filters[payload];
-
-    const filterConfigThunk = setFilterConfiguration(filtersClone);
-    filterConfigThunk(store.dispatch, store.getState);
-
-    // send acknoledgement
-    source.postMessage(
-      { correlationId },
-      { targetOrigin: this.topLevelOrigin },
-    );
-  }
-
-  private async upsertNativeFilter(
-    source: MessageEventSource,
-    payload: UpsertNativeFilterParams,
-    correlationId: string,
-  ) {
-    const { store } = await import('src/views/store');
-
-    const filterObject: Filter = {
-      cascadeParentIds: [],
-      defaultDataMask: {},
-      id: payload.id,
-      name: payload.filterName,
-      scope: {
-        // no-op
-        rootPath: ['ROOT_ID'],
-        excluded: [],
-      },
-      filterType: 'filter_select',
-      targets: [
-        {
-          column: {
-            name: payload.columnName,
-          },
-        },
-      ], // if column is unset, empty array will do
-      controlValues: {}, // no-op
-      description: '', // no-op
-      type: NativeFilterType.NATIVE_FILTER, // no-op
-    };
-
-    const nativeFilters = Object.values(store.getState().nativeFilters.filters);
-    const filterConfigThunk = setFilterConfiguration([
-      ...nativeFilters,
-      filterObject,
-    ]);
-
-    filterConfigThunk(store.dispatch, store.getState);
-
-    // send acknoledgement
-    source.postMessage(
-      { correlationId },
-      { targetOrigin: this.topLevelOrigin },
-    );
-  }
-
-  private async upsertDataMask(
-    source: MessageEventSource,
-    payload: UpsertDataMaskFilterParams,
-    correlationId: string,
-  ) {
-    const { store } = await import('src/views/store');
-
-    store.dispatch(
-      updateDataMask(payload.filterId, {
-        extraFormData: {
-          filters: [
-            {
-              ...payload.opAndValue,
-              col: payload.columnName,
-            },
-          ],
-        },
-      }),
-    );
-
-    // send acknoledgement
-    source.postMessage(
-      { correlationId },
-      { targetOrigin: this.topLevelOrigin },
-    );
-  }
 
   private async handleNotifyUpdateSupersetCharts(
     source: MessageEventSource,
@@ -479,26 +255,6 @@ export class SupersetContextService {
       }
     });
 
-    source.postMessage(
-      { correlationId },
-      { targetOrigin: this.topLevelOrigin },
-    );
-  }
-
-  private async handleRequestFilters(
-    source: MessageEventSource,
-    correlationId: string,
-  ) {
-    const { store } = await import('src/views/store');
-    const filterBoxFilters = store.getState().dashboardFilters;
-    const filters = mapSupersetFiltersToPlatformSpec(filterBoxFilters);
-
-    const message: OutgoingMessage = {
-      type: 'filtersUpdated',
-      payload: filters,
-    };
-
-    source.postMessage(message, { targetOrigin: this.topLevelOrigin });
     source.postMessage(
       { correlationId },
       { targetOrigin: this.topLevelOrigin },

@@ -126,7 +126,6 @@ const legacyChartDataRequest = async (
     // eslint-disable-next-line camelcase
     domainShardingEnabled && requestParams?.dashboard_id;
 
-  console.log('Place1?');
   delete formData['slice_id'];
 
   const url = getExploreUrl({
@@ -145,8 +144,6 @@ const legacyChartDataRequest = async (
     url,
     postPayload: { form_data: formData },
   };
-
-  console.log(url, querySettings);
 
   const clientMethod =
     'GET' && isFeatureEnabled(FeatureFlag.CLIENT_CACHE)

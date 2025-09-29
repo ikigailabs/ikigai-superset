@@ -1,8 +1,5 @@
 import type { CustomMarkdowns } from 'src/dashboard/types';
-import type {
-  UpsertDataMaskFilterParams,
-  UpsertNativeFilterParams,
-} from './types';
+import type { PlatformFilter } from 'src/utils/filterUtils';
 
 export type IncomingMessageUnion = {
   [K in IncomingMessageType]: {
@@ -26,15 +23,8 @@ export type IncomingMessagePayload = {
   requestFilters: void;
   getDashboardLayout: void;
   sendCustomMarkdowns: CustomMarkdowns;
-  upsertNativeFilter: UpsertNativeFilterParams;
-  upsertDataMask: UpsertDataMaskFilterParams;
-  deleteDataMask: string;
-  deleteNativeFilter: string;
-  upsertSuggestionKey: {
-    filterId: string;
-    suggestionKey: string;
-  };
-  deleteSuggestionKey: string;
+  upsertFilter: PlatformFilter;
+  deleteFilter: string;
 };
 
 export type IncomingMessageType = keyof IncomingMessagePayload;

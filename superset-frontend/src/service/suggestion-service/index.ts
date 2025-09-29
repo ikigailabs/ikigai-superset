@@ -10,21 +10,20 @@ type FetchCandidate = {
   filters: QueryObjectFilterClause[];
 };
 
-type FetchResult = {
-  columnName: string;
-  records: string[];
-}
-
+/**
+ * Fetches suggestions for given column names. Also provides an in-memory
+ * cache using columnName and filters as keys
+ */
 class SuggestionServiceClass {
-  private cache: Map<string, Promise<FetchResult>> = new Map();
-  private resolved: Map<string, FetchResult> = new Map();
+  private cache: Map<string, Promise<string[]>> = new Map();
+  private resolved: Map<string, string[]> = new Map();
 
   public async getSuggestions(candidates: FetchCandidate[]) {
-    const results = await Promise.all(
+    const results: String[][] = await Promise.all(
       candidates.map(c => this.fetchWithCache(c))
     );
 
-    return mergeResults(results);
+    return results.flat();
   }
 
   private async fetchWithCache(candidate: FetchCandidate) {
@@ -40,7 +39,6 @@ class SuggestionServiceClass {
       return this.cache.get(cacheKey)!;
     }
 
-    // 
     const formData: Record<string, any> = {
       datasource: candidate.datasource.uid,
       groupby: [candidate.key],
@@ -48,20 +46,17 @@ class SuggestionServiceClass {
       adhoc_filters: buildAdhocFilters(candidate.filters),
     };
 
-    // Create request promise
     const request = SupersetClient.get({
       url: buildExploreUrl(formData),
     })
       .then(({ json }) => {
-        const result = {
-          columnName: candidate.key,
-          records: json?.data?.records ?? [],
-        };
+        const result: Record<string, string>[] = json?.data?.records ?? [];
+        const parsed = result.map((r) => r[candidate.key]);
 
         // Save resolved result
-        this.resolved.set(cacheKey, result);
+        this.resolved.set(cacheKey, parsed);
         this.cache.delete(cacheKey);
-        return result;
+        return parsed;
       })
       .catch(err => {
         this.cache.delete(cacheKey);
@@ -107,22 +102,5 @@ function buildExploreUrl(formData: Record<string, any>) {
 
   return uri.search(search).directory(directory).toString();
 }
-
-function mergeResults(results: FetchResult[]): FetchResult[] {
-  const merged: Record<string, Set<string>> = {};
-
-  results.forEach(({ columnName, records }) => {
-    if (!merged[columnName]) {
-      merged[columnName] = new Set();
-    }
-    records.forEach(r => merged[columnName].add(r));
-  });
-
-  return Object.entries(merged).map(([columnName, values]) => ({
-    columnName,
-    records: Array.from(values),
-  }));
-}
-
 
 export const SuggestionService = new SuggestionServiceClass();

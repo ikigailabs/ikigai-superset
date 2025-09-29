@@ -1,0 +1,63 @@
+import { IPCSubservice } from 'src/service/ipc-subservice.ts';
+import type { TypedMiddleware } from './typed-middleware';
+import { SuggestionService } from 'src/service/suggestion-service';
+
+type GetSuggestionsPayload = {
+  columnName: string;
+  applyFilters: string[];
+};
+
+let initialized = false;
+
+/**
+ * Receives `getSuggestions` IPC events, then uses the Superset API
+ * (via SuggestionService) to fetch the unique values for the given column
+ * for each datasource which contains the given column.
+ */
+const suggestionMiddleware: TypedMiddleware = api => next => action => {
+  if (initialized === true) return next(action);
+
+  IPCSubservice.onRequest<GetSuggestionsPayload>(
+    'getSuggestions',
+    async ({ respond, payload }) => {
+      const rootState = api.getState();
+
+      const relevantFilters = payload.applyFilters
+        .map(f => rootState.dataMask[f])
+        .filter(dm => dm.extraFormData?.filters?.length)
+        .flatMap(dm => dm.extraFormData!.filters!);
+
+      const fetchCandidates = Object.values(rootState.datasources)
+        // Ignore datasources that do not contain the column name
+        .filter(d =>
+          d.columns.map(c => c.column_name).includes(payload.columnName),
+        )
+        .flatMap(d => {
+          const columnNames = d.columns.map(c => c.column_name);
+
+          // Which filters apply to this datasource? (match by column name)
+          const filtersForDatasource = relevantFilters.filter(f =>
+            columnNames.includes(
+              typeof f.col === 'string' ? f.col : f.col.label || 'ColumnName',
+            ),
+          );
+
+          return {
+            datasource: d,
+            key: payload.columnName,
+            filters: filtersForDatasource,
+          };
+        });
+
+      const suggestions = await SuggestionService.getSuggestions(
+        fetchCandidates,
+      );
+      respond(suggestions);
+    },
+  );
+
+  initialized = true;
+  return next(action);
+};
+
+export default suggestionMiddleware;

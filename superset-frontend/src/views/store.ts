@@ -16,7 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { applyMiddleware, combineReducers, compose, createStore } from 'redux';
+import {
+  applyMiddleware,
+  combineReducers,
+  compose,
+  createStore,
+  Middleware,
+} from 'redux';
 import thunk from 'redux-thunk';
 import messageToastReducer from 'src/components/MessageToasts/reducers';
 import { initEnhancer } from 'src/reduxUtils';
@@ -36,8 +42,15 @@ import {
   BootstrapUser,
   UserWithPermissionsAndRoles,
 } from 'src/types/bootstrapTypes';
-import dataMaskSyncMiddleware from 'src/middleware/data-mask-sync';
-import suggestionKeySyncMiddleware from 'src/middleware/suggestion-key-sync';
+import customMiddlewares from '../middleware/custom-middlewares';
+
+import { LogLevel, setGlobalConfig } from 'src/service/logger';
+import { ConsoleTransport } from 'src/service/logger/transports/console-transport';
+import { RootState } from 'src/dashboard/types';
+
+setGlobalConfig({
+  transports: [new ConsoleTransport({ logLevel: LogLevel.VERBOSE })],
+});
 
 // Some reducers don't do anything, and redux is just used to reference the initial "state".
 // This may change later, as the client application takes on more responsibilities.
@@ -93,12 +106,7 @@ export const store = createStore(
   rootReducer,
   {},
   compose(
-    applyMiddleware(
-      thunk,
-      logger,
-      dataMaskSyncMiddleware,
-      suggestionKeySyncMiddleware,
-    ),
+    applyMiddleware(thunk, logger, ...customMiddlewares),
     initEnhancer(false),
   ),
 );
