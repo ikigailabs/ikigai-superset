@@ -51,6 +51,7 @@ import findPermission from 'src/dashboard/util/findPermission';
 import { FILTER_BOX_MIGRATION_STATES } from 'src/explore/constants';
 import { PageHeaderWithActions } from 'src/components/PageHeaderWithActions';
 import { Dropdown } from 'src/components/Dropdown';
+import { ContextService } from 'src/service/context-service/context-service';
 import { DashboardEmbedModal } from '../DashboardEmbedControls';
 
 const propTypes = {
@@ -615,13 +616,26 @@ class Header extends React.PureComponent {
               ) : (
                 <div css={actionButtonsStyle}>
                   <Button
-                    buttonStyle="dashed"
-                    onClick={this.forceRefresh}
-                    data-test="refresh-dashboard-menu-item"
-                    aria-label={t('Refresh dashboard')}
-                  >
-                    <Icons.Refresh />
-                  </Button>
+                    icon={
+                      <Icons.Refresh
+                        id="refresh-icon"
+                        data-testid="RefreshIcon"
+                        iconSize="m"
+                      />
+                    }
+                    onClick={() => {
+                      const icon = document.getElementById('refresh-icon');
+                      if (icon) {
+                        icon.style.transition = 'transform .6s';
+                        icon.style.transform = 'rotate(360deg)';
+                        setTimeout(() => {
+                          icon.style.transition = 'none';
+                          icon.style.transform = 'rotate(0deg)';
+                        }, 850);
+                      }
+                      ContextService.refreshDashboard();
+                    }}
+                  />
 
                   {userCanEdit && (
                     <Button
