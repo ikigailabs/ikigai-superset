@@ -16,13 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import {
-  applyMiddleware,
-  combineReducers,
-  compose,
-  createStore,
-  Middleware,
-} from 'redux';
+import { applyMiddleware, combineReducers, compose, createStore } from 'redux';
 import thunk from 'redux-thunk';
 import messageToastReducer from 'src/components/MessageToasts/reducers';
 import { initEnhancer } from 'src/reduxUtils';
@@ -46,7 +40,6 @@ import customMiddlewares from '../middleware/custom-middlewares';
 
 import { LogLevel, setGlobalConfig } from 'src/service/logger';
 import { ConsoleTransport } from 'src/service/logger/transports/console-transport';
-import { RootState } from 'src/dashboard/types';
 
 setGlobalConfig({
   transports: [new ConsoleTransport({ logLevel: LogLevel.VERBOSE })],

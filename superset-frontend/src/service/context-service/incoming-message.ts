@@ -1,5 +1,9 @@
 import type { CustomMarkdowns } from 'src/dashboard/types';
-import type { PlatformFilter } from 'src/utils/filterUtils';
+import type {
+  PlatformHighBoundTimeFilter,
+  PlatformLowBoundTimeFilter,
+  PlatformValueFilter,
+} from 'src/utils/filterUtils';
 
 export type IncomingMessageUnion = {
   [K in IncomingMessageType]: {
@@ -23,8 +27,10 @@ export type IncomingMessagePayload = {
   requestFilters: void;
   getDashboardLayout: void;
   sendCustomMarkdowns: CustomMarkdowns;
-  upsertFilter: PlatformFilter;
-  deleteFilter: string;
+  upsertValueFilter: PlatformValueFilter;
+  deleteValueFilter: string;
+  upsertTimeFilter: PlatformLowBoundTimeFilter | PlatformHighBoundTimeFilter;
+  deleteTimeFilter: PlatformLowBoundTimeFilter | PlatformHighBoundTimeFilter;
 };
 
 export type IncomingMessageType = keyof IncomingMessagePayload;

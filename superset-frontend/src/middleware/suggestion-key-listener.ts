@@ -1,6 +1,7 @@
-import { IPCSubservice } from 'src/service/ipc-subservice.ts';
+import { IPCSubservice } from 'src/service/ipc-subservice';
 import type { TypedMiddleware } from './typed-middleware';
 import { SuggestionService } from 'src/service/suggestion-service';
+import { getPlatformFiltersFromRootState } from 'src/utils/filterUtils';
 
 type GetSuggestionsPayload = {
   columnName: string;
@@ -21,11 +22,7 @@ const suggestionMiddleware: TypedMiddleware = api => next => action => {
     'getSuggestions',
     async ({ respond, payload }) => {
       const rootState = api.getState();
-
-      const relevantFilters = payload.applyFilters
-        .map(f => rootState.dataMask[f])
-        .filter(dm => dm.extraFormData?.filters?.length)
-        .flatMap(dm => dm.extraFormData!.filters!);
+      const validFilters = getPlatformFiltersFromRootState(rootState);
 
       const fetchCandidates = Object.values(rootState.datasources)
         // Ignore datasources that do not contain the column name
@@ -36,10 +33,8 @@ const suggestionMiddleware: TypedMiddleware = api => next => action => {
           const columnNames = d.columns.map(c => c.column_name);
 
           // Which filters apply to this datasource? (match by column name)
-          const filtersForDatasource = relevantFilters.filter(f =>
-            columnNames.includes(
-              typeof f.col === 'string' ? f.col : f.col.label || 'ColumnName',
-            ),
+          const filtersForDatasource = validFilters.filter(f =>
+            columnNames.includes(f.columnName),
           );
 
           return {
@@ -52,6 +47,7 @@ const suggestionMiddleware: TypedMiddleware = api => next => action => {
       const suggestions = await SuggestionService.getSuggestions(
         fetchCandidates,
       );
+
       respond(suggestions);
     },
   );
