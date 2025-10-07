@@ -74,8 +74,6 @@ import { shouldFocusTabs, getRootLevelTabsComponent } from './utils';
 import DashboardContainer from './DashboardContainer';
 import { useNativeFilters } from './state';
 import { ContextService } from '../../../service/context-service/context-service';
-import { setFilterConfiguration } from 'src/dashboard/actions/nativeFilters';
-import { clearDataMaskState } from 'src/dataMask/actions';
 
 type DashboardBuilderProps = {};
 
