@@ -42,7 +42,7 @@ import '../stylesheets/index.less';
 import getLocationHash from '../util/getLocationHash';
 import isDashboardEmpty from '../util/isDashboardEmpty';
 import { getAffectedOwnDataCharts } from '../util/charts/getOwnDataCharts';
-import { DatepickerPopup } from 'src/ikigai/datepicker/datepicker-popup';
+import { DatepickerPopup } from 'src/ikigai/datepicker/DatepickerPopup';
 
 const propTypes = {
   actions: PropTypes.shape({
