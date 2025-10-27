@@ -6,4 +6,5 @@ export type RequestHandler<T = any> = ({
   payload: T;
   respond: (payload: any) => void;
   acknowledge: () => void;
+  source: MessageEventSource | null;
 }) => any;

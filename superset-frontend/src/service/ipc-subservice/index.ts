@@ -106,6 +106,7 @@ export class IpcSubserviceClass {
             { targetOrigin: this.platformUrl },
           );
         },
+        source: event.source,
       });
     }
   };
