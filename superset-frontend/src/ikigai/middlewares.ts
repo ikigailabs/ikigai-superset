@@ -3,6 +3,7 @@
  * All custom Ikigai-created middleware should be loaded into Superset via
  * this file.
  */
+import datepickerMiddleware from './datepicker/datepicker-middleware';
 import {
   filterSyncMiddleware,
   filterIpcMiddleware,
@@ -13,4 +14,5 @@ export default [
   filterIpcMiddleware,
   filterSyncMiddleware,
   suggestionMiddleware,
+  datepickerMiddleware,
 ];

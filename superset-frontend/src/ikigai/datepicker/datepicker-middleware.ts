@@ -5,6 +5,7 @@ import { hideDatepicker, showDatepicker } from './datepicker-slice';
 type ShowDatepickerPayload = {
   x: number;
   y: number;
+  iframeId: string;
 };
 
 type HideDatepickerPayload = {};
@@ -20,6 +21,7 @@ export const dateSelected = (dateISO: string | null) => {
 
 let initialized = false;
 let pendingRespondFn: (payload: any) => void | undefined;
+let pendingAcknowledgeFn: () => void | undefined;
 
 const datepickerMiddleware: TypedMiddleware = api => next => action => {
   if (action.type === 'ikigai/dateSelected' && pendingRespondFn) {
@@ -30,10 +32,30 @@ const datepickerMiddleware: TypedMiddleware = api => next => action => {
 
   IPCSubservice.onRequest<ShowDatepickerPayload>(
     'showDatepicker',
-    async ({ respond, payload }) => {
-      const { x, y } = payload;
-      api.dispatch(showDatepicker(x, y));
+    async ({ respond, payload, source, acknowledge }) => {
+      const { x: childX, y: childY, iframeId } = payload;
+
+      if (!source) {
+        console.warn('source is null! Unable to show calendar.');
+        acknowledge();
+        return;
+      }
+
+      const iframeElement = document.getElementById(iframeId);
+      const rect = iframeElement?.getBoundingClientRect();
+
+      if (!rect) {
+        console.warn('unable to find bounding rect for iframe!');
+        acknowledge();
+        return;
+      }
+
+      const sumX = rect.left + childX;
+      const sumY = rect.top + childY;
+
+      api.dispatch(showDatepicker(sumX, sumY));
       pendingRespondFn = respond;
+      pendingAcknowledgeFn = acknowledge;
     },
   );
 
@@ -42,6 +64,7 @@ const datepickerMiddleware: TypedMiddleware = api => next => action => {
     async ({ acknowledge }) => {
       api.dispatch(hideDatepicker());
       acknowledge();
+      pendingAcknowledgeFn();
     },
   );
 
