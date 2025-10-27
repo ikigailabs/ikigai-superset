@@ -16,7 +16,7 @@ import {
   PlatformValueFilter,
 } from 'src/utils/filterUtils';
 import { IPCSubservice } from 'src/service/ipc-subservice';
-import type { TypedMiddleware } from './typed-middleware';
+import type { TypedMiddleware } from '../typed-middleware';
 
 let initialized = false;
 

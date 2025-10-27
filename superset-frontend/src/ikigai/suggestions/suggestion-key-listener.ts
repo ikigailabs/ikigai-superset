@@ -1,5 +1,5 @@
 import { IPCSubservice } from 'src/service/ipc-subservice';
-import type { TypedMiddleware } from './typed-middleware';
+import type { TypedMiddleware } from '../typed-middleware';
 import { SuggestionService } from 'src/service/suggestion-service';
 import { getPlatformFiltersFromRootState } from 'src/utils/filterUtils';
 

@@ -42,6 +42,7 @@ import '../stylesheets/index.less';
 import getLocationHash from '../util/getLocationHash';
 import isDashboardEmpty from '../util/isDashboardEmpty';
 import { getAffectedOwnDataCharts } from '../util/charts/getOwnDataCharts';
+import { DatepickerPopup } from 'src/ikigai/datepicker/datepicker-popup';
 
 const propTypes = {
   actions: PropTypes.shape({
@@ -291,6 +292,7 @@ class Dashboard extends React.PureComponent {
     }
     return (
       <>
+        <DatepickerPopup />
         <DashboardBuilder />
       </>
     );

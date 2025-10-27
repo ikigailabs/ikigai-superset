@@ -36,7 +36,8 @@ import {
   BootstrapUser,
   UserWithPermissionsAndRoles,
 } from 'src/types/bootstrapTypes';
-import customMiddlewares from '../middleware/custom-middlewares';
+import ikigaiMiddlewares from '../ikigai/middlewares';
+import ikigaiSlices from '../ikigai/slices';
 
 import { LogLevel, setGlobalConfig } from 'src/service/logger';
 import { ConsoleTransport } from 'src/service/logger/transports/console-transport';
@@ -93,13 +94,16 @@ export const rootReducer = combineReducers({
   user: userReducer,
   impressionId: noopReducer(shortid.generate()),
   ...dashboardReducers,
+  ...ikigaiSlices,
 });
 
 export const store = createStore(
   rootReducer,
   {},
   compose(
-    applyMiddleware(thunk, logger, ...customMiddlewares),
+    applyMiddleware(thunk, logger, ...ikigaiMiddlewares),
     initEnhancer(false),
   ),
 );
+
+export type RootState = ReturnType<typeof rootReducer>;
