@@ -4,6 +4,7 @@
  * this file.
  */
 import datepickerMiddleware from './datepicker/datepicker-middleware';
+import dropdownOptionsMiddleware from './dropdown-options/dropdown-options-middleware';
 import {
   filterSyncMiddleware,
   filterIpcMiddleware,
@@ -15,4 +16,5 @@ export default [
   filterSyncMiddleware,
   suggestionMiddleware,
   datepickerMiddleware,
+  dropdownOptionsMiddleware,
 ];

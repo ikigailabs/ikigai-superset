@@ -36,7 +36,6 @@ export function DatepickerPopup() {
       autoFocus
       open={visible}
       style={{
-        backgroundColor: 'blue',
         height: 0,
         opacity: 0,
         top: coords.y,

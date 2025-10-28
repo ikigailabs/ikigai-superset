@@ -7,11 +7,14 @@
  */
 
 import { datepickerReducer } from './datepicker/datepicker-slice';
+import { dropdownOptionsReducer } from './dropdown-options/dropdown-options-slice';
 
 export default {
   datepicker: datepickerReducer,
+  dropdownOptions: dropdownOptionsReducer,
 };
 
 export interface IkigaiState {
   datepicker: ReturnType<typeof datepickerReducer>;
+  dropdownOptions: ReturnType<typeof dropdownOptionsReducer>;
 }
