@@ -63,6 +63,10 @@ export type DropdownOptionsAction =
   | SetSearchTermAction
   | SetDropdownLoadingAction;
 
+/**
+ * Manages state for the DropdownOptionsPopup.tsx. See that file and
+ * `dropdown-options-middleware.ts` for more info.
+ */
 export function dropdownOptionsReducer(
   state: DropdownOptionsState = initialState,
   action: DropdownOptionsAction,

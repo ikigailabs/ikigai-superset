@@ -22,6 +22,10 @@ export type HideDatepickerAction = {
 
 export type DatepickerAction = ShowDatepickerAction | HideDatepickerAction;
 
+/**
+ * Manages state for the DatepickerPopup.tsx. See that file and
+ * `datepicker-middleware.ts` for more info.
+ */
 export function datepickerReducer(
   state: DatepickerState = initialState,
   action: DatepickerAction,

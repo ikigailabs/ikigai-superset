@@ -23,6 +23,15 @@ let initialized = false;
 let pendingRespondFn: (payload: any) => void | undefined;
 let pendingAcknowledgeFn: () => void | undefined;
 
+/**
+ * Receives instructions from child custom elements iframes on how to render a
+ * datepicker. While the Superset upgrade is underway (and we're still rendering
+ * custom elements) in their own iframes, we need to render the calendar popup
+ * of Datepickers inside the Superset process.
+ *
+ * Once Superset has been upgraded and custom elements are being rendered directly
+ * inside of the Superset process, we can revert these changes.
+ */
 const datepickerMiddleware: TypedMiddleware = api => next => action => {
   if (action.type === 'ikigai/dateSelected' && pendingRespondFn) {
     pendingRespondFn(action.payload.dateISO);

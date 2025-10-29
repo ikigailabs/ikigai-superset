@@ -11,6 +11,12 @@ import {
 } from './datepicker-slice';
 import { dateSelected } from './datepicker-middleware';
 
+/**
+ * Standalone calendar display; the popup that appears when click on a Datepicker.
+ *
+ * The child custom element iframes instruct this process when and where to render
+ * this component. For more info on how and why, see `datepicker-middleware.ts`
+ */
 export function DatepickerPopup() {
   const dispatch = useDispatch();
   const visible = useSelector(selectDatepickerVisible);

@@ -31,6 +31,15 @@ let initialized = false;
 let pendingAcknowledgeFn: (() => void) | undefined;
 let pendingRespondFn: ((payload: any) => void) | undefined;
 
+/**
+ * Receives instructions from child custom elements iframes on how to render a
+ * dropdown options list. While the Superset upgrade is underway (and we're still
+ * rendering custom elements in their own iframes), we need to render the list popup
+ * for options inside the Superset process.
+ *
+ * Once Superset has been upgraded and custom elements are being rendered directly
+ * inside of the Superset process, we can revert these changes.
+ */
 const dropdownOptionsMiddleware: TypedMiddleware = api => next => action => {
   if (action.type === 'ikigai/optionChosen' && pendingRespondFn) {
     pendingRespondFn(action.payload.option);

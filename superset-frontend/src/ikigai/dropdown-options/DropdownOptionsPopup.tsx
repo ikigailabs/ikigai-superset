@@ -7,6 +7,12 @@ import {
 } from './dropdown-options-slice';
 import { optionChosen } from './dropdown-options-middleware';
 
+/**
+ * Standalone list display; the popup that appears when clicking on a Dropdown.
+ *
+ * The child custom element iframes instruct this process when and where to render
+ * this component. For more info on how and why, see `dropdown-options-middleware.ts`
+ */
 export function DropdownOptionsPopup() {
   const dispatch = useDispatch();
   const activeDropdown = useSelector(selectActiveDropdown);
