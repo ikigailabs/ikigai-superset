@@ -36,6 +36,15 @@ import {
   BootstrapUser,
   UserWithPermissionsAndRoles,
 } from 'src/types/bootstrapTypes';
+import ikigaiMiddlewares from '../ikigai/middlewares';
+import ikigaiSlices from '../ikigai/slices';
+
+import { LogLevel, setGlobalConfig } from 'src/service/logger';
+import { ConsoleTransport } from 'src/service/logger/transports/console-transport';
+
+setGlobalConfig({
+  transports: [new ConsoleTransport({ logLevel: LogLevel.VERBOSE })],
+});
 
 // Some reducers don't do anything, and redux is just used to reference the initial "state".
 // This may change later, as the client application takes on more responsibilities.
@@ -85,10 +94,16 @@ export const rootReducer = combineReducers({
   user: userReducer,
   impressionId: noopReducer(shortid.generate()),
   ...dashboardReducers,
+  ...ikigaiSlices,
 });
 
 export const store = createStore(
   rootReducer,
   {},
-  compose(applyMiddleware(thunk, logger), initEnhancer(false)),
+  compose(
+    applyMiddleware(thunk, logger, ...ikigaiMiddlewares),
+    initEnhancer(false),
+  ),
 );
+
+export type RootState = ReturnType<typeof rootReducer>;
