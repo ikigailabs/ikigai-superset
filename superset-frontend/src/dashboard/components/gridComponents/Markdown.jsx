@@ -86,6 +86,7 @@ const MARKDOWN_PLACE_HOLDER = `# ✨Markdown
 Click here to edit [markdown](https://bit.ly/1dQOfRK)`;
 
 const MARKDOWN_ERROR_MESSAGE = t('This markdown component has an error.');
+const SANITIZATION_DATE_BOUNDARY = Date.parse('2025-11-01T00:00:00.000Z'); // Nov 1st, 2025
 
 class Markdown extends React.PureComponent {
   constructor(props) {
@@ -265,29 +266,19 @@ class Markdown extends React.PureComponent {
 
   renderPreviewMode() {
     const { hasError, markdownSource } = this.state;
-    const { ikigaiOrigin } = this.props;
-    let markdown = markdownSource;
-    if (markdown && ikigaiOrigin) {
-      const foundWidget = markdown.includes('/widget/');
-      if (foundWidget) {
-        const iframeWrapper = document.createElement('div');
-        iframeWrapper.innerHTML = markdown;
-        const iframeHtml = iframeWrapper.getElementsByTagName('iframe')[0];
-        const iframeSrcUrl = new URL(iframeHtml.src);
-        const newIframeSrc = `${ikigaiOrigin}${iframeSrcUrl.pathname}${iframeSrcUrl.search}`;
-        iframeWrapper
-          .getElementsByTagName('iframe')[0]
-          .setAttribute('src', newIframeSrc);
-        markdown = iframeWrapper.innerHTML;
-      }
-    }
+
+    const createdOn = new Date(this.props.createdOn);
+    const now = new Date(SANITIZATION_DATE_BOUNDARY);
+    const doSanitize = createdOn > now;
 
     return (
       <SafeMarkdown
         source={
-          hasError ? MARKDOWN_ERROR_MESSAGE : markdown || MARKDOWN_PLACE_HOLDER
+          hasError
+            ? MARKDOWN_ERROR_MESSAGE
+            : markdownSource || MARKDOWN_PLACE_HOLDER
         }
-        htmlSanitization={this.props.htmlSanitization}
+        htmlSanitization={doSanitize && this.props.htmlSanitization}
         htmlSchemaOverrides={this.props.htmlSchemaOverrides}
       />
     );
@@ -399,6 +390,7 @@ function mapStateToProps(state) {
     redoLength: state.dashboardLayout.future.length,
     htmlSanitization: state.common.conf.HTML_SANITIZATION,
     htmlSchemaOverrides: state.common.conf.HTML_SANITIZATION_SCHEMA_EXTENSIONS,
+    createdOn: state.dashboardInfo.created_on,
   };
 }
 export default connect(mapStateToProps)(Markdown);

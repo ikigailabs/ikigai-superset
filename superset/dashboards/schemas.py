@@ -162,6 +162,7 @@ class DashboardGetResponseSchema(Schema):
     changed_by_url = fields.String()
     changed_by = fields.Nested(UserSchema)
     changed_on = fields.DateTime()
+    created_on = fields.DateTime()
     charts = fields.List(fields.String(description=charts_description))
     owners = fields.List(fields.Nested(UserSchema))
     roles = fields.List(fields.Nested(RolesSchema))
