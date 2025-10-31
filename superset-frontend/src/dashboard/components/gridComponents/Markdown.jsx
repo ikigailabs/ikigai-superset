@@ -16,6 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+/*
+ *Sep 8 2022 - Added functionality to modify all custom component URL's added manualy (html iframe) - update url origin
+ */
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
@@ -47,6 +50,7 @@ const propTypes = {
   index: PropTypes.number.isRequired,
   depth: PropTypes.number.isRequired,
   editMode: PropTypes.bool.isRequired,
+  ikigaiOrigin: PropTypes.string,
 
   // from redux
   logEvent: PropTypes.func.isRequired,
@@ -260,14 +264,28 @@ class Markdown extends React.PureComponent {
   }
 
   renderPreviewMode() {
-    const { hasError } = this.state;
+    const { hasError, markdownSource } = this.state;
+    const { ikigaiOrigin } = this.props;
+    let markdown = markdownSource;
+    if (markdown && ikigaiOrigin) {
+      const foundWidget = markdown.includes('/widget/');
+      if (foundWidget) {
+        const iframeWrapper = document.createElement('div');
+        iframeWrapper.innerHTML = markdown;
+        const iframeHtml = iframeWrapper.getElementsByTagName('iframe')[0];
+        const iframeSrcUrl = new URL(iframeHtml.src);
+        const newIframeSrc = `${ikigaiOrigin}${iframeSrcUrl.pathname}${iframeSrcUrl.search}`;
+        iframeWrapper
+          .getElementsByTagName('iframe')[0]
+          .setAttribute('src', newIframeSrc);
+        markdown = iframeWrapper.innerHTML;
+      }
+    }
 
     return (
       <SafeMarkdown
         source={
-          hasError
-            ? MARKDOWN_ERROR_MESSAGE
-            : this.state.markdownSource || MARKDOWN_PLACE_HOLDER
+          hasError ? MARKDOWN_ERROR_MESSAGE : markdown || MARKDOWN_PLACE_HOLDER
         }
         htmlSanitization={this.props.htmlSanitization}
         htmlSchemaOverrides={this.props.htmlSchemaOverrides}

@@ -19,24 +19,24 @@
 import React from 'react';
 import moment from 'moment';
 import {
-  Behavior,
+  // Behavior,
   css,
-  getChartMetadataRegistry,
+  // getChartMetadataRegistry,
   QueryFormData,
   styled,
   t,
 } from '@superset-ui/core';
 import { Menu } from 'src/components/Menu';
 import { NoAnimationDropdown } from 'src/components/Dropdown';
-import ShareMenuItems from 'src/dashboard/components/menu/ShareMenuItems';
+// import ShareMenuItems from 'src/dashboard/components/menu/ShareMenuItems';
 import downloadAsImage from 'src/utils/downloadAsImage';
 import { FeatureFlag, isFeatureEnabled } from 'src/featureFlags';
 import CrossFilterScopingModal from 'src/dashboard/components/CrossFilterScopingModal/CrossFilterScopingModal';
 import Icons from 'src/components/Icons';
-import ModalTrigger from 'src/components/ModalTrigger';
-import Button from 'src/components/Button';
-import ViewQueryModal from 'src/explore/components/controls/ViewQueryModal';
-import { ResultsPaneOnDashboard } from 'src/explore/components/DataTablesPane';
+// import ModalTrigger from 'src/components/ModalTrigger';
+// import Button from 'src/components/Button';
+// import ViewQueryModal from 'src/explore/components/controls/ViewQueryModal';
+// import { ResultsPaneOnDashboard } from 'src/explore/components/DataTablesPane';
 
 const MENU_KEYS = {
   CROSS_FILTER_SCOPING: 'cross_filter_scoping',
@@ -227,26 +227,26 @@ class SliceHeaderControls extends React.PureComponent<
 
   render() {
     const {
-      componentId,
-      dashboardId,
+      // componentId,
+      // dashboardId,
       slice,
       isFullSize,
       cachedDttm = [],
       updatedDttm = null,
-      addSuccessToast = () => {},
-      addDangerToast = () => {},
-      supersetCanShare = false,
+      // addSuccessToast = () => {},
+      // addDangerToast = () => {},
+      // supersetCanShare = false,
       isCached = [],
     } = this.props;
-    const crossFilterItems = getChartMetadataRegistry().items;
+    // const crossFilterItems = getChartMetadataRegistry().items;
     const isTable = slice.viz_type === 'table';
-    const isCrossFilter = Object.entries(crossFilterItems)
-      // @ts-ignore
-      .filter(([, { value }]) =>
-        value.behaviors?.includes(Behavior.INTERACTIVE_CHART),
-      )
-      .find(([key]) => key === slice.viz_type);
-    const canEmitCrossFilter = slice.form_data?.emit_filter;
+    // const isCrossFilter = Object.entries(crossFilterItems)
+    //   // @ts-ignore
+    //   .filter(([, { value }]) =>
+    //     value.behaviors?.includes(Behavior.INTERACTIVE_CHART),
+    //   )
+    //   .find(([key]) => key === slice.viz_type);
+    // const canEmitCrossFilter = slice.form_data?.emit_filter;
 
     const cachedWhen = (cachedDttm || []).map(itemCachedDttm =>
       moment.utc(itemCachedDttm).fromNow(),
@@ -270,9 +270,9 @@ class SliceHeaderControls extends React.PureComponent<
           : item}
       </div>
     ));
-    const fullscreenLabel = isFullSize
-      ? t('Exit fullscreen')
-      : t('Enter fullscreen');
+    // const fullscreenLabel = isFullSize
+    //   ? t('Exit fullscreen')
+    //   : t('Enter fullscreen');
     const menu = (
       <Menu
         onClick={this.handleMenuClick}
@@ -291,7 +291,7 @@ class SliceHeaderControls extends React.PureComponent<
           </RefreshTooltip>
         </Menu.Item>
 
-        <Menu.Item key={MENU_KEYS.FULLSCREEN}>{fullscreenLabel}</Menu.Item>
+        {/* <Menu.Item key={MENU_KEYS.FULLSCREEN}>{fullscreenLabel}</Menu.Item> */}
 
         <Menu.Divider />
 
@@ -303,16 +303,16 @@ class SliceHeaderControls extends React.PureComponent<
           </Menu.Item>
         )}
 
-        {this.props.supersetCanExplore && (
+        {/* {this.props.supersetCanExplore && (
           <Menu.Item
             key={MENU_KEYS.EXPLORE_CHART}
             onClick={this.props.onExploreChart}
           >
             {t('Edit chart')}
           </Menu.Item>
-        )}
+        )} */}
 
-        {this.props.supersetCanExplore && (
+        {/* {this.props.supersetCanExplore && (
           <Menu.Item key={MENU_KEYS.VIEW_QUERY}>
             <ModalTrigger
               triggerNode={
@@ -327,9 +327,9 @@ class SliceHeaderControls extends React.PureComponent<
               responsive
             />
           </Menu.Item>
-        )}
+        )} */}
 
-        {this.props.supersetCanExplore && (
+        {/* {this.props.supersetCanExplore && (
           <Menu.Item key={MENU_KEYS.VIEW_RESULTS}>
             <ModalTrigger
               triggerNode={
@@ -361,13 +361,13 @@ class SliceHeaderControls extends React.PureComponent<
               responsive
             />
           </Menu.Item>
-        )}
+        )} */}
 
-        {(slice.description || this.props.supersetCanExplore) && (
+        {/* {(slice.description || this.props.supersetCanExplore) && (
           <Menu.Divider />
-        )}
+        )} */}
 
-        {isFeatureEnabled(FeatureFlag.DASHBOARD_CROSS_FILTERS) &&
+        {/* {isFeatureEnabled(FeatureFlag.DASHBOARD_CROSS_FILTERS) &&
           isCrossFilter &&
           canEmitCrossFilter && (
             <>
@@ -376,9 +376,9 @@ class SliceHeaderControls extends React.PureComponent<
               </Menu.Item>
               <Menu.Divider />
             </>
-          )}
+          )} */}
 
-        {supersetCanShare && (
+        {/* {supersetCanShare && (
           <Menu.SubMenu title={t('Share')}>
             <ShareMenuItems
               dashboardId={dashboardId}
@@ -391,7 +391,7 @@ class SliceHeaderControls extends React.PureComponent<
               addDangerToast={addDangerToast}
             />
           </Menu.SubMenu>
-        )}
+        )} */}
 
         {this.props.slice.viz_type !== 'filter_box' &&
           this.props.supersetCanCSV && (

@@ -312,12 +312,13 @@ export function saveDashboardRequest(data, id, saveType) {
       if (lastModifiedTime) {
         dispatch(saveDashboardRequestSuccess(lastModifiedTime));
       }
-      // redirect to the new slug or id
-      window.history.pushState(
-        { event: 'dashboard_properties_changed' },
-        '',
-        `/superset/dashboard/${slug || id}/`,
-      );
+
+      // commented out to resolve: https://ikigailabs.atlassian.net/browse/PR-932
+      // window.history.pushState(
+      //   { event: 'dashboard_properties_changed' },
+      //   '',
+      //   `/superset/dashboard/${slug || id}/`,
+      // );
 
       dispatch(addSuccessToast(t('This dashboard was saved successfully.')));
       return response;
@@ -619,4 +620,14 @@ export function setDatasetsStatus(status) {
     type: SET_DATASETS_STATUS,
     status,
   };
+}
+
+export const SET_SUPERSET_URL = 'SET_SUPERSET_URL';
+export function setSupersetUrl(supersetUrl) {
+  return { type: SET_SUPERSET_URL, supersetUrl };
+}
+
+export const SET_CUSTOM_MARKDOWNS = 'SET_CUSTOM_MARKDOWNS';
+export function setCustomMarkdowns(customMarkdowns) {
+  return { type: SET_CUSTOM_MARKDOWNS, customMarkdowns };
 }

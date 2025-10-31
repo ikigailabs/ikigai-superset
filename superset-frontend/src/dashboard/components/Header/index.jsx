@@ -38,7 +38,6 @@ import PublishedStatus from 'src/dashboard/components/PublishedStatus';
 import UndoRedoKeyListeners from 'src/dashboard/components/UndoRedoKeyListeners';
 import PropertiesModal from 'src/dashboard/components/PropertiesModal';
 import { chartPropShape } from 'src/dashboard/util/propShapes';
-import { UserWithPermissionsAndRoles } from 'src/types/bootstrapTypes';
 import {
   UNDO_LIMIT,
   SAVE_TYPE_OVERWRITE,
@@ -51,13 +50,14 @@ import { options as PeriodicRefreshOptions } from 'src/dashboard/components/Refr
 import findPermission from 'src/dashboard/util/findPermission';
 import { FILTER_BOX_MIGRATION_STATES } from 'src/explore/constants';
 import { PageHeaderWithActions } from 'src/components/PageHeaderWithActions';
+import { Dropdown } from 'src/components/Dropdown';
+import { ContextService } from 'src/service/context-service/context-service';
 import { DashboardEmbedModal } from '../DashboardEmbedControls';
 
 const propTypes = {
   addSuccessToast: PropTypes.func.isRequired,
   addDangerToast: PropTypes.func.isRequired,
   addWarningToast: PropTypes.func.isRequired,
-  user: UserWithPermissionsAndRoles,
   dashboardInfo: PropTypes.object.isRequired,
   dashboardTitle: PropTypes.string.isRequired,
   dataMask: PropTypes.object.isRequired,
@@ -86,6 +86,10 @@ const propTypes = {
   hasUnsavedChanges: PropTypes.bool.isRequired,
   maxUndoHistoryExceeded: PropTypes.bool.isRequired,
   lastModifiedTime: PropTypes.number.isRequired,
+  ikigaiOrigin: PropTypes.string,
+  supersetUrl: PropTypes.string,
+  filterboxMigrationState: PropTypes.string,
+  user: PropTypes.object,
 
   // redux
   onRefresh: PropTypes.func.isRequired,
@@ -161,11 +165,14 @@ const discardBtnStyle = theme => css`
 `;
 
 class Header extends React.PureComponent {
-  static discardChanges() {
+  static discardChanges(ikigaiOrigin, supersetUrl) {
     const url = new URL(window.location.href);
 
-    url.searchParams.delete('edit');
-    window.location.assign(url);
+    if (supersetUrl) {
+      window.location.replace(supersetUrl.toString());
+    } else {
+      window.location.assign(url);
+    }
   }
 
   constructor(props) {
@@ -450,6 +457,8 @@ class Header extends React.PureComponent {
       setRefreshFrequency,
       lastModifiedTime,
       filterboxMigrationState,
+      ikigaiOrigin,
+      supersetUrl,
     } = this.props;
 
     const userCanEdit =
@@ -572,7 +581,12 @@ class Header extends React.PureComponent {
                       <Button
                         css={discardBtnStyle}
                         buttonSize="small"
-                        onClick={this.constructor.discardChanges}
+                        onClick={() =>
+                          this.constructor.discardChanges(
+                            ikigaiOrigin,
+                            supersetUrl,
+                          )
+                        }
                         buttonStyle="default"
                         data-test="discard-changes-button"
                         aria-label={t('Discard')}
@@ -601,6 +615,28 @@ class Header extends React.PureComponent {
                 />
               ) : (
                 <div css={actionButtonsStyle}>
+                  <Button
+                    icon={
+                      <Icons.Refresh
+                        id="refresh-icon"
+                        data-testid="RefreshIcon"
+                        iconSize="m"
+                      />
+                    }
+                    onClick={() => {
+                      const icon = document.getElementById('refresh-icon');
+                      if (icon) {
+                        icon.style.transition = 'transform .6s';
+                        icon.style.transform = 'rotate(360deg)';
+                        setTimeout(() => {
+                          icon.style.transition = 'none';
+                          icon.style.transform = 'rotate(0deg)';
+                        }, 850);
+                      }
+                      ContextService.refreshDashboard();
+                    }}
+                  />
+
                   {userCanEdit && (
                     <Button
                       buttonStyle="secondary"
@@ -615,6 +651,50 @@ class Header extends React.PureComponent {
                   )}
                 </div>
               )}
+              <Dropdown
+                overlay={
+                  <HeaderActionsDropdown
+                    addSuccessToast={this.props.addSuccessToast}
+                    addDangerToast={this.props.addDangerToast}
+                    dashboardId={dashboardInfo.id}
+                    dashboardTitle={dashboardTitle}
+                    dashboardInfo={dashboardInfo}
+                    dataMask={dataMask}
+                    layout={layout}
+                    expandedSlices={expandedSlices}
+                    customCss={customCss}
+                    colorNamespace={colorNamespace}
+                    colorScheme={colorScheme}
+                    onSave={onSave}
+                    onChange={onChange}
+                    forceRefreshAllCharts={this.forceRefresh}
+                    startPeriodicRender={this.startPeriodicRender}
+                    refreshFrequency={refreshFrequency}
+                    shouldPersistRefreshFrequency={
+                      shouldPersistRefreshFrequency
+                    }
+                    setRefreshFrequency={setRefreshFrequency}
+                    updateCss={updateCss}
+                    editMode={editMode}
+                    hasUnsavedChanges={hasUnsavedChanges}
+                    userCanEdit={userCanEdit}
+                    userCanShare={userCanShare}
+                    userCanSave={userCanSaveAs}
+                    userCanCurate={userCanCurate}
+                    isLoading={isLoading}
+                    showPropertiesModal={this.showPropertiesModal}
+                    manageEmbedded={this.showEmbedModal}
+                    refreshLimit={refreshLimit}
+                    refreshWarning={refreshWarning}
+                    lastModifiedTime={lastModifiedTime}
+                    filterboxMigrationState={filterboxMigrationState}
+                    isDropdownVisible={this.state.isDropdownVisible}
+                    setIsDropdownVisible={this.setIsDropdownVisible}
+                  />
+                }
+              >
+                <Icons.MoreVert iconColor="red" />
+              </Dropdown>
             </div>
           }
           menuDropdownProps={{
@@ -623,44 +703,6 @@ class Header extends React.PureComponent {
             visible: this.state.isDropdownVisible,
             onVisibleChange: this.setIsDropdownVisible,
           }}
-          additionalActionsMenu={
-            <HeaderActionsDropdown
-              addSuccessToast={this.props.addSuccessToast}
-              addDangerToast={this.props.addDangerToast}
-              dashboardId={dashboardInfo.id}
-              dashboardTitle={dashboardTitle}
-              dashboardInfo={dashboardInfo}
-              dataMask={dataMask}
-              layout={layout}
-              expandedSlices={expandedSlices}
-              customCss={customCss}
-              colorNamespace={colorNamespace}
-              colorScheme={colorScheme}
-              onSave={onSave}
-              onChange={onChange}
-              forceRefreshAllCharts={this.forceRefresh}
-              startPeriodicRender={this.startPeriodicRender}
-              refreshFrequency={refreshFrequency}
-              shouldPersistRefreshFrequency={shouldPersistRefreshFrequency}
-              setRefreshFrequency={setRefreshFrequency}
-              updateCss={updateCss}
-              editMode={editMode}
-              hasUnsavedChanges={hasUnsavedChanges}
-              userCanEdit={userCanEdit}
-              userCanShare={userCanShare}
-              userCanSave={userCanSaveAs}
-              userCanCurate={userCanCurate}
-              isLoading={isLoading}
-              showPropertiesModal={this.showPropertiesModal}
-              manageEmbedded={this.showEmbedModal}
-              refreshLimit={refreshLimit}
-              refreshWarning={refreshWarning}
-              lastModifiedTime={lastModifiedTime}
-              filterboxMigrationState={filterboxMigrationState}
-              isDropdownVisible={this.state.isDropdownVisible}
-              setIsDropdownVisible={this.setIsDropdownVisible}
-            />
-          }
           showFaveStar={user?.userId && dashboardInfo?.id}
           showTitlePanelItems={!editMode}
         />

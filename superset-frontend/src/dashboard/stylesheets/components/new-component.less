@@ -28,7 +28,13 @@
   cursor: move;
 
   &:not(.static):hover {
-    background: @gray-bg;
+    background-color: #e8e8e8b7;
+  }
+
+  &.disable-hover:not(.static) {
+    background: @lightest;
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 }
 

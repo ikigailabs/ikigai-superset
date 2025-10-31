@@ -53,7 +53,7 @@ from pandas._libs.parsers import STR_NA_VALUES  # pylint: disable=no-name-in-mod
 from superset.advanced_data_type.plugins.internet_address import internet_address
 from superset.advanced_data_type.plugins.internet_port import internet_port
 from superset.advanced_data_type.types import AdvancedDataType
-from superset.constants import CHANGE_ME_SECRET_KEY
+# from superset.constants import CHANGE_ME_SECRET_KEY
 from superset.jinja_context import BaseTemplateProcessor
 from superset.stats_logger import DummyStatsLogger
 from superset.superset_typing import CacheConfig
@@ -146,7 +146,7 @@ BUILD_NUMBER = None
 DEFAULT_VIZ_TYPE = "table"
 
 # default row limit when requesting chart data
-ROW_LIMIT = 50000
+ROW_LIMIT = 1000000
 # default row limit when requesting samples from datasource in explore view
 SAMPLES_ROW_LIMIT = 1000
 # max rows retrieved by filter select auto complete
@@ -160,7 +160,7 @@ SUPERSET_WEBSERVER_PORT = 8088
 # [load balancer / proxy / envoy / kong / ...] timeout settings.
 # You should also make sure to configure your WSGI server
 # (gunicorn, nginx, apache, ...) timeout setting to be <= to this setting
-SUPERSET_WEBSERVER_TIMEOUT = int(timedelta(minutes=1).total_seconds())
+SUPERSET_WEBSERVER_TIMEOUT = int(timedelta(minutes=2).total_seconds())
 
 # this 2 settings are used by dashboard period force refresh feature
 # When user choose auto force refresh frequency
@@ -170,7 +170,7 @@ SUPERSET_WEBSERVER_TIMEOUT = int(timedelta(minutes=1).total_seconds())
 SUPERSET_DASHBOARD_PERIODICAL_REFRESH_LIMIT = 0
 SUPERSET_DASHBOARD_PERIODICAL_REFRESH_WARNING_MESSAGE = None
 
-SUPERSET_DASHBOARD_POSITION_DATA_LIMIT = 65535
+SUPERSET_DASHBOARD_POSITION_DATA_LIMIT = 131070
 CUSTOM_SECURITY_MANAGER = None
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 # ---------------------------------------------------------
@@ -178,7 +178,7 @@ SQLALCHEMY_TRACK_MODIFICATIONS = False
 # Your App secret key. Make sure you override it on superset_config.py.
 # Use a strong complex alphanumeric string and use a tool to help you generate
 # a sufficiently random sequence, ex: openssl rand -base64 42"
-SECRET_KEY = CHANGE_ME_SECRET_KEY
+SECRET_KEY = "\2\1thisismyscretkey\1\2\\e\\y\\y\\h"
 
 # The SQLAlchemy connection string.
 SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.path.join(DATA_DIR, "superset.db")
@@ -423,7 +423,7 @@ DEFAULT_FEATURE_FLAGS: Dict[str, bool] = {
     # This could cause the server to run out of memory or compute.
     "ALLOW_FULL_CSV_EXPORT": False,
     "UX_BETA": False,
-    "GENERIC_CHART_AXES": False,
+    "GENERIC_CHART_AXES": True,
     "ALLOW_ADHOC_SUBQUERY": False,
     "USE_ANALAGOUS_COLORS": True,
     # Apply RLS rules to SQL Lab queries. This requires parsing and manipulating the
@@ -726,6 +726,11 @@ BACKUP_COUNT = 30
 # ):
 #     pass
 QUERY_LOGGER = None
+
+# Uncomment below to view SQL Query in logs
+# def log_sql_statements(database, query, schema, user, client, security_manager): 
+#     logger.info("Ikigai SQL Query :" + str(query)) 
+# QUERY_LOGGER = log_sql_statements
 
 # Set this API key to enable Mapbox visualizations
 MAPBOX_API_KEY = os.environ.get("MAPBOX_API_KEY", "")

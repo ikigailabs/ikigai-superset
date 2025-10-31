@@ -43,6 +43,8 @@ import {
   ON_FILTERS_REFRESH,
   ON_FILTERS_REFRESH_SUCCESS,
   SET_DATASETS_STATUS,
+  SET_SUPERSET_URL,
+  SET_CUSTOM_MARKDOWNS,
 } from '../actions/dashboardState';
 import { HYDRATE_DASHBOARD } from '../actions/hydrate';
 
@@ -217,6 +219,34 @@ export default function dashboardStateReducer(state = {}, action) {
       return {
         ...state,
         datasetsStatus: action.status,
+      };
+    },
+    [SET_SUPERSET_URL]() {
+      const { supersetUrl } = action;
+      let ikigaiOrigin = '';
+      const iframeUrl = new URL(supersetUrl);
+      if (iframeUrl && iframeUrl.search) {
+        const iframeUrlParameters = new URLSearchParams(iframeUrl.search);
+        if (iframeUrlParameters) {
+          const ikigaiURL = iframeUrlParameters.get('dash_url')
+            ? new URL(iframeUrlParameters.get('dash_url'))
+            : '';
+          ikigaiOrigin = ikigaiURL ? ikigaiURL.origin : '';
+        }
+      }
+      return {
+        ...state,
+        supersetUrl,
+        ikigaiOrigin,
+      };
+    },
+
+    [SET_CUSTOM_MARKDOWNS]() {
+      const { customMarkdowns } = action;
+
+      return {
+        ...state,
+        customMarkdowns,
       };
     },
   };

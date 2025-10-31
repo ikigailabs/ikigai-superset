@@ -233,7 +233,7 @@ function ExploreViewContainer(props) {
   );
 
   const [showingModal, setShowingModal] = useState(false);
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(true);
   const [shouldForceUpdate, setShouldForceUpdate] = useState(-1);
   const tabId = useTabId();
 
@@ -292,9 +292,11 @@ function ExploreViewContainer(props) {
   const onQuery = useCallback(() => {
     props.actions.setForceQuery(false);
     props.actions.triggerQuery(true, props.chart.id);
-    addHistory();
+
+    // commented out to resolve: https://ikigailabs.atlassian.net/browse/PR-932
+    // addHistory();
     setLastQueriedControls(props.controls);
-  }, [props.controls, addHistory, props.actions, props.chart.id]);
+  }, [props.controls, props.actions, props.chart.id]);
 
   const handleKeydown = useCallback(
     event => {
@@ -603,7 +605,7 @@ function ExploreViewContainer(props) {
           }
         >
           <div className="title-container">
-            <span className="horizontal-text">{t('Dataset')}</span>
+            <span className="horizontal-text">{t('Metrics & Columns')}</span>
             <span
               role="button"
               tabIndex={0}

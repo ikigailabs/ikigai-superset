@@ -48,9 +48,7 @@ const Styled = styled.div`
       border-radius: ${theme.gridUnit}px;
       background: ${theme.colors.grayscale.light5};
       padding: ${theme.gridUnit * 2}px;
-      margin: 0 ${theme.gridUnit * 3}px
-        ${theme.gridUnit * 3}px
-        ${theme.gridUnit * 3}px;
+      margin: 0 16px;
       position: relative;
       cursor: move;
       white-space: nowrap;
@@ -104,8 +102,8 @@ const Styled = styled.div`
 `;
 
 function AddSliceCard({
-  datasourceUrl,
-  datasourceName,
+  // datasourceUrl,
+  // datasourceName,
   innerRef,
   isSelected,
   lastModified,
@@ -131,10 +129,10 @@ function AddSliceCard({
             <span>{t('Visualization')} </span>
             <span>{visType}</span>
           </div>
-          <div className="item">
+          {/* <div className="item">
             <span>{t('Data source')} </span>
             <a href={datasourceUrl}>{datasourceName}</a>
-          </div>
+          </div> */}
         </div>
       </div>
       {isSelected && <div className="is-added-label">{t('Added')}</div>}
