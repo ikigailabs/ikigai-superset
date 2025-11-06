@@ -51,7 +51,7 @@ import {
   TIME_FILTER_LABELS,
   TIME_FILTER_MAP,
 } from 'src/explore/constants';
-import { ContextService } from 'src/service/context-service/context-service';
+import { ContextService } from 'src/ikigai/service/context-service/context-service';
 
 // a shortcut to a map key, used by many components
 export const TIME_RANGE = TIME_FILTER_MAP.time_range;

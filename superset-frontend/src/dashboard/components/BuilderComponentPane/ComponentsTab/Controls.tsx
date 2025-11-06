@@ -2,7 +2,7 @@ import React, { Dispatch, SetStateAction } from 'react';
 import { SearchOutlined } from '@ant-design/icons';
 import { Input } from 'antd';
 import Button from '../../../../components/Button';
-import { ContextService } from '../../../../service/context-service/context-service';
+import { ContextService } from '../../../../ikigai/service/context-service/context-service';
 
 type PropTypes = {
   searchTerm: string;

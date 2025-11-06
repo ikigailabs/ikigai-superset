@@ -39,8 +39,8 @@ import {
 import ikigaiMiddlewares from '../ikigai/middlewares';
 import ikigaiSlices from '../ikigai/slices';
 
-import { LogLevel, setGlobalConfig } from 'src/service/logger';
-import { ConsoleTransport } from 'src/service/logger/transports/console-transport';
+import { LogLevel, setGlobalConfig } from 'src/ikigai/service/logger';
+import { ConsoleTransport } from 'src/ikigai/service/logger/transports/console-transport';
 
 setGlobalConfig({
   transports: [new ConsoleTransport({ logLevel: LogLevel.VERBOSE })],

@@ -3,7 +3,7 @@ import {
   UPDATE_DATA_MASK,
   updateDataMask,
 } from 'src/dataMask/actions';
-import { ContextService } from 'src/service/context-service/context-service';
+import { ContextService } from 'src/ikigai/service/context-service/context-service';
 import {
   getPlatformFiltersFromRootState,
   platformValueFilterToDataMask,
@@ -15,7 +15,7 @@ import {
   SupersetOriginPlatformTimeFilter,
   PlatformValueFilter,
 } from 'src/utils/filterUtils';
-import { IPCSubservice } from 'src/service/ipc-subservice';
+import { IPCSubservice } from 'src/ikigai/service/ipc-subservice';
 import type { TypedMiddleware } from '../typed-middleware';
 
 let initialized = false;

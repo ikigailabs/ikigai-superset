@@ -21,20 +21,20 @@ import { DashboardComponentMetadata, JsonObject, t } from '@superset-ui/core';
 import backgroundStyleOptions from 'src/dashboard/util/backgroundStyleOptions';
 import cx from 'classnames';
 import { useSelector } from 'react-redux';
-import DragDroppable from '../dnd/DragDroppable';
-import { COLUMN_TYPE, ROW_TYPE } from '../../util/componentTypes';
-import WithPopoverMenu from '../menu/WithPopoverMenu';
-import ResizableContainer from '../resizable/ResizableContainer';
+import DragDroppable from '../../dashboard/components/dnd/DragDroppable';
+import { COLUMN_TYPE, ROW_TYPE } from '../../dashboard/util/componentTypes';
+import WithPopoverMenu from '../../dashboard/components/menu/WithPopoverMenu';
+import ResizableContainer from '../../dashboard/components/resizable/ResizableContainer';
 import {
   BACKGROUND_TRANSPARENT,
   GRID_BASE_UNIT,
   GRID_MIN_COLUMN_COUNT,
-} from '../../util/constants';
-import HoverMenu from '../menu/HoverMenu';
-import DeleteComponentButton from '../DeleteComponentButton';
-import BackgroundStyleDropdown from '../menu/BackgroundStyleDropdown';
-import dashboardComponents from '../../../visualizations/presets/dashboardComponents';
-import { RootState } from '../../types';
+} from '../../dashboard/util/constants';
+import HoverMenu from '../../dashboard/components/menu/HoverMenu';
+import DeleteComponentButton from '../../dashboard/components/DeleteComponentButton';
+import BackgroundStyleDropdown from '../../dashboard/components/menu/BackgroundStyleDropdown';
+import dashboardComponents from '../../visualizations/presets/dashboardComponents';
+import { RootState } from '../../dashboard/types';
 
 type FilterSummaryType = {
   component: JsonObject;

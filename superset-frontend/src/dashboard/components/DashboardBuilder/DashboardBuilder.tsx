@@ -73,7 +73,7 @@ import {
 import { shouldFocusTabs, getRootLevelTabsComponent } from './utils';
 import DashboardContainer from './DashboardContainer';
 import { useNativeFilters } from './state';
-import { ContextService } from '../../../service/context-service/context-service';
+import { ContextService } from '../../../ikigai/service/context-service/context-service';
 
 type DashboardBuilderProps = {};
 

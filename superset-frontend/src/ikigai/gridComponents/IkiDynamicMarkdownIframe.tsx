@@ -1,7 +1,7 @@
 import { SafeMarkdown } from '@superset-ui/core';
 import React from 'react';
 import { DYNAMIC_MARKDOWN } from 'src/dashboard/constants';
-import { ContextService } from 'src/service/context-service/context-service';
+import { ContextService } from 'src/ikigai/service/context-service/context-service';
 
 const { projectId, topLevelOrigin } = ContextService;
 

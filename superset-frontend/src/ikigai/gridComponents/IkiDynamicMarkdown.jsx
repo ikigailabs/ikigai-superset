@@ -17,7 +17,7 @@ import {
 } from 'src/dashboard/util/constants';
 import { refreshChart } from 'src/components/Chart/chartAction';
 import { isEqual } from 'lodash';
-import { ContextService } from 'src/service/context-service/context-service';
+import { ContextService } from 'src/ikigai/service/context-service/context-service';
 import { withRouter } from 'react-router-dom';
 import { migrate } from 'src/migrations/dynamic-markdown/migration-runner';
 import { IkiDynamicMarkdownIframe } from './IkiDynamicMarkdownIframe';

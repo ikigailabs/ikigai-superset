@@ -5,7 +5,7 @@ import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import cx from 'classnames';
 
-import { ContextService } from 'src/service/context-service/context-service';
+import { ContextService } from 'src/ikigai/service/context-service/context-service';
 import DeleteComponentButton from 'src/dashboard/components/DeleteComponentButton';
 import MarkdownModeDropdown from 'src/dashboard/components/menu/MarkdownModeDropdown';
 import WithPopoverMenu from 'src/dashboard/components/menu/WithPopoverMenu';
@@ -14,16 +14,16 @@ import {
   GRID_BASE_UNIT,
   GRID_MIN_COLUMN_COUNT,
   GRID_MIN_ROW_UNITS,
-} from '../../util/constants';
+} from '../../dashboard/util/constants';
 
-import { editorModes, orientations } from '../../constants';
+import { editorModes, orientations } from '../../dashboard/constants';
 import {
   EditorMode,
   LayoutItem,
   LayoutItemWithCustomMarkdown,
-} from '../../types';
-import { COLUMN_TYPE, ROW_TYPE } from '../../util/componentTypes';
-import DragDroppable from '../dnd/DragDroppable';
+} from '../../dashboard/types';
+import { COLUMN_TYPE, ROW_TYPE } from '../../dashboard/util/componentTypes';
+import DragDroppable from '../../dashboard/components/dnd/DragDroppable';
 import { IkiDynamicMarkdownIframe } from './IkiDynamicMarkdownIframe';
 
 type PropTypes = {

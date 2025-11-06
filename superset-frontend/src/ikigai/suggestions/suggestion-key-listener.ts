@@ -1,6 +1,6 @@
-import { IPCSubservice } from 'src/service/ipc-subservice';
+import { IPCSubservice } from 'src/ikigai/service/ipc-subservice';
 import type { TypedMiddleware } from '../typed-middleware';
-import { SuggestionService } from 'src/service/suggestion-service';
+import { SuggestionService } from 'src/ikigai/service/suggestion-service';
 import { getPlatformFiltersFromRootState } from 'src/utils/filterUtils';
 
 type GetSuggestionsPayload = {

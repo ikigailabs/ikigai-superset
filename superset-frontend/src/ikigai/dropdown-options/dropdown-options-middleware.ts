@@ -1,4 +1,4 @@
-import { IPCSubservice } from 'src/service/ipc-subservice';
+import { IPCSubservice } from 'src/ikigai/service/ipc-subservice';
 import type { TypedMiddleware } from '../typed-middleware';
 import {
   showDropdownOptions,

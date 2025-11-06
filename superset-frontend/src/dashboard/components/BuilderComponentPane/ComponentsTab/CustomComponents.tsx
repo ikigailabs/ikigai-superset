@@ -4,7 +4,7 @@ import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../types';
 import { IKI_DYNAMIC_SINGLE_MARKDOWN_TYPE } from '../../../util/componentTypes';
-import { ContextService } from '../../../../service/context-service/context-service';
+import { ContextService } from '../../../../ikigai/service/context-service/context-service';
 import NewDynamicSingleMarkdown from '../../gridComponents/new/components/NewDynamicSingleMarkdown';
 
 type PropTypes = {
