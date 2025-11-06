@@ -14,7 +14,7 @@ import {
   removeTimeFilter,
   SupersetOriginPlatformTimeFilter,
   PlatformValueFilter,
-} from 'src/utils/filterUtils';
+} from 'src/ikigai/utils/filterUtils';
 import { IPCSubservice } from 'src/ikigai/service/ipc-subservice';
 import type { TypedMiddleware } from '../typed-middleware';
 

@@ -3,7 +3,7 @@ import type {
   PlatformHighBoundTimeFilter,
   PlatformLowBoundTimeFilter,
   PlatformValueFilter,
-} from 'src/utils/filterUtils';
+} from 'src/ikigai/utils/filterUtils';
 
 export type IncomingMessageUnion = {
   [K in IncomingMessageType]: {

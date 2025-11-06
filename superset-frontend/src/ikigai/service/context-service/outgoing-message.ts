@@ -1,5 +1,5 @@
 import type { CustomMarkdown, DashboardLayout } from 'src/dashboard/types';
-import type { PlatformFilter } from 'src/utils/filterUtils';
+import type { PlatformFilter } from 'src/ikigai/utils/filterUtils';
 
 type OutgoingMessagePayload = {
   dashboardLayoutUpdated: DashboardLayout;

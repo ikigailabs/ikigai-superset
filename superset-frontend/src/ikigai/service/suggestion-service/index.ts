@@ -7,7 +7,7 @@ import type {
   PlatformFilter,
   PlatformValueFilter,
   SupersetOriginPlatformTimeFilter,
-} from 'src/utils/filterUtils';
+} from 'src/ikigai/utils/filterUtils';
 
 type FetchCandidate = {
   datasource: Datasource;

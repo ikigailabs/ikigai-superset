@@ -4,12 +4,12 @@ import { setCustomMarkdowns } from 'src/dashboard/actions/dashboardState';
 
 import { LOG_EVENT } from 'src/logger/actions';
 import { LOG_ACTIONS_FORCE_REFRESH_CHART } from 'src/logger/LogUtils';
-import { CURRENT_VERSION } from 'src/migrations/dynamic-markdown/migration-runner';
+import { CURRENT_VERSION } from 'src/ikigai/migrations/dynamic-markdown/migration-runner';
 
 import type { CustomMarkdown, CustomMarkdowns } from 'src/dashboard/types';
 import type { IncomingMessageUnion } from './incoming-message';
 import type { OutgoingMessage } from './outgoing-message';
-import type { PlatformFilter } from 'src/utils/filterUtils';
+import type { PlatformFilter } from 'src/ikigai/utils/filterUtils';
 
 /**
  * Manages communication in between same-window processes. Reads init data passed
