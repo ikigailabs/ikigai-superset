@@ -14,11 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-<<<<<<< HEAD
 x-superset-image: &superset-image apachesuperset.docker.scarf.sh/apache/superset:${TAG:-latest-dev}
-=======
-x-superset-image: &superset-image apache/superset:2.0.0
->>>>>>> migration-2.0.1
 x-superset-user: &superset-user root
 x-superset-depends-on: &superset-depends-on
   - db
