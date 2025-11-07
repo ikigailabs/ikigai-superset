@@ -1057,6 +1057,13 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
     def extract_errors(
         cls, ex: Exception, context: dict[str, Any] | None = None
     ) -> list[SupersetError]:
+        """Changes made to original codebase:
+        - Ternary operator to change heading from "Dremio Error" to
+        "SQL Error"
+        """
+        ERR_DB_NAME = os.environ.get("ERR_DB_NAME")
+        ALTERNATE_DB_NAME = os.environ.get("ALTERNATE_DB_NAME")
+
         raw_message = cls._extract_error_message(ex)
 
         context = context or {}
@@ -1079,7 +1086,9 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
                 error_type=SupersetErrorType.GENERIC_DB_ENGINE_ERROR,
                 message=cls._extract_error_message(ex),
                 level=ErrorLevel.ERROR,
-                extra={"engine_name": cls.engine_name},
+                extra={"engine_name": ALTERNATE_DB_NAME}
+                if cls.engine_name == ERR_DB_NAME
+                else {"engine_name": cls.engine_name},
             )
         ]
 
@@ -1521,6 +1530,23 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
         if cls.arraysize:
             cursor.arraysize = cls.arraysize
         try:
+            sql_statement = query
+            if (
+                "metadata"
+                in sql_statement[
+                    sql_statement.index("SELECT") + 6 : sql_statement.index("FROM")
+                ].lower()
+            ):
+                sub_statement = sql_statement[
+                    sql_statement.index("SELECT") + 6 : sql_statement.index("FROM")
+                ].lower()
+                sub_statement = sub_statement.replace("metadata", '"metadata"')
+                sql_statement = (
+                    sql_statement[0 : sql_statement.index("SELECT") + 6]
+                    + sub_statement
+                    + sql_statement[sql_statement.index("FROM") :]
+                )
+                query = sql_statement
             cursor.execute(query)
         except Exception as ex:
             raise cls.get_dbapi_mapped_exception(ex) from ex
@@ -1575,6 +1601,21 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
                 return sqla_type(match), generic_type
             return sqla_type, generic_type
         return None
+
+    @classmethod
+    def get_url_for_impersonation(
+        cls, url: URL, impersonate_user: bool, username: Optional[str]
+    ) -> URL:
+        """
+        Return a modified URL with the username set.
+        :param url: SQLAlchemy URL object
+        :param impersonate_user: Flag indicating if impersonation is enabled
+        :param username: Effective username
+        """
+        if impersonate_user and username is not None:
+            url = url.set(username=username)
+
+        return url
 
     @staticmethod
     def _mutate_label(label: str) -> str:
@@ -1695,6 +1736,25 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
         Some databases require some sensitive information which do not conform to
         the username:password syntax normally used by SQLAlchemy.
 
+        :param database: database instance from which to extract extras
+        :param params: params to be updated
+        """
+        if not database.encrypted_extra:
+            return
+        try:
+            encrypted_extra = json.loads(database.encrypted_extra)
+            params.update(encrypted_extra)
+        except json.JSONDecodeError as ex:
+            logger.error(ex, exc_info=True)
+            raise ex
+
+    @staticmethod
+    def update_params_from_encrypted_extra(  # pylint: disable=invalid-name
+        database: "Database", params: Dict[str, Any]
+    ) -> None:
+        """
+        Some databases require some sensitive information which do not conform to
+        the username:password syntax normally used by SQLAlchemy.
         :param database: database instance from which to extract extras
         :param params: params to be updated
         """

@@ -48,3 +48,15 @@ export const DEFAULT_CROSS_FILTER_SCOPING: NativeFilterScope = {
   rootPath: [DASHBOARD_ROOT_ID],
   excluded: [],
 };
+
+export const editorModes = {
+  EDIT: 'edit',
+  PREVIEW: 'preview',
+} as const;
+
+export const orientations = {
+  COLUMN: 'column',
+  ROW: 'row',
+} as const;
+
+export const DYNAMIC_MARKDOWN = 'dynamic-markdown';

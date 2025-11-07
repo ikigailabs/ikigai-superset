@@ -39,7 +39,7 @@ import {
 } from '@superset-ui/core';
 import { Global } from '@emotion/react';
 import { useDispatch, useSelector } from 'react-redux';
-import ErrorBoundary from 'src/components/ErrorBoundary';
+// import ErrorBoundary from 'src/components/ErrorBoundary';
 import BuilderComponentPane from 'src/dashboard/components/BuilderComponentPane';
 import DashboardHeader from 'src/dashboard/containers/DashboardHeader';
 import Icons from 'src/components/Icons';
@@ -58,6 +58,7 @@ import {
 import {
   setDirectPathToChild,
   setEditMode,
+  setSupersetUrl,
 } from 'src/dashboard/actions/dashboardState';
 import {
   deleteTopLevelTabs,
@@ -86,6 +87,7 @@ import {
 import { getRootLevelTabsComponent, shouldFocusTabs } from './utils';
 import DashboardContainer from './DashboardContainer';
 import { useNativeFilters } from './state';
+import { ContextService } from '../../../service/context-service/context-service';
 
 type DashboardBuilderProps = {};
 
@@ -161,12 +163,12 @@ const FiltersPanel = styled.div<{ width: number; hidden: boolean }>`
   ${({ hidden }) => hidden && `display: none;`}
 `;
 
-const StickyPanel = styled.div<{ width: number }>`
-  position: sticky;
-  top: -1px;
-  width: ${({ width }) => width}px;
-  flex: 0 0 ${({ width }) => width}px;
-`;
+// const StickyPanel = styled.div<{ width: number }>`
+//   position: sticky;
+//   top: -1px;
+//   width: ${({ width }) => width}px;
+//   flex: 0 0 ${({ width }) => width}px;
+// `;
 
 // @z-index-above-dashboard-popovers (99) + 1 = 100
 const StyledHeader = styled.div`
@@ -495,6 +497,8 @@ const DashboardBuilder: FC<DashboardBuilderProps> = () => {
 
   const [barTopOffset, setBarTopOffset] = useState(0);
 
+  useEffect(() => ContextService.requestCustomMarkdowns(), []);
+
   useEffect(() => {
     setBarTopOffset(headerRef.current?.getBoundingClientRect()?.height || 0);
 
@@ -509,6 +513,12 @@ const DashboardBuilder: FC<DashboardBuilderProps> = () => {
       observer.observe(headerRef.current);
     }
 
+    const iframeUrl: any = new URL(window.location.href);
+
+    if (iframeUrl && iframeUrl.search) {
+      dispatch(setSupersetUrl(iframeUrl.toString()));
+    }
+
     return () => {
       observer?.disconnect();
     };
@@ -517,7 +527,7 @@ const DashboardBuilder: FC<DashboardBuilderProps> = () => {
   const {
     showDashboard,
     dashboardFiltersOpen,
-    toggleDashboardFiltersOpen,
+    // toggleDashboardFiltersOpen,
     nativeFiltersEnabled,
   } = useNativeFilters();
 
@@ -533,10 +543,10 @@ const DashboardBuilder: FC<DashboardBuilderProps> = () => {
   const showFilterBar =
     (crossFiltersEnabled || nativeFiltersEnabled) && !editMode;
 
-  const offset =
-    FILTER_BAR_HEADER_HEIGHT +
-    (isSticky || standaloneMode ? 0 : MAIN_HEADER_HEIGHT) +
-    (filterSetEnabled ? FILTER_BAR_TABS_HEIGHT : 0);
+  // const offset =
+  //   FILTER_BAR_HEADER_HEIGHT +
+  //   (isSticky || standaloneMode ? 0 : MAIN_HEADER_HEIGHT) +
+  //   (filterSetEnabled ? FILTER_BAR_TABS_HEIGHT : 0);
 
   const filterBarHeight = `calc(100vh - ${offset}px)`;
   const filterBarOffset = dashboardFiltersOpen ? 0 : barTopOffset + 20;

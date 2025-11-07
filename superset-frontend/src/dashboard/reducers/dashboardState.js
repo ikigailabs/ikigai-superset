@@ -45,6 +45,12 @@ import {
   SET_OVERRIDE_CONFIRM,
   SAVE_DASHBOARD_STARTED,
   SAVE_DASHBOARD_FINISHED,
+  /**
+   * TODO: IKIGAI
+   * Thse almost definitiely shouldn't be here anymore
+   */
+  SET_SUPERSET_URL,
+  SET_CUSTOM_MARKDOWNS,
 } from '../actions/dashboardState';
 import { HYDRATE_DASHBOARD } from '../actions/hydrate';
 
@@ -229,6 +235,34 @@ export default function dashboardStateReducer(state = {}, action) {
       return {
         ...state,
         datasetsStatus: action.status,
+      };
+    },
+    [SET_SUPERSET_URL]() {
+      const { supersetUrl } = action;
+      let ikigaiOrigin = '';
+      const iframeUrl = new URL(supersetUrl);
+      if (iframeUrl && iframeUrl.search) {
+        const iframeUrlParameters = new URLSearchParams(iframeUrl.search);
+        if (iframeUrlParameters) {
+          const ikigaiURL = iframeUrlParameters.get('dash_url')
+            ? new URL(iframeUrlParameters.get('dash_url'))
+            : '';
+          ikigaiOrigin = ikigaiURL ? ikigaiURL.origin : '';
+        }
+      }
+      return {
+        ...state,
+        supersetUrl,
+        ikigaiOrigin,
+      };
+    },
+
+    [SET_CUSTOM_MARKDOWNS]() {
+      const { customMarkdowns } = action;
+
+      return {
+        ...state,
+        customMarkdowns,
       };
     },
   };

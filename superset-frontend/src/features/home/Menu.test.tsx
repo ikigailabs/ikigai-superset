@@ -254,7 +254,7 @@ beforeEach(() => {
 
 test('should render', async () => {
   useSelectorMock.mockReturnValue({ roles: user.roles });
-  const { container } = render(<Menu {...mockedProps} />, {
+  const { container } = render(<Menu />, {
     useRedux: true,
     useQueryParams: true,
     useRouter: true,

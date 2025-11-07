@@ -33,6 +33,7 @@ import { UrlParamEntries } from 'src/utils/urlUtils';
 
 import { UserWithPermissionsAndRoles } from 'src/types/bootstrapTypes';
 import { ChartState } from '../explore/types';
+import { editorModes, orientations } from './constants';
 
 export type { Dashboard } from 'src/types/Dashboard';
 
@@ -113,6 +114,14 @@ export type DashboardState = {
     dashboardId: number;
     data: JsonObject;
   };
+  /**
+   * TODO: IKIGAI
+   * We need to hard consider whether or not these fields actually belong here.
+   * We shouldn't be maintaining these lines if they're not actually in use.
+   */
+  ikigaiOrigin: string;
+  supersetUrl: string;
+  customMarkdowns: CustomMarkdowns;
 };
 export type DashboardInfo = {
   id: number;
@@ -189,6 +198,14 @@ export type LayoutItem = {
     text?: string;
     uuid: string;
     width: number;
+    customMarkdown?: CustomMarkdown;
+  };
+};
+
+export type LayoutItemWithCustomMarkdown = LayoutItem & {
+  meta: LayoutItem['meta'] & {
+    customElementId?: string;
+    customMarkdown: CustomMarkdown;
   };
 };
 
@@ -238,3 +255,47 @@ export type Slice = {
   owners: { id: number }[];
   created_by: { id: number };
 };
+
+export type CustomMarkdown = {
+  custom_markdown_id: string;
+  name: string;
+  project_id: string;
+  definition: any;
+  directory: CustomMarkdownDirectory;
+  created_at: string;
+  modified_at: string;
+};
+
+export type CustomMarkdowns = CustomMarkdown[];
+
+export type CustomMarkdownDirectory = {
+  directory_id: string;
+  name: string;
+  type: 'CUSTOM_MARKDOWN';
+  project_id: string;
+  parent_id: string;
+  size: string;
+};
+
+export type CustomMarkdownDirectoryPropType = {
+  directory_id: string;
+  name: string;
+  type: 'CUSTOM_MARKDOWN';
+  project_id: string;
+  parent_id: string;
+  size: string;
+};
+
+export type CustomMarkdownPropType = {
+  custom_markdown_id: string;
+  name: string;
+  project_id: string;
+  definition: any;
+  directory: CustomMarkdownDirectoryPropType;
+  created_at: string;
+  modified_at: string;
+};
+
+export type Orientation = typeof orientations[keyof typeof orientations];
+
+export type EditorMode = typeof editorModes[keyof typeof editorModes];

@@ -99,6 +99,13 @@ function mapStateToProps({
     slug: dashboardInfo.slug,
     metadata: dashboardInfo.metadata,
     reports,
+    /**
+     * TODO: IKIGAI
+     * Do we really need these here?
+     */
+    filterboxMigrationState: dashboardState.filterboxMigrationState,
+    ikigaiOrigin: dashboardState.ikigaiOrigin,
+    supersetUrl: dashboardState.supersetUrl,
   };
 }
 

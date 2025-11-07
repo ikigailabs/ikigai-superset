@@ -120,10 +120,10 @@ export default class Registry<
       (('value' in item && item.value !== value) || 'loader' in item);
     if (willOverwrite) {
       if (this.overwritePolicy === OverwritePolicy.WARN) {
-        // eslint-disable-next-line no-console
-        console.warn(
-          `Item with key "${key}" already exists. You are assigning a new value.`,
-        );
+        // This is unhelpful while running locally.
+        // console.warn(
+        //   `Item with key "${key}" already exists. You are assigning a new value.`,
+        // );
       } else if (this.overwritePolicy === OverwritePolicy.PROHIBIT) {
         throw new Error(
           `Item with key "${key}" already exists. Cannot overwrite.`,
@@ -146,10 +146,10 @@ export default class Registry<
       (('loader' in item && item.loader !== loader) || 'value' in item);
     if (willOverwrite) {
       if (this.overwritePolicy === OverwritePolicy.WARN) {
-        // eslint-disable-next-line no-console
-        console.warn(
-          `Item with key "${key}" already exists. You are assigning a new value.`,
-        );
+        // This is unhelpful while running locally.
+        // console.warn(
+        //   `Item with key "${key}" already exists. You are assigning a new value.`,
+        // );
       } else if (this.overwritePolicy === OverwritePolicy.PROHIBIT) {
         throw new Error(
           `Item with key "${key}" already exists. Cannot overwrite.`,

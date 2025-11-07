@@ -71,7 +71,7 @@
     >
   </head>
 
-  <body {% if standalone_mode %}class="standalone"{% endif %}>
+  <body style="background-color: white;" {% if standalone_mode %}class="standalone"{% endif %}>
     {% block navbar %}
       {% if not standalone_mode %}
         {% include 'appbuilder/navbar.html' %}

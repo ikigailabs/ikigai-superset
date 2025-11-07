@@ -36,10 +36,9 @@ export const useNativeFilters = () => {
 
   const filters = useFilters();
   const filterValues = Object.values(filters);
-  const expandFilters = getUrlParam(URL_PARAMS.expandFilters);
-  const [dashboardFiltersOpen, setDashboardFiltersOpen] = useState(
-    expandFilters ?? !!filterValues.length,
-  );
+  // const expandFilters = getUrlParam(URL_PARAMS.expandFilters);
+  const expandFilters = false;
+  const [dashboardFiltersOpen, setDashboardFiltersOpen] = useState(false);
 
   const nativeFiltersEnabled =
     isFeatureEnabled(FeatureFlag.DASHBOARD_NATIVE_FILTERS) &&

@@ -49,6 +49,15 @@ import { AnyDatasourcesAction } from 'src/explore/actions/datasourcesActions';
 import { HydrateExplore } from 'src/explore/actions/hydrateExplore';
 import getBootstrapData from 'src/utils/getBootstrapData';
 import { Dataset } from '@superset-ui/chart-controls';
+import ikigaiMiddlewares from '../ikigai/middlewares';
+import ikigaiSlices from '../ikigai/slices';
+
+import { LogLevel, setGlobalConfig } from 'src/service/logger';
+import { ConsoleTransport } from 'src/service/logger/transports/console-transport';
+
+setGlobalConfig({
+  transports: [new ConsoleTransport({ logLevel: LogLevel.VERBOSE })],
+});
 
 // Some reducers don't do anything, and redux is just used to reference the initial "state".
 // This may change later, as the client application takes on more responsibilities.
@@ -89,7 +98,7 @@ const getMiddleware: ConfigureStoreOptions['middleware'] =
             ignoredPaths: [/queryController/g],
             warnAfter: 200,
           },
-        }).concat(logger, api.middleware)
+        }).concat(logger, api.middleware, ...ikigaiMiddlewares)
       : [thunk, logger, api.middleware];
 
 // TODO: This reducer is a combination of the Dashboard and Explore reducers.
@@ -129,6 +138,7 @@ const reducers = {
   reports,
   saveModal,
   explore,
+  ...ikigaiSlices,
 };
 
 /* In some cases the jinja template injects two seperate React apps into basic.html

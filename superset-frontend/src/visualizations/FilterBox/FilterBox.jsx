@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unused-state */
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -19,6 +20,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { debounce } from 'lodash';
+import { connect } from 'react-redux';
 import { max as d3Max } from 'd3-array';
 import {
   AsyncCreatableSelect,
@@ -53,11 +55,13 @@ import {
   TIME_FILTER_LABELS,
   TIME_FILTER_MAP,
 } from 'src/explore/constants';
+import { ContextService } from 'src/service/context-service/context-service';
 
 // a shortcut to a map key, used by many components
 export const TIME_RANGE = TIME_FILTER_MAP.time_range;
 
 const propTypes = {
+  ikigaiOrigin: PropTypes.string,
   chartId: PropTypes.number.isRequired,
   origSelectedValues: PropTypes.object,
   datasource: PropTypes.object.isRequired,
@@ -141,6 +145,14 @@ class FilterBox extends React.PureComponent {
     this.onFilterMenuClose = this.onFilterMenuClose.bind(this);
   }
 
+  componentDidMount() {
+    ContextService.sendFilters();
+  }
+
+  componentWillUnmount() {
+    ContextService.sendFilters();
+  }
+
   onFilterMenuOpen(column) {
     return this.props.onFilterMenuOpen(this.props.chartId, column);
   }
@@ -212,6 +224,8 @@ class FilterBox extends React.PureComponent {
         if (this.props.instantFiltering) {
           this.props.onChange({ [fltr]: vals }, false);
         }
+        this.clickApply();
+        ContextService.sendFilters();
       },
     );
   }
@@ -434,7 +448,7 @@ class FilterBox extends React.PureComponent {
   }
 
   render() {
-    const { instantFiltering, width, height } = this.props;
+    const { width, height } = this.props;
     const { zIndex, gridUnit } = this.props.theme;
     return (
       <>
@@ -446,7 +460,7 @@ class FilterBox extends React.PureComponent {
 
             .filter_box {
               padding: ${gridUnit * 2 + 2}px 0;
-              overflow: visible !important;
+              overflow: hidden !important;
 
               &:hover {
                 z-index: ${zIndex.max};
@@ -456,18 +470,7 @@ class FilterBox extends React.PureComponent {
         />
         <div style={{ width, height, overflow: 'auto' }}>
           {this.renderDateFilter()}
-          {this.renderDatasourceFilters()}
           {this.renderFilters()}
-          {!instantFiltering && (
-            <Button
-              buttonSize="small"
-              buttonStyle="primary"
-              onClick={this.clickApply.bind(this)}
-              disabled={!this.state.hasChanged}
-            >
-              {t('Apply')}
-            </Button>
-          )}
         </div>
       </>
     );
@@ -477,4 +480,10 @@ class FilterBox extends React.PureComponent {
 FilterBox.propTypes = propTypes;
 FilterBox.defaultProps = defaultProps;
 
-export default withTheme(FilterBox);
+function mapStateToProps(state) {
+  return {
+    ikigaiOrigin: state?.dashboardState?.ikigaiOrigin,
+  };
+}
+
+export default withTheme(connect(mapStateToProps)(FilterBox));

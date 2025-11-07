@@ -16,6 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+/*
+ *Sep 8 2022 - Added functionality to modify all custom component URL's added manualy (html iframe) - update url origin
+ */
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
@@ -47,6 +50,7 @@ const propTypes = {
   index: PropTypes.number.isRequired,
   depth: PropTypes.number.isRequired,
   editMode: PropTypes.bool.isRequired,
+  ikigaiOrigin: PropTypes.string,
 
   // from redux
   logEvent: PropTypes.func.isRequired,
@@ -83,6 +87,7 @@ const MARKDOWN_PLACE_HOLDER = `# ✨Header 1
 Click here to learn more about [markdown formatting](https://bit.ly/1dQOfRK)`;
 
 const MARKDOWN_ERROR_MESSAGE = t('This markdown component has an error.');
+const SANITIZATION_DATE_BOUNDARY = Date.parse('2025-11-01T00:00:00.000Z'); // Nov 1st, 2025
 
 const MarkdownStyles = styled.div`
   ${({ theme }) => css`
@@ -292,16 +297,20 @@ class Markdown extends React.PureComponent {
   }
 
   renderPreviewMode() {
-    const { hasError } = this.state;
+    const { hasError, markdownSource } = this.state;
+
+    const createdOn = new Date(this.props.createdOn);
+    const now = new Date(SANITIZATION_DATE_BOUNDARY);
+    const doSanitize = createdOn > now;
 
     return (
       <SafeMarkdown
         source={
           hasError
             ? MARKDOWN_ERROR_MESSAGE
-            : this.state.markdownSource || MARKDOWN_PLACE_HOLDER
+            : markdownSource || MARKDOWN_PLACE_HOLDER
         }
-        htmlSanitization={this.props.htmlSanitization}
+        htmlSanitization={doSanitize && this.props.htmlSanitization}
         htmlSchemaOverrides={this.props.htmlSchemaOverrides}
       />
     );
@@ -413,6 +422,7 @@ function mapStateToProps(state) {
     redoLength: state.dashboardLayout.future.length,
     htmlSanitization: state.common.conf.HTML_SANITIZATION,
     htmlSchemaOverrides: state.common.conf.HTML_SANITIZATION_SCHEMA_EXTENSIONS,
+    createdOn: state.dashboardInfo.created_on,
   };
 }
 export default connect(mapStateToProps)(Markdown);

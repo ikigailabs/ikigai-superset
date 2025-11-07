@@ -436,6 +436,7 @@ class Chart extends React.Component {
         data-test-chart-id={id}
         data-test-viz-type={slice.viz_type}
         data-test-chart-name={slice.slice_name}
+        data-slice-container-name={slice.slice_name}
       >
         <SliceHeader
           innerRef={this.setHeaderRef}
@@ -494,6 +495,7 @@ class Chart extends React.Component {
             'dashboard-chart',
             isOverflowable && 'dashboard-chart--overflowable',
           )}
+          data-dashboard-chart={sliceName}
         >
           {isLoading && (
             <ChartOverlay

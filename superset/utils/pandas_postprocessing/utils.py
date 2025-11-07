@@ -75,6 +75,7 @@ ALLOWLIST_CUMULATIVE_FUNCTIONS = (
     "cumsum",
 )
 
+<<<<<<< HEAD
 PROPHET_TIME_GRAIN_MAP: dict[str, str] = {
     TimeGrain.SECOND: "S",
     TimeGrain.MINUTE: "min",
@@ -92,6 +93,25 @@ PROPHET_TIME_GRAIN_MAP: dict[str, str] = {
     TimeGrain.WEEK_STARTING_MONDAY: "W-MON",
     TimeGrain.WEEK_ENDING_SATURDAY: "W-SAT",
     TimeGrain.WEEK_ENDING_SUNDAY: "W-SUN",
+=======
+PROPHET_TIME_GRAIN_MAP = {
+    "PT1S": "S",
+    "PT1M": "min",
+    "PT5M": "5min",
+    "PT10M": "10min",
+    "PT15M": "15min",
+    "PT30M": "30min",
+    "PT1H": "H",
+    "P1D": "D",
+    "P1W": "W",
+    "P1M": "M",
+    "P3M": "Q",
+    "P1Y": "A",
+    "1969-12-28T00:00:00Z/P1W": "W-SUN",
+    "1969-12-29T00:00:00Z/P1W": "W-MON",
+    "P1W/1970-01-03T00:00:00Z": "W-SAT",
+    "P1W/1970-01-04T00:00:00Z": "W-SUN",
+>>>>>>> migration-2.0.1
 }
 
 RESAMPLE_METHOD = ("asfreq", "bfill", "ffill", "linear", "median", "mean", "sum")

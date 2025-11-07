@@ -264,7 +264,7 @@ export function runAnnotationQuery({
     const sliceKey = key || Object.keys(getState().charts)[0];
     // make a copy of formData, not modifying original formData
     const fd = {
-      ...(formData || getState().charts[sliceKey].latestQueryFormData),
+      ...(formData || getState().charts[sliceKey]?.latestQueryFormData),
     };
 
     if (!requiresQuery(annotation.sourceType)) {
@@ -599,17 +599,17 @@ export function refreshChart(chartKey, force, dashboardId) {
       getState().dashboardInfo.common.conf.SUPERSET_WEBSERVER_TIMEOUT;
 
     if (
-      !chart.latestQueryFormData ||
-      Object.keys(chart.latestQueryFormData).length === 0
+      !chart?.latestQueryFormData ||
+      Object.keys(chart?.latestQueryFormData).length === 0
     ) {
       return;
     }
     dispatch(
       postChartFormData(
-        chart.latestQueryFormData,
+        chart?.latestQueryFormData,
         force,
         timeout,
-        chart.id,
+        chart?.id,
         dashboardId,
         getState().dataMask[chart.id]?.ownState,
       ),
