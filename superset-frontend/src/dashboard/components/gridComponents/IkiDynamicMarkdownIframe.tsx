@@ -41,6 +41,6 @@ export class IkiDynamicMarkdownIframe extends React.Component<{
           style="height:100%;"
         />`;
 
-    return <SafeMarkdown source={iframeString} />;
+    return <SafeMarkdown source={iframeString} htmlSanitization={false} />;
   }
 }
