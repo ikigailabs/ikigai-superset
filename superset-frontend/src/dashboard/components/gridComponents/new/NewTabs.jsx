@@ -19,18 +19,18 @@
 import React from 'react';
 import { t } from '@superset-ui/core';
 
-import { HEADER_TYPE } from '../../../../util/componentTypes';
-import { NEW_HEADER_ID } from '../../../../util/constants';
-import DraggableNewComponent from '../DraggableNewComponent';
+import { TABS_TYPE } from '../../../util/componentTypes';
+import { NEW_TABS_ID } from '../../../util/constants';
+import DraggableNewComponent from './DraggableNewComponent';
 
-export default function DraggableNewHeader() {
+export default function DraggableNewTabs() {
   return (
     <DraggableNewComponent
-      id={NEW_HEADER_ID}
-      type={HEADER_TYPE}
-      label={t('Header')}
-      description={t('Title')}
-      className="fa fa-header"
+      id={NEW_TABS_ID}
+      type={TABS_TYPE}
+      label={t('Tabs')}
+      description={t('Separate dashboard content')}
+      className="fa fa-window-restore"
     />
   );
 }

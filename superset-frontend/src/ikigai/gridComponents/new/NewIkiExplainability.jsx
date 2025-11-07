@@ -18,30 +18,20 @@
  */
 import React from 'react';
 import { t } from '@superset-ui/core';
-import type { CustomMarkdown } from '../../../../types';
-import { IKI_DYNAMIC_SINGLE_MARKDOWN_TYPE } from '../../../../util/componentTypes';
-import { NEW_DYNAMIC_COMPONENT } from '../../../../util/constants';
-import DraggableNewComponent from '../DraggableNewComponent';
 
-type PropTypes = {
-  customMarkdown: CustomMarkdown;
-  disableDragDrop?: boolean;
-};
+import { IKI_EXPLAINABILITY_TYPE } from '../../../dashboard/util/componentTypes';
+import { NEW_IKI_EXPLAINABILITY_ID } from '../../../dashboard/util/constants';
+import DraggableNewComponent from '../../../dashboard/components/gridComponents/new/DraggableNewComponent';
 
-export default function DraggableNewDivider({
-  customMarkdown,
-  disableDragDrop = false,
-}: PropTypes) {
+export default function DraggableNewHeader() {
   return (
     <DraggableNewComponent
-      id={NEW_DYNAMIC_COMPONENT}
-      type={IKI_DYNAMIC_SINGLE_MARKDOWN_TYPE}
-      label={t(customMarkdown.name)}
-      description="Custom Element"
-      className="fa fa-mouse-pointer"
-      meta={{ customMarkdown }}
-      isCustomComponent
-      disableDragDrop={disableDragDrop}
+      id={NEW_IKI_EXPLAINABILITY_ID}
+      type={IKI_EXPLAINABILITY_TYPE}
+      label={t('Explainability')}
+      description={t('View insights into your forecast')}
+      className="fa fa-info-circle"
+      demandApp
     />
   );
 }

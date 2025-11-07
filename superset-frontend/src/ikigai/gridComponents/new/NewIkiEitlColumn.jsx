@@ -19,19 +19,18 @@
 import React from 'react';
 import { t } from '@superset-ui/core';
 
-import { IKI_EXPLAINABILITY_TYPE } from '../../../util/componentTypes';
-import { NEW_IKI_EXPLAINABILITY_ID } from '../../../util/constants';
-import DraggableNewComponent from './DraggableNewComponent';
+import { IKI_EITL_COLUMN_TYPE } from '../../../dashboard/util/componentTypes';
+import { NEW_IKI_EITL_COLUMN_ID } from '../../../dashboard/util/constants';
+import DraggableNewComponent from '../../../dashboard/components/gridComponents/new/DraggableNewComponent';
 
-export default function DraggableNewHeader() {
+export default function DraggableNewDivider() {
   return (
     <DraggableNewComponent
-      id={NEW_IKI_EXPLAINABILITY_ID}
-      type={IKI_EXPLAINABILITY_TYPE}
-      label={t('Explainability')}
-      description={t('View insights into your forecast')}
-      className="fa fa-info-circle"
-      demandApp
+      id={NEW_IKI_EITL_COLUMN_ID}
+      type={IKI_EITL_COLUMN_TYPE}
+      label={t('aiMatch Expert in the Loop (Columns)')}
+      description="aiMatch model component"
+      className="fa fa-bars fa-rotate-90"
     />
   );
 }

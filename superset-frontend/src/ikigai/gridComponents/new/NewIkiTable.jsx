@@ -19,17 +19,18 @@
 import React from 'react';
 import { t } from '@superset-ui/core';
 
-import { IKI_INTERACTIVE_FORECAST_TYPE } from '../../../util/componentTypes';
-import { NEW_IKI_INTERACTIVE_FORECAST_ID } from '../../../util/constants';
-import DraggableNewComponent from './DraggableNewComponent';
+import { IKI_TABLE_TYPE } from '../../../dashboard/util/componentTypes';
+import { NEW_IKI_TABLE_ID } from '../../../dashboard/util/constants';
+import DraggableNewComponent from '../../../dashboard/components/gridComponents/new/DraggableNewComponent';
 
 export default function DraggableNewDivider() {
   return (
     <DraggableNewComponent
-      id={NEW_IKI_INTERACTIVE_FORECAST_ID}
-      type={IKI_INTERACTIVE_FORECAST_TYPE}
-      label={t('Interactive Forecast')}
-      className="fa fa-eye"
+      id={NEW_IKI_TABLE_ID}
+      type={IKI_TABLE_TYPE}
+      label={t('Editable Dataset')}
+      description="Edit your data from the dashboard"
+      className="fa fa-table"
     />
   );
 }

@@ -17,29 +17,19 @@
  * under the License.
  */
 import React from 'react';
-import { shallow } from 'enzyme';
+import { t } from '@superset-ui/core';
 
-import DraggableNewComponent from 'src/dashboard/components/gridComponents/new/DraggableNewComponent';
-import NewTabs from 'src/dashboard/components/gridComponents/new/layout/NewTabs';
+import { IKI_INTERACTIVE_FORECAST_TYPE } from '../../../dashboard/util/componentTypes';
+import { NEW_IKI_INTERACTIVE_FORECAST_ID } from '../../../dashboard/util/constants';
+import DraggableNewComponent from '../../../dashboard/components/gridComponents/new/DraggableNewComponent';
 
-import { NEW_TABS_ID } from 'src/dashboard/util/constants';
-import { TABS_TYPE } from 'src/dashboard/util/componentTypes';
-
-describe('NewTabs', () => {
-  function setup() {
-    return shallow(<NewTabs />);
-  }
-
-  it('should render a DraggableNewComponent', () => {
-    const wrapper = setup();
-    expect(wrapper.find(DraggableNewComponent)).toExist();
-  });
-
-  it('should set appropriate type and id', () => {
-    const wrapper = setup();
-    expect(wrapper.find(DraggableNewComponent).props()).toMatchObject({
-      type: TABS_TYPE,
-      id: NEW_TABS_ID,
-    });
-  });
-});
+export default function DraggableNewDivider() {
+  return (
+    <DraggableNewComponent
+      id={NEW_IKI_INTERACTIVE_FORECAST_ID}
+      type={IKI_INTERACTIVE_FORECAST_TYPE}
+      label={t('Interactive Forecast')}
+      className="fa fa-eye"
+    />
+  );
+}

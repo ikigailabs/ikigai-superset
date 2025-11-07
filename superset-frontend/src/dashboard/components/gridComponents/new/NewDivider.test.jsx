@@ -17,20 +17,29 @@
  * under the License.
  */
 import React from 'react';
-import { t } from '@superset-ui/core';
+import { shallow } from 'enzyme';
 
-import { IKI_TABLE_TYPE } from '../../../../util/componentTypes';
-import { NEW_IKI_TABLE_ID } from '../../../../util/constants';
-import DraggableNewComponent from '../DraggableNewComponent';
+import DraggableNewComponent from 'src/dashboard/components/gridComponents/new/DraggableNewComponent';
+import NewDivider from 'src/dashboard/components/gridComponents/new/NewDivider';
 
-export default function DraggableNewDivider() {
-  return (
-    <DraggableNewComponent
-      id={NEW_IKI_TABLE_ID}
-      type={IKI_TABLE_TYPE}
-      label={t('Editable Dataset')}
-      description="Edit your data from the dashboard"
-      className="fa fa-table"
-    />
-  );
-}
+import { NEW_DIVIDER_ID } from 'src/dashboard/util/constants';
+import { DIVIDER_TYPE } from 'src/dashboard/util/componentTypes';
+
+describe('NewDivider', () => {
+  function setup() {
+    return shallow(<NewDivider />);
+  }
+
+  it('should render a DraggableNewComponent', () => {
+    const wrapper = setup();
+    expect(wrapper.find(DraggableNewComponent)).toExist();
+  });
+
+  it('should set appropriate type and id', () => {
+    const wrapper = setup();
+    expect(wrapper.find(DraggableNewComponent).props()).toMatchObject({
+      type: DIVIDER_TYPE,
+      id: NEW_DIVIDER_ID,
+    });
+  });
+});

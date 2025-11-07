@@ -17,20 +17,29 @@
  * under the License.
  */
 import React from 'react';
-import { t } from '@superset-ui/core';
+import { shallow } from 'enzyme';
 
-import { IKI_EITL_COLUMN_TYPE } from '../../../../util/componentTypes';
-import { NEW_IKI_EITL_COLUMN_ID } from '../../../../util/constants';
-import DraggableNewComponent from '../DraggableNewComponent';
+import DraggableNewComponent from 'src/dashboard/components/gridComponents/new/DraggableNewComponent';
+import NewRow from 'src/dashboard/components/gridComponents/new/NewRow';
 
-export default function DraggableNewDivider() {
-  return (
-    <DraggableNewComponent
-      id={NEW_IKI_EITL_COLUMN_ID}
-      type={IKI_EITL_COLUMN_TYPE}
-      label={t('aiMatch Expert in the Loop (Columns)')}
-      description="aiMatch model component"
-      className="fa fa-bars fa-rotate-90"
-    />
-  );
-}
+import { NEW_ROW_ID } from 'src/dashboard/util/constants';
+import { ROW_TYPE } from 'src/dashboard/util/componentTypes';
+
+describe('NewRow', () => {
+  function setup() {
+    return shallow(<NewRow />);
+  }
+
+  it('should render a DraggableNewComponent', () => {
+    const wrapper = setup();
+    expect(wrapper.find(DraggableNewComponent)).toExist();
+  });
+
+  it('should set appropriate type and id', () => {
+    const wrapper = setup();
+    expect(wrapper.find(DraggableNewComponent).props()).toMatchObject({
+      type: ROW_TYPE,
+      id: NEW_ROW_ID,
+    });
+  });
+});

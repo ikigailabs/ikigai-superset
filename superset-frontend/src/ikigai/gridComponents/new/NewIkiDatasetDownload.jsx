@@ -1,9 +1,9 @@
 import React from 'react';
 import { t } from '@superset-ui/core';
 
-import { IKI_DATASET_DOWNLOAD_TYPE } from '../../../../util/componentTypes';
-import { NEW_IKI_DATASET_DOWNLOAD_ID } from '../../../../util/constants';
-import DraggableNewComponent from '../DraggableNewComponent';
+import { IKI_DATASET_DOWNLOAD_TYPE } from '../../../dashboard/util/componentTypes';
+import { NEW_IKI_DATASET_DOWNLOAD_ID } from '../../../dashboard/util/constants';
+import DraggableNewComponent from '../../../dashboard/components/gridComponents/new/DraggableNewComponent';
 
 export default function DraggableNewDivider() {
   return (

@@ -17,29 +17,20 @@
  * under the License.
  */
 import React from 'react';
-import { shallow } from 'enzyme';
+import { t } from '@superset-ui/core';
 
-import DraggableNewComponent from 'src/dashboard/components/gridComponents/new/DraggableNewComponent';
-import NewColumn from 'src/dashboard/components/gridComponents/new/layout/NewColumn';
+import { IKI_RUN_PIPELINE_TYPE } from '../../../dashboard/util/componentTypes';
+import { NEW_IKI_RUN_PIPELINE_ID } from '../../../dashboard/util/constants';
+import DraggableNewComponent from '../../../dashboard/components/gridComponents/new/DraggableNewComponent';
 
-import { NEW_COLUMN_ID } from 'src/dashboard/util/constants';
-import { COLUMN_TYPE } from 'src/dashboard/util/componentTypes';
-
-describe('NewColumn', () => {
-  function setup() {
-    return shallow(<NewColumn />);
-  }
-
-  it('should render a DraggableNewComponent', () => {
-    const wrapper = setup();
-    expect(wrapper.find(DraggableNewComponent)).toExist();
-  });
-
-  it('should set appropriate type and id', () => {
-    const wrapper = setup();
-    expect(wrapper.find(DraggableNewComponent).props()).toMatchObject({
-      type: COLUMN_TYPE,
-      id: NEW_COLUMN_ID,
-    });
-  });
-});
+export default function DraggableNewDivider() {
+  return (
+    <DraggableNewComponent
+      id={NEW_IKI_RUN_PIPELINE_ID}
+      type={IKI_RUN_PIPELINE_TYPE}
+      label={t('Run Flow')}
+      description={t('Trigger a Flow to run with a single click')}
+      className="fa fa-bolt"
+    />
+  );
+}

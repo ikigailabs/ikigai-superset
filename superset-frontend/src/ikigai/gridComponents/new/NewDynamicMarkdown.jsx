@@ -17,29 +17,20 @@
  * under the License.
  */
 import React from 'react';
-import { shallow } from 'enzyme';
+import { t } from '@superset-ui/core';
 
-import DraggableNewComponent from 'src/dashboard/components/gridComponents/new/DraggableNewComponent';
-import NewRow from 'src/dashboard/components/gridComponents/new/layout/NewRow';
+import { IKI_DYNAMIC_MARKDOWN_TYPE } from '../../../dashboard/util/componentTypes';
+import { NEW_DYNAMIC_COMPONENT } from '../../../dashboard/util/constants';
+import DraggableNewComponent from '../../../dashboard/components/gridComponents/new/DraggableNewComponent';
 
-import { NEW_ROW_ID } from 'src/dashboard/util/constants';
-import { ROW_TYPE } from 'src/dashboard/util/componentTypes';
-
-describe('NewRow', () => {
-  function setup() {
-    return shallow(<NewRow />);
-  }
-
-  it('should render a DraggableNewComponent', () => {
-    const wrapper = setup();
-    expect(wrapper.find(DraggableNewComponent)).toExist();
-  });
-
-  it('should set appropriate type and id', () => {
-    const wrapper = setup();
-    expect(wrapper.find(DraggableNewComponent).props()).toMatchObject({
-      type: ROW_TYPE,
-      id: NEW_ROW_ID,
-    });
-  });
-});
+export default function DraggableNewDivider() {
+  return (
+    <DraggableNewComponent
+      id={NEW_DYNAMIC_COMPONENT}
+      type={IKI_DYNAMIC_MARKDOWN_TYPE}
+      label={t('Custom Element')}
+      description="Construct custom layout with powerful features"
+      className="fa fa-mouse-pointer"
+    />
+  );
+}

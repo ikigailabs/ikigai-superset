@@ -5,7 +5,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../../../types';
 import { IKI_DYNAMIC_SINGLE_MARKDOWN_TYPE } from '../../../util/componentTypes';
 import { ContextService } from '../../../../ikigai/service/context-service/context-service';
-import NewDynamicSingleMarkdown from '../../gridComponents/new/components/NewDynamicSingleMarkdown';
+import NewDynamicSingleMarkdown from '../../../../ikigai/gridComponents/new/NewDynamicSingleMarkdown';
 
 type PropTypes = {
   searchTerm: string;

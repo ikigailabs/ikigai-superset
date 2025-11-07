@@ -18,19 +18,30 @@
  */
 import React from 'react';
 import { t } from '@superset-ui/core';
+import type { CustomMarkdown } from '../../../dashboard/types';
+import { IKI_DYNAMIC_SINGLE_MARKDOWN_TYPE } from '../../../dashboard/util/componentTypes';
+import { NEW_DYNAMIC_COMPONENT } from '../../../dashboard/util/constants';
+import DraggableNewComponent from '../../../dashboard/components/gridComponents/new/DraggableNewComponent';
 
-import { ROW_TYPE } from '../../../../util/componentTypes';
-import { NEW_ROW_ID } from '../../../../util/constants';
-import DraggableNewComponent from '../DraggableNewComponent';
+type PropTypes = {
+  customMarkdown: CustomMarkdown;
+  disableDragDrop?: boolean;
+};
 
-export default function DraggableNewRow() {
+export default function DraggableNewDivider({
+  customMarkdown,
+  disableDragDrop = false,
+}: PropTypes) {
   return (
     <DraggableNewComponent
-      id={NEW_ROW_ID}
-      type={ROW_TYPE}
-      label={t('Row')}
-      description={t('Horizontal content placeholder')}
-      className="fa fa-ellipsis-h"
+      id={NEW_DYNAMIC_COMPONENT}
+      type={IKI_DYNAMIC_SINGLE_MARKDOWN_TYPE}
+      label={t(customMarkdown.name)}
+      description="Custom Element"
+      className="fa fa-mouse-pointer"
+      meta={{ customMarkdown }}
+      isCustomComponent
+      disableDragDrop={disableDragDrop}
     />
   );
 }
