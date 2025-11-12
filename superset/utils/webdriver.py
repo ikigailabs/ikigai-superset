@@ -238,12 +238,8 @@ class WebDriverProxy:
 
             img = element.screenshot_as_png
         except TimeoutException:
-<<<<<<< HEAD
             # raise again for the finally block, but handled above
             pass
-=======
-            logger.warning("Selenium timed out requesting url %s", url, exc_info=True)
->>>>>>> migration-2.0.1
         except StaleElementReferenceException:
             logger.exception(
                 "Selenium got a stale element while requesting url %s",
