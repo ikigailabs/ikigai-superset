@@ -785,14 +785,12 @@ const Header = () => {
       className="dashboard-header-container"
     >
       <PageHeaderWithActions
-        editableTitleProps={editableTitleProps}
         certificatiedBadgeProps={certifiedBadgeProps}
         faveStarProps={faveStarProps}
-        titlePanelAdditionalItems={titlePanelAdditionalItems}
         rightPanelAdditionalItems={rightPanelAdditionalItems}
         menuDropdownProps={menuDropdownProps}
         additionalActionsMenu={additionalActionsMenu}
-        showFaveStar={user?.userId && dashboardInfo?.id}
+        showFaveStar={false}
         showTitlePanelItems
       />
       {showingPropertiesModal && (
