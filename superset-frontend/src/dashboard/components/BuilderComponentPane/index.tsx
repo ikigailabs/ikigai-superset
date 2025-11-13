@@ -21,14 +21,8 @@ import { rgba } from 'emotion-rgba';
 import Tabs from 'src/components/Tabs';
 import { t, css, SupersetTheme } from '@superset-ui/core';
 import SliceAdder from 'src/dashboard/containers/SliceAdder';
-import dashboardComponents from 'src/visualizations/presets/dashboardComponents';
-import NewColumn from '../gridComponents/new/layout/NewColumn';
-import NewDivider from '../gridComponents/new/layout/NewDivider';
-import NewHeader from '../gridComponents/new/layout/NewHeader';
-import NewRow from '../gridComponents/new/layout/NewRow';
-import NewTabs from '../gridComponents/new/layout/NewTabs';
-import NewMarkdown from '../gridComponents/new/layout/NewMarkdown';
-import NewDynamicComponent from '../gridComponents/new/NewDynamicComponent';
+import { ComponentsTab } from './ComponentsTab/ComponentsTab';
+import { LayoutTab } from './LayoutTab/LayoutTab';
 
 const BUILDER_PANE_WIDTH = 374;
 
@@ -68,30 +62,16 @@ const BuilderComponentPane = ({ topOffset = 0 }) => (
           }
         `}
       >
-        <Tabs.TabPane
-          key={1}
-          tab={t('Charts')}
-          css={css`
-            height: 100%;
-          `}
-        >
-          <SliceAdder />
+        <Tabs.TabPane key={1} tab={t('Layout')}>
+          <LayoutTab />
         </Tabs.TabPane>
-        <Tabs.TabPane key={2} tab={t('Layout elements')}>
-          <NewTabs />
-          <NewRow />
-          <NewColumn />
-          <NewHeader />
-          <NewMarkdown />
-          <NewDivider />
-          {dashboardComponents
-            .getAll()
-            .map(({ key: componentKey, metadata }) => (
-              <NewDynamicComponent
-                metadata={metadata}
-                componentKey={componentKey}
-              />
-            ))}
+
+        <Tabs.TabPane key={2} tab={t('Components')}>
+          <ComponentsTab />
+        </Tabs.TabPane>
+
+        <Tabs.TabPane key={3} tab={t('Charts')}>
+          <SliceAdder />
         </Tabs.TabPane>
       </Tabs>
     </div>

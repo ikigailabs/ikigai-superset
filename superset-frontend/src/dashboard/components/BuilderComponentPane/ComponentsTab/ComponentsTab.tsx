@@ -4,6 +4,8 @@ import { Controls } from './Controls';
 import { CustomMarkdowns } from './CustomComponents';
 import { LegacyComponents } from './LegacyComponents';
 
+import './ComponentsTab.less';
+
 export function ComponentsTab() {
   const [searchTerm, setSearchTerm] = useState('');
 

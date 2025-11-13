@@ -22,6 +22,8 @@ import { DYNAMIC_TYPE } from '../../../util/componentTypes';
 import { NEW_DYNAMIC_COMPONENT } from '../../../util/constants';
 import { DashboardComponentsRegistryMetadata } from '../../../../visualizations/dashboardComponents/DashboardComponentsRegistry';
 
+import './components/NewComponent.less';
+
 type DraggableNewDynamicComponent = {
   componentKey: string;
   metadata: DashboardComponentsRegistryMetadata;

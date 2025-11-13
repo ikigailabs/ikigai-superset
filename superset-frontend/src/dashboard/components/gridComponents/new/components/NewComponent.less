@@ -1,0 +1,98 @@
+@import '../../../../../assets/stylesheets/less/variables.less';
+
+.new-component {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  padding: 16px;
+  background: @lightest;
+  cursor: move;
+
+  &:not(.static):hover {
+    background-color: #e8e8e8b7;
+  }
+
+  &.disable-hover:not(.static) {
+    background: @lightest;
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.new-component-placeholder {
+  position: relative;
+  background: @gray-bg;
+  width: 40px;
+  height: 40px;
+  margin-right: 16px;
+  border: 1px solid @lightest;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: @gray;
+  font-size: @font-size-xxl;
+
+  &.fa-window-restore {
+    font-size: @font-size-l;
+  }
+
+  &.fa-area-chart {
+    font-size: @font-size-xl;
+  }
+}
+
+.new-component-placeholder.divider-placeholder:after {
+  content: '';
+  height: 2px;
+  width: 100%;
+  background-color: #e0e0e0;
+}
+
+.new-component-placeholder {
+  position: relative;
+  background: #f7f7f7;
+  width: 40px;
+  height: 40px;
+  margin-right: 16px;
+  border: 1px solid #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #879399;
+  font-size: 28px;
+}
+.new-component-placeholder.fa-window-restore {
+  font-size: 16px;
+}
+.new-component-placeholder.fa-area-chart {
+  font-size: 21px;
+}
+
+.ant-tabs-tabpane .new-component .new-component-placeholder {
+  background-color: #eee;
+  border-radius: 4px;
+  border: none !important;
+  width: 40px;
+  height: 40px;
+  aspect-ratio: 1/1;
+}
+
+.new-component-placeholder::before {
+  font-size: 16px;
+  // color: var(--txtColor2);
+  color: #824fe0;
+  transition: all 0.2s ease;
+}
+
+.ant-tabs-tabpane .new-component:hover .new-component-placeholder::before {
+  color: var(--primaryColor);
+  transition: all 0.2s ease;
+}
+
+.new-component-placeholder.divider-placeholder:after {
+  content: '';
+  height: 2px;
+  width: 100%;
+  background-color: #e0e0e0;
+}
