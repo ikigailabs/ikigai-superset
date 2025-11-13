@@ -16,33 +16,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
-import FilterableTable, {
-  convertBigIntStrToNumber,
-} from 'src/components/FilterableTable';
+import { isValidElement } from 'react';
+import FilterableTable from 'src/components/FilterableTable';
 import { render, screen, within } from 'spec/helpers/testing-library';
 import userEvent from '@testing-library/user-event';
 
 describe('FilterableTable', () => {
   const mockedProps = {
-    orderedColumnKeys: ['a', 'b', 'c'],
+    orderedColumnKeys: ['a', 'b', 'c', 'children'],
     data: [
-      { a: 'a1', b: 'b1', c: 'c1', d: 0 },
-      { a: 'a2', b: 'b2', c: 'c2', d: 100 },
-      { a: null, b: 'b3', c: 'c3', d: 50 },
+      { a: 'a1', b: 'b1', c: 'c1', d: 0, children: 0 },
+      { a: 'a2', b: 'b2', c: 'c2', d: 100, children: 2 },
+      { a: null, b: 'b3', c: 'c3', d: 50, children: 1 },
     ],
     height: 500,
   };
   it('is valid element', () => {
-    expect(React.isValidElement(<FilterableTable {...mockedProps} />)).toBe(
-      true,
-    );
+    expect(isValidElement(<FilterableTable {...mockedProps} />)).toBe(true);
   });
   it('renders a grid with 3 Table rows', () => {
     const { getByRole, getByText } = render(
       <FilterableTable {...mockedProps} />,
     );
-    expect(getByRole('table')).toBeInTheDocument();
+    expect(getByRole('treegrid')).toBeInTheDocument();
     mockedProps.data.forEach(({ b: columnBContent }) => {
       expect(getByText(columnBContent)).toBeInTheDocument();
     });
@@ -54,8 +50,8 @@ describe('FilterableTable', () => {
     };
     const { getByText, queryByText } = render(<FilterableTable {...props} />);
     expect(getByText(props.filterText)).toBeInTheDocument();
-    expect(queryByText('b2')).toBeFalsy();
-    expect(queryByText('b3')).toBeFalsy();
+    expect(queryByText('b2')).not.toBeInTheDocument();
+    expect(queryByText('b3')).not.toBeInTheDocument();
   });
   it('filters on a number', () => {
     const props = {
@@ -64,8 +60,8 @@ describe('FilterableTable', () => {
     };
     const { getByText, queryByText } = render(<FilterableTable {...props} />);
     expect(getByText('b2')).toBeInTheDocument();
-    expect(queryByText('b1')).toBeFalsy();
-    expect(queryByText('b3')).toBeFalsy();
+    expect(queryByText('b1')).not.toBeInTheDocument();
+    expect(queryByText('b3')).not.toBeInTheDocument();
   });
 });
 
@@ -82,11 +78,10 @@ describe('FilterableTable sorting - RTL', () => {
     };
     render(<FilterableTable {...stringProps} />);
 
-    const stringColumn = within(screen.getByRole('table'))
+    const stringColumn = within(screen.getByRole('treegrid'))
       .getByText('columnA')
-      .closest('th');
-    // Antd 4.x Table does not follow the table role structure. Need a hacky selector to point the cell item
-    const gridCells = screen.getByTitle('Bravo').closest('.virtual-grid');
+      .closest('[role=button]');
+    const gridCells = screen.getByText('Bravo').closest('[role=rowgroup]');
 
     // Original order
     expect(gridCells?.textContent).toEqual(
@@ -128,10 +123,10 @@ describe('FilterableTable sorting - RTL', () => {
     };
     render(<FilterableTable {...integerProps} />);
 
-    const integerColumn = within(screen.getByRole('table'))
+    const integerColumn = within(screen.getByRole('treegrid'))
       .getByText('columnB')
-      .closest('th');
-    const gridCells = screen.getByTitle('21').closest('.virtual-grid');
+      .closest('[role=button]');
+    const gridCells = screen.getByText('21').closest('[role=rowgroup]');
 
     // Original order
     expect(gridCells?.textContent).toEqual(['21', '0', '623'].join(''));
@@ -163,10 +158,10 @@ describe('FilterableTable sorting - RTL', () => {
     };
     render(<FilterableTable {...floatProps} />);
 
-    const floatColumn = within(screen.getByRole('table'))
+    const floatColumn = within(screen.getByRole('treegrid'))
       .getByText('columnC')
-      .closest('th');
-    const gridCells = screen.getByTitle('45.67').closest('.virtual-grid');
+      .closest('[role=button]');
+    const gridCells = screen.getByText('45.67').closest('[role=rowgroup]');
 
     // Original order
     expect(gridCells?.textContent).toEqual(
@@ -218,10 +213,10 @@ describe('FilterableTable sorting - RTL', () => {
     };
     render(<FilterableTable {...mixedFloatProps} />);
 
-    const mixedFloatColumn = within(screen.getByRole('table'))
+    const mixedFloatColumn = within(screen.getByRole('treegrid'))
       .getByText('columnD')
-      .closest('th');
-    const gridCells = screen.getByTitle('48710.92').closest('.virtual-grid');
+      .closest('[role=button]');
+    const gridCells = screen.getByText('48710.92').closest('[role=rowgroup]');
 
     // Original order
     expect(gridCells?.textContent).toEqual(
@@ -316,10 +311,10 @@ describe('FilterableTable sorting - RTL', () => {
     };
     render(<FilterableTable {...dsProps} />);
 
-    const dsColumn = within(screen.getByRole('table'))
+    const dsColumn = within(screen.getByRole('treegrid'))
       .getByText('columnDS')
-      .closest('th');
-    const gridCells = screen.getByTitle('2021-01-01').closest('.virtual-grid');
+      .closest('[role=button]');
+    const gridCells = screen.getByText('2021-01-01').closest('[role=rowgroup]');
 
     // Original order
     expect(gridCells?.textContent).toEqual(
@@ -382,20 +377,4 @@ describe('FilterableTable sorting - RTL', () => {
       ].join(''),
     );
   });
-});
-
-test('renders bigInt value in a number format', () => {
-  expect(convertBigIntStrToNumber('123')).toBe('123');
-  expect(convertBigIntStrToNumber('some string value')).toBe(
-    'some string value',
-  );
-  expect(convertBigIntStrToNumber('{ a: 123 }')).toBe('{ a: 123 }');
-  expect(convertBigIntStrToNumber('"Not a Number"')).toBe('"Not a Number"');
-  // trim quotes for bigint string format
-  expect(convertBigIntStrToNumber('"-12345678901234567890"')).toBe(
-    '-12345678901234567890',
-  );
-  expect(convertBigIntStrToNumber('"12345678901234567890"')).toBe(
-    '12345678901234567890',
-  );
 });

@@ -16,19 +16,17 @@
 # under the License.
 import logging
 
-from flask import request, Response
+from flask import request, Response, url_for
 from flask_appbuilder.api import expose, protect, safe
 from marshmallow import ValidationError
 
-from superset.constants import MODEL_API_RW_METHOD_PERMISSION_MAP
-from superset.dashboards.commands.exceptions import (
+from superset.commands.dashboard.exceptions import (
     DashboardAccessDeniedError,
     DashboardNotFoundError,
 )
-from superset.dashboards.permalink.commands.create import (
-    CreateDashboardPermalinkCommand,
-)
-from superset.dashboards.permalink.commands.get import GetDashboardPermalinkCommand
+from superset.commands.dashboard.permalink.create import CreateDashboardPermalinkCommand
+from superset.commands.dashboard.permalink.get import GetDashboardPermalinkCommand
+from superset.constants import MODEL_API_RW_METHOD_PERMISSION_MAP
 from superset.dashboards.permalink.exceptions import DashboardPermalinkInvalidStateError
 from superset.dashboards.permalink.schemas import DashboardPermalinkStateSchema
 from superset.extensions import event_logger
@@ -56,11 +54,10 @@ class DashboardPermalinkRestApi(BaseSupersetApi):
     )
     @requires_json
     def post(self, pk: str) -> Response:
-        """Stores a new permanent link.
+        """Create a new dashboard's permanent link.
         ---
         post:
-          description: >-
-            Stores a new permanent link.
+          summary: Create a new dashboard's permanent link
           parameters:
           - in: path
             schema:
@@ -101,8 +98,7 @@ class DashboardPermalinkRestApi(BaseSupersetApi):
                 dashboard_id=pk,
                 state=state,
             ).run()
-            http_origin = request.headers.environ.get("HTTP_ORIGIN")
-            url = f"{http_origin}/superset/dashboard/p/{key}/"
+            url = url_for("Superset.dashboard_permalink", key=key, _external=True)
             return self.response(201, key=key, url=url)
         except (ValidationError, DashboardPermalinkInvalidStateError) as ex:
             return self.response(400, message=str(ex))
@@ -122,11 +118,10 @@ class DashboardPermalinkRestApi(BaseSupersetApi):
         log_to_statsd=False,
     )
     def get(self, key: str) -> Response:
-        """Retrives permanent link state for dashboard.
+        """Get dashboard's permanent link state.
         ---
         get:
-          description: >-
-            Retrives dashboard state associated with a permanent link.
+          summary: Get dashboard's permanent link state
           parameters:
           - in: path
             schema:

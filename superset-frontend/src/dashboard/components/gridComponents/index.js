@@ -49,7 +49,7 @@ import Divider from './Divider';
 import Header from './Header';
 import Row from './Row';
 import Tab from './Tab';
-import TabsConnected from './Tabs';
+import Tabs from './Tabs';
 import DynamicComponent from './DynamicComponent';
 import IkiDynamicMarkdown from './IkiDynamicMarkdown';
 import IkiDynamicSingleMarkdown from './IkiDynamicSingleMarkdown';
@@ -96,7 +96,7 @@ export const componentLookup = {
   [HEADER_TYPE]: Header,
   [ROW_TYPE]: Row,
   [TAB_TYPE]: Tab,
-  [TABS_TYPE]: TabsConnected,
+  [TABS_TYPE]: Tabs,
   [DYNAMIC_TYPE]: DynamicComponent,
   [IKI_DYNAMIC_MARKDOWN_TYPE]: IkiDynamicMarkdown,
   [IKI_DYNAMIC_SINGLE_MARKDOWN_TYPE]: IkiDynamicSingleMarkdown,

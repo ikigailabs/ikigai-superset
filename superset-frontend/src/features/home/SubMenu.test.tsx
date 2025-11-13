@@ -17,7 +17,6 @@
  * under the License.
  */
 import userEvent from '@testing-library/user-event';
-import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { render, screen } from 'spec/helpers/testing-library';
 import SubMenu, { ButtonProps } from './SubMenu';
@@ -125,7 +124,7 @@ test('should render the buttons', async () => {
   ];
   setup({ buttons });
   const testButton = screen.getByText(buttons[0].name);
-  expect(await screen.findAllByRole('button')).toHaveLength(3);
+  expect(await screen.findAllByRole('button')).toHaveLength(2);
   userEvent.click(testButton);
   expect(mockFunc).toHaveBeenCalled();
 });

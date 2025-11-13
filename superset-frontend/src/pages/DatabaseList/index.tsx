@@ -17,22 +17,23 @@
  * under the License.
  */
 import {
-  isFeatureEnabled,
-  FeatureFlag,
   getExtensionsRegistry,
   styled,
   SupersetClient,
   t,
 } from '@superset-ui/core';
-import React, { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import rison from 'rison';
 import { useSelector } from 'react-redux';
 import { useQueryParams, BooleanParam } from 'use-query-params';
 import { LocalStorageKeys, setItem } from 'src/utils/localStorageHelpers';
-
 import Loading from 'src/components/Loading';
 import { useListViewResource } from 'src/views/CRUD/hooks';
-import { createErrorHandler, uploadUserPerms } from 'src/views/CRUD/utils';
+import {
+  createErrorHandler,
+  createFetchRelated,
+  uploadUserPerms,
+} from 'src/views/CRUD/utils';
 import withToasts from 'src/components/MessageToasts/withToasts';
 import SubMenu, { SubMenuProps } from 'src/features/home/SubMenu';
 import DeleteModal from 'src/components/DeleteModal';
@@ -47,7 +48,10 @@ import { ExtensionConfigs } from 'src/features/home/types';
 import { UserWithPermissionsAndRoles } from 'src/types/bootstrapTypes';
 import type { MenuObjectProps } from 'src/types/bootstrapTypes';
 import DatabaseModal from 'src/features/databases/DatabaseModal';
+import UploadDataModal from 'src/features/databases/UploadDataModel';
 import { DatabaseObject } from 'src/features/databases/types';
+import { ModifiedInfo } from 'src/components/AuditInfo';
+import { QueryObjectColumns } from 'src/views/CRUD/types';
 
 const extensionsRegistry = getExtensionsRegistry();
 const DatabaseDeleteRelatedExtension = extensionsRegistry.get(
@@ -60,13 +64,18 @@ const dbConfigExtraExtension = extensionsRegistry.get(
 const PAGE_SIZE = 25;
 
 interface DatabaseDeleteObject extends DatabaseObject {
-  chart_count: number;
-  dashboard_count: number;
+  charts: any;
+  dashboards: any;
   sqllab_tab_count: number;
 }
 interface DatabaseListProps {
   addDangerToast: (msg: string) => void;
   addSuccessToast: (msg: string) => void;
+  user: {
+    userId: string | number;
+    firstName: string;
+    lastName: string;
+  };
 }
 
 const IconCheck = styled(Icons.Check)`
@@ -90,7 +99,11 @@ function BooleanDisplay({ value }: { value: Boolean }) {
   return value ? <IconCheck /> : <IconCancelX />;
 }
 
-function DatabaseList({ addDangerToast, addSuccessToast }: DatabaseListProps) {
+function DatabaseList({
+  addDangerToast,
+  addSuccessToast,
+  user,
+}: DatabaseListProps) {
   const {
     state: {
       loading,
@@ -105,7 +118,7 @@ function DatabaseList({ addDangerToast, addSuccessToast }: DatabaseListProps) {
     t('database'),
     addDangerToast,
   );
-  const user = useSelector<any, UserWithPermissionsAndRoles>(
+  const fullUser = useSelector<any, UserWithPermissionsAndRoles>(
     state => state.user,
   );
   const showDatabaseModal = getUrlParam(URL_PARAMS.showDatabaseModal);
@@ -122,12 +135,19 @@ function DatabaseList({ addDangerToast, addSuccessToast }: DatabaseListProps) {
   const [currentDatabase, setCurrentDatabase] = useState<DatabaseObject | null>(
     null,
   );
+  const [csvUploadDataModalOpen, setCsvUploadDataModalOpen] =
+    useState<boolean>(false);
+  const [excelUploadDataModalOpen, setExcelUploadDataModalOpen] =
+    useState<boolean>(false);
+  const [columnarUploadDataModalOpen, setColumnarUploadDataModalOpen] =
+    useState<boolean>(false);
+
   const [allowUploads, setAllowUploads] = useState<boolean>(false);
-  const isAdmin = isUserAdmin(user);
+  const isAdmin = isUserAdmin(fullUser);
   const showUploads = allowUploads || isAdmin;
 
   const [preparingExport, setPreparingExport] = useState<boolean>(false);
-  const { roles } = user;
+  const { roles } = fullUser;
   const {
     CSV_EXTENSIONS,
     COLUMNAR_EXTENSIONS,
@@ -149,8 +169,8 @@ function DatabaseList({ addDangerToast, addSuccessToast }: DatabaseListProps) {
       .then(({ json = {} }) => {
         setDatabaseCurrentlyDeleting({
           ...database,
-          chart_count: json.charts.count,
-          dashboard_count: json.dashboards.count,
+          charts: json.charts,
+          dashboards: json.dashboards,
           sqllab_tab_count: json.sqllab_tab_states.count,
         });
       })
@@ -178,7 +198,7 @@ function DatabaseList({ addDangerToast, addSuccessToast }: DatabaseListProps) {
         }
 
         // Delete user-selected db from local storage
-        setItem(LocalStorageKeys.db, null);
+        setItem(LocalStorageKeys.Database, null);
 
         // Close delete modal
         setDatabaseCurrentlyDeleting(null);
@@ -201,8 +221,7 @@ function DatabaseList({ addDangerToast, addSuccessToast }: DatabaseListProps) {
   const canCreate = hasPerm('can_write');
   const canEdit = hasPerm('can_write');
   const canDelete = hasPerm('can_write');
-  const canExport =
-    hasPerm('can_export') && isFeatureEnabled(FeatureFlag.VERSIONED_EXPORT);
+  const canExport = hasPerm('can_export');
 
   const { canUploadCSV, canUploadColumnar, canUploadExcel } = uploadUserPerms(
     roles,
@@ -221,22 +240,31 @@ function DatabaseList({ addDangerToast, addSuccessToast }: DatabaseListProps) {
         {
           label: t('Upload CSV'),
           name: 'Upload CSV file',
-          url: '/csvtodatabaseview/form',
+          url: '#',
+          onClick: () => {
+            setCsvUploadDataModalOpen(true);
+          },
           perm: canUploadCSV && showUploads,
           disable: isDisabled,
         },
         {
-          label: t('Upload columnar file'),
-          name: 'Upload columnar file',
-          url: '/columnartodatabaseview/form',
-          perm: canUploadColumnar && showUploads,
+          label: t('Upload Excel'),
+          name: 'Upload Excel file',
+          url: '#',
+          onClick: () => {
+            setExcelUploadDataModalOpen(true);
+          },
+          perm: canUploadExcel && showUploads,
           disable: isDisabled,
         },
         {
-          label: t('Upload Excel file'),
-          name: 'Upload Excel file',
-          url: '/exceltodatabaseview/form',
-          perm: canUploadExcel && showUploads,
+          label: t('Upload Columnar'),
+          name: 'Upload columnar file',
+          url: '#',
+          onClick: () => {
+            setColumnarUploadDataModalOpen(true);
+          },
+          perm: canUploadColumnar && showUploads,
           disable: isDisabled,
         },
       ],
@@ -252,7 +280,7 @@ function DatabaseList({ addDangerToast, addSuccessToast }: DatabaseListProps) {
     SupersetClient.get({
       endpoint: `/api/v1/database/?q=${rison.encode(payload)}`,
     }).then(({ json }: Record<string, any>) => {
-      // There might be some existings Gsheets and Clickhouse DBs
+      // There might be some existing Gsheets and Clickhouse DBs
       // with allow_file_upload set as True which is not possible from now on
       const allowedDatabasesWithFileUpload =
         json?.result?.filter(
@@ -313,7 +341,7 @@ function DatabaseList({ addDangerToast, addSuccessToast }: DatabaseListProps) {
     () => [
       {
         accessor: 'database_name',
-        Header: t('Database'),
+        Header: t('Name'),
       },
       {
         accessor: 'backend',
@@ -361,7 +389,7 @@ function DatabaseList({ addDangerToast, addSuccessToast }: DatabaseListProps) {
       },
       {
         accessor: 'allow_file_upload',
-        Header: t('CSV upload'),
+        Header: t('File upload'),
         Cell: ({
           row: {
             original: { allow_file_upload: allowFileUpload },
@@ -380,23 +408,14 @@ function DatabaseList({ addDangerToast, addSuccessToast }: DatabaseListProps) {
         size: 'md',
       },
       {
-        accessor: 'created_by',
-        disableSortBy: true,
-        Header: t('Created by'),
         Cell: ({
           row: {
-            original: { created_by: createdBy },
+            original: {
+              changed_by: changedBy,
+              changed_on_delta_humanized: changedOn,
+            },
           },
-        }: any) =>
-          createdBy ? `${createdBy.first_name} ${createdBy.last_name}` : '',
-        size: 'xl',
-      },
-      {
-        Cell: ({
-          row: {
-            original: { changed_on_delta_humanized: changedOn },
-          },
-        }: any) => changedOn,
+        }: any) => <ModifiedInfo date={changedOn} user={changedBy} />,
         Header: t('Last modified'),
         accessor: 'changed_on_delta_humanized',
         size: 'xl',
@@ -470,6 +489,10 @@ function DatabaseList({ addDangerToast, addSuccessToast }: DatabaseListProps) {
         hidden: !canEdit && !canDelete,
         disableSortBy: true,
       },
+      {
+        accessor: QueryObjectColumns.ChangedBy,
+        hidden: true,
+      },
     ],
     [canDelete, canEdit, canExport],
   );
@@ -477,11 +500,18 @@ function DatabaseList({ addDangerToast, addSuccessToast }: DatabaseListProps) {
   const filters: Filters = useMemo(
     () => [
       {
+        Header: t('Name'),
+        key: 'search',
+        id: 'database_name',
+        input: 'search',
+        operator: FilterOperator.Contains,
+      },
+      {
         Header: t('Expose in SQL Lab'),
         key: 'expose_in_sql_lab',
         id: 'expose_in_sqllab',
         input: 'select',
-        operator: FilterOperator.equals,
+        operator: FilterOperator.Equals,
         unfilteredLabel: t('All'),
         selects: [
           { label: t('Yes'), value: true },
@@ -501,7 +531,7 @@ function DatabaseList({ addDangerToast, addSuccessToast }: DatabaseListProps) {
         key: 'allow_run_async',
         id: 'allow_run_async',
         input: 'select',
-        operator: FilterOperator.equals,
+        operator: FilterOperator.Equals,
         unfilteredLabel: t('All'),
         selects: [
           { label: t('Yes'), value: true },
@@ -509,11 +539,24 @@ function DatabaseList({ addDangerToast, addSuccessToast }: DatabaseListProps) {
         ],
       },
       {
-        Header: t('Search'),
-        key: 'search',
-        id: 'database_name',
-        input: 'search',
-        operator: FilterOperator.contains,
+        Header: t('Modified by'),
+        key: 'changed_by',
+        id: 'changed_by',
+        input: 'select',
+        operator: FilterOperator.RelationOneMany,
+        unfilteredLabel: t('All'),
+        fetchSelects: createFetchRelated(
+          'database',
+          'changed_by',
+          createErrorHandler(errMsg =>
+            t(
+              'An error occurred while fetching dataset datasource values: %s',
+              errMsg,
+            ),
+          ),
+          user,
+        ),
+        paginate: true,
       },
     ],
     [],
@@ -530,19 +573,117 @@ function DatabaseList({ addDangerToast, addSuccessToast }: DatabaseListProps) {
           refreshData();
         }}
       />
+      <UploadDataModal
+        addDangerToast={addDangerToast}
+        addSuccessToast={addSuccessToast}
+        onHide={() => {
+          setCsvUploadDataModalOpen(false);
+        }}
+        show={csvUploadDataModalOpen}
+        allowedExtensions={CSV_EXTENSIONS}
+        type="csv"
+      />
+      <UploadDataModal
+        addDangerToast={addDangerToast}
+        addSuccessToast={addSuccessToast}
+        onHide={() => {
+          setExcelUploadDataModalOpen(false);
+        }}
+        show={excelUploadDataModalOpen}
+        allowedExtensions={EXCEL_EXTENSIONS}
+        type="excel"
+      />
+      <UploadDataModal
+        addDangerToast={addDangerToast}
+        addSuccessToast={addSuccessToast}
+        onHide={() => {
+          setColumnarUploadDataModalOpen(false);
+        }}
+        show={columnarUploadDataModalOpen}
+        allowedExtensions={COLUMNAR_EXTENSIONS}
+        type="columnar"
+      />
       {databaseCurrentlyDeleting && (
         <DeleteModal
           description={
             <>
               <p>
+                {t('The database')}{' '}
+                <b>{databaseCurrentlyDeleting.database_name}</b>{' '}
                 {t(
-                  'The database %s is linked to %s charts that appear on %s dashboards and users have %s SQL Lab tabs using this database open. Are you sure you want to continue? Deleting the database will break those objects.',
-                  databaseCurrentlyDeleting.database_name,
-                  databaseCurrentlyDeleting.chart_count,
-                  databaseCurrentlyDeleting.dashboard_count,
+                  'is linked to %s charts that appear on %s dashboards and users have %s SQL Lab tabs using this database open. Are you sure you want to continue? Deleting the database will break those objects.',
+                  databaseCurrentlyDeleting.charts.count,
+                  databaseCurrentlyDeleting.dashboards.count,
                   databaseCurrentlyDeleting.sqllab_tab_count,
                 )}
               </p>
+              {databaseCurrentlyDeleting.dashboards.count >= 1 && (
+                <>
+                  <h4>{t('Affected Dashboards')}</h4>
+                  <ul>
+                    {databaseCurrentlyDeleting.dashboards.result
+                      .slice(0, 10)
+                      .map(
+                        (
+                          result: { id: number; title: string },
+                          index: number,
+                        ) => (
+                          <li key={result.id}>
+                            <a
+                              href={`/superset/dashboard/${result.id}`}
+                              target="_atRiskItem"
+                            >
+                              {result.title}
+                            </a>
+                          </li>
+                        ),
+                      )}
+                    {databaseCurrentlyDeleting.dashboards.result.length >
+                      10 && (
+                      <li>
+                        {t(
+                          '... and %s others',
+                          databaseCurrentlyDeleting.dashboards.result.length -
+                            10,
+                        )}
+                      </li>
+                    )}
+                  </ul>
+                </>
+              )}
+              {databaseCurrentlyDeleting.charts.count >= 1 && (
+                <>
+                  <h4>{t('Affected Charts')}</h4>
+                  <ul>
+                    {databaseCurrentlyDeleting.charts.result.slice(0, 10).map(
+                      (
+                        result: {
+                          id: number;
+                          slice_name: string;
+                        },
+                        index: number,
+                      ) => (
+                        <li key={result.id}>
+                          <a
+                            href={`/explore/?slice_id=${result.id}`}
+                            target="_atRiskItem"
+                          >
+                            {result.slice_name}
+                          </a>
+                        </li>
+                      ),
+                    )}
+                    {databaseCurrentlyDeleting.charts.result.length > 10 && (
+                      <li>
+                        {t(
+                          '... and %s others',
+                          databaseCurrentlyDeleting.charts.result.length - 10,
+                        )}
+                      </li>
+                    )}
+                  </ul>
+                </>
+              )}
               {DatabaseDeleteRelatedExtension && (
                 <DatabaseDeleteRelatedExtension
                   database={databaseCurrentlyDeleting}
@@ -570,6 +711,9 @@ function DatabaseList({ addDangerToast, addSuccessToast }: DatabaseListProps) {
         filters={filters}
         initialSort={initialSort}
         loading={loading}
+        addDangerToast={addDangerToast}
+        addSuccessToast={addSuccessToast}
+        refreshData={() => {}}
         pageSize={PAGE_SIZE}
       />
 

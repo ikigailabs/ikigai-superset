@@ -17,21 +17,21 @@
 """Fix schema perm for datasets
 
 Revision ID: 0769ef90fddd
-Revises: bf646a0c1501
+Revises: ee179a490af9
 Create Date: 2023-08-02 15:23:58.242396
 
 """
 
 # revision identifiers, used by Alembic.
 revision = "0769ef90fddd"
-down_revision = "bf646a0c1501"
+down_revision = "ee179a490af9"
 
-import sqlalchemy as sa
-from alembic import op
-from sqlalchemy.dialects.sqlite.base import SQLiteDialect
-from sqlalchemy.ext.declarative import declarative_base
+import sqlalchemy as sa  # noqa: E402
+from alembic import op  # noqa: E402
+from sqlalchemy.dialects.sqlite.base import SQLiteDialect  # noqa: E402
+from sqlalchemy.ext.declarative import declarative_base  # noqa: E402
 
-from superset import db
+from superset import db  # noqa: E402
 
 Base = declarative_base()
 

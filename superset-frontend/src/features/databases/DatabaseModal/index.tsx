@@ -20,18 +20,21 @@ import {
   t,
   styled,
   SupersetTheme,
-  FeatureFlag,
-  isFeatureEnabled,
   getExtensionsRegistry,
 } from '@superset-ui/core';
-import React, {
+
+import {
   FunctionComponent,
   useEffect,
   useRef,
   useState,
   useReducer,
   Reducer,
+  useCallback,
+  ChangeEvent,
 } from 'react';
+
+import { useHistory } from 'react-router-dom';
 import { setItem, LocalStorageKeys } from 'src/utils/localStorageHelpers';
 import { UploadChangeParam, UploadFile } from 'antd/lib/upload/interface';
 import Tabs from 'src/components/Tabs';
@@ -57,13 +60,16 @@ import {
 import { useCommonConf } from 'src/features/databases/state';
 import Loading from 'src/components/Loading';
 import { isEmpty, pick } from 'lodash';
+import { OnlyKeyWithType } from 'src/utils/types';
 import {
   DatabaseObject,
   DatabaseForm,
-  CONFIGURATION_METHOD,
+  ConfigurationMethod,
   CatalogObject,
   Engines,
   ExtraJson,
+  CustomTextType,
+  DatabaseParameters,
 } from '../types';
 import ExtraOptions from './ExtraOptions';
 import SqlAlchemyForm from './SqlAlchemyForm';
@@ -133,7 +139,7 @@ const SSHTunnelContainer = styled.div`
   `};
 `;
 
-interface DatabaseModalProps {
+export interface DatabaseModalProps {
   addDangerToast: (msg: string) => void;
   addSuccessToast: (msg: string) => void;
   onDatabaseAdd?: (database?: DatabaseObject) => void;
@@ -141,31 +147,31 @@ interface DatabaseModalProps {
   show: boolean;
   databaseId: number | undefined; // If included, will go into edit mode
   dbEngine: string | undefined; // if included goto step 2 with engine already set
-  history?: any;
 }
 
 export enum ActionType {
-  addTableCatalogSheet,
-  configMethodChange,
-  dbSelected,
-  editorChange,
-  extraEditorChange,
-  extraInputChange,
-  fetched,
-  inputChange,
-  parametersChange,
-  queryChange,
-  removeTableCatalogSheet,
-  reset,
-  textChange,
-  parametersSSHTunnelChange,
-  setSSHTunnelLoginMethod,
-  removeSSHTunnelConfig,
+  AddTableCatalogSheet,
+  ConfigMethodChange,
+  DbSelected,
+  EditorChange,
+  ExtraEditorChange,
+  ExtraInputChange,
+  EncryptedExtraInputChange,
+  Fetched,
+  InputChange,
+  ParametersChange,
+  QueryChange,
+  RemoveTableCatalogSheet,
+  Reset,
+  TextChange,
+  ParametersSSHTunnelChange,
+  SetSSHTunnelLoginMethod,
+  RemoveSSHTunnelConfig,
 }
 
 export enum AuthType {
-  password,
-  privateKey,
+  Password,
+  PrivateKey,
 }
 
 interface DBReducerPayloadType {
@@ -180,52 +186,54 @@ interface DBReducerPayloadType {
 export type DBReducerActionType =
   | {
       type:
-        | ActionType.extraEditorChange
-        | ActionType.extraInputChange
-        | ActionType.textChange
-        | ActionType.queryChange
-        | ActionType.inputChange
-        | ActionType.editorChange
-        | ActionType.parametersChange
-        | ActionType.parametersSSHTunnelChange;
+        | ActionType.ExtraEditorChange
+        | ActionType.ExtraInputChange
+        | ActionType.EncryptedExtraInputChange
+        | ActionType.TextChange
+        | ActionType.QueryChange
+        | ActionType.InputChange
+        | ActionType.EditorChange
+        | ActionType.ParametersChange
+        | ActionType.ParametersSSHTunnelChange;
       payload: DBReducerPayloadType;
     }
   | {
-      type: ActionType.fetched;
+      type: ActionType.Fetched;
       payload: Partial<DatabaseObject>;
     }
   | {
-      type: ActionType.dbSelected;
+      type: ActionType.DbSelected;
       payload: {
         database_name?: string;
         engine?: string;
-        configuration_method: CONFIGURATION_METHOD;
+        configuration_method: ConfigurationMethod;
         engine_information?: {};
         driver?: string;
+        sqlalchemy_uri_placeholder?: string;
       };
     }
   | {
       type:
-        | ActionType.reset
-        | ActionType.addTableCatalogSheet
-        | ActionType.removeSSHTunnelConfig;
+        | ActionType.Reset
+        | ActionType.RemoveSSHTunnelConfig
+        | ActionType.AddTableCatalogSheet;
     }
   | {
-      type: ActionType.removeTableCatalogSheet;
+      type: ActionType.RemoveTableCatalogSheet;
       payload: {
         indexToDelete: number;
       };
     }
   | {
-      type: ActionType.configMethodChange;
+      type: ActionType.ConfigMethodChange;
       payload: {
         database_name?: string;
         engine?: string;
-        configuration_method: CONFIGURATION_METHOD;
+        configuration_method: ConfigurationMethod;
       };
     }
   | {
-      type: ActionType.setSSHTunnelLoginMethod;
+      type: ActionType.SetSSHTunnelLoginMethod;
       payload: {
         login_method: AuthType;
       };
@@ -250,7 +258,7 @@ export function dbReducer(
   const extraJson: ExtraJson = JSON.parse(trimmedState.extra || '{}');
 
   switch (action.type) {
-    case ActionType.extraEditorChange:
+    case ActionType.ExtraEditorChange:
       // "extra" payload in state is a string
       try {
         // we don't want to stringify encoded strings twice
@@ -265,7 +273,15 @@ export function dbReducer(
           [action.payload.name]: actionPayloadJson,
         }),
       };
-    case ActionType.extraInputChange:
+    case ActionType.EncryptedExtraInputChange:
+      return {
+        ...trimmedState,
+        masked_encrypted_extra: JSON.stringify({
+          ...JSON.parse(trimmedState.masked_encrypted_extra || '{}'),
+          [action.payload.name]: action.payload.value,
+        }),
+      };
+    case ActionType.ExtraInputChange:
       // "extra" payload in state is a string
       if (
         action.payload.name === 'schema_cache_timeout' ||
@@ -306,6 +322,18 @@ export function dbReducer(
           }),
         };
       }
+      if (action.payload.name === 'expand_rows') {
+        return {
+          ...trimmedState,
+          extra: JSON.stringify({
+            ...extraJson,
+            schema_options: {
+              ...extraJson?.schema_options,
+              [action.payload.name]: !!action.payload.value,
+            },
+          }),
+        };
+      }
       return {
         ...trimmedState,
         extra: JSON.stringify({
@@ -316,7 +344,7 @@ export function dbReducer(
               : action.payload.value,
         }),
       };
-    case ActionType.inputChange:
+    case ActionType.InputChange:
       if (action.payload.type === 'checkbox') {
         return {
           ...trimmedState,
@@ -327,7 +355,7 @@ export function dbReducer(
         ...trimmedState,
         [action.payload.name]: action.payload.value,
       };
-    case ActionType.parametersChange:
+    case ActionType.ParametersChange:
       // catalog params will always have a catalog state for
       // dbs that use a catalog, i.e., gsheets, even if the
       // fields are empty strings
@@ -338,19 +366,26 @@ export function dbReducer(
         // Formatting wrapping google sheets table catalog
         const catalogCopy: CatalogObject[] = [...trimmedState.catalog];
         const idx = action.payload.type?.split('-')[1];
-        const catalogToUpdate: CatalogObject = catalogCopy[idx] || {};
-        catalogToUpdate[action.payload.name] = action.payload.value;
+        const catalogToUpdate: CatalogObject =
+          catalogCopy[parseInt(idx, 10)] || {};
+        if (action.payload.value !== undefined) {
+          catalogToUpdate[action.payload.name as keyof CatalogObject] =
+            action.payload.value;
+        }
 
         // insert updated catalog to existing state
         catalogCopy.splice(parseInt(idx, 10), 1, catalogToUpdate);
 
         // format catalog for state
         // eslint-disable-next-line array-callback-return
-        parametersCatalog = catalogCopy.reduce((obj, item: any) => {
-          const catalog = { ...obj };
-          catalog[item.name] = item.value;
-          return catalog;
-        }, {});
+        parametersCatalog = catalogCopy.reduce<Record<string, string>>(
+          (obj, item: CatalogObject) => {
+            const catalog = { ...obj };
+            catalog[item.name as keyof CatalogObject] = item.value;
+            return catalog;
+          },
+          {},
+        );
 
         return {
           ...trimmedState,
@@ -369,7 +404,7 @@ export function dbReducer(
         },
       };
 
-    case ActionType.parametersSSHTunnelChange:
+    case ActionType.ParametersSSHTunnelChange:
       return {
         ...trimmedState,
         ssh_tunnel: {
@@ -377,7 +412,7 @@ export function dbReducer(
           [action.payload.name]: action.payload.value,
         },
       };
-    case ActionType.setSSHTunnelLoginMethod: {
+    case ActionType.SetSSHTunnelLoginMethod: {
       let ssh_tunnel = {};
       if (trimmedState?.ssh_tunnel) {
         // remove any attributes that are considered sensitive
@@ -388,7 +423,7 @@ export function dbReducer(
           'username',
         ]);
       }
-      if (action.payload.login_method === AuthType.privateKey) {
+      if (action.payload.login_method === AuthType.PrivateKey) {
         return {
           ...trimmedState,
           ssh_tunnel: {
@@ -399,7 +434,7 @@ export function dbReducer(
           },
         };
       }
-      if (action.payload.login_method === AuthType.password) {
+      if (action.payload.login_method === AuthType.Password) {
         return {
           ...trimmedState,
           ssh_tunnel: {
@@ -412,12 +447,12 @@ export function dbReducer(
         ...trimmedState,
       };
     }
-    case ActionType.removeSSHTunnelConfig:
+    case ActionType.RemoveSSHTunnelConfig:
       return {
         ...trimmedState,
         ssh_tunnel: undefined,
       };
-    case ActionType.addTableCatalogSheet:
+    case ActionType.AddTableCatalogSheet:
       if (trimmedState.catalog !== undefined) {
         return {
           ...trimmedState,
@@ -428,17 +463,17 @@ export function dbReducer(
         ...trimmedState,
         catalog: [{ name: '', value: '' }],
       };
-    case ActionType.removeTableCatalogSheet:
+    case ActionType.RemoveTableCatalogSheet:
       trimmedState.catalog?.splice(action.payload.indexToDelete, 1);
       return {
         ...trimmedState,
       };
-    case ActionType.editorChange:
+    case ActionType.EditorChange:
       return {
         ...trimmedState,
         [action.payload.name]: action.payload.json,
       };
-    case ActionType.queryChange:
+    case ActionType.QueryChange:
       return {
         ...trimmedState,
         parameters: {
@@ -447,12 +482,12 @@ export function dbReducer(
         },
         query_input: action.payload.value,
       };
-    case ActionType.textChange:
+    case ActionType.TextChange:
       return {
         ...trimmedState,
         [action.payload.name]: action.payload.value,
       };
-    case ActionType.fetched:
+    case ActionType.Fetched:
       // convert query to a string and store in query_input
       query = action.payload?.parameters?.query || {};
       query_input = Object.entries(query)
@@ -461,8 +496,7 @@ export function dbReducer(
 
       if (
         action.payload.masked_encrypted_extra &&
-        action.payload.configuration_method ===
-          CONFIGURATION_METHOD.DYNAMIC_FORM
+        action.payload.configuration_method === ConfigurationMethod.DynamicForm
       ) {
         // "extra" payload from the api is a string
         const extraJsonPayload: ExtraJson = {
@@ -497,19 +531,19 @@ export function dbReducer(
         query_input,
       };
 
-    case ActionType.dbSelected:
+    case ActionType.DbSelected:
       // set initial state for blank form
       return {
         ...action.payload,
         extra: DEFAULT_EXTRA,
         expose_in_sqllab: true,
       };
-    case ActionType.configMethodChange:
+    case ActionType.ConfigMethodChange:
       return {
         ...action.payload,
       };
 
-    case ActionType.reset:
+    case ActionType.Reset:
     default:
       return null;
   }
@@ -525,7 +559,6 @@ const DatabaseModal: FunctionComponent<DatabaseModalProps> = ({
   show,
   databaseId,
   dbEngine,
-  history,
 }) => {
   const [db, setDB] = useReducer<
     Reducer<Partial<DatabaseObject> | null, DBReducerActionType>
@@ -584,7 +617,9 @@ const DatabaseModal: FunctionComponent<DatabaseModalProps> = ({
   const SSHTunnelSwitchComponent =
     extensionsRegistry.get('ssh_tunnel.form.switch') ?? SSHTunnelSwitch;
 
-  const [useSSHTunneling, setUseSSHTunneling] = useState<boolean>(false);
+  const [useSSHTunneling, setUseSSHTunneling] = useState<boolean | undefined>(
+    undefined,
+  );
 
   let dbConfigExtraExtension = extensionsRegistry.get(
     'databaseconnection.extraOption',
@@ -607,32 +642,42 @@ const DatabaseModal: FunctionComponent<DatabaseModalProps> = ({
   const dbImages = getDatabaseImages();
   const connectionAlert = getConnectionAlert();
   const isEditMode = !!databaseId;
-  const disableSSHTunnelingForEngine = (
-    availableDbs?.databases?.find(
-      (DB: DatabaseObject) =>
-        DB.backend === db?.engine || DB.engine === db?.engine,
-    ) as DatabaseObject
-  )?.engine_information?.disable_ssh_tunneling;
-  const isSSHTunneling =
-    isFeatureEnabled(FeatureFlag.SSH_TUNNELING) &&
-    !disableSSHTunnelingForEngine;
   const hasAlert =
-    connectionAlert || !!(db?.engine && engineSpecificAlertMapping[db.engine]);
+    connectionAlert ||
+    !!(
+      db?.engine &&
+      engineSpecificAlertMapping[
+        db.engine as keyof typeof engineSpecificAlertMapping
+      ]
+    );
   const useSqlAlchemyForm =
-    db?.configuration_method === CONFIGURATION_METHOD.SQLALCHEMY_URI;
+    db?.configuration_method === ConfigurationMethod.SqlalchemyUri;
   const useTabLayout = isEditMode || useSqlAlchemyForm;
   const isDynamic = (engine: string | undefined) =>
     availableDbs?.databases?.find(
       (DB: DatabaseObject) => DB.backend === engine || DB.engine === engine,
     )?.parameters !== undefined;
   const showDBError = validationErrors || dbErrors;
+  const history = useHistory();
 
   const dbModel: DatabaseForm =
+    // TODO: we need a centralized engine in one place
+
+    // first try to match both engine and driver
+    availableDbs?.databases?.find(
+      (available: {
+        engine: string | undefined;
+        default_driver: string | undefined;
+      }) =>
+        available.engine === (isEditMode ? db?.backend : db?.engine) &&
+        available.default_driver === db?.driver,
+    ) ||
+    // alternatively try to match only engine
     availableDbs?.databases?.find(
       (available: { engine: string | undefined }) =>
-        // TODO: we need a centralized engine in one place
         available.engine === (isEditMode ? db?.backend : db?.engine),
-    ) || {};
+    ) ||
+    {};
 
   // Test Connection logic
   const testConnection = () => {
@@ -648,7 +693,13 @@ const DatabaseModal: FunctionComponent<DatabaseModalProps> = ({
       extra: db?.extra,
       masked_encrypted_extra: db?.masked_encrypted_extra || '',
       server_cert: db?.server_cert || undefined,
-      ssh_tunnel: db?.ssh_tunnel || undefined,
+      ssh_tunnel:
+        !isEmpty(db?.ssh_tunnel) && useSSHTunneling
+          ? {
+              ...db.ssh_tunnel,
+              server_port: Number(db.ssh_tunnel!.server_port),
+            }
+          : undefined,
     };
     setTestInProgress(true);
     testDatabaseConnection(
@@ -676,10 +727,36 @@ const DatabaseModal: FunctionComponent<DatabaseModalProps> = ({
     return false;
   };
 
+  const onChange = useCallback(
+    (
+      type: DBReducerActionType['type'],
+      payload: CustomTextType | DBReducerPayloadType,
+    ) => {
+      setDB({ type, payload } as DBReducerActionType);
+    },
+    [],
+  );
+
+  const handleClearValidationErrors = useCallback(() => {
+    setValidationErrors(null);
+  }, [setValidationErrors]);
+
+  const handleParametersChange = useCallback(
+    ({ target }: { target: HTMLInputElement }) => {
+      onChange(ActionType.ParametersChange, {
+        type: target.type,
+        name: target.name,
+        checked: target.checked,
+        value: target.value,
+      });
+    },
+    [onChange],
+  );
+
   const onClose = () => {
-    setDB({ type: ActionType.reset });
+    setDB({ type: ActionType.Reset });
     setHasConnectedDb(false);
-    setValidationErrors(null); // reset validation errors on close
+    handleClearValidationErrors(); // reset validation errors on close
     clearError();
     setEditNewDb(false);
     setFileList([]);
@@ -694,18 +771,12 @@ const DatabaseModal: FunctionComponent<DatabaseModalProps> = ({
     setSSHTunnelPrivateKeys({});
     setSSHTunnelPrivateKeyPasswords({});
     setConfirmedOverwrite(false);
-    setUseSSHTunneling(false);
+    setUseSSHTunneling(undefined);
     onHide();
   };
 
   const redirectURL = (url: string) => {
-    /* TODO (lyndsiWilliams): This check and passing history
-      as a prop can be removed once SQL Lab is in the SPA */
-    if (!isEmpty(history)) {
-      history?.push(url);
-    } else {
-      window.location.href = url;
-    }
+    history.push(url);
   };
 
   // Database import logic
@@ -724,12 +795,11 @@ const DatabaseModal: FunctionComponent<DatabaseModalProps> = ({
     setImportingErrorMessage(msg);
   });
 
-  const onChange = (type: any, payload: any) => {
-    setDB({ type, payload } as DBReducerActionType);
-  };
-
   const onSave = async () => {
     let dbConfigExtraExtensionOnSaveError;
+
+    setLoading(true);
+
     dbConfigExtraExtension
       ?.onSave(extraExtensionComponentState, db)
       .then(({ error }: { error: any }) => {
@@ -738,6 +808,7 @@ const DatabaseModal: FunctionComponent<DatabaseModalProps> = ({
           addDangerToast(error);
         }
       });
+
     if (dbConfigExtraExtensionOnSaveError) {
       setLoading(false);
       return;
@@ -745,7 +816,7 @@ const DatabaseModal: FunctionComponent<DatabaseModalProps> = ({
     // Clone DB object
     const dbToUpdate = { ...(db || {}) };
 
-    if (dbToUpdate.configuration_method === CONFIGURATION_METHOD.DYNAMIC_FORM) {
+    if (dbToUpdate.configuration_method === ConfigurationMethod.DynamicForm) {
       // Validate DB before saving
       if (dbToUpdate?.parameters?.catalog) {
         // need to stringify gsheets catalog to allow it to be serialized
@@ -757,17 +828,13 @@ const DatabaseModal: FunctionComponent<DatabaseModalProps> = ({
         });
       }
 
-      // only do validation for non ssh tunnel connections
-      if (!dbToUpdate?.ssh_tunnel) {
-        // make sure that button spinner animates
-        setLoading(true);
-        const errors = await getValidation(dbToUpdate, true);
-        if ((validationErrors && !isEmpty(validationErrors)) || errors) {
-          setLoading(false);
-          return;
-        }
-        // end spinner animation
+      const errors = await getValidation(dbToUpdate, true);
+      if (!isEmpty(validationErrors) || errors?.length) {
+        addDangerToast(
+          t('Connection failed, please check your connection settings.'),
+        );
         setLoading(false);
+        return;
       }
 
       const parameters_schema = isEditMode
@@ -786,20 +853,28 @@ const DatabaseModal: FunctionComponent<DatabaseModalProps> = ({
          */
         if (
           parameters_schema[paramConfig]['x-encrypted-extra'] &&
-          dbToUpdate.parameters?.[paramConfig]
+          dbToUpdate.parameters?.[paramConfig as keyof DatabaseParameters]
         ) {
-          if (typeof dbToUpdate.parameters?.[paramConfig] === 'object') {
+          if (
+            typeof dbToUpdate.parameters?.[
+              paramConfig as keyof DatabaseParameters
+            ] === 'object'
+          ) {
             // add new encrypted extra to masked_encrypted_extra object
             additionalEncryptedExtra[paramConfig] =
-              dbToUpdate.parameters?.[paramConfig];
+              dbToUpdate.parameters?.[paramConfig as keyof DatabaseParameters];
             // The backend expects `masked_encrypted_extra` as a string for historical
             // reasons.
-            dbToUpdate.parameters[paramConfig] = JSON.stringify(
-              dbToUpdate.parameters[paramConfig],
+            dbToUpdate.parameters[
+              paramConfig as OnlyKeyWithType<DatabaseParameters, string>
+            ] = JSON.stringify(
+              dbToUpdate.parameters[paramConfig as keyof DatabaseParameters],
             );
           } else {
             additionalEncryptedExtra[paramConfig] = JSON.parse(
-              dbToUpdate.parameters?.[paramConfig] || '{}',
+              dbToUpdate.parameters?.[
+                paramConfig as OnlyKeyWithType<DatabaseParameters, string>
+              ] || '{}',
             );
           }
         }
@@ -824,12 +899,17 @@ const DatabaseModal: FunctionComponent<DatabaseModalProps> = ({
       });
     }
 
-    setLoading(true);
+    // strictly checking for false as an indication that the toggle got unchecked
+    if (useSSHTunneling === false) {
+      // remove ssh tunnel
+      dbToUpdate.ssh_tunnel = null;
+    }
+
     if (db?.id) {
       const result = await updateResource(
         db.id as number,
         dbToUpdate as DatabaseObject,
-        dbToUpdate.configuration_method === CONFIGURATION_METHOD.DYNAMIC_FORM, // onShow toast on SQLA Forms
+        dbToUpdate.configuration_method === ConfigurationMethod.DynamicForm, // onShow toast on SQLA Forms
       );
       if (result) {
         if (onDatabaseAdd) onDatabaseAdd();
@@ -854,7 +934,7 @@ const DatabaseModal: FunctionComponent<DatabaseModalProps> = ({
       // Create
       const dbId = await createResource(
         dbToUpdate as DatabaseObject,
-        dbToUpdate.configuration_method === CONFIGURATION_METHOD.DYNAMIC_FORM, // onShow toast on SQLA Forms
+        dbToUpdate.configuration_method === ConfigurationMethod.DynamicForm, // onShow toast on SQLA Forms
       );
       if (dbId) {
         setHasConnectedDb(true);
@@ -927,10 +1007,10 @@ const DatabaseModal: FunctionComponent<DatabaseModalProps> = ({
     if (database_name === 'Other') {
       // Allow users to connect to DB via legacy SQLA form
       setDB({
-        type: ActionType.dbSelected,
+        type: ActionType.DbSelected,
         payload: {
           database_name,
-          configuration_method: CONFIGURATION_METHOD.SQLALCHEMY_URI,
+          configuration_method: ConfigurationMethod.SqlalchemyUri,
           engine: undefined,
           engine_information: {
             supports_file_upload: true,
@@ -941,25 +1021,31 @@ const DatabaseModal: FunctionComponent<DatabaseModalProps> = ({
       const selectedDbModel = availableDbs?.databases.filter(
         (db: DatabaseObject) => db.name === database_name,
       )[0];
-      const { engine, parameters, engine_information, default_driver } =
-        selectedDbModel;
+      const {
+        engine,
+        parameters,
+        engine_information,
+        default_driver,
+        sqlalchemy_uri_placeholder,
+      } = selectedDbModel;
       const isDynamic = parameters !== undefined;
       setDB({
-        type: ActionType.dbSelected,
+        type: ActionType.DbSelected,
         payload: {
           database_name,
           engine,
           configuration_method: isDynamic
-            ? CONFIGURATION_METHOD.DYNAMIC_FORM
-            : CONFIGURATION_METHOD.SQLALCHEMY_URI,
+            ? ConfigurationMethod.DynamicForm
+            : ConfigurationMethod.SqlalchemyUri,
           engine_information,
           driver: default_driver,
+          sqlalchemy_uri_placeholder,
         },
       });
 
       if (engine === Engines.GSheet) {
         // only create a catalog if the DB is Google Sheets
-        setDB({ type: ActionType.addTableCatalogSheet });
+        setDB({ type: ActionType.AddTableCatalogSheet });
       }
     }
   };
@@ -1073,7 +1159,7 @@ const DatabaseModal: FunctionComponent<DatabaseModalProps> = ({
       setSSHTunnelPrivateKeys({});
       setSSHTunnelPrivateKeyPasswords({});
     }
-    setDB({ type: ActionType.reset });
+    setDB({ type: ActionType.Reset });
     setFileList([]);
   };
 
@@ -1225,7 +1311,7 @@ const DatabaseModal: FunctionComponent<DatabaseModalProps> = ({
   useEffect(() => {
     if (dbFetched) {
       setDB({
-        type: ActionType.fetched,
+        type: ActionType.Fetched,
         payload: dbFetched,
       });
       // keep a copy of the name separate for display purposes
@@ -1249,7 +1335,7 @@ const DatabaseModal: FunctionComponent<DatabaseModalProps> = ({
   useEffect(() => {
     if (importingModal) {
       document
-        .getElementsByClassName('ant-upload-list-item-name')[0]
+        ?.getElementsByClassName('ant-upload-list-item-name')[0]
         .scrollIntoView();
     }
   }, [importingModal]);
@@ -1271,10 +1357,10 @@ const DatabaseModal: FunctionComponent<DatabaseModalProps> = ({
   }, [sshPrivateKeyPasswordNeeded]);
 
   useEffect(() => {
-    if (db && isSSHTunneling) {
-      setUseSSHTunneling(!isEmpty(db?.ssh_tunnel));
+    if (db?.parameters?.ssh !== undefined) {
+      setUseSSHTunneling(db.parameters.ssh);
     }
-  }, [db, isSSHTunneling]);
+  }, [db?.parameters?.ssh]);
 
   const onDbImport = async (info: UploadChangeParam) => {
     setImportingErrorMessage('');
@@ -1344,7 +1430,7 @@ const DatabaseModal: FunctionComponent<DatabaseModalProps> = ({
             name="password_needed"
             required
             value={passwords[database]}
-            onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+            onChange={(event: ChangeEvent<HTMLInputElement>) =>
               setPasswords({ ...passwords, [database]: event.target.value })
             }
             validationMethods={{ onBlur: () => {} }}
@@ -1359,7 +1445,7 @@ const DatabaseModal: FunctionComponent<DatabaseModalProps> = ({
             name="ssh_tunnel_password_needed"
             required
             value={sshTunnelPasswords[database]}
-            onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+            onChange={(event: ChangeEvent<HTMLInputElement>) =>
               setSSHTunnelPasswords({
                 ...sshTunnelPasswords,
                 [database]: event.target.value,
@@ -1377,7 +1463,7 @@ const DatabaseModal: FunctionComponent<DatabaseModalProps> = ({
             name="ssh_tunnel_private_key_needed"
             required
             value={sshTunnelPrivateKeys[database]}
-            onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+            onChange={(event: ChangeEvent<HTMLInputElement>) =>
               setSSHTunnelPrivateKeys({
                 ...sshTunnelPrivateKeys,
                 [database]: event.target.value,
@@ -1395,7 +1481,7 @@ const DatabaseModal: FunctionComponent<DatabaseModalProps> = ({
             name="ssh_tunnel_private_key_password_needed"
             required
             value={sshTunnelPrivateKeyPasswords[database]}
-            onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+            onChange={(event: ChangeEvent<HTMLInputElement>) =>
               setSSHTunnelPrivateKeyPasswords({
                 ...sshTunnelPrivateKeyPasswords,
                 [database]: event.target.value,
@@ -1426,7 +1512,7 @@ const DatabaseModal: FunctionComponent<DatabaseModalProps> = ({
     );
   };
 
-  const confirmOverwrite = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const confirmOverwrite = (event: ChangeEvent<HTMLInputElement>) => {
     const targetValue = (event.currentTarget?.value as string) ?? '';
     setConfirmedOverwrite(targetValue.toUpperCase() === t('OVERWRITE'));
   };
@@ -1481,12 +1567,14 @@ const DatabaseModal: FunctionComponent<DatabaseModalProps> = ({
             type="info"
             showIcon
             message={
-              engineSpecificAlertMapping[db.engine]?.message ||
-              connectionAlert?.DEFAULT?.message
+              engineSpecificAlertMapping[
+                db.engine as keyof typeof engineSpecificAlertMapping
+              ]?.message || connectionAlert?.DEFAULT?.message
             }
             description={
-              engineSpecificAlertMapping[db.engine]?.description ||
-              connectionAlert?.DEFAULT?.description + ipAlert
+              engineSpecificAlertMapping[
+                db.engine as keyof typeof engineSpecificAlertMapping
+              ]?.description || connectionAlert?.DEFAULT?.description + ipAlert
             }
           />
         </StyledAlertMargin>
@@ -1502,8 +1590,8 @@ const DatabaseModal: FunctionComponent<DatabaseModalProps> = ({
         typeof dbErrors === 'object'
           ? Object.values(dbErrors)
           : typeof dbErrors === 'string'
-          ? [dbErrors]
-          : [];
+            ? [dbErrors]
+            : [];
     } else if (
       !isEmpty(validationErrors) &&
       validationErrors?.error_type === 'GENERIC_DB_ENGINE_ERROR'
@@ -1520,8 +1608,9 @@ const DatabaseModal: FunctionComponent<DatabaseModalProps> = ({
             description={t(
               'We are unable to connect to your database. Click "See more" for database-provided information that may help troubleshoot the issue.',
             )}
-            subtitle={alertErrors?.[0] || validationErrors?.description}
-            copyText={validationErrors?.description}
+            descriptionDetails={
+              alertErrors?.[0] || validationErrors?.description
+            }
           />
         </ErrorAlertContainer>
       );
@@ -1532,27 +1621,24 @@ const DatabaseModal: FunctionComponent<DatabaseModalProps> = ({
   const fetchAndSetDB = () => {
     setLoading(true);
     fetchResource(dbFetched?.id as number).then(r => {
-      setItem(LocalStorageKeys.db, r);
+      setItem(LocalStorageKeys.Database, r);
     });
   };
 
   const renderSSHTunnelForm = () => (
     <SSHTunnelForm
       db={db as DatabaseObject}
-      onSSHTunnelParametersChange={({
-        target,
-      }: {
-        target: HTMLInputElement | HTMLTextAreaElement;
-      }) =>
-        onChange(ActionType.parametersSSHTunnelChange, {
+      onSSHTunnelParametersChange={({ target }) => {
+        onChange(ActionType.ParametersSSHTunnelChange, {
           type: target.type,
           name: target.name,
           value: target.value,
-        })
-      }
+        });
+        handleClearValidationErrors();
+      }}
       setSSHTunnelLoginMethod={(method: AuthType) =>
         setDB({
-          type: ActionType.setSSHTunnelLoginMethod,
+          type: ActionType.SetSSHTunnelLoginMethod,
           payload: { login_method: method },
         })
       }
@@ -1576,7 +1662,7 @@ const DatabaseModal: FunctionComponent<DatabaseModalProps> = ({
         onClick={() => {
           setLoading(true);
           fetchAndSetDB();
-          redirectURL(`/superset/sqllab/?db=true`);
+          redirectURL(`/sqllab?db=true`);
         }}
       >
         {t('QUERY DATA IN SQL LAB')}
@@ -1592,36 +1678,39 @@ const DatabaseModal: FunctionComponent<DatabaseModalProps> = ({
         sslForced={false}
         dbModel={dbModel}
         onAddTableCatalog={() => {
-          setDB({ type: ActionType.addTableCatalogSheet });
+          setDB({ type: ActionType.AddTableCatalogSheet });
         }}
         onQueryChange={({ target }: { target: HTMLInputElement }) =>
-          onChange(ActionType.queryChange, {
+          onChange(ActionType.QueryChange, {
             name: target.name,
             value: target.value,
           })
         }
         onExtraInputChange={({ target }: { target: HTMLInputElement }) =>
-          onChange(ActionType.extraInputChange, {
+          onChange(ActionType.ExtraInputChange, {
+            name: target.name,
+            value: target.value,
+          })
+        }
+        onEncryptedExtraInputChange={({
+          target,
+        }: {
+          target: HTMLInputElement;
+        }) =>
+          onChange(ActionType.EncryptedExtraInputChange, {
             name: target.name,
             value: target.value,
           })
         }
         onRemoveTableCatalog={(idx: number) => {
           setDB({
-            type: ActionType.removeTableCatalogSheet,
+            type: ActionType.RemoveTableCatalogSheet,
             payload: { indexToDelete: idx },
           });
         }}
-        onParametersChange={({ target }: { target: HTMLInputElement }) =>
-          onChange(ActionType.parametersChange, {
-            type: target.type,
-            name: target.name,
-            checked: target.checked,
-            value: target.value,
-          })
-        }
+        onParametersChange={handleParametersChange}
         onChange={({ target }: { target: HTMLInputElement }) =>
-          onChange(ActionType.textChange, {
+          onChange(ActionType.TextChange, {
             name: target.name,
             value: target.value,
           })
@@ -1629,9 +1718,9 @@ const DatabaseModal: FunctionComponent<DatabaseModalProps> = ({
         getValidation={() => getValidation(db)}
         validationErrors={validationErrors}
         getPlaceholder={getPlaceholder}
-        clearValidationErrors={() => setValidationErrors(null)}
+        clearValidationErrors={handleClearValidationErrors}
       />
-      {db?.parameters?.ssh && (
+      {useSSHTunneling && (
         <SSHTunnelContainer>{renderSSHTunnelForm()}</SSHTunnelContainer>
       )}
     </>
@@ -1644,7 +1733,7 @@ const DatabaseModal: FunctionComponent<DatabaseModalProps> = ({
           extraExtension={dbConfigExtraExtension}
           db={db as DatabaseObject}
           onInputChange={({ target }: { target: HTMLInputElement }) =>
-            onChange(ActionType.inputChange, {
+            onChange(ActionType.InputChange, {
               type: target.type,
               name: target.name,
               checked: target.checked,
@@ -1652,16 +1741,16 @@ const DatabaseModal: FunctionComponent<DatabaseModalProps> = ({
             })
           }
           onTextChange={({ target }: { target: HTMLTextAreaElement }) =>
-            onChange(ActionType.textChange, {
+            onChange(ActionType.TextChange, {
               name: target.name,
               value: target.value,
             })
           }
           onEditorChange={(payload: { name: string; json: any }) =>
-            onChange(ActionType.editorChange, payload)
+            onChange(ActionType.EditorChange, payload)
           }
           onExtraInputChange={({ target }: { target: HTMLInputElement }) => {
-            onChange(ActionType.extraInputChange, {
+            onChange(ActionType.ExtraInputChange, {
               type: target.type,
               name: target.name,
               checked: target.checked,
@@ -1669,7 +1758,7 @@ const DatabaseModal: FunctionComponent<DatabaseModalProps> = ({
             });
           }}
           onExtraEditorChange={(payload: { name: string; json: any }) =>
-            onChange(ActionType.extraEditorChange, payload)
+            onChange(ActionType.ExtraEditorChange, payload)
           }
         />
       );
@@ -1687,35 +1776,36 @@ const DatabaseModal: FunctionComponent<DatabaseModalProps> = ({
   ) {
     return (
       <Modal
+        centered
         css={(theme: SupersetTheme) => [
           antDModalNoPaddingStyles,
           antDModalStyles(theme),
           formHelperStyles(theme),
           formStyles(theme),
         ]}
+        footer={renderModalFooter()}
+        maskClosable={false}
         name="database"
-        onHandledPrimaryAction={onSave}
         onHide={onClose}
+        onHandledPrimaryAction={onSave}
         primaryButtonName={t('Connect')}
-        width="500px"
-        centered
         show={show}
         title={<h4>{t('Connect a database')}</h4>}
-        footer={renderModalFooter()}
+        width="500px"
       >
         <ModalHeader
-          isLoading={isLoading}
-          isEditMode={isEditMode}
-          useSqlAlchemyForm={useSqlAlchemyForm}
-          hasConnectedDb={hasConnectedDb}
           db={db}
           dbName={dbName}
           dbModel={dbModel}
           fileList={fileList}
+          hasConnectedDb={hasConnectedDb}
+          isEditMode={isEditMode}
+          isLoading={isLoading}
+          useSqlAlchemyForm={useSqlAlchemyForm}
         />
-        {passwordNeededField()}
         {confirmOverwriteField()}
         {importingErrorAlert()}
+        {passwordNeededField()}
       </Modal>
     );
   }
@@ -1743,6 +1833,7 @@ const DatabaseModal: FunctionComponent<DatabaseModalProps> = ({
         <h4>{isEditMode ? t('Edit database') : t('Connect a database')}</h4>
       }
       footer={modalFooter}
+      maskClosable={false}
     >
       <StyledStickyHeader>
         <TabHeader>
@@ -1769,7 +1860,7 @@ const DatabaseModal: FunctionComponent<DatabaseModalProps> = ({
               <SqlAlchemyForm
                 db={db as DatabaseObject}
                 onInputChange={({ target }: { target: HTMLInputElement }) =>
-                  onChange(ActionType.inputChange, {
+                  onChange(ActionType.InputChange, {
                     type: target.type,
                     name: target.name,
                     checked: target.checked,
@@ -1781,13 +1872,12 @@ const DatabaseModal: FunctionComponent<DatabaseModalProps> = ({
                 testInProgress={testInProgress}
               >
                 <SSHTunnelSwitchComponent
-                  isEditMode={isEditMode}
-                  dbFetched={dbFetched}
-                  disableSSHTunnelingForEngine={disableSSHTunnelingForEngine}
-                  useSSHTunneling={useSSHTunneling}
-                  setUseSSHTunneling={setUseSSHTunneling}
-                  setDB={setDB}
-                  isSSHTunneling={isSSHTunneling}
+                  dbModel={dbModel}
+                  db={db as DatabaseObject}
+                  changeMethods={{
+                    onParametersChange: handleParametersChange,
+                  }}
+                  clearValidationErrors={handleClearValidationErrors}
                 />
                 {useSSHTunneling && renderSSHTunnelForm()}
               </SqlAlchemyForm>
@@ -1797,11 +1887,10 @@ const DatabaseModal: FunctionComponent<DatabaseModalProps> = ({
                     buttonStyle="link"
                     onClick={() =>
                       setDB({
-                        type: ActionType.configMethodChange,
+                        type: ActionType.ConfigMethodChange,
                         payload: {
                           database_name: db?.database_name,
-                          configuration_method:
-                            CONFIGURATION_METHOD.DYNAMIC_FORM,
+                          configuration_method: ConfigurationMethod.DynamicForm,
                           engine: db?.engine,
                         },
                       })
@@ -1856,7 +1945,7 @@ const DatabaseModal: FunctionComponent<DatabaseModalProps> = ({
             extraExtension={dbConfigExtraExtension}
             db={db as DatabaseObject}
             onInputChange={({ target }: { target: HTMLInputElement }) =>
-              onChange(ActionType.inputChange, {
+              onChange(ActionType.InputChange, {
                 type: target.type,
                 name: target.name,
                 checked: target.checked,
@@ -1864,16 +1953,16 @@ const DatabaseModal: FunctionComponent<DatabaseModalProps> = ({
               })
             }
             onTextChange={({ target }: { target: HTMLTextAreaElement }) =>
-              onChange(ActionType.textChange, {
+              onChange(ActionType.TextChange, {
                 name: target.name,
                 value: target.value,
               })
             }
             onEditorChange={(payload: { name: string; json: any }) =>
-              onChange(ActionType.editorChange, payload)
+              onChange(ActionType.EditorChange, payload)
             }
             onExtraInputChange={({ target }: { target: HTMLInputElement }) => {
-              onChange(ActionType.extraInputChange, {
+              onChange(ActionType.ExtraInputChange, {
                 type: target.type,
                 name: target.name,
                 checked: target.checked,
@@ -1881,7 +1970,7 @@ const DatabaseModal: FunctionComponent<DatabaseModalProps> = ({
               });
             }}
             onExtraEditorChange={(payload: { name: string; json: any }) => {
-              onChange(ActionType.extraEditorChange, payload);
+              onChange(ActionType.ExtraEditorChange, payload);
             }}
           />
         </Tabs.TabPane>
@@ -1904,6 +1993,7 @@ const DatabaseModal: FunctionComponent<DatabaseModalProps> = ({
       show={show}
       title={<h4>{t('Connect a database')}</h4>}
       footer={renderModalFooter()}
+      maskClosable={false}
     >
       {!isLoading && hasConnectedDb ? (
         <>
@@ -1980,11 +2070,11 @@ const DatabaseModal: FunctionComponent<DatabaseModalProps> = ({
                         buttonStyle="link"
                         onClick={() =>
                           setDB({
-                            type: ActionType.configMethodChange,
+                            type: ActionType.ConfigMethodChange,
                             payload: {
                               engine: db.engine,
                               configuration_method:
-                                CONFIGURATION_METHOD.SQLALCHEMY_URI,
+                                ConfigurationMethod.SqlalchemyUri,
                               database_name: db.database_name,
                             },
                           })

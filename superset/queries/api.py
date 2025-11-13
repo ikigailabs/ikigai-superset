@@ -71,11 +71,19 @@ class QueryRestApi(BaseSupersetModelRestApi):
     list_columns = [
         "id",
         "changed_on",
+        "client_id",
+        "database.id",
         "database.database_name",
         "executed_sql",
+        "error_message",
+        "limit",
+        "limiting_factor",
+        "progress",
         "rows",
         "schema",
+        "select_as_cta",
         "sql",
+        "sql_editor_id",
         "sql_tables",
         "status",
         "tab_name",
@@ -86,6 +94,7 @@ class QueryRestApi(BaseSupersetModelRestApi):
         "end_time",
         "tmp_table_name",
         "tracking_url",
+        "results_key",
     ]
     show_columns = [
         "id",
@@ -135,15 +144,25 @@ class QueryRestApi(BaseSupersetModelRestApi):
     ]
     base_related_field_filters = {
         "created_by": [["id", BaseFilterRelatedUsers, lambda: []]],
+        "changed_by": [["id", BaseFilterRelatedUsers, lambda: []]],
         "user": [["id", BaseFilterRelatedUsers, lambda: []]],
         "database": [["id", DatabaseFilter, lambda: []]],
     }
     related_field_filters = {
         "created_by": RelatedFieldFilter("first_name", FilterRelatedOwners),
+        "changed_by": RelatedFieldFilter("first_name", FilterRelatedOwners),
         "user": RelatedFieldFilter("first_name", FilterRelatedOwners),
     }
 
-    search_columns = ["changed_on", "database", "sql", "status", "user", "start_time"]
+    search_columns = [
+        "changed_on",
+        "database",
+        "sql",
+        "status",
+        "user",
+        "start_time",
+        "sql_editor_id",
+    ]
 
     allowed_rel_fields = {"database", "user"}
     allowed_distinct_fields = {"status"}
@@ -159,7 +178,7 @@ class QueryRestApi(BaseSupersetModelRestApi):
         log_to_statsd=False,
     )
     def get_updated_since(self, **kwargs: Any) -> FlaskResponse:
-        """Get a list of queries that changed after last_updated_ms
+        """Get a list of queries that changed after last_updated_ms.
         ---
         get:
           summary: Get a list of queries that changed after last_updated_ms
@@ -214,13 +233,13 @@ class QueryRestApi(BaseSupersetModelRestApi):
         backoff.constant,
         Exception,
         interval=1,
-        on_backoff=lambda details: db.session.rollback(),
-        on_giveup=lambda details: db.session.rollback(),
+        on_backoff=lambda details: db.session.rollback(),  # pylint: disable=consider-using-transaction
+        on_giveup=lambda details: db.session.rollback(),  # pylint: disable=consider-using-transaction
         max_tries=5,
     )
     @requires_json
     def stop_query(self) -> FlaskResponse:
-        """Manually stop a query with client_id
+        """Manually stop a query with client_id.
         ---
         post:
           summary: Manually stop a query with client_id

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import {
   t,
@@ -26,7 +26,7 @@ import {
   styled,
   getExtensionsRegistry,
 } from '@superset-ui/core';
-import moment from 'moment';
+import { extendedDayjs } from 'src/utils/dates';
 import ActionsBar, { ActionProps } from 'src/components/ListView/ActionsBar';
 import FacePile from 'src/components/FacePile';
 import { Tooltip } from 'src/components/Tooltip';
@@ -53,6 +53,8 @@ import { isUserAdmin } from 'src/dashboard/util/permissionUtils';
 import Owner from 'src/types/Owner';
 import AlertReportModal from 'src/features/alerts/AlertReportModal';
 import { AlertObject, AlertState } from 'src/features/alerts/types';
+import { ModifiedInfo } from 'src/components/AuditInfo';
+import { QueryObjectColumns } from 'src/views/CRUD/types';
 
 const extensionsRegistry = getExtensionsRegistry();
 
@@ -107,14 +109,14 @@ function AlertList({
   user,
   addSuccessToast,
 }: AlertListProps) {
-  const title = isReportEnabled ? t('report') : t('alert');
+  const title = isReportEnabled ? t('Report') : t('Alert');
   const titlePlural = isReportEnabled ? t('reports') : t('alerts');
   const pathName = isReportEnabled ? 'Reports' : 'Alerts';
   const initialFilters = useMemo(
     () => [
       {
         id: 'type',
-        operator: FilterOperator.equals,
+        operator: FilterOperator.Equals,
         value: isReportEnabled ? 'Report' : 'Alert',
       },
     ],
@@ -135,7 +137,7 @@ function AlertList({
     toggleBulkSelect,
   } = useListViewResource<AlertObject>(
     'report',
-    t('reports'),
+    t('report'),
     addDangerToast,
     true,
     undefined,
@@ -261,7 +263,10 @@ function AlertList({
           },
         }: any) =>
           lastEvalDttm
-            ? moment.utc(lastEvalDttm).local().format(DATETIME_WITH_TIME_ZONE)
+            ? extendedDayjs
+                .utc(lastEvalDttm)
+                .local()
+                .format(DATETIME_WITH_TIME_ZONE)
             : '',
         accessor: 'last_eval_dttm',
         Header: t('Last run'),
@@ -306,18 +311,6 @@ function AlertList({
       {
         Cell: ({
           row: {
-            original: { created_by },
-          },
-        }: any) =>
-          created_by ? `${created_by.first_name} ${created_by.last_name}` : '',
-        Header: t('Created by'),
-        id: 'created_by',
-        disableSortBy: true,
-        size: 'xl',
-      },
-      {
-        Cell: ({
-          row: {
             original: { owners = [] },
           },
         }: any) => <FacePile users={owners} />,
@@ -329,10 +322,13 @@ function AlertList({
       {
         Cell: ({
           row: {
-            original: { changed_on_delta_humanized: changedOn },
+            original: {
+              changed_on_delta_humanized: changedOn,
+              changed_by: changedBy,
+            },
           },
-        }: any) => <span className="no-wrap">{changedOn}</span>,
-        Header: t('Modified'),
+        }: any) => <ModifiedInfo date={changedOn} user={changedBy} />,
+        Header: t('Last modified'),
         accessor: 'changed_on_delta_humanized',
         size: 'xl',
       },
@@ -407,6 +403,10 @@ function AlertList({
         disableSortBy: true,
         size: 'xl',
       },
+      {
+        accessor: QueryObjectColumns.ChangedBy,
+        hidden: true,
+      },
     ],
     [canDelete, canEdit, isReportEnabled, toggleActive],
   );
@@ -449,11 +449,18 @@ function AlertList({
   const filters: Filters = useMemo(
     () => [
       {
+        Header: t('Name'),
+        key: 'search',
+        id: 'name',
+        input: 'search',
+        operator: FilterOperator.Contains,
+      },
+      {
         Header: t('Owner'),
         key: 'owner',
         id: 'owners',
         input: 'select',
-        operator: FilterOperator.relationManyMany,
+        operator: FilterOperator.RelationManyMany,
         unfilteredLabel: t('All'),
         fetchSelects: createFetchRelated(
           'report',
@@ -466,28 +473,11 @@ function AlertList({
         paginate: true,
       },
       {
-        Header: t('Created by'),
-        key: 'created_by',
-        id: 'created_by',
-        input: 'select',
-        operator: FilterOperator.relationOneMany,
-        unfilteredLabel: 'All',
-        fetchSelects: createFetchRelated(
-          'report',
-          'created_by',
-          createErrorHandler(errMsg =>
-            t('An error occurred while fetching created by values: %s', errMsg),
-          ),
-          user,
-        ),
-        paginate: true,
-      },
-      {
         Header: t('Status'),
         key: 'status',
         id: 'last_state',
         input: 'select',
-        operator: FilterOperator.equals,
+        operator: FilterOperator.Equals,
         unfilteredLabel: 'Any',
         selects: [
           {
@@ -504,11 +494,24 @@ function AlertList({
         ],
       },
       {
-        Header: t('Search'),
-        key: 'search',
-        id: 'name',
-        input: 'search',
-        operator: FilterOperator.contains,
+        Header: t('Modified by'),
+        key: 'changed_by',
+        id: 'changed_by',
+        input: 'select',
+        operator: FilterOperator.RelationOneMany,
+        unfilteredLabel: t('All'),
+        fetchSelects: createFetchRelated(
+          'report',
+          'changed_by',
+          createErrorHandler(errMsg =>
+            t(
+              'An error occurred while fetching dataset datasource values: %s',
+              errMsg,
+            ),
+          ),
+          user,
+        ),
+        paginate: true,
       },
     ],
     [],
@@ -612,6 +615,9 @@ function AlertList({
               bulkActions={bulkActions}
               bulkSelectEnabled={bulkSelectEnabled}
               disableBulkSelect={toggleBulkSelect}
+              refreshData={refreshData}
+              addDangerToast={addDangerToast}
+              addSuccessToast={addSuccessToast}
               pageSize={PAGE_SIZE}
             />
           );

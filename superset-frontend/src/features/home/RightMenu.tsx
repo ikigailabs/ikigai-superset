@@ -16,12 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { Fragment, useState, useEffect } from 'react';
+import { Fragment, useState, useEffect, FC, PureComponent } from 'react';
+
 import rison from 'rison';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { useQueryParams, BooleanParam } from 'use-query-params';
-import { isEmpty } from 'lodash';
+import { get, isEmpty } from 'lodash';
 
 import {
   t,
@@ -32,7 +33,7 @@ import {
   getExtensionsRegistry,
   useTheme,
 } from '@superset-ui/core';
-import { MainNav as Menu } from 'src/components/Menu';
+import { Menu } from 'src/components/Menu';
 import { Tooltip } from 'src/components/Tooltip';
 import Icons from 'src/components/Icons';
 import Label from 'src/components/Label';
@@ -45,7 +46,9 @@ import {
 } from 'src/types/bootstrapTypes';
 import { RootState } from 'src/dashboard/types';
 import DatabaseModal from 'src/features/databases/DatabaseModal';
+import UploadDataModal from 'src/features/databases/UploadDataModel';
 import { uploadUserPerms } from 'src/views/CRUD/utils';
+import TelemetryPixel from 'src/components/TelemetryPixel';
 import LanguagePicker from './LanguagePicker';
 import {
   ExtensionConfigs,
@@ -68,21 +71,15 @@ const StyledI = styled.div`
 
 const styledDisabled = (theme: SupersetTheme) => css`
   color: ${theme.colors.grayscale.light1};
-  .ant-menu-item-active {
-    color: ${theme.colors.grayscale.light1};
-    cursor: default;
-  }
 `;
 
 const StyledDiv = styled.div<{ align: string }>`
   display: flex;
+  height: 100%;
   flex-direction: row;
   justify-content: ${({ align }) => align};
   align-items: center;
   margin-right: ${({ theme }) => theme.gridUnit}px;
-  .ant-menu-submenu-title > svg {
-    top: ${({ theme }) => theme.gridUnit * 5.25}px;
-  }
 `;
 
 const StyledMenuItemWithIcon = styled.div`
@@ -109,6 +106,14 @@ const styledChildMenu = (theme: SupersetTheme) => css`
 `;
 
 const { SubMenu } = Menu;
+
+const StyledSubMenu = styled(SubMenu)`
+  &.antd5-menu-submenu-active {
+    .antd5-menu-title-content {
+      color: ${({ theme }) => theme.colors.primary.base};
+    }
+  }
+`;
 
 const RightMenu = ({
   align,
@@ -142,6 +147,11 @@ const RightMenu = ({
     HAS_GSHEETS_INSTALLED,
   } = useSelector<any, ExtensionConfigs>(state => state.common.conf);
   const [showDatabaseModal, setShowDatabaseModal] = useState<boolean>(false);
+  const [showCSVUploadModal, setShowCSVUploadModal] = useState<boolean>(false);
+  const [showExcelUploadModal, setShowExcelUploadModal] =
+    useState<boolean>(false);
+  const [showColumnarUploadModal, setShowColumnarUploadModal] =
+    useState<boolean>(false);
   const [engine, setEngine] = useState<string>('');
   const canSql = findPermission('can_sqllab', 'Superset', roles);
   const canDashboard = findPermission('can_write', 'Dashboard', roles);
@@ -171,46 +181,43 @@ const RightMenu = ({
       childs: [
         {
           label: t('Connect database'),
-          name: GlobalMenuDataOptions.DB_CONNECTION,
+          name: GlobalMenuDataOptions.DbConnection,
           perm: canDatabase && !nonExamplesDBConnected,
         },
         {
           label: t('Create dataset'),
-          name: GlobalMenuDataOptions.DATASET_CREATION,
+          name: GlobalMenuDataOptions.DatasetCreation,
           url: '/dataset/add/',
           perm: canDataset && nonExamplesDBConnected,
         },
         {
           label: t('Connect Google Sheet'),
-          name: GlobalMenuDataOptions.GOOGLE_SHEETS,
+          name: GlobalMenuDataOptions.GoogleSheets,
           perm: canDatabase && HAS_GSHEETS_INSTALLED,
         },
         {
           label: t('Upload CSV to database'),
-          name: 'Upload a CSV',
-          url: '/csvtodatabaseview/form',
+          name: GlobalMenuDataOptions.CSVUpload,
           perm: canUploadCSV && showUploads,
           disable: isAdmin && !allowUploads,
         },
         {
-          label: t('Upload columnar file to database'),
-          name: 'Upload a Columnar file',
-          url: '/columnartodatabaseview/form',
-          perm: canUploadColumnar && showUploads,
+          label: t('Upload Excel to database'),
+          name: GlobalMenuDataOptions.ExcelUpload,
+          perm: canUploadExcel && showUploads,
           disable: isAdmin && !allowUploads,
         },
         {
-          label: t('Upload Excel file to database'),
-          name: 'Upload Excel',
-          url: '/exceltodatabaseview/form',
-          perm: canUploadExcel && showUploads,
+          label: t('Upload Columnar file to database'),
+          name: GlobalMenuDataOptions.ColumnarUpload,
+          perm: canUploadColumnar && showUploads,
           disable: isAdmin && !allowUploads,
         },
       ],
     },
     {
       label: t('SQL query'),
-      url: '/superset/sqllab?new=true',
+      url: '/sqllab?new=true',
       icon: 'fa-fw fa-search',
       perm: 'can_sqllab',
       view: 'Superset',
@@ -242,7 +249,7 @@ const RightMenu = ({
     SupersetClient.get({
       endpoint: `/api/v1/database/?q=${rison.encode(payload)}`,
     }).then(({ json }: Record<string, any>) => {
-      // There might be some existings Gsheets and Clickhouse DBs
+      // There might be some existing Gsheets and Clickhouse DBs
       // with allow_file_upload set as True which is not possible from now on
       const allowedDatabasesWithFileUpload =
         json?.result?.filter(
@@ -275,19 +282,22 @@ const RightMenu = ({
     }
   }, [canDatabase, canDataset]);
 
-  const menuIconAndLabel = (menu: MenuObjectProps) => (
-    <>
-      <i data-test={`menu-item-${menu.label}`} className={`fa ${menu.icon}`} />
-      {menu.label}
-    </>
+  const menuIcon = (menu: MenuObjectProps) => (
+    <i data-test={`menu-item-${menu.label}`} className={`fa ${menu.icon}`} />
   );
 
   const handleMenuSelection = (itemChose: any) => {
-    if (itemChose.key === GlobalMenuDataOptions.DB_CONNECTION) {
+    if (itemChose.key === GlobalMenuDataOptions.DbConnection) {
       setShowDatabaseModal(true);
-    } else if (itemChose.key === GlobalMenuDataOptions.GOOGLE_SHEETS) {
+    } else if (itemChose.key === GlobalMenuDataOptions.GoogleSheets) {
       setShowDatabaseModal(true);
       setEngine('Google Sheets');
+    } else if (itemChose.key === GlobalMenuDataOptions.CSVUpload) {
+      setShowCSVUploadModal(true);
+    } else if (itemChose.key === GlobalMenuDataOptions.ExcelUpload) {
+      setShowExcelUploadModal(true);
+    } else if (itemChose.key === GlobalMenuDataOptions.ColumnarUpload) {
+      setShowColumnarUploadModal(true);
     }
   };
 
@@ -302,7 +312,7 @@ const RightMenu = ({
 
   const buildMenuItem = (item: MenuObjectChildProps) =>
     item.disable ? (
-      <Menu.Item key={item.name} css={styledDisabled}>
+      <Menu.Item key={item.name} css={styledDisabled} disabled>
         <Tooltip placement="top" title={tooltipText}>
           {item.label}
         </Tooltip>
@@ -337,6 +347,10 @@ const RightMenu = ({
 
   const handleDatabaseAdd = () => setQuery({ databaseAdded: true });
 
+  const handleLogout = () => {
+    localStorage.removeItem('redux');
+  };
+
   const theme = useTheme();
 
   return (
@@ -349,15 +363,37 @@ const RightMenu = ({
           onDatabaseAdd={handleDatabaseAdd}
         />
       )}
+      {canUploadCSV && (
+        <UploadDataModal
+          onHide={() => setShowCSVUploadModal(false)}
+          show={showCSVUploadModal}
+          allowedExtensions={CSV_EXTENSIONS}
+          type="csv"
+        />
+      )}
+      {canUploadExcel && (
+        <UploadDataModal
+          onHide={() => setShowExcelUploadModal(false)}
+          show={showExcelUploadModal}
+          allowedExtensions={EXCEL_EXTENSIONS}
+          type="excel"
+        />
+      )}
+      {canUploadColumnar && (
+        <UploadDataModal
+          onHide={() => setShowColumnarUploadModal(false)}
+          show={showColumnarUploadModal}
+          allowedExtensions={COLUMNAR_EXTENSIONS}
+          type="columnar"
+        />
+      )}
       {environmentTag?.text && (
         <Label
           css={{ borderRadius: `${theme.gridUnit * 125}px` }}
           color={
             /^#(?:[0-9a-f]{3}){1,2}$/i.test(environmentTag.color)
               ? environmentTag.color
-              : environmentTag.color
-                  .split('.')
-                  .reduce((o, i) => o[i], theme.colors)
+              : get(theme.colors, environmentTag.color)
           }
         >
           <span css={tagStyles}>{environmentTag.text}</span>
@@ -368,10 +404,11 @@ const RightMenu = ({
         mode="horizontal"
         onClick={handleMenuSelection}
         onOpenChange={onMenuOpen}
+        disabledOverflow
       >
         {RightMenuExtension && <RightMenuExtension />}
         {!navbarRight.user_is_anonymous && showActionDropdown && (
-          <SubMenu
+          <StyledSubMenu
             data-test="new-dropdown"
             title={
               <StyledI data-test="new-dropdown-icon" className="fa fa-plus" />
@@ -385,10 +422,11 @@ const RightMenu = ({
               if (menu.childs) {
                 if (canShowChild) {
                   return (
-                    <SubMenu
+                    <StyledSubMenu
                       key={`sub2_${menu.label}`}
                       className="data-menu"
-                      title={menuIconAndLabel(menu)}
+                      title={menu.label}
+                      icon={menuIcon(menu)}
                     >
                       {menu?.childs?.map?.((item, idx) =>
                         typeof item !== 'string' && item.name && item.perm ? (
@@ -398,7 +436,7 @@ const RightMenu = ({
                           </Fragment>
                         ) : null,
                       )}
-                    </SubMenu>
+                    </StyledSubMenu>
                   );
                 }
                 if (!menu.url) {
@@ -433,9 +471,9 @@ const RightMenu = ({
                 )
               );
             })}
-          </SubMenu>
+          </StyledSubMenu>
         )}
-        <SubMenu
+        <StyledSubMenu
           title={t('Settings')}
           icon={<Icons.TriangleDown iconSize="xl" />}
         >
@@ -472,17 +510,12 @@ const RightMenu = ({
           {!navbarRight.user_is_anonymous && [
             <Menu.Divider key="user-divider" />,
             <Menu.ItemGroup key="user-section" title={t('User')}>
-              {navbarRight.user_profile_url && (
-                <Menu.Item key="profile">
-                  <a href={navbarRight.user_profile_url}>{t('Profile')}</a>
-                </Menu.Item>
-              )}
               {navbarRight.user_info_url && (
                 <Menu.Item key="info">
                   <a href={navbarRight.user_info_url}>{t('Info')}</a>
                 </Menu.Item>
               )}
-              <Menu.Item key="logout">
+              <Menu.Item key="logout" onClick={handleLogout}>
                 <a href={navbarRight.user_logout_url}>{t('Logout')}</a>
               </Menu.Item>
             </Menu.ItemGroup>,
@@ -514,7 +547,7 @@ const RightMenu = ({
               </div>
             </Menu.ItemGroup>,
           ]}
-        </SubMenu>
+        </StyledSubMenu>
         {navbarRight.show_language_picker && (
           <LanguagePicker
             locale={navbarRight.locale}
@@ -562,11 +595,16 @@ const RightMenu = ({
           {t('Login')}
         </StyledAnchor>
       )}
+      <TelemetryPixel
+        version={navbarRight.version_string}
+        sha={navbarRight.version_sha}
+        build={navbarRight.build_number}
+      />
     </StyledDiv>
   );
 };
 
-const RightMenuWithQueryWrapper: React.FC<RightMenuProps> = props => {
+const RightMenuWithQueryWrapper: FC<RightMenuProps> = props => {
   const [, setQuery] = useQueryParams({
     databaseAdded: BooleanParam,
     datasetAdded: BooleanParam,
@@ -580,7 +618,7 @@ const RightMenuWithQueryWrapper: React.FC<RightMenuProps> = props => {
 // Superset still has multiple entry points, and not all of them have
 // the same setup, and critically, not all of them have the QueryParamProvider.
 // This wrapper ensures the RightMenu renders regardless of the provider being present.
-class RightMenuErrorWrapper extends React.PureComponent<RightMenuProps> {
+class RightMenuErrorWrapper extends PureComponent<RightMenuProps> {
   state = {
     hasError: false,
   };
@@ -600,7 +638,7 @@ class RightMenuErrorWrapper extends React.PureComponent<RightMenuProps> {
   }
 }
 
-const RightMenuWrapper: React.FC<RightMenuProps> = props => (
+const RightMenuWrapper: FC<RightMenuProps> = props => (
   <RightMenuErrorWrapper {...props}>
     <RightMenuWithQueryWrapper {...props} />
   </RightMenuErrorWrapper>

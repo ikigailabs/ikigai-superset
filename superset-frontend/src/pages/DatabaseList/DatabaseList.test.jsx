@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
 import thunk from 'redux-thunk';
 import * as reactRedux from 'react-redux';
 import configureStore from 'redux-mock-store';
@@ -165,14 +164,7 @@ describe('Admin DatabaseList', () => {
     });
     await waitForComponentToPaint(wrapper);
 
-    expect(wrapper.find(DeleteModal).props().description)
-      .toMatchInlineSnapshot(`
-      <React.Fragment>
-        <p>
-          The database db 0 is linked to 0 charts that appear on 0 dashboards and users have 0 SQL Lab tabs using this database open. Are you sure you want to continue? Deleting the database will break those objects.
-        </p>
-      </React.Fragment>
-    `);
+    expect(wrapper.find(DeleteModal).props().description).toMatchSnapshot();
 
     act(() => {
       wrapper
@@ -218,7 +210,7 @@ describe('Admin DatabaseList', () => {
     await waitForComponentToPaint(wrapper);
 
     expect(fetchMock.lastCall()[0]).toMatchInlineSnapshot(
-      `"http://localhost/api/v1/database/?q=(filters:!((col:expose_in_sqllab,opr:eq,value:!t),(col:allow_run_async,opr:eq,value:!f),(col:database_name,opr:ct,value:fooo)),order_column:changed_on_delta_humanized,order_direction:desc,page:0,page_size:25)"`,
+      `"http://localhost/api/v1/database/?q=(filters:!((col:database_name,opr:ct,value:fooo),(col:expose_in_sqllab,opr:eq,value:!t),(col:allow_run_async,opr:eq,value:!f)),order_column:changed_on_delta_humanized,order_direction:desc,page:0,page_size:25)"`,
     );
   });
 

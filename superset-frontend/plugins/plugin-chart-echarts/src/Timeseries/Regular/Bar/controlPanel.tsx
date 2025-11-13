@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
 import { t } from '@superset-ui/core';
 import {
   ControlPanelConfig,
@@ -32,9 +31,13 @@ import {
 } from '@superset-ui/chart-controls';
 import {
   legendSection,
+  minorTicks,
   richTooltipSection,
   seriesOrderSection,
   showValueSection,
+  truncateXAxis,
+  xAxisBounds,
+  xAxisLabelRotation,
 } from '../../../controls';
 
 import { OrientationType } from '../../types';
@@ -49,16 +52,15 @@ const {
   truncateYAxis,
   yAxisBounds,
   zoomable,
-  xAxisLabelRotation,
   orientation,
 } = DEFAULT_FORM_DATA;
 
 function createAxisTitleControl(axis: 'x' | 'y'): ControlSetRow[] {
   const isXAxis = axis === 'x';
   const isVertical = (controls: ControlStateMapping) =>
-    Boolean(controls?.orientation.value === OrientationType.vertical);
+    Boolean(controls?.orientation.value === OrientationType.Vertical);
   const isHorizontal = (controls: ControlStateMapping) =>
-    Boolean(controls?.orientation.value === OrientationType.horizontal);
+    Boolean(controls?.orientation.value === OrientationType.Horizontal);
   return [
     [
       {
@@ -71,6 +73,8 @@ function createAxisTitleControl(axis: 'x' | 'y'): ControlSetRow[] {
           description: t('Changing this control takes effect instantly'),
           visibility: ({ controls }: ControlPanelsContainerProps) =>
             isXAxis ? isVertical(controls) : isHorizontal(controls),
+          disableStash: true,
+          resetOnHide: false,
         },
       },
     ],
@@ -88,6 +92,8 @@ function createAxisTitleControl(axis: 'x' | 'y'): ControlSetRow[] {
           description: t('Changing this control takes effect instantly'),
           visibility: ({ controls }: ControlPanelsContainerProps) =>
             isXAxis ? isVertical(controls) : isHorizontal(controls),
+          disableStash: true,
+          resetOnHide: false,
         },
       },
     ],
@@ -102,6 +108,8 @@ function createAxisTitleControl(axis: 'x' | 'y'): ControlSetRow[] {
           description: t('Changing this control takes effect instantly'),
           visibility: ({ controls }: ControlPanelsContainerProps) =>
             isXAxis ? isHorizontal(controls) : isVertical(controls),
+          disableStash: true,
+          resetOnHide: false,
         },
       },
     ],
@@ -114,11 +122,13 @@ function createAxisTitleControl(axis: 'x' | 'y'): ControlSetRow[] {
           clearable: true,
           label: t('AXIS TITLE MARGIN'),
           renderTrigger: true,
-          default: sections.TITLE_MARGIN_OPTIONS[0],
+          default: sections.TITLE_MARGIN_OPTIONS[1],
           choices: formatSelectOptions(sections.TITLE_MARGIN_OPTIONS),
           description: t('Changing this control takes effect instantly'),
           visibility: ({ controls }: ControlPanelsContainerProps) =>
             isXAxis ? isHorizontal(controls) : isVertical(controls),
+          disableStash: true,
+          resetOnHide: false,
         },
       },
     ],
@@ -136,6 +146,8 @@ function createAxisTitleControl(axis: 'x' | 'y'): ControlSetRow[] {
           description: t('Changing this control takes effect instantly'),
           visibility: ({ controls }: ControlPanelsContainerProps) =>
             isXAxis ? isHorizontal(controls) : isVertical(controls),
+          disableStash: true,
+          resetOnHide: false,
         },
       },
     ],
@@ -145,9 +157,9 @@ function createAxisTitleControl(axis: 'x' | 'y'): ControlSetRow[] {
 function createAxisControl(axis: 'x' | 'y'): ControlSetRow[] {
   const isXAxis = axis === 'x';
   const isVertical = (controls: ControlStateMapping) =>
-    Boolean(controls?.orientation.value === OrientationType.vertical);
+    Boolean(controls?.orientation.value === OrientationType.Vertical);
   const isHorizontal = (controls: ControlStateMapping) =>
-    Boolean(controls?.orientation.value === OrientationType.horizontal);
+    Boolean(controls?.orientation.value === OrientationType.Horizontal);
   return [
     [
       {
@@ -158,28 +170,20 @@ function createAxisControl(axis: 'x' | 'y'): ControlSetRow[] {
           description: `${D3_TIME_FORMAT_DOCS}. ${TIME_SERIES_DESCRIPTION_TEXT}`,
           visibility: ({ controls }: ControlPanelsContainerProps) =>
             isXAxis ? isVertical(controls) : isHorizontal(controls),
+          disableStash: true,
+          resetOnHide: false,
         },
       },
     ],
     [
       {
-        name: 'xAxisLabelRotation',
+        name: xAxisLabelRotation.name,
         config: {
-          type: 'SelectControl',
-          freeForm: true,
-          clearable: false,
-          label: t('Rotate axis label'),
-          choices: [
-            [0, '0°'],
-            [45, '45°'],
-          ],
-          default: xAxisLabelRotation,
-          renderTrigger: true,
-          description: t(
-            'Input field supports custom rotation. e.g. 30 for 30°',
-          ),
+          ...xAxisLabelRotation.config,
           visibility: ({ controls }: ControlPanelsContainerProps) =>
             isXAxis ? isVertical(controls) : isHorizontal(controls),
+          disableStash: true,
+          resetOnHide: false,
         },
       },
     ],
@@ -191,6 +195,8 @@ function createAxisControl(axis: 'x' | 'y'): ControlSetRow[] {
           label: t('Axis Format'),
           visibility: ({ controls }: ControlPanelsContainerProps) =>
             isXAxis ? isHorizontal(controls) : isVertical(controls),
+          disableStash: true,
+          resetOnHide: false,
         },
       },
     ],
@@ -206,6 +212,8 @@ function createAxisControl(axis: 'x' | 'y'): ControlSetRow[] {
           description: t('Logarithmic axis'),
           visibility: ({ controls }: ControlPanelsContainerProps) =>
             isXAxis ? isHorizontal(controls) : isVertical(controls),
+          disableStash: true,
+          resetOnHide: false,
         },
       },
     ],
@@ -220,6 +228,8 @@ function createAxisControl(axis: 'x' | 'y'): ControlSetRow[] {
           description: t('Draw split lines for minor axis ticks'),
           visibility: ({ controls }: ControlPanelsContainerProps) =>
             isXAxis ? isHorizontal(controls) : isVertical(controls),
+          disableStash: true,
+          resetOnHide: false,
         },
       },
     ],
@@ -234,6 +244,8 @@ function createAxisControl(axis: 'x' | 'y'): ControlSetRow[] {
           description: t('It’s not recommended to truncate axis in Bar chart.'),
           visibility: ({ controls }: ControlPanelsContainerProps) =>
             isXAxis ? isHorizontal(controls) : isVertical(controls),
+          disableStash: true,
+          resetOnHide: false,
         },
       },
     ],
@@ -254,6 +266,8 @@ function createAxisControl(axis: 'x' | 'y'): ControlSetRow[] {
           visibility: ({ controls }: ControlPanelsContainerProps) =>
             Boolean(controls?.truncateYAxis?.value) &&
             (isXAxis ? isHorizontal(controls) : isVertical(controls)),
+          disableStash: true,
+          resetOnHide: false,
         },
       },
     ],
@@ -262,7 +276,6 @@ function createAxisControl(axis: 'x' | 'y'): ControlSetRow[] {
 
 const config: ControlPanelConfig = {
   controlPanelSections: [
-    sections.genericTime,
     sections.echartsTimeSeriesQueryWithXAxisSort,
     sections.advancedAnalyticsControls,
     sections.annotationsAndLayersControls,
@@ -280,8 +293,8 @@ const config: ControlPanelConfig = {
               label: t('Bar orientation'),
               default: orientation,
               options: [
-                [OrientationType.vertical, t('Vertical')],
-                [OrientationType.horizontal, t('Horizontal')],
+                [OrientationType.Vertical, t('Vertical')],
+                [OrientationType.Horizontal, t('Horizontal')],
               ],
               description: t('Orientation of bar chart'),
             },
@@ -306,7 +319,9 @@ const config: ControlPanelConfig = {
       controlSetRows: [
         ...seriesOrderSection,
         ['color_scheme'],
+        ['time_shift_color'],
         ...showValueSection,
+        [minorTicks],
         [
           {
             name: 'zoomable',
@@ -322,6 +337,8 @@ const config: ControlPanelConfig = {
         ...legendSection,
         [<ControlSubSectionHeader>{t('X Axis')}</ControlSubSectionHeader>],
         ...createAxisControl('x'),
+        [truncateXAxis],
+        [xAxisBounds],
         ...richTooltipSection,
         [<ControlSubSectionHeader>{t('Y Axis')}</ControlSubSectionHeader>],
         ...createAxisControl('y'),

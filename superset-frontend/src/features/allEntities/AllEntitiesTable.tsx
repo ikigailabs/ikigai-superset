@@ -16,110 +16,156 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useState, useEffect } from 'react';
-import moment from 'moment';
-import { t, styled, logging } from '@superset-ui/core';
+import { extendedDayjs } from 'src/utils/dates';
+import { t, styled } from '@superset-ui/core';
 import TableView, { EmptyWrapperType } from 'src/components/TableView';
-import { addDangerToast } from 'src/components/MessageToasts/actions';
-import Loading from 'src/components/Loading';
-import { fetchObjects } from '../tags/tags';
+import { TagsList } from 'src/components/Tags';
+import FacePile from 'src/components/FacePile';
+import Tag from 'src/types/TagType';
+import { EmptyState } from 'src/components/EmptyState';
+import { NumberParam, useQueryParam } from 'use-query-params';
+import { TaggedObject, TaggedObjects } from 'src/types/TaggedObject';
+
+const MAX_TAGS_TO_SHOW = 3;
+const PAGE_SIZE = 10;
 
 const AllEntitiesTableContainer = styled.div`
   text-align: left;
   border-radius: ${({ theme }) => theme.gridUnit * 1}px 0;
-  margin: 0 ${({ theme }) => theme.gridUnit * 4}px;
   .table {
     table-layout: fixed;
   }
   .td {
     width: 33%;
   }
+  .entity-title {
+    font-family: Inter;
+    font-size: ${({ theme }) => theme.typography.sizes.m}px;
+    font-weight: ${({ theme }) => theme.typography.weights.medium};
+    line-height: 17px;
+    letter-spacing: 0px;
+    text-align: left;
+    margin: ${({ theme }) => theme.gridUnit * 4}px 0;
+  }
 `;
-
-interface TaggedObject {
-  id: number;
-  type: string;
-  name: string;
-  url: string;
-  changed_on: moment.MomentInput;
-  created_by: number | undefined;
-  creator: string;
-}
-
-interface TaggedObjects {
-  dashboard: TaggedObject[];
-  chart: TaggedObject[];
-  query: TaggedObject[];
-}
 
 interface AllEntitiesTableProps {
   search?: string;
+  setShowTagModal: (show: boolean) => void;
+  objects: TaggedObjects;
+  canEditTag: boolean;
 }
 
 export default function AllEntitiesTable({
   search = '',
+  setShowTagModal,
+  objects,
+  canEditTag,
 }: AllEntitiesTableProps) {
   type objectType = 'dashboard' | 'chart' | 'query';
 
-  const [objects, setObjects] = useState<TaggedObjects>({
-    dashboard: [],
-    chart: [],
-    query: [],
-  });
-
-  useEffect(() => {
-    fetchObjects(
-      { tags: search, types: null },
-      (data: TaggedObject[]) => {
-        const objects = { dashboard: [], chart: [], query: [] };
-        data.forEach(function (object) {
-          const object_type = object.type;
-          objects[object_type].push(object);
-        });
-        setObjects(objects);
-      },
-      (error: Response) => {
-        addDangerToast('Error Fetching Tagged Objects');
-        logging.log(error.text);
-      },
-    );
-  }, [search]);
+  const [tagId] = useQueryParam('id', NumberParam);
+  const showDashboardList = objects.dashboard.length > 0;
+  const showChartList = objects.chart.length > 0;
+  const showQueryList = objects.query.length > 0;
+  const showListViewObjs = showDashboardList || showChartList || showQueryList;
 
   const renderTable = (type: objectType) => {
     const data = objects[type].map((o: TaggedObject) => ({
       [type]: <a href={o.url}>{o.name}</a>,
-      modified: moment.utc(o.changed_on).fromNow(),
+      modified: extendedDayjs.utc(o.changed_on).fromNow(),
+      tags: o.tags,
+      owners: o.owners,
     }));
+
     return (
       <TableView
         className="table-condensed"
         emptyWrapperType={EmptyWrapperType.Small}
         data={data}
-        pageSize={50}
+        pageSize={PAGE_SIZE}
         columns={[
           {
             accessor: type,
-            Header: type.charAt(0).toUpperCase() + type.slice(1),
+            Header: 'Title',
           },
-          { accessor: 'modified', Header: 'Modified' },
+          {
+            Cell: ({
+              row: {
+                original: { tags = [] },
+              },
+            }: {
+              row: {
+                original: {
+                  tags: Tag[];
+                };
+              };
+            }) => (
+              // Only show custom type tags
+              <TagsList
+                tags={tags.filter(
+                  (tag: Tag) =>
+                    tag.type !== undefined &&
+                    ['TagType.custom', 1].includes(tag.type) &&
+                    tag.id !== tagId,
+                )}
+                maxTags={MAX_TAGS_TO_SHOW}
+              />
+            ),
+            Header: t('Tags'),
+            accessor: 'tags',
+            disableSortBy: true,
+          },
+          {
+            Cell: ({
+              row: {
+                original: { owners = [] },
+              },
+            }: any) => <FacePile users={owners} />,
+            Header: t('Owners'),
+            accessor: 'owners',
+            disableSortBy: true,
+            size: 'xl',
+          },
         ]}
       />
     );
   };
 
-  if (objects) {
-    return (
-      <AllEntitiesTableContainer>
-        <h3>{t('Dashboards')}</h3>
-        {renderTable('dashboard')}
-        <hr />
-        <h3>{t('Charts')}</h3>
-        {renderTable('chart')}
-        <hr />
-        <h3>{t('Queries')}</h3>
-        {renderTable('query')}
-      </AllEntitiesTableContainer>
-    );
-  }
-  return <Loading />;
+  return (
+    <AllEntitiesTableContainer>
+      {showListViewObjs ? (
+        <>
+          {showDashboardList && (
+            <>
+              <div className="entity-title">{t('Dashboards')}</div>
+              {renderTable('dashboard')}
+            </>
+          )}
+          {showChartList && (
+            <>
+              <div className="entity-title">{t('Charts')}</div>
+              {renderTable('chart')}
+            </>
+          )}
+          {showQueryList && (
+            <>
+              <div className="entity-title">{t('Queries')}</div>
+              {renderTable('query')}
+            </>
+          )}
+        </>
+      ) : (
+        <EmptyState
+          image="dashboard.svg"
+          size="large"
+          title={t('No entities have this tag currently assigned')}
+          {...(canEditTag && {
+            buttonAction: () => setShowTagModal(true),
+            buttonText: t('Add tag to entities'),
+          })}
+        />
+      )}
+    </AllEntitiesTableContainer>
+  );
 }

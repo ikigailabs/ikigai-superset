@@ -27,6 +27,7 @@ from flask.cli import FlaskGroup, with_appcontext
 from superset import app, appbuilder, cli, security_manager
 from superset.cli.lib import normalize_token
 from superset.extensions import db
+from superset.utils.decorators import transaction
 
 logger = logging.getLogger(__name__)
 
@@ -37,15 +38,16 @@ logger = logging.getLogger(__name__)
 )
 @with_appcontext
 def superset() -> None:
-    """This is a management script for the Superset application."""
+    """\033[1;37mThe Apache Superset CLI\033[0m"""
+    # NOTE: codes above are ANSI color codes for bold white in CLI header ^^^
 
     @app.shell_context_processor
     def make_shell_context() -> dict[str, Any]:
-        return dict(app=app, db=db)
+        return {"app": app, "db": db}
 
 
 # add sub-commands
-for load, module_name, is_pkg in pkgutil.walk_packages(
+for load, module_name, is_pkg in pkgutil.walk_packages(  # noqa: B007
     cli.__path__, cli.__name__ + "."
 ):
     module = importlib.import_module(module_name)
@@ -59,6 +61,7 @@ for load, module_name, is_pkg in pkgutil.walk_packages(
 
 @superset.command()
 @with_appcontext
+@transaction()
 def init() -> None:
     """Inits the Superset application"""
     appbuilder.add_permissions(update_perms=True)
@@ -71,12 +74,7 @@ def init() -> None:
 def version(verbose: bool) -> None:
     """Prints the current version number"""
     print(Fore.BLUE + "-=" * 15)
-    print(
-        Fore.YELLOW
-        + "Superset "
-        + Fore.CYAN
-        + "{version}".format(version=app.config["VERSION_STRING"])
-    )
+    print(Fore.YELLOW + "Superset " + Fore.CYAN + f"{app.config['VERSION_STRING']}")
     print(Fore.BLUE + "-=" * 15)
     if verbose:
         print("[DB] : " + f"{db.engine}")

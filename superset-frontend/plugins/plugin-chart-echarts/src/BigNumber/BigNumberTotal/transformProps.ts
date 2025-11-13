@@ -80,13 +80,13 @@ export default function transformProps(
     metric,
     currencyFormats,
     columnFormats,
-    yAxisFormat,
+    metricEntry?.d3format || yAxisFormat,
     currencyFormat,
   );
 
   const headerFormatter =
-    coltypes[0] === GenericDataType.TEMPORAL ||
-    coltypes[0] === GenericDataType.STRING ||
+    coltypes[0] === GenericDataType.Temporal ||
+    coltypes[0] === GenericDataType.String ||
     forceTimestampFormatting
       ? formatTime
       : numberFormatter;

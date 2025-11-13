@@ -16,17 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
 import thunk from 'redux-thunk';
 import configureStore from 'redux-mock-store';
 import fetchMock from 'fetch-mock';
 import { Provider } from 'react-redux';
 import { styledMount as mount } from 'spec/helpers/theming';
 import { render, screen, cleanup } from 'spec/helpers/testing-library';
-import { FeatureFlag } from '@superset-ui/core';
+import { isFeatureEnabled } from '@superset-ui/core';
 import userEvent from '@testing-library/user-event';
 import { QueryParamProvider } from 'use-query-params';
-import * as uiCore from '@superset-ui/core';
 
 import DatasetList from 'src/pages/DatasetList';
 import ListView from 'src/components/ListView';
@@ -36,6 +34,13 @@ import waitForComponentToPaint from 'spec/helpers/waitForComponentToPaint';
 import { act } from 'react-dom/test-utils';
 import SubMenu from 'src/features/home/SubMenu';
 import * as reactRedux from 'react-redux';
+
+jest.mock('@superset-ui/core', () => ({
+  ...jest.requireActual('@superset-ui/core'),
+  isFeatureEnabled: jest.fn(),
+}));
+
+const mockedIsFeatureEnabled = isFeatureEnabled as jest.Mock;
 
 // store needed for withToasts(DatasetList)
 const mockStore = configureStore([thunk]);
@@ -197,7 +202,7 @@ describe('DatasetList', () => {
     ).toBeFalsy();
     act(() => {
       wrapper
-        .find('#duplicate-action-tooltop')
+        .find('#duplicate-action-tooltip')
         .at(0)
         .find('.action-button')
         .props()
@@ -213,7 +218,7 @@ describe('DatasetList', () => {
     await waitForComponentToPaint(wrapper);
     await act(async () => {
       wrapper
-        .find('#duplicate-action-tooltop')
+        .find('#duplicate-action-tooltip')
         .at(0)
         .find('.action-button')
         .props()
@@ -258,17 +263,14 @@ describe('RTL', () => {
     return mounted;
   }
 
-  let isFeatureEnabledMock: jest.SpyInstance<boolean, [feature: FeatureFlag]>;
   beforeEach(async () => {
-    isFeatureEnabledMock = jest
-      .spyOn(uiCore, 'isFeatureEnabled')
-      .mockImplementation(() => true);
+    mockedIsFeatureEnabled.mockReturnValue(true);
     await renderAndWait();
   });
 
   afterEach(() => {
     cleanup();
-    isFeatureEnabledMock.mockRestore();
+    mockedIsFeatureEnabled.mockRestore();
   });
 
   it('renders an "Import Dataset" tooltip under import button', async () => {
@@ -285,56 +287,41 @@ describe('RTL', () => {
 });
 
 describe('Prevent unsafe URLs', () => {
+  const columnCount = 8;
+  const exploreUrlIndex = 1;
+  const getTdIndex = (rowNumber: number): number =>
+    rowNumber * columnCount + exploreUrlIndex;
+
   const mockedProps = {};
   let wrapper: any;
 
   it('Check prevent unsafe is on renders relative links', async () => {
-    const tdColumnsNumber = 9;
     useSelectorMock.mockReturnValue(true);
     wrapper = await mountAndWait(mockedProps);
     const tdElements = wrapper.find(ListView).find('td');
-    expect(
-      tdElements
-        .at(0 * tdColumnsNumber + 1)
-        .find('a')
-        .prop('href'),
-    ).toBe('/https://www.google.com?0');
-    expect(
-      tdElements
-        .at(1 * tdColumnsNumber + 1)
-        .find('a')
-        .prop('href'),
-    ).toBe('/https://www.google.com?1');
-    expect(
-      tdElements
-        .at(2 * tdColumnsNumber + 1)
-        .find('a')
-        .prop('href'),
-    ).toBe('/https://www.google.com?2');
+    expect(tdElements.at(getTdIndex(0)).find('a').prop('href')).toBe(
+      '/https://www.google.com?0',
+    );
+    expect(tdElements.at(getTdIndex(1)).find('a').prop('href')).toBe(
+      '/https://www.google.com?1',
+    );
+    expect(tdElements.at(getTdIndex(2)).find('a').prop('href')).toBe(
+      '/https://www.google.com?2',
+    );
   });
 
   it('Check prevent unsafe is off renders absolute links', async () => {
-    const tdColumnsNumber = 9;
     useSelectorMock.mockReturnValue(false);
     wrapper = await mountAndWait(mockedProps);
     const tdElements = wrapper.find(ListView).find('td');
-    expect(
-      tdElements
-        .at(0 * tdColumnsNumber + 1)
-        .find('a')
-        .prop('href'),
-    ).toBe('https://www.google.com?0');
-    expect(
-      tdElements
-        .at(1 * tdColumnsNumber + 1)
-        .find('a')
-        .prop('href'),
-    ).toBe('https://www.google.com?1');
-    expect(
-      tdElements
-        .at(2 * tdColumnsNumber + 1)
-        .find('a')
-        .prop('href'),
-    ).toBe('https://www.google.com?2');
+    expect(tdElements.at(getTdIndex(0)).find('a').prop('href')).toBe(
+      'https://www.google.com?0',
+    );
+    expect(tdElements.at(getTdIndex(1)).find('a').prop('href')).toBe(
+      'https://www.google.com?1',
+    );
+    expect(tdElements.at(getTdIndex(2)).find('a').prop('href')).toBe(
+      'https://www.google.com?2',
+    );
   });
 });

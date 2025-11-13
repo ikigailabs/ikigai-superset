@@ -17,8 +17,9 @@
  * under the License.
  */
 import { t } from '@superset-ui/core';
+import type { Type } from 'src/components/Label';
 
-export const STATE_TYPE_MAP = {
+export const STATE_TYPE_MAP: Record<string, Type> = {
   offline: 'danger',
   failed: 'danger',
   pending: 'info',
@@ -28,7 +29,7 @@ export const STATE_TYPE_MAP = {
   success: 'success',
 };
 
-export const STATE_TYPE_MAP_LOCALIZED = {
+export const STATE_TYPE_MAP_LOCALIZED: Record<string, string> = {
   offline: t('offline'),
   failed: t('failed'),
   pending: t('pending'),

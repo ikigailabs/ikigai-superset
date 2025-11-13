@@ -30,8 +30,8 @@ from werkzeug.wrappers import Response
 from superset import db
 from superset.extensions import cache_manager
 from superset.models.cache import CacheKey
-from superset.utils.core import json_int_dttm_ser
 from superset.utils.hashing import md5_sha_from_dict
+from superset.utils.json import json_int_dttm_ser
 
 if TYPE_CHECKING:
     from superset.stats_logger import BaseStatsLogger
@@ -89,14 +89,7 @@ ONE_YEAR = 365 * 24 * 60 * 60  # 1 year in seconds
 logger = logging.getLogger(__name__)
 
 
-def view_cache_key(*args: Any, **kwargs: Any) -> str:  # pylint: disable=unused-argument
-    args_hash = hash(frozenset(request.args.items()))
-    return f"view/{request.path}/{args_hash}"
-
-
-def memoized_func(
-    key: str | None = None, cache: Cache = cache_manager.cache
-) -> Callable[..., Any]:
+def memoized_func(key: str, cache: Cache = cache_manager.cache) -> Callable[..., Any]:
     """
     Decorator with configurable key and cache backend.
 
@@ -116,33 +109,36 @@ def memoized_func(
     force means whether to force refresh the cache and is treated as False by default,
     except force = True is passed to the decorated function.
 
-    timeout of cache is set to 600 seconds by default,
+    timeout of cache is set to CACHE_DEFAULT_TIMEOUT seconds by default,
     except cache_timeout = {timeout in seconds} is passed to the decorated function.
 
     :param key: a callable function that takes function arguments and returns
                 the caching key.
     :param cache: a FlaskCache instance that will store the cache.
-    """
+    """  # noqa: E501
 
     def wrap(f: Callable[..., Any]) -> Callable[..., Any]:
         def wrapped_f(*args: Any, **kwargs: Any) -> Any:
-            if not kwargs.get("cache", True):
+            should_cache = kwargs.pop("cache", True)
+            force = kwargs.pop("force", False)
+            cache_timeout = kwargs.pop(
+                "cache_timeout", app.config["CACHE_DEFAULT_TIMEOUT"]
+            )
+
+            if not should_cache:
                 return f(*args, **kwargs)
 
-            if key:
-                # format the key using args/kwargs passed to the decorated function
-                signature = inspect.signature(f)
-                bound_args = signature.bind(*args, **kwargs)
-                bound_args.apply_defaults()
-                cache_key = key.format(**bound_args.arguments)
-            else:
-                cache_key = view_cache_key(*args, **kwargs)
+            # format the key using args/kwargs passed to the decorated function
+            signature = inspect.signature(f)
+            bound_args = signature.bind(*args, **kwargs)
+            bound_args.apply_defaults()
+            cache_key = key.format(**bound_args.arguments)
 
             obj = cache.get(cache_key)
-            if not kwargs.get("force") and obj is not None:
+            if not force and obj is not None:
                 return obj
             obj = f(*args, **kwargs)
-            cache.set(cache_key, obj, timeout=kwargs.get("cache_timeout", 0))
+            cache.set(cache_key, obj, timeout=cache_timeout)
             return obj
 
         return wrapped_f
@@ -150,10 +146,10 @@ def memoized_func(
     return wrap
 
 
-def etag_cache(
+def etag_cache(  # noqa: C901
     cache: Cache = cache_manager.cache,
     get_last_modified: Callable[..., datetime] | None = None,
-    max_age: int | float | None = None,
+    max_age: int | float = app.config["CACHE_DEFAULT_TIMEOUT"],
     raise_for_access: Callable[..., Any] | None = None,
     skip: Callable[..., bool] | None = None,
 ) -> Callable[..., Any]:
@@ -169,12 +165,10 @@ def etag_cache(
     dataframe cache for requests that produce the same SQL.
 
     """
-    if max_age is None:
-        max_age = app.config["CACHE_DEFAULT_TIMEOUT"]
 
-    def decorator(f: Callable[..., Any]) -> Callable[..., Any]:
+    def decorator(f: Callable[..., Any]) -> Callable[..., Any]:  # noqa: C901
         @wraps(f)
-        def wrapper(*args: Any, **kwargs: Any) -> Response:
+        def wrapper(*args: Any, **kwargs: Any) -> Response:  # noqa: C901
             # Check if the user can access the resource
             if raise_for_access:
                 try:

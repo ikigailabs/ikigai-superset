@@ -17,9 +17,10 @@
  * under the License.
  */
 
-import React, { useCallback, useState } from 'react';
-import { Radio } from 'src/components/Radio';
-import { RadioChangeEvent, AsyncSelect } from 'src/components';
+import { useCallback, useState, FormEvent } from 'react';
+
+import { Radio, RadioChangeEvent } from 'src/components/Radio';
+import { AsyncSelect } from 'src/components';
 import { Input } from 'src/components/Input';
 import StyledModal from 'src/components/Modal';
 import Button from 'src/components/Button';
@@ -31,9 +32,10 @@ import {
   JsonObject,
   QueryResponse,
   QueryFormData,
+  VizType,
 } from '@superset-ui/core';
 import { useSelector, useDispatch } from 'react-redux';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import rison from 'rison';
 import { createDatasource } from 'src/SqlLab/actions/sqlLab';
 import { addDangerToast } from 'src/components/MessageToasts/actions';
@@ -42,15 +44,13 @@ import {
   DatasetRadioState,
   EXPLORE_CHART_DEFAULT,
   DatasetOwner,
-  SqlLabExploreRootState,
-  getInitialState,
   SqlLabRootState,
 } from 'src/SqlLab/types';
 import { mountExploreUrl } from 'src/explore/exploreUtils';
 import { postFormData } from 'src/explore/exploreUtils/formData';
 import { URL_PARAMS } from 'src/constants';
 import { SelectValue } from 'antd/lib/select';
-import { isEmpty, isString } from 'lodash';
+import { isEmpty } from 'lodash';
 
 interface QueryDatabase {
   id?: number;
@@ -79,6 +79,7 @@ export interface ISaveableDatasource {
   dbId: number;
   sql: string;
   templateParams?: string | object | null;
+  catalog?: string | null;
   schema?: string | null;
   database?: Database;
 }
@@ -95,32 +96,36 @@ interface SaveDatasetModalProps {
 }
 
 const Styles = styled.div`
+  ${({ theme }) => `
   .sdm-body {
-    margin: 0 8px;
+    margin: 0 ${theme.gridUnit * 2}px;
   }
   .sdm-input {
-    margin-left: 45px;
+    margin-left: ${theme.gridUnit * 10}px;
     width: 401px;
   }
   .sdm-autocomplete {
     width: 401px;
     align-self: center;
+    margin-left: ${theme.gridUnit}px;
   }
   .sdm-radio {
-    display: block;
     height: 30px;
     margin: 10px 0px;
     line-height: 30px;
   }
+  .sdm-radio span {
+    display: inline-flex;
+    padding-right: 0px;
+  }
   .sdm-overwrite-msg {
-    margin: 7px;
+    margin: ${theme.gridUnit * 2}px;
   }
   .sdm-overwrite-container {
     flex: 1 1 auto;
     display: flex;
-  }
+  `}
 `;
-
 const updateDataset = async (
   dbId: number,
   datasetId: number,
@@ -159,14 +164,14 @@ export const SaveDatasetModal = ({
   formData = {},
 }: SaveDatasetModalProps) => {
   const defaultVizType = useSelector<SqlLabRootState, string>(
-    state => state.common?.conf?.DEFAULT_VIZ_TYPE || 'table',
+    state => state.common?.conf?.DEFAULT_VIZ_TYPE || VizType.Table,
   );
 
   const getDefaultDatasetName = () =>
-    `${datasource?.name || UNTITLED} ${moment().format('L HH:mm:ss')}`;
+    `${datasource?.name || UNTITLED} ${dayjs().format('L HH:mm:ss')}`;
   const [datasetName, setDatasetName] = useState(getDefaultDatasetName());
   const [newOrOverwrite, setNewOrOverwrite] = useState(
-    DatasetRadioState.SAVE_NEW,
+    DatasetRadioState.SaveNew,
   );
   const [shouldOverwriteDataset, setShouldOverwriteDataset] = useState(false);
   const [datasetToOverwrite, setDatasetToOverwrite] = useState<
@@ -177,9 +182,7 @@ export const SaveDatasetModal = ({
   >(undefined);
   const [loading, setLoading] = useState<boolean>(false);
 
-  const user = useSelector<SqlLabExploreRootState, User>(user =>
-    getInitialState(user),
-  );
+  const user = useSelector<SqlLabRootState, User>(state => state.user);
   const dispatch = useDispatch<(dispatch: any) => Promise<JsonObject>>();
 
   const createWindow = (url: string) => {
@@ -219,7 +222,7 @@ export const SaveDatasetModal = ({
       postFormData(datasetToOverwrite.datasetid, 'table', {
         ...formDataWithDefaults,
         datasource: `${datasetToOverwrite.datasetid}__table`,
-        ...(defaultVizType === 'table' && {
+        ...(defaultVizType === VizType.Table && {
           all_columns: datasource?.columns?.map(column => column.column_name),
         }),
       }),
@@ -257,7 +260,7 @@ export const SaveDatasetModal = ({
       });
 
       return SupersetClient.get({
-        endpoint: `/api/v1/dataset?q=${queryParams}`,
+        endpoint: `/api/v1/dataset/?q=${queryParams}`,
       }).then(response => ({
         data: response.json.result.map(
           (r: { table_name: string; id: number; owners: [DatasetOwner] }) => ({
@@ -281,7 +284,7 @@ export const SaveDatasetModal = ({
     // Remove the special filters entry from the templateParams
     // before saving the dataset.
     let templateParams;
-    if (isString(datasource?.templateParams)) {
+    if (typeof datasource?.templateParams === 'string') {
       const p = JSON.parse(datasource.templateParams);
       /* eslint-disable-next-line no-underscore-dangle */
       if (p._filters) {
@@ -296,6 +299,7 @@ export const SaveDatasetModal = ({
       createDatasource({
         sql: datasource.sql,
         dbId: datasource.dbId || datasource?.database?.id,
+        catalog: datasource?.catalog,
         schema: datasource?.schema,
         templateParams,
         datasourceName: datasetName,
@@ -305,7 +309,7 @@ export const SaveDatasetModal = ({
         postFormData(data.id, 'table', {
           ...formDataWithDefaults,
           datasource: `${data.id}__table`,
-          ...(defaultVizType === 'table' && {
+          ...(defaultVizType === VizType.Table && {
             all_columns: selectedColumns.map(column => column.column_name),
           }),
         }),
@@ -330,7 +334,7 @@ export const SaveDatasetModal = ({
     setSelectedDatasetToOverwrite(value);
   };
 
-  const handleDatasetNameChange = (e: React.FormEvent<HTMLInputElement>) => {
+  const handleDatasetNameChange = (e: FormEvent<HTMLInputElement>) => {
     // @ts-expect-error
     setDatasetName(e.target.value);
   };
@@ -341,9 +345,9 @@ export const SaveDatasetModal = ({
   };
 
   const disableSaveAndExploreBtn =
-    (newOrOverwrite === DatasetRadioState.SAVE_NEW &&
+    (newOrOverwrite === DatasetRadioState.SaveNew &&
       datasetName.length === 0) ||
-    (newOrOverwrite === DatasetRadioState.OVERWRITE_DATASET &&
+    (newOrOverwrite === DatasetRadioState.OverwriteDataset &&
       isEmpty(selectedDatasetToOverwrite));
 
   const filterAutocompleteOption = (
@@ -358,7 +362,7 @@ export const SaveDatasetModal = ({
       onHide={onHide}
       footer={
         <>
-          {newOrOverwrite === DatasetRadioState.SAVE_NEW && (
+          {newOrOverwrite === DatasetRadioState.SaveNew && (
             <Button
               disabled={disableSaveAndExploreBtn}
               buttonStyle="primary"
@@ -368,7 +372,7 @@ export const SaveDatasetModal = ({
               {buttonTextOnSave}
             </Button>
           )}
-          {newOrOverwrite === DatasetRadioState.OVERWRITE_DATASET && (
+          {newOrOverwrite === DatasetRadioState.OverwriteDataset && (
             <>
               {shouldOverwriteDataset && (
                 <Button onClick={handleOverwriteCancel}>{t('Back')}</Button>

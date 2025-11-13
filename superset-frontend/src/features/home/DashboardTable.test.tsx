@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
 import { styledMount as mount } from 'spec/helpers/theming';
 import thunk from 'redux-thunk';
 import configureStore from 'redux-mock-store';
@@ -70,7 +69,7 @@ describe('DashboardTable', () => {
   });
 
   it('render a submenu with clickable tabs and buttons', async () => {
-    expect(wrapper.find('SubMenu')).toExist();
+    expect(wrapper.find('Menu')).toExist();
     expect(wrapper.find('[role="tab"]')).toHaveLength(2);
     expect(wrapper.find('Button')).toHaveLength(6);
     act(() => {

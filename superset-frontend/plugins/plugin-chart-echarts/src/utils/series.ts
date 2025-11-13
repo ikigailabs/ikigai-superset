@@ -25,23 +25,30 @@ import {
   DTTM_ALIAS,
   ensureIsArray,
   GenericDataType,
+  LegendState,
+  normalizeTimestamp,
   NumberFormats,
   NumberFormatter,
-  TimeFormatter,
   SupersetTheme,
-  normalizeTimestamp,
-  LegendState,
+  TimeFormatter,
   ValueFormatter,
 } from '@superset-ui/core';
-import { SortSeriesType } from '@superset-ui/chart-controls';
-import { format, LegendComponentOption, SeriesOption } from 'echarts';
-import { maxBy, meanBy, minBy, orderBy, sumBy } from 'lodash';
+import { SortSeriesType, LegendPaddingType } from '@superset-ui/chart-controls';
+import { format } from 'echarts/core';
+import type { LegendComponentOption } from 'echarts/components';
+import type { SeriesOption } from 'echarts';
+import { isEmpty, maxBy, meanBy, minBy, orderBy, sumBy } from 'lodash';
 import {
   NULL_STRING,
   StackControlsValue,
   TIMESERIES_CONSTANTS,
 } from '../constants';
-import { LegendOrientation, LegendType, StackType } from '../types';
+import {
+  EchartsTimeseriesSeriesType,
+  LegendOrientation,
+  LegendType,
+  StackType,
+} from '../types';
 import { defaultLegendPadding } from '../defaults';
 
 function isDefined<T>(value: T | undefined | null): boolean {
@@ -149,9 +156,15 @@ export function sortAndFilterSeries(
     case SortSeriesType.Avg:
       aggregator = name => ({ name, value: meanBy(rows, name) });
       break;
-    default:
-      aggregator = name => ({ name, value: name.toLowerCase() });
-      break;
+    default: {
+      const collator = new Intl.Collator(undefined, {
+        numeric: true,
+        sensitivity: 'base',
+      });
+      return seriesNames.sort((a, b) =>
+        sortSeriesAscending ? collator.compare(a, b) : collator.compare(b, a),
+      );
+    }
   }
 
   const sortedValues = seriesNames.map(aggregator);
@@ -224,8 +237,10 @@ export function sortRows(
     }
 
     const value =
-      xAxisSortSeries === SortSeriesType.Name && typeof sortKey === 'string'
-        ? sortKey.toLowerCase()
+      xAxisSortSeries === SortSeriesType.Name
+        ? typeof sortKey === 'string'
+          ? sortKey.toLowerCase()
+          : sortKey
         : aggregate;
 
     return {
@@ -354,10 +369,10 @@ export function formatSeriesName(
   if (name === undefined || name === null) {
     return NULL_STRING;
   }
-  if (typeof name === 'boolean') {
+  if (typeof name === 'boolean' || typeof name === 'bigint') {
     return name.toString();
   }
-  if (name instanceof Date || coltype === GenericDataType.TEMPORAL) {
+  if (name instanceof Date || coltype === GenericDataType.Temporal) {
     const normalizedName =
       typeof name === 'string' ? normalizeTimestamp(name) : name;
     const d =
@@ -416,6 +431,7 @@ export function getLegendProps(
   theme: SupersetTheme,
   zoomable = false,
   legendState?: LegendState,
+  padding?: LegendPaddingType,
 ): LegendComponentOption | LegendComponentOption[] {
   const legend: LegendComponentOption | LegendComponentOption[] = {
     orient: [LegendOrientation.Top, LegendOrientation.Bottom].includes(
@@ -434,13 +450,30 @@ export function getLegendProps(
       borderColor: theme.colors.grayscale.base,
     },
   };
+  const MIN_LEGEND_WIDTH = 0;
+  const MARGIN_GUTTER = 45;
+  const getLegendWidth = (paddingWidth: number) =>
+    Math.max(paddingWidth - MARGIN_GUTTER, MIN_LEGEND_WIDTH);
+
   switch (orientation) {
     case LegendOrientation.Left:
       legend.left = 0;
+      if (padding?.left) {
+        legend.textStyle = {
+          overflow: 'truncate',
+          width: getLegendWidth(padding.left),
+        };
+      }
       break;
     case LegendOrientation.Right:
       legend.right = 0;
       legend.top = zoomable ? TIMESERIES_CONSTANTS.legendRightTopOffset : 0;
+      if (padding?.right) {
+        legend.textStyle = {
+          overflow: 'truncate',
+          width: getLegendWidth(padding.right),
+        };
+      }
       break;
     case LegendOrientation.Bottom:
       legend.bottom = 0;
@@ -458,7 +491,8 @@ export function getChartPadding(
   show: boolean,
   orientation: LegendOrientation,
   margin?: string | number | null,
-  padding?: { top?: number; bottom?: number; left?: number; right?: number },
+  padding?: LegendPaddingType,
+  isHorizontal?: boolean,
 ): {
   bottom: number;
   left: number;
@@ -479,6 +513,19 @@ export function getChartPadding(
   }
 
   const { bottom = 0, left = 0, right = 0, top = 0 } = padding || {};
+
+  if (isHorizontal) {
+    return {
+      left:
+        left + (orientation === LegendOrientation.Bottom ? legendMargin : 0),
+      right:
+        right + (orientation === LegendOrientation.Right ? legendMargin : 0),
+      top: top + (orientation === LegendOrientation.Top ? legendMargin : 0),
+      bottom:
+        bottom + (orientation === LegendOrientation.Left ? legendMargin : 0),
+    };
+  }
+
   return {
     left: left + (orientation === LegendOrientation.Left ? legendMargin : 0),
     right: right + (orientation === LegendOrientation.Right ? legendMargin : 0),
@@ -508,11 +555,21 @@ export function sanitizeHtml(text: string): string {
   return format.encodeHTML(text);
 }
 
-export function getAxisType(dataType?: GenericDataType): AxisType {
-  if (dataType === GenericDataType.TEMPORAL) {
-    return AxisType.time;
+export function getAxisType(
+  stack: StackType,
+  forceCategorical?: boolean,
+  dataType?: GenericDataType,
+): AxisType {
+  if (forceCategorical) {
+    return AxisType.Category;
   }
-  return AxisType.category;
+  if (dataType === GenericDataType.Temporal) {
+    return AxisType.Time;
+  }
+  if (dataType === GenericDataType.Numeric && !stack) {
+    return AxisType.Value;
+  }
+  return AxisType.Category;
 }
 
 export function getOverMaxHiddenFormatter(
@@ -539,4 +596,92 @@ export function getOverMaxHiddenFormatter(
 export function calculateLowerLogTick(minPositiveValue: number) {
   const logBase10 = Math.floor(Math.log10(minPositiveValue));
   return Math.pow(10, logBase10);
+}
+
+type BoundsType = {
+  min?: number | 'dataMin';
+  max?: number | 'dataMax';
+  scale?: true;
+};
+
+export function getMinAndMaxFromBounds(
+  axisType: AxisType,
+  truncateAxis: boolean,
+  min?: number,
+  max?: number,
+  seriesType?: EchartsTimeseriesSeriesType,
+): BoundsType | {} {
+  if (axisType === AxisType.Value && truncateAxis) {
+    const ret: BoundsType = {};
+    if (seriesType === EchartsTimeseriesSeriesType.Bar) {
+      ret.scale = true;
+    }
+    if (min !== undefined) {
+      ret.min = min;
+    } else if (seriesType !== EchartsTimeseriesSeriesType.Bar) {
+      ret.min = 'dataMin';
+    }
+    if (max !== undefined) {
+      ret.max = max;
+    } else if (seriesType !== EchartsTimeseriesSeriesType.Bar) {
+      ret.max = 'dataMax';
+    }
+    return ret;
+  }
+  return {};
+}
+
+/**
+ * Returns the stackId used in stacked series.
+ * It will return the defaultId if the chart is not using time comparison.
+ * If time comparison is used, it will return the time comparison value as the stackId
+ * if the name includes the time comparison value.
+ *
+ * @param {string} defaultId The default stackId.
+ * @param {string[]} timeCompare The time comparison values.
+ * @param {string | number} name The name of the serie.
+ *
+ * @returns {string} The stackId.
+ */
+export function getTimeCompareStackId(
+  defaultId: string,
+  timeCompare: string[],
+  name?: string | number,
+): string {
+  if (isEmpty(timeCompare)) {
+    return defaultId;
+  }
+  // Each timeCompare is its own stack so it doesn't stack on top of original ones
+  return (
+    timeCompare.find(value => {
+      if (typeof name === 'string') {
+        // offset is represented as <offset>, group by list
+        return (
+          name.includes(`${value},`) ||
+          // offset is represented as <metric>__<offset>
+          name.includes(`__${value}`)
+        );
+      }
+      return name?.toString().includes(value);
+    }) || defaultId
+  );
+}
+
+const TOOLTIP_SERIES_KEY = 'seriesId';
+export function extractTooltipKeys(
+  forecastValue: any[],
+  yIndex: number,
+  richTooltip?: boolean,
+  tooltipSortByMetric?: boolean,
+): string[] {
+  if (richTooltip && tooltipSortByMetric) {
+    return forecastValue
+      .slice()
+      .sort((a, b) => b.data[yIndex] - a.data[yIndex])
+      .map(value => value[TOOLTIP_SERIES_KEY]);
+  }
+  if (richTooltip) {
+    return forecastValue.map(s => s[TOOLTIP_SERIES_KEY]);
+  }
+  return [forecastValue[0][TOOLTIP_SERIES_KEY]];
 }

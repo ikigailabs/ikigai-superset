@@ -16,7 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { styled, SupersetClient, t, useTheme } from '@superset-ui/core';
 import SyntaxHighlighter from 'react-syntax-highlighter/dist/cjs/light';
 import sql from 'react-syntax-highlighter/dist/cjs/languages/hljs/sql';
@@ -73,7 +74,7 @@ export const CardStyles = styled.div`
   a {
     text-decoration: none;
   }
-  .ant-card-cover {
+  .antd5-card-cover {
     border-bottom: 1px solid ${({ theme }) => theme.colors.grayscale.light2};
     & > div {
       height: 171px;
@@ -193,12 +194,8 @@ const SavedQueries = ({
   const renderMenu = (query: Query) => (
     <Menu>
       {canEdit && (
-        <Menu.Item
-          onClick={() => {
-            window.location.href = `/superset/sqllab?savedQueryId=${query.id}`;
-          }}
-        >
-          {t('Edit')}
+        <Menu.Item>
+          <Link to={`/sqllab?savedQueryId=${query.id}`}>{t('Edit')}</Link>
         </Menu.Item>
       )}
       <Menu.Item
@@ -256,15 +253,12 @@ const SavedQueries = ({
         buttons={[
           {
             name: (
-              <>
+              <Link to="/sqllab?new=true">
                 <i className="fa fa-plus" />
                 {t('SQL Query')}
-              </>
+              </Link>
             ),
             buttonStyle: 'tertiary',
-            onClick: () => {
-              window.location.href = '/superset/sqllab?new=true';
-            },
           },
           {
             name: t('View All »'),
@@ -278,18 +272,13 @@ const SavedQueries = ({
       {queries.length > 0 ? (
         <CardContainer showThumbnails={showThumbnails}>
           {queries.map(q => (
-            <CardStyles
-              onClick={() => {
-                window.location.href = `/superset/sqllab?savedQueryId=${q.id}`;
-              }}
-              key={q.id}
-            >
+            <CardStyles key={q.id}>
               <ListViewCard
                 imgURL=""
-                url={`/superset/sqllab?savedQueryId=${q.id}`}
+                url={`/sqllab?savedQueryId=${q.id}`}
                 title={q.label}
                 imgFallbackURL="/static/assets/images/empty-query.svg"
-                description={t('Ran %s', q.changed_on_delta_humanized)}
+                description={t('Modified %s', q.changed_on_delta_humanized)}
                 cover={
                   q?.sql?.length && showThumbnails && featureFlag ? (
                     <QueryContainer>
