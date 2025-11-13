@@ -205,14 +205,6 @@ const Header = () => {
   );
   const isLoading = useSelector(state => isDashboardLoading(state.charts));
 
-  const url = new URL(window.location.href);
-
-  if (supersetUrl) {
-    window.location.replace(supersetUrl.toString());
-  } else {
-    window.location.assign(url);
-  }
-
   const refreshTimer = useRef(0);
   const ctrlYTimeout = useRef(0);
   const ctrlZTimeout = useRef(0);

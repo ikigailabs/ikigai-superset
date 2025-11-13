@@ -111,7 +111,6 @@ from superset.superset_typing import (
     Column as ColumnTyping,
     FilterValue,
     FilterValues,
-    HEAD,
     Metric,
     QueryObjectDict,
     ResultSetColumnType,

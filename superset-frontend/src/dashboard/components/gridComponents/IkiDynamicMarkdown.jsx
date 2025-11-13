@@ -6,7 +6,7 @@ import cx from 'classnames';
 
 import { Logger, LOG_ACTIONS_RENDER_CHART } from 'src/logger/LogUtils';
 
-import DragDroppable from 'src/dashboard/components/dnd/DragDroppable';
+import { DragDroppable } from 'src/dashboard/components/dnd/DragDroppable';
 import ResizableContainer from 'src/dashboard/components/resizable/ResizableContainer';
 import { componentShape } from 'src/dashboard/util/propShapes';
 import { ROW_TYPE, COLUMN_TYPE } from 'src/dashboard/util/componentTypes';

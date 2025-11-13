@@ -23,7 +23,7 @@ import {
   LayoutItemWithCustomMarkdown,
 } from '../../types';
 import { COLUMN_TYPE, ROW_TYPE } from '../../util/componentTypes';
-import DragDroppable from '../dnd/DragDroppable';
+import { DragDroppable } from '../dnd/DragDroppable';
 import { IkiDynamicMarkdownIframe } from './IkiDynamicMarkdownIframe';
 
 type PropTypes = {

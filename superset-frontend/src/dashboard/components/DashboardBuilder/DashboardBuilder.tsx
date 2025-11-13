@@ -32,7 +32,7 @@ import {
 } from '@superset-ui/core';
 import { Global } from '@emotion/react';
 import { useDispatch, useSelector } from 'react-redux';
-// import ErrorBoundary from 'src/components/ErrorBoundary';
+import ErrorBoundary from 'src/components/ErrorBoundary';
 import BuilderComponentPane from 'src/dashboard/components/BuilderComponentPane';
 import DashboardHeader from 'src/dashboard/components/Header';
 import Icons from 'src/components/Icons';
@@ -83,6 +83,7 @@ import { getRootLevelTabsComponent, shouldFocusTabs } from './utils';
 import DashboardContainer from './DashboardContainer';
 import { useNativeFilters } from './state';
 import DashboardWrapper from './DashboardWrapper';
+import { ContextService } from 'src/service/context-service/context-service';
 
 // @z-index-above-dashboard-charts + 1 = 11
 const FiltersPanel = styled.div<{ width: number; hidden: boolean }>`
@@ -93,12 +94,12 @@ const FiltersPanel = styled.div<{ width: number; hidden: boolean }>`
   ${({ hidden }) => hidden && `display: none;`}
 `;
 
-// const StickyPanel = styled.div<{ width: number }>`
-//   position: sticky;
-//   top: -1px;
-//   width: ${({ width }) => width}px;
-//   flex: 0 0 ${({ width }) => width}px;
-// `;
+const StickyPanel = styled.div<{ width: number }>`
+  position: sticky;
+  top: -1px;
+  width: ${({ width }) => width}px;
+  flex: 0 0 ${({ width }) => width}px;
+`;
 
 // @z-index-above-dashboard-popovers (99) + 1 = 100
 const StyledHeader = styled.div`
@@ -332,13 +333,15 @@ const StyledDashboardContent = styled.div<{
       overflow-y: visible;
 
       // transitionable traits to show filter relevance
-      transition: opacity ${theme.transitionTiming}s ease-in-out,
+      transition:
+        opacity ${theme.transitionTiming}s ease-in-out,
         border-color ${theme.transitionTiming}s ease-in-out,
         box-shadow ${theme.transitionTiming}s ease-in-out;
 
       &.fade-in {
         border-radius: ${theme.borderRadius}px;
-        box-shadow: inset 0 0 0 2px ${theme.colors.primary.base},
+        box-shadow:
+          inset 0 0 0 2px ${theme.colors.primary.base},
           0 0 0 3px
             ${addAlpha(
               theme.colors.primary.base,
@@ -472,7 +475,7 @@ const DashboardBuilder = () => {
     showDashboard,
     missingInitialFilters,
     dashboardFiltersOpen,
-    // toggleDashboardFiltersOpen,
+    toggleDashboardFiltersOpen,
     nativeFiltersEnabled,
   } = useNativeFilters();
 
@@ -626,19 +629,20 @@ const DashboardBuilder = () => {
 
   return (
     <DashboardWrapper>
-      {showFilterBar && filterBarOrientation === FilterBarOrientation.Vertical && (
-        <>
-          <ResizableSidebar
-            id={`dashboard:${dashboardId}`}
-            enable={dashboardFiltersOpen}
-            minWidth={OPEN_FILTER_BAR_WIDTH}
-            maxWidth={OPEN_FILTER_BAR_MAX_WIDTH}
-            initialWidth={OPEN_FILTER_BAR_WIDTH}
-          >
-            {renderChild}
-          </ResizableSidebar>
-        </>
-      )}
+      {showFilterBar &&
+        filterBarOrientation === FilterBarOrientation.Vertical && (
+          <>
+            <ResizableSidebar
+              id={`dashboard:${dashboardId}`}
+              enable={dashboardFiltersOpen}
+              minWidth={OPEN_FILTER_BAR_WIDTH}
+              maxWidth={OPEN_FILTER_BAR_MAX_WIDTH}
+              initialWidth={OPEN_FILTER_BAR_WIDTH}
+            >
+              {renderChild}
+            </ResizableSidebar>
+          </>
+        )}
       <StyledHeader ref={headerRef}>
         {/* @ts-ignore */}
         <Droppable

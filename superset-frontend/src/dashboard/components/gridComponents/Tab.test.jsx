@@ -23,7 +23,7 @@ import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 
 import DashboardComponent from 'src/dashboard/containers/DashboardComponent';
-import DragDroppable from 'src/dashboard/components/dnd/DragDroppable';
+import { DragDroppable } from 'src/dashboard/components/dnd/DragDroppable';
 import EditableTitle from 'src/components/EditableTitle';
 import Tab, {
   RENDER_TAB,

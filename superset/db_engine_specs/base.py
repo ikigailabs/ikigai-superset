@@ -1954,21 +1954,6 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
             return sqla_type, generic_type
         return None
 
-    @classmethod
-    def get_url_for_impersonation(
-        cls, url: URL, impersonate_user: bool, username: Optional[str]
-    ) -> URL:
-        """
-        Return a modified URL with the username set.
-        :param url: SQLAlchemy URL object
-        :param impersonate_user: Flag indicating if impersonation is enabled
-        :param username: Effective username
-        """
-        if impersonate_user and username is not None:
-            url = url.set(username=username)
-
-        return url
-
     @staticmethod
     def _mutate_label(label: str) -> str:
         """
