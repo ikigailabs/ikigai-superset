@@ -191,7 +191,7 @@ export type Layout = { [key: string]: LayoutItem };
 export type Charts = { [key: number]: Chart };
 
 type ComponentTypesKeys = keyof typeof componentTypes;
-export type ComponentType = typeof componentTypes[ComponentTypesKeys];
+export type ComponentType = (typeof componentTypes)[ComponentTypesKeys];
 
 export type LayoutItemMeta = {
   chartId: number;
@@ -203,6 +203,7 @@ export type LayoutItemMeta = {
   text?: string;
   uuid: string;
   width: number;
+  customMarkdown?: CustomMarkdown;
 };
 
 /** State of dashboardLayout item in redux */
@@ -212,6 +213,13 @@ export type LayoutItem = {
   type: ComponentType;
   id: string;
   meta: LayoutItemMeta;
+};
+
+export type LayoutItemWithCustomMarkdown = LayoutItem & {
+  meta: LayoutItem['meta'] & {
+    customElementId?: string;
+    customMarkdown: CustomMarkdown;
+  };
 };
 
 type ActiveFilter = {
@@ -303,9 +311,9 @@ export type CustomMarkdownPropType = {
   modified_at: string;
 };
 
-export type Orientation = typeof orientations[keyof typeof orientations];
+export type Orientation = (typeof orientations)[keyof typeof orientations];
 
-export type EditorMode = typeof editorModes[keyof typeof editorModes];
+export type EditorMode = (typeof editorModes)[keyof typeof editorModes];
 
 export enum MenuKeys {
   DownloadAsImage = 'download_as_image',

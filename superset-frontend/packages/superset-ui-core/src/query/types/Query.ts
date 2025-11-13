@@ -33,6 +33,19 @@ import { JsonObject } from '../../connection';
 import { TimeGranularity } from '../../time-format';
 import { GenericDataType, DataRecordValue } from './QueryResponse';
 
+export type OperatorAndValue =
+  | {
+      op: BinaryOperator;
+      val: DataRecordValue;
+    }
+  | {
+      op: SetOperator;
+      val: DataRecordValue[];
+    }
+  | {
+      op: UnaryOperator;
+    };
+
 export type BaseQueryObjectFilterClause = {
   col: QueryFormColumn;
   grain?: TimeGranularity;

@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import Collapse from 'src/components/Collapse';
-import { Title } from 'src/dashboard/components/FiltersBadge/Styles';
 import dashboardComponents from 'src/visualizations/presets/dashboardComponents';
 import NewDynamicMarkdown from '../../gridComponents/new/components/NewDynamicMarkdown';
 import NewIkiTable from '../../gridComponents/new/components/NewIkiTable';
@@ -30,9 +29,9 @@ export function LegacyComponents() {
         key="legacy-components"
         className="legacy-components"
         header={
-          <Title bold color="#626262">
+          <h2 style={{ color: '#626262' }}>
             <span>Legacy Components</span>
-          </Title>
+          </h2>
         }
       >
         <NewDynamicMarkdown />

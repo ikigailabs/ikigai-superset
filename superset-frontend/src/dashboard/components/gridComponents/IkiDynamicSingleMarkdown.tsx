@@ -25,6 +25,7 @@ import {
 import { COLUMN_TYPE, ROW_TYPE } from '../../util/componentTypes';
 import { DragDroppable } from '../dnd/DragDroppable';
 import { IkiDynamicMarkdownIframe } from './IkiDynamicMarkdownIframe';
+import { ResizeCallback } from 're-resizable';
 
 type PropTypes = {
   id: string;
@@ -45,7 +46,7 @@ type PropTypes = {
   availableColumnCount: number;
   columnWidth: number;
   onResizeStart: (event: any) => void;
-  onResize: (widthMultiple: number, heightMultiple: number) => void;
+  onResize: ResizeCallback;
   onResizeStop: () => void;
 
   // dnd
