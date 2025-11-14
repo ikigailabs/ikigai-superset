@@ -107,7 +107,7 @@ const getMiddleware: ConfigureStoreOptions['middleware'] =
             warnAfter: 200,
           },
         }).concat(logger, api.middleware, ...ikigaiMiddlewares)
-      : [thunk, logger, api.middleware];
+      : [thunk, logger, api.middleware, ...ikigaiMiddlewares];
 
 // TODO: This reducer is a combination of the Dashboard and Explore reducers.
 // The correct way of handling this is to unify the actions and reducers from both
