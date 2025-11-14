@@ -39,6 +39,8 @@ import isDashboardEmpty from '../util/isDashboardEmpty';
 import { getAffectedOwnDataCharts } from '../util/charts/getOwnDataCharts';
 import { getRelatedCharts } from '../util/getRelatedCharts';
 
+import './IkigaiDashboardStyles.less';
+
 const propTypes = {
   actions: PropTypes.shape({
     addSliceToDashboard: PropTypes.func.isRequired,
