@@ -65,7 +65,10 @@ class SuggestionServiceClass {
         force: false,
         queries: [
           {
-            filters: buildAdhocFilters(candidate.filters),
+            filters: [
+              ...buildAdhocFilters(candidate.filters),
+              ...buildTimeFilters(candidate.filters),
+            ],
             metrics: [],
             groupby: [candidate.key],
             orderby: [[candidate.key, true]],
@@ -104,32 +107,20 @@ class SuggestionServiceClass {
  * the first time first and apply it. In reality, there will only ever be 1 time
  * filter per-dashboard, but there is theoretically the possibility for >1.
  */
-function applyFirstTimeFilter(
-  formData: Record<string, any>,
-  filters: PlatformFilter[],
-) {
+function buildTimeFilters(filters: PlatformFilter[]) {
   const timeFilters = filters.filter(
     f => f.type === 'time',
   ) as SupersetOriginPlatformTimeFilter[];
 
-  if (timeFilters.length === 0) return formData;
+  if (timeFilters.length === 0) return [];
 
   const firstFilter = timeFilters[0];
 
-  return {
-    ...formData,
-    time_range: `${firstFilter.lowBound} : ${firstFilter.highBound}`,
-    granularity_sqla: firstFilter.columnName,
-  };
-}
-
-function buildFilterConfigs(key: string) {
   return [
     {
-      asc: true,
-      column: key,
-      multiple: true,
-      searchAllOptions: false,
+      op: 'TEMPORAL_RANGE',
+      val: `${firstFilter.lowBound} : ${firstFilter.highBound}`,
+      col: firstFilter.columnName,
     },
   ];
 }
