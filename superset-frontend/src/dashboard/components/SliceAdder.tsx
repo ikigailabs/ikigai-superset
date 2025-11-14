@@ -103,28 +103,6 @@ const StyledSelect = styled(Select)<{ id?: string }>`
   min-width: 150px;
 `;
 
-const NewChartButtonContainer = styled.div`
-  ${({ theme }) => css`
-    display: flex;
-    justify-content: flex-end;
-    padding-right: ${theme.gridUnit * 2}px;
-  `}
-`;
-
-const NewChartButton = styled(Button)`
-  ${({ theme }) => css`
-    height: auto;
-    & > .anticon + span {
-      margin-left: 0;
-    }
-    & > [role='img']:first-of-type {
-      margin-right: ${theme.gridUnit}px;
-      padding-bottom: 1px;
-      line-height: 0;
-    }
-  `}
-`;
-
 export const ChartList = styled.div`
   flex-grow: 1;
   min-height: 0;
