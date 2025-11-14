@@ -30,6 +30,7 @@ const propTypes = {
   type: PropTypes.string.isRequired,
   label: PropTypes.string.isRequired,
   className: PropTypes.string,
+  disableDragDrop: PropTypes.boolean,
 };
 
 const defaultProps = {
@@ -85,7 +86,7 @@ const NewComponentPlaceholder = styled.div`
 
 export default class DraggableNewComponent extends PureComponent {
   render() {
-    const { label, id, type, className, meta } = this.props;
+    const { label, id, type, className, meta, disableDragDrop } = this.props;
     return (
       <DragDroppable
         component={{ type, id, meta }}
@@ -96,6 +97,7 @@ export default class DraggableNewComponent extends PureComponent {
         index={0}
         depth={0}
         editMode
+        disableDragDrop={disableDragDrop}
       >
         {({ dragSourceRef }) => (
           <NewComponent ref={dragSourceRef} data-test="new-component">
