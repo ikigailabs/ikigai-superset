@@ -80,7 +80,6 @@
 
 .new-component-placeholder::before {
   font-size: 16px;
-  // color: var(--txtColor2);
   color: #824fe0;
   transition: all 0.2s ease;
 }
@@ -95,4 +94,18 @@
   height: 2px;
   width: 100%;
   background-color: #e0e0e0;
+}
+
+.custom-markdown-container.drop-indicator--forbidden div {
+  cursor: not-allowed !important;
+}
+
+.custom-markdown-container.drop-indicator--forbidden {
+  .new-component-placeholder {
+    opacity: 0.5;
+  }
+
+  div > div {
+    opacity: 0.5;
+  }
 }

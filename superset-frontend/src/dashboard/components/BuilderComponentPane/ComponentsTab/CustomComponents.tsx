@@ -45,7 +45,7 @@ export function CustomMarkdowns({ searchTerm }: PropTypes) {
         return (
           <div
             key={cm.custom_markdown_id}
-            className="custom-markdown-container"
+            className={`custom-markdown-container ${isAdded ? 'drop-indicator--forbidden' : ''}`}
             style={{ display: isVisible ? 'block' : 'none' }}
           >
             <NewDynamicSingleMarkdown
