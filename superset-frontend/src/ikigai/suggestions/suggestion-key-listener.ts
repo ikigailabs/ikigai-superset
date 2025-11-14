@@ -26,11 +26,9 @@ const suggestionMiddleware: TypedMiddleware = api => next => action => {
 
       const fetchCandidates = Object.values(rootState.datasources)
         // Ignore datasources that do not contain the column name
-        .filter(d =>
-          d.columns.map(c => c.column_name).includes(payload.columnName),
-        )
+        .filter(d => (d.column_names || []).includes(payload.columnName))
         .flatMap(d => {
-          const columnNames = d.columns.map(c => c.column_name);
+          const columnNames = d.column_names || [];
 
           // Which filters apply to this datasource? (match by column name)
           const filtersForDatasource = validFilters.filter(f =>
@@ -44,9 +42,8 @@ const suggestionMiddleware: TypedMiddleware = api => next => action => {
           };
         });
 
-      const suggestions = await SuggestionService.getSuggestions(
-        fetchCandidates,
-      );
+      const suggestions =
+        await SuggestionService.getSuggestions(fetchCandidates);
 
       respond(suggestions);
     },
