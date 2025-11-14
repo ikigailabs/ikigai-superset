@@ -27,6 +27,7 @@ import { Droppable } from './dnd/DragDroppable';
 import { GRID_GUTTER_SIZE, GRID_COLUMN_COUNT } from '../util/constants';
 import { TAB_TYPE } from '../util/componentTypes';
 import { DropdownOptionsPopup } from 'src/ikigai/dropdown-options/DropdownOptionsPopup';
+import { DatepickerPopup } from 'src/ikigai/datepicker/DatepickerPopup';
 
 const propTypes = {
   depth: PropTypes.number.isRequired,
@@ -280,6 +281,7 @@ class DashboardGrid extends PureComponent {
         )}
         <div className="dashboard-grid" ref={this.setGridRef}>
           <DropdownOptionsPopup />
+          <DatepickerPopup />
           <GridContent
             className="grid-content"
             data-test="grid-content"
