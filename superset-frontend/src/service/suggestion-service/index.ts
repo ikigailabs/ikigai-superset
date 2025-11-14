@@ -1,7 +1,6 @@
 import { Datasource } from 'src/dashboard/types';
 
 import { SupersetClient } from '@superset-ui/core';
-import { safeStringify } from 'src/utils/safeStringify';
 import { getChartDataUri } from 'src/explore/exploreUtils';
 import type {
   PlatformFilter,
@@ -13,6 +12,16 @@ type FetchCandidate = {
   datasource: Datasource;
   key: string;
   filters: (SupersetOriginPlatformTimeFilter | PlatformValueFilter)[];
+};
+
+type GetChartDataResponse = {
+  result: {
+    colnames: string[];
+    coltypes: number[];
+    data: Record<string, any>[];
+    rowcount: number;
+    sql_rowcount: number;
+  }[];
 };
 
 /**
@@ -44,21 +53,34 @@ class SuggestionServiceClass {
       return this.cache.get(cacheKey)!;
     }
 
-    let formData: Record<string, any> = {
-      datasource: candidate.datasource.uid,
-      groupby: [candidate.key],
-      filter_configs: buildFilterConfigs(candidate.key),
-      adhoc_filters: buildAdhocFilters(candidate.filters),
-    };
+    // formData = applyFirstTimeFilter(formData, candidate.filters);
 
-    formData = applyFirstTimeFilter(formData, candidate.filters);
-
-    const request = SupersetClient.get({
-      url: buildExploreUrl(formData),
+    const request = SupersetClient.post({
+      url: buildExploreUrl(),
+      jsonPayload: {
+        datasource: {
+          id: candidate.datasource.id,
+          type: candidate.datasource.type,
+        },
+        force: false,
+        queries: [
+          {
+            filters: buildAdhocFilters(candidate.filters),
+            metrics: [],
+            groupby: [candidate.key],
+            orderby: [[candidate.key, true]],
+          },
+        ],
+        result_format: 'json',
+        result_type: 'results',
+      },
     })
       .then(({ json }) => {
-        const result: Record<string, string>[] = json?.data?.records ?? [];
-        const parsed = result.map(r => r[candidate.key]);
+        const result = (json as GetChartDataResponse).result;
+
+        if (!result.length) return [];
+
+        const parsed = result[0].data.map(r => r[candidate.key]);
 
         // Save resolved result
         this.resolved.set(cacheKey, parsed);
@@ -113,31 +135,25 @@ function buildFilterConfigs(key: string) {
 }
 
 function buildAdhocFilters(filters: PlatformFilter[]) {
-  return filters.filter(f => f.type === 'value').map(buildValueAdhocFilter);
+  return filters.filter(f => f.type === 'value').map(buildValueFilter);
 }
 
-function buildValueAdhocFilter(f: PlatformValueFilter) {
+function buildValueFilter(f: PlatformValueFilter) {
   return {
-    clause: 'WHERE',
-    expressionType: 'SIMPLE',
-    subject: f.columnName,
-    operator: f.op,
-    comparator: (f as any).val, // Accessing this field is weird w.r.t. OperatorAndValue
+    col: f.columnName,
+    op: f.op,
+    val: (f as any).val, // Accessing this field is weird w.r.t. OperatorAndValue
   };
 }
 
-function buildExploreUrl(formData: Record<string, any>) {
+function buildExploreUrl() {
   const uri = getChartDataUri({
-    path: '/',
+    path: '/api/v1/chart/data',
     allowDomainSharding: false,
     qs: false,
   });
-  const directory = '/superset/explore_json';
-  const search = uri.search(true);
 
-  search.form_data = safeStringify(formData);
-
-  return uri.search(search).directory(directory).toString();
+  return uri.toString();
 }
 
 export const SuggestionService = new SuggestionServiceClass();
