@@ -419,7 +419,12 @@ class IkiDemandSensing extends React.PureComponent {
     } else {
       iframe = '';
     }
-    return <SafeMarkdown source={hasError ? MARKDOWN_ERROR_MESSAGE : iframe} />;
+    return (
+      <SafeMarkdown
+        source={hasError ? MARKDOWN_ERROR_MESSAGE : iframe}
+        htmlSanitization={false}
+      />
+    );
   }
 
   renderEditMode() {
