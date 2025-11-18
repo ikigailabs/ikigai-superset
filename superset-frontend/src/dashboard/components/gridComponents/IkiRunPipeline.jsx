@@ -40,6 +40,7 @@ import {
   LOG_ACTIONS_RENDER_CHART,
   LOG_ACTIONS_FORCE_REFRESH_CHART,
 } from 'src/logger/LogUtils';
+import { isObject } from 'lodash';
 import { MarkdownEditor } from 'src/components/AsyncAceEditor';
 
 import DeleteComponentButton from 'src/dashboard/components/DeleteComponentButton';
@@ -217,7 +218,12 @@ class IkiRunPipeline extends React.PureComponent {
     window.addEventListener('message', event => {
       if (event.origin === this.props.ikigaiOrigin) {
         // if (event.origin === 'http://localhost:3000') {
-        const messageObject = JSON.parse(event.data);
+        const messageObject = isObject(event.data)
+          ? event.data
+          : typeof event.data === 'string'
+            ? JSON.parse(event.data)
+            : {};
+
         if (messageObject.info && messageObject.dataType) {
           const { dataType } = messageObject;
           const chartsList = [];

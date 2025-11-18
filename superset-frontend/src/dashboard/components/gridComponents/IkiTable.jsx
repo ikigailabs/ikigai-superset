@@ -37,6 +37,7 @@ import {
   GRID_MIN_ROW_UNITS,
   GRID_BASE_UNIT,
 } from 'src/dashboard/util/constants';
+import { isObject } from 'lodash';
 
 const propTypes = {
   id: PropTypes.string.isRequired,
@@ -170,7 +171,12 @@ class IkiTable extends React.PureComponent {
   handleIncomingWindowMsg() {
     window.addEventListener('message', event => {
       if (event.origin === this.props.ikigaiOrigin) {
-        const messageObject = JSON.parse(event.data);
+        const messageObject = isObject(event.data)
+          ? event.data
+          : typeof event.data === 'string'
+            ? JSON.parse(event.data)
+            : {};
+
         if (messageObject.info && messageObject.dataType) {
           const { dataType } = messageObject;
           let messageData;

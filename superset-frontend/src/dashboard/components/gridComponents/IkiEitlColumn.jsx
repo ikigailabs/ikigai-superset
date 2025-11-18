@@ -30,6 +30,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import cx from 'classnames';
+import { isObject } from 'lodash';
 
 import { t, SafeMarkdown } from '@superset-ui/core';
 import { Logger, LOG_ACTIONS_RENDER_CHART } from 'src/logger/LogUtils';
@@ -198,7 +199,12 @@ class IkiEitlColumn extends React.PureComponent {
   handleIncomingWindowMsg() {
     window.addEventListener('message', event => {
       if (event.origin === this.props.ikigaiOrigin) {
-        const messageObject = JSON.parse(event.data);
+        const messageObject = isObject(event.data)
+          ? event.data
+          : typeof event.data === 'string'
+            ? JSON.parse(event.data)
+            : {};
+
         if (messageObject.info && messageObject.dataType) {
           const { dataType } = messageObject;
 
