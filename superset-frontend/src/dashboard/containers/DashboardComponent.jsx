@@ -61,6 +61,7 @@ const DashboardComponent = props => {
   const fullSizeChartId = useSelector(
     state => state.dashboardState.fullSizeChartId,
   );
+  const ikigaiOrigin = useSelector(state => state.dashboardState.ikigaiOrigin);
   const dashboardId = dashboardInfo.id;
   const component = dashboardLayout[props.id];
   const parentComponent = dashboardLayout[props.parentId];
@@ -124,6 +125,7 @@ const DashboardComponent = props => {
       parentComponent={parentComponent}
       editMode={editMode}
       filters={filters}
+      ikigaiOrigin={ikigaiOrigin}
       dashboardId={dashboardId}
       dashboardInfo={dashboardInfo}
       fullSizeChartId={fullSizeChartId}
