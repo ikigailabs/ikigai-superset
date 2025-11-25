@@ -139,3 +139,14 @@ except ImportError:
 # nice when running on localhost. In remote environments, Secure == True and SameSite == 'None'
 # SESSION_COOKIE_SAMESITE = 'None'  # One of [None, 'None', 'Lax', 'Strict']
 SESSION_COOKIE_SECURE = False  # Prevent cookie from being transmitted over non-tls?
+TALISMAN_ENABLED = False
+ENABLE_CORS = True
+HTTP_HEADERS = {"X-Frame-Options": "ALLOWALL"}
+CORS_OPTIONS = {
+    "supports_credentials": True,
+    "allow_headers": ["*"],
+    "expose_headers": ["*"],
+    "resources": ["*"],
+    "origins": ["*", "http://localhost:3000"],
+}
+SECRET_KEY = "this_is_a_dummy_private_key_dont_try_to_attack_me"
