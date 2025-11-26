@@ -197,6 +197,9 @@ def env(key, default=None):
 
 # The SQLAlchemy connection string.
 SQLALCHEMY_DATABASE_URI = f"postgresql+psycopg2://{env('DB_USER')}:{env('DB_PASS')}@{env('DB_HOST')}:{env('DB_PORT')}/{env('DB_NAME')}"
+# SQLALCHEMY_DATABASE_URI = (
+#     f"""sqlite:///{os.path.join(DATA_DIR, "superset.db")}?check_same_thread=false"""
+# )
 
 # SQLALCHEMY_DATABASE_URI = 'mysql://myapp@localhost/myapp'
 # SQLALCHEMY_DATABASE_URI = 'postgresql://root:password@localhost/myapp'
