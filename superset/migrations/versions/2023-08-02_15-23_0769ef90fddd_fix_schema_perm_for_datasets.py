@@ -60,8 +60,18 @@ class Database(Base):
     database_name = sa.Column(sa.String(250))
 
 
+def batched_query(query, batch_size=5000):
+    offset = 0
+    while True:
+        batch = query.limit(batch_size).offset(offset).all()
+        if not batch:
+            break
+        yield batch
+        offset += batch_size
+
+
 def fix_datasets_schema_perm(session):
-    for result in (
+    query = (
         session.query(SqlaTable, Database.database_name)
         .join(Database)
         .filter(SqlaTable.schema.isnot(None))
@@ -69,14 +79,18 @@ def fix_datasets_schema_perm(session):
             SqlaTable.schema_perm
             != sa.func.concat("[", Database.database_name, "].[", SqlaTable.schema, "]")
         )
-    ):
-        result.SqlaTable.schema_perm = (
-            f"[{result.database_name}].[{result.SqlaTable.schema}]"
-        )
+    )
+
+    for batch in batched_query(query):
+        for result in batch:
+            result.SqlaTable.schema_perm = (
+                f"[{result.database_name}].[{result.SqlaTable.schema}]"
+            )
+        session.commit()
 
 
 def fix_charts_schema_perm(session):
-    for result in (
+    query = (
         session.query(Slice, SqlaTable, Database.database_name)
         .join(SqlaTable, Slice.datasource_id == SqlaTable.id)
         .join(Database, SqlaTable.database_id == Database.id)
@@ -85,22 +99,26 @@ def fix_charts_schema_perm(session):
             Slice.schema_perm
             != sa.func.concat("[", Database.database_name, "].[", SqlaTable.schema, "]")
         )
-    ):
-        result.Slice.schema_perm = (
-            f"[{result.database_name}].[{result.SqlaTable.schema}]"
-        )
+    )
+
+    for batch in batched_query(query):
+        for result in batch:
+            result.Slice.schema_perm = (
+                f"[{result.database_name}].[{result.SqlaTable.schema}]"
+            )
+        session.commit()
 
 
 def upgrade():
     bind = op.get_bind()
     session = db.Session(bind=bind)
+
     if isinstance(bind.dialect, SQLiteDialect):
-        return  # sqlite doesn't have a concat function
+        return
 
     fix_datasets_schema_perm(session)
     fix_charts_schema_perm(session)
 
-    session.commit()
     session.close()
 
 
