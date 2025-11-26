@@ -42,13 +42,12 @@ EXAMPLES_HOST = os.getenv("EXAMPLES_HOST")
 EXAMPLES_PORT = os.getenv("EXAMPLES_PORT")
 EXAMPLES_DB = os.getenv("EXAMPLES_DB")
 
-
-def env(key, default=None):
-    return os.getenv(key, default)
-
-
 # The SQLAlchemy connection string.
-SQLALCHEMY_DATABASE_URI = f"postgresql+psycopg2://{env('DB_USER')}:{env('DB_PASS')}@{env('DB_HOST')}:{env('DB_PORT')}/{env('DB_NAME')}"
+SQLALCHEMY_DATABASE_URI = (
+    f"{DATABASE_DIALECT}://"
+    f"{DATABASE_USER}:{DATABASE_PASSWORD}@"
+    f"{DATABASE_HOST}:{DATABASE_PORT}/{DATABASE_DB}"
+)
 
 SQLALCHEMY_EXAMPLES_URI = (
     f"{DATABASE_DIALECT}://"
