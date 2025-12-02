@@ -44,6 +44,7 @@ const suggestionMiddleware: TypedMiddleware = api => next => action => {
           };
         });
 
+      // prettier-ignore
       const suggestions =
         await SuggestionService.getSuggestions(fetchCandidates);
 

@@ -1,3 +1,6 @@
+/* eslint-disable theme-colors/no-literal-colors */
+/* eslint-disable no-return-assign */
+
 import React, { useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -63,12 +66,9 @@ export function DropdownOptionsPopup() {
         position: 'absolute',
         top: coords.y,
         left: coords.x,
-        // eslint-disable-next-line no-literal-colors
         backgroundColor: '#fff',
-        // eslint-disable-next-line no-literal-colors
         border: '1px solid #d9d9d9',
         borderRadius: 4,
-        // eslint-disable-next-line no-literal-colors
         boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
         zIndex: 9999,
         minWidth: 160,
@@ -89,9 +89,7 @@ export function DropdownOptionsPopup() {
             style={{
               width: 24,
               height: 24,
-              // eslint-disable-next-line no-literal-colors
               border: '3px solid #ccc',
-              // eslint-disable-next-line no-literal-colors
               borderTop: '3px solid #7367f0',
               borderRadius: '50%',
               animation: 'spin 0.8s linear infinite',
@@ -142,7 +140,6 @@ export function DropdownOptionsPopup() {
             <li
               style={{
                 padding: '5px 12px',
-                // eslint-disable-next-line no-literal-colors
                 color: '#999',
                 fontStyle: 'italic',
               }}

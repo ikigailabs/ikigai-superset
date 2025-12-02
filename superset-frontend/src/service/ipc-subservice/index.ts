@@ -12,6 +12,7 @@ const logger = createLogger({ moduleName: 'IPCSubservice' });
 
 export class IpcSubserviceClass {
   private pendingRequests = new Map<string, PendingRequest>();
+
   private requestHandlers = new Map<string, RequestHandler>();
 
   constructor(
