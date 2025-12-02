@@ -42,6 +42,6 @@ export class Logger {
   private logToTransports(logLevel: LogLevelType, message: string) {
     const entry = this.createLogEntry(logLevel, message);
 
-    GlobalConfig.transports.forEach((transport) => transport.log(entry));
+    GlobalConfig.transports.forEach(transport => transport.log(entry));
   }
 }

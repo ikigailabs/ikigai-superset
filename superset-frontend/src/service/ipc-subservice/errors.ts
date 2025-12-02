@@ -1,3 +1,4 @@
+/* eslint-disable */
 export class IpcTimeoutError extends Error {
   constructor(message: string) {
     super(message);

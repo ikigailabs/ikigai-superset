@@ -1,7 +1,7 @@
 import { IPCSubservice } from 'src/service/ipc-subservice';
-import type { TypedMiddleware } from '../typed-middleware';
 import { SuggestionService } from 'src/service/suggestion-service';
 import { getPlatformFiltersFromRootState } from 'src/utils/filterUtils';
+import type { TypedMiddleware } from '../typed-middleware';
 
 type GetSuggestionsPayload = {
   columnName: string;
@@ -44,9 +44,8 @@ const suggestionMiddleware: TypedMiddleware = api => next => action => {
           };
         });
 
-      const suggestions = await SuggestionService.getSuggestions(
-        fetchCandidates,
-      );
+      const suggestions =
+        await SuggestionService.getSuggestions(fetchCandidates);
 
       respond(suggestions);
     },

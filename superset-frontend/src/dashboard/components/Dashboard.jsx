@@ -22,6 +22,8 @@ import { isFeatureEnabled, t, FeatureFlag } from '@superset-ui/core';
 
 import { PluginContext } from 'src/components/DynamicPlugins';
 import Loading from 'src/components/Loading';
+import { DatepickerPopup } from 'src/ikigai/datepicker/DatepickerPopup';
+import { DropdownOptionsPopup } from 'src/ikigai/dropdown-options/DropdownOptionsPopup';
 import getChartIdsFromLayout from '../util/getChartIdsFromLayout';
 import getLayoutComponentFromChartId from '../util/getLayoutComponentFromChartId';
 import DashboardBuilder from './DashboardBuilder/DashboardBuilder';

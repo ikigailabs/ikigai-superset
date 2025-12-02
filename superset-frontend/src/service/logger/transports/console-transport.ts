@@ -12,6 +12,7 @@ export class ConsoleTransport implements LogTransport {
   public log(entry: LogEntry) {
     if (Severity[entry.logLevel] < Severity[this.logLevel]) return;
 
+    // prettier-ignore
     const output = `[${entry.logLevel.toUpperCase()}] ${entry.timestamp.toLocaleTimeString('en-US', { hour12: false })}${
       entry.moduleName ? ` [${entry.moduleName}]` : ''
     } ${entry.message}`;
@@ -27,6 +28,8 @@ export class ConsoleTransport implements LogTransport {
       case 'error':
       case 'fatal':
         console.error(output);
+        break;
+      default:
         break;
     }
   }
