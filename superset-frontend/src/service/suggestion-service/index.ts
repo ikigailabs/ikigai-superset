@@ -21,6 +21,7 @@ type FetchCandidate = {
  */
 class SuggestionServiceClass {
   private cache: Map<string, Promise<string[]>> = new Map();
+
   private resolved: Map<string, string[]> = new Map();
 
   public async getSuggestions(candidates: FetchCandidate[]) {

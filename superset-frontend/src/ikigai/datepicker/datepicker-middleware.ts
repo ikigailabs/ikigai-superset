@@ -10,14 +10,12 @@ type ShowDatepickerPayload = {
 
 type HideDatepickerPayload = {};
 
-export const dateSelected = (dateISO: string | null) => {
-  return {
-    type: 'ikigai/dateSelected',
-    payload: {
-      dateISO: dateISO,
-    },
-  };
-};
+export const dateSelected = (dateISO: string | null) => ({
+  type: 'ikigai/dateSelected',
+  payload: {
+    dateISO,
+  },
+});
 
 let initialized = false;
 let pendingRespondFn: (payload: any) => void | undefined;

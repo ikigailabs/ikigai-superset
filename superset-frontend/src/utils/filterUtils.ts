@@ -222,6 +222,7 @@ export function dataMaskToPlatformValueFilter(
 }
 
 export function isValueFilter(dm: DataMask) {
+  // eslint-disable-next-line no-self-compare
   return !!dm.extraFormData?.filters?.length || 0 > 0;
 }
 
@@ -270,9 +271,9 @@ export function applyTimeFilter(
   // That is - the high bound is higher than the low bound
   const keysForValidLowHighBoundPairs = Array.from(
     new Set([...Object.keys(lowBounds), ...Object.keys(highBounds)]),
-  ).filter(k => {
-    return lowBounds[k] === getLowestDatetime(lowBounds[k], highBounds[k]);
-  });
+  ).filter(
+    k => lowBounds[k] === getLowestDatetime(lowBounds[k], highBounds[k]),
+  );
 
   return keysForValidLowHighBoundPairs.map(k => ({
     columnName: k,
@@ -338,8 +339,8 @@ function getLowestDatetime(a: string, b: string) {
   const dateA = new Date(a);
   const dateB = new Date(b);
 
-  if (isNaN(dateA.getTime())) return b;
-  if (isNaN(dateB.getTime())) return a;
+  if (Number.isNaN(dateA.getTime())) return b;
+  if (Number.isNaN(dateB.getTime())) return a;
 
   return dateA.getTime() <= dateB.getTime() ? a : b;
 }

@@ -36,11 +36,10 @@ import {
   BootstrapUser,
   UserWithPermissionsAndRoles,
 } from 'src/types/bootstrapTypes';
-import ikigaiMiddlewares from '../ikigai/middlewares';
-import ikigaiSlices from '../ikigai/slices';
-
 import { LogLevel, setGlobalConfig } from 'src/service/logger';
 import { ConsoleTransport } from 'src/service/logger/transports/console-transport';
+import ikigaiMiddlewares from '../ikigai/middlewares';
+import ikigaiSlices from '../ikigai/slices';
 
 setGlobalConfig({
   transports: [new ConsoleTransport({ logLevel: LogLevel.VERBOSE })],
