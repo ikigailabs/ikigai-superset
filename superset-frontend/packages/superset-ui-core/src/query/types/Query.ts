@@ -32,11 +32,7 @@ import { PostProcessingRule } from './PostProcessing';
 import { JsonObject } from '../../connection';
 import { TimeGranularity } from '../../time-format';
 
-export type QueryObjectFilterClause = {
-  col: QueryFormColumn;
-  grain?: TimeGranularity;
-  isExtra?: boolean;
-} & (
+export type OperatorAndValue =
   | {
       op: BinaryOperator;
       val: string | number | boolean;
@@ -47,8 +43,13 @@ export type QueryObjectFilterClause = {
     }
   | {
       op: UnaryOperator;
-    }
-);
+    };
+
+export type QueryObjectFilterClause = {
+  col: QueryFormColumn;
+  grain?: TimeGranularity;
+  isExtra?: boolean;
+} & OperatorAndValue;
 
 export type QueryObjectExtras = Partial<{
   /** HAVING condition for Druid */

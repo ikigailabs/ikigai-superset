@@ -125,6 +125,9 @@ const legacyChartDataRequest = async (
   const allowDomainSharding =
     // eslint-disable-next-line camelcase
     domainShardingEnabled && requestParams?.dashboard_id;
+
+  delete formData['slice_id'];
+
   const url = getExploreUrl({
     formData,
     endpointType,
@@ -135,6 +138,7 @@ const legacyChartDataRequest = async (
       ? { dashboard_id: requestParams.dashboard_id }
       : {},
   });
+
   const querySettings = {
     ...requestParams,
     url,
