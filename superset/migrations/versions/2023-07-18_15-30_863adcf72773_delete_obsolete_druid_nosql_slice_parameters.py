@@ -26,76 +26,126 @@ Create Date: 2023-07-18 15:30:43.695135
 revision = "863adcf72773"
 down_revision = "6d05b0a70c89"
 
-import logging  # noqa: E402
+import logging
+import time
 
-from alembic import op  # noqa: E402
-from sqlalchemy import Column, Integer, Text  # noqa: E402
-from sqlalchemy.ext.declarative import declarative_base  # noqa: E402
+from alembic import op
+from sqlalchemy import Column, Integer, Text
+from sqlalchemy.ext.declarative import declarative_base
 
-from superset import db  # noqa: E402
-from superset.utils import json  # noqa: E402
+from superset import db
+from superset.utils import json
 
 Base = declarative_base()
+logger = logging.getLogger(__name__)
+
+BATCH_SIZE = 2000  # Tune to DB speed
 
 
 class Slice(Base):
     __tablename__ = "slices"
-
     id = Column(Integer, primary_key=True)
     params = Column(Text)
     query_context = Column(Text)
 
 
-def upgrade():  # noqa: C901
+def upgrade():
     bind = op.get_bind()
     session = db.Session(bind=bind)
 
-    for slc in session.query(Slice).all():
-        if slc.params:
+    # Count rows first
+    total = session.query(Slice.id).count()
+    print(f"[migration 863adcf72773] Total slices: {total}")
+
+    offset = 0
+    processed = 0
+    start = time.time()
+
+    while offset < total:
+        batch_start = time.time()
+
+        rows = (
+            session.query(Slice)
+            .order_by(Slice.id)
+            .offset(offset)
+            .limit(BATCH_SIZE)
+            .all()
+        )
+
+        if not rows:
+            break
+
+        for slc in rows:
             updated = False
 
-            try:
-                params = json.loads(slc.params)
-
-                for key in ["druid_time_origin", "granularity"]:
-                    if key in params:
-                        del params[key]
+            # ------------ params ------------
+            if slc.params:
+                try:
+                    params = json.loads(slc.params)
+                    if "druid_time_origin" in params:
+                        del params["druid_time_origin"]
+                        updated = True
+                    if "granularity" in params:
+                        del params["granularity"]
                         updated = True
 
-                if updated:
-                    slc.params = json.dumps(params)
-            except Exception:
-                logging.exception(f"Unable to parse params for slice {slc.id}")
+                    if updated:
+                        slc.params = json.dumps(params)
+                except Exception:
+                    logger.exception(
+                        f"[migration 863adcf72773] Unable to parse params for slice {slc.id}"
+                    )
 
-        if slc.query_context:
-            updated = False
+            # ------------ query_context ------------
+            if slc.query_context:
+                try:
+                    qc = json.loads(slc.query_context)
+                    qc_updated = False
 
-            try:
-                query_context = json.loads(slc.query_context)
-
-                if form_data := query_context.get("form_data"):
+                    form_data = qc.get("form_data") or {}
                     for key in ["druid_time_origin", "granularity"]:
                         if key in form_data:
                             del form_data[key]
-                            updated = True
+                            qc_updated = True
 
-                for query in query_context.get("queries", []):
-                    for key in ["druid_time_origin", "granularity"]:
-                        if key in query:
-                            del query[key]
-                            updated = True
+                    for query in qc.get("queries", []):
+                        for key in ["druid_time_origin", "granularity"]:
+                            if key in query:
+                                del query[key]
+                                qc_updated = True
 
-                    if extras := query.get("extras"):
-                        if "having_druid" in extras:
+                        extras = query.get("extras")
+                        if extras and "having_druid" in extras:
                             del extras["having_druid"]
-                            updated = True
+                            qc_updated = True
 
-                if updated:
-                    slc.query_context = json.dumps(query_context)
-            except Exception:
-                logging.exception(f"Unable to parse query context for slice {slc.id}")
+                    if qc_updated:
+                        slc.query_context = json.dumps(qc)
 
-    session.commit()
+                except Exception:
+                    logger.exception(
+                        f"[migration 863adcf72773] Unable to parse query context for slice {slc.id}"
+                    )
+
+        session.commit()
+
+        batch_time = time.time() - batch_start
+        processed += len(rows)
+        offset += BATCH_SIZE
+
+        pct = processed / total * 100
+        elapsed = time.time() - start
+        eta = (elapsed / processed) * (total - processed) if processed else 0
+
+        print(
+            f"[migration 863adcf72773] "
+            f"{processed}/{total} slices ({pct:.2f}%) | "
+            f"batch={len(rows)} | "
+            f"batch_time={batch_time:.2f}s | "
+            f"elapsed={elapsed:.1f}s | ETA={eta:.1f}s"
+        )
+
+    print(f"[migration 863adcf72773] Completed in {time.time() - start:.1f}s")
     session.close()
 
 

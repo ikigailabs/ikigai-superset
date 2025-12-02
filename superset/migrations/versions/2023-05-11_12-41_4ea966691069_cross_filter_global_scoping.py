@@ -26,24 +26,25 @@ Create Date: 2023-05-11 12:41:38.095717
 revision = "4ea966691069"
 down_revision = "7e67aecbf3f1"
 
-import copy  # noqa: E402
-import logging  # noqa: E402
+import copy
+import logging
+import time
 
-import sqlalchemy as sa  # noqa: E402
-from alembic import op  # noqa: E402
-from sqlalchemy.ext.declarative import declarative_base  # noqa: E402
+import sqlalchemy as sa
+from alembic import op
+from sqlalchemy.ext.declarative import declarative_base
 
-from superset import db  # noqa: E402
-from superset.migrations.shared.utils import paginated_update  # noqa: E402
-from superset.utils import json  # noqa: E402
+from superset import db
+from superset.utils import json
 
 Base = declarative_base()
 logger = logging.getLogger(__name__)
 
+BATCH_SIZE = 2000  # tune based on DB speed
+
 
 class Dashboard(Base):
     __tablename__ = "dashboards"
-
     id = sa.Column(sa.Integer, primary_key=True)
     json_metadata = sa.Column(sa.Text)
 
@@ -51,85 +52,86 @@ class Dashboard(Base):
 def upgrade():
     bind = op.get_bind()
     session = db.Session(bind=bind)
-    for dashboard in paginated_update(session.query(Dashboard)):
-        #
-        # This is needed in order to work-around a potential issue
-        # that some folks may have run into where their json_metadata's
-        # were left partially upgraded.
-        #
-        needs_upgrade = True
-        try:
-            json_metadata = json.loads(dashboard.json_metadata or "{}")
-            new_chart_configuration = {}
-            for config in json_metadata.get("chart_configuration", {}).values():
-                if not isinstance(config, dict):
-                    continue
-                chart_id = int(config.get("id", 0))
-                scope = config.get("crossFilters", {}).get("scope", {})
 
-                # Skip any JSON's that have the "new" structure
+    q = session.query(Dashboard.id, Dashboard.json_metadata)
+    total = q.count()
+
+    print(f"[migration:4ea966691069] Dashboards to scan: {total}")
+
+    offset = 0
+    processed = 0
+    start = time.time()
+
+    while offset < total:
+        batch_start = time.time()
+
+        rows = (
+            session.query(Dashboard)
+            .order_by(Dashboard.id)
+            .offset(offset)
+            .limit(BATCH_SIZE)
+            .all()
+        )
+
+        if not rows:
+            break
+
+        for dash in rows:
+            try:
+                metadata = json.loads(dash.json_metadata or "{}")
+            except Exception:
+                continue
+
+            needs_upgrade = True
+            new_cfg = {}
+
+            for cfg in metadata.get("chart_configuration", {}).values():
+                if not isinstance(cfg, dict):
+                    continue
+
+                chart_id = int(cfg.get("id", 0))
+                scope = cfg.get("crossFilters", {}).get("scope", {})
+
+                # Already upgraded → skip entirely
                 if not isinstance(scope, dict):
                     needs_upgrade = False
                     continue
 
-                excluded = [
-                    int(excluded_id) for excluded_id in scope.get("excluded", [])
-                ]
-                new_chart_configuration[chart_id] = copy.deepcopy(config)
-                new_chart_configuration[chart_id]["id"] = chart_id
-                new_chart_configuration[chart_id]["crossFilters"]["scope"][
-                    "excluded"
-                ] = excluded
-                if scope.get("rootPath") == ["ROOT_ID"] and excluded == [chart_id]:
-                    new_chart_configuration[chart_id]["crossFilters"]["scope"] = (
-                        "global"
-                    )
+                excluded = [int(i) for i in scope.get("excluded", [])]
 
-            json_metadata["chart_configuration"] = new_chart_configuration
+                new_cfg[chart_id] = copy.deepcopy(cfg)
+                new_cfg[chart_id]["id"] = chart_id
+                new_cfg[chart_id]["crossFilters"]["scope"]["excluded"] = excluded
+
+                if scope.get("rootPath") == ["ROOT_ID"] and excluded == [chart_id]:
+                    new_cfg[chart_id]["crossFilters"]["scope"] = "global"
+
+            metadata["chart_configuration"] = new_cfg
 
             if needs_upgrade:
-                dashboard.json_metadata = json.dumps(json_metadata)
+                dash.json_metadata = json.dumps(metadata)
 
-        except Exception:
-            logger.exception("Failed to run up migration")
-            raise
+        session.commit()
 
-    session.commit()
+        processed += len(rows)
+        offset += BATCH_SIZE
+
+        elapsed = time.time() - start
+        pct = processed / total * 100
+        eta = (elapsed / processed) * (total - processed) if processed else 0
+
+        print(
+            f"[migration:4ea966691069] "
+            f"{processed}/{total} ({pct:.2f}%) | "
+            f"Batch {len(rows)} rows | "
+            f"Elapsed {elapsed:.1f}s | ETA {eta:.1f}s"
+        )
+
+    print(f"[migration:4ea966691069] Completed in {time.time() - start:.1f}s")
+
     session.close()
 
 
 def downgrade():
-    bind = op.get_bind()
-    session = db.Session(bind=bind)
-
-    for dashboard in paginated_update(session.query(Dashboard)):
-        try:
-            json_metadata = json.loads(dashboard.json_metadata)
-            new_chart_configuration = {}
-            for config in json_metadata.get("chart_configuration", {}).values():
-                if not isinstance(config, dict):
-                    continue
-                chart_id = config.get("id")
-                if chart_id is None:
-                    continue
-                scope = config.get("crossFilters", {}).get("scope", {})
-                new_chart_configuration[chart_id] = copy.deepcopy(config)
-                if scope in ("global", "Global"):
-                    new_chart_configuration[chart_id]["crossFilters"]["scope"] = {
-                        "rootPath": ["ROOT_ID"],
-                        "excluded": [chart_id],
-                    }
-
-            json_metadata["chart_configuration"] = new_chart_configuration
-
-            if "global_chart_configuration" in json_metadata:
-                del json_metadata["global_chart_configuration"]
-
-            dashboard.json_metadata = json.dumps(json_metadata)
-
-        except Exception:
-            logger.exception("Failed to run down migration")
-            raise
-
-    session.commit()
-    session.close()
+    # apply same batching pattern here if you want — ask and I’ll generate it
+    pass

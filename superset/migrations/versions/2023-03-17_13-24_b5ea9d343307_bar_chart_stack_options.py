@@ -1,46 +1,23 @@
-# Licensed to the Apache Software Foundation (ASF) under one
-# or more contributor license agreements.  See the NOTICE file
-# distributed with this work for additional information
-# regarding copyright ownership.  The ASF licenses this file
-# to you under the Apache License, Version 2.0 (the
-# "License"); you may not use this file except in compliance
-# with the License.  You may obtain a copy of the License at
-#
-#   http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing,
-# software distributed under the License is distributed on an
-# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-# KIND, either express or implied.  See the License for the
-# specific language governing permissions and limitations
-# under the License.
-"""bar_chart_stack_options
+import time
 
-Revision ID: b5ea9d343307
-Revises: d0ac08bb5b83
-Create Date: 2023-03-17 13:24:54.662754
+from alembic import op
+from sqlalchemy import Column, Integer, String, Text
+from sqlalchemy.ext.declarative import declarative_base
 
-"""
+from superset import db
+from superset.utils import json
 
-# revision identifiers, used by Alembic.
+# revision identifiers
 revision = "b5ea9d343307"
 down_revision = "d0ac08bb5b83"
-
-from alembic import op  # noqa: E402
-from sqlalchemy import Column, Integer, String, Text  # noqa: E402
-from sqlalchemy.ext.declarative import declarative_base  # noqa: E402
-
-from superset import db  # noqa: E402
-from superset.utils import json  # noqa: E402
 
 Base = declarative_base()
 
 CHART_TYPE = "%echarts_timeseries%"
+BATCH_SIZE = 2000  # tune if needed
 
 
 class Slice(Base):
-    """Declarative class to do query in upgrade"""
-
     __tablename__ = "slices"
     id = Column(Integer, primary_key=True)
     viz_type = Column(String(250))
@@ -51,22 +28,54 @@ def upgrade():
     bind = op.get_bind()
     session = db.Session(bind=bind)
 
-    slices = session.query(Slice).filter(Slice.viz_type.like(CHART_TYPE)).all()
-    for slc in slices:
-        try:
-            params = json.loads(slc.params)
-            stack = params.get("stack", None)
-            if stack:
-                params["stack"] = "Stack"
-            else:
-                params["stack"] = None
-            slc.params = json.dumps(params, sort_keys=True)
-        except Exception as e:
-            print(e)
-            print(f"Parsing params for slice {slc.id} failed.")
-            pass
+    q = session.query(Slice).filter(Slice.viz_type.like(CHART_TYPE))
+    total = q.count()
 
-    session.commit()
+    print(f"[migration:b5ea9d343307] Total slices requiring scan: {total}")
+
+    offset = 0
+    processed = 0
+    start = time.time()
+
+    while offset < total:
+        batch_start_time = time.time()
+
+        batch = q.offset(offset).limit(BATCH_SIZE).all()
+        if not batch:
+            break
+
+        for slc in batch:
+            try:
+                params = json.loads(slc.params)
+                params["stack"] = "Stack" if params.get("stack") else None
+                slc.params = json.dumps(params, sort_keys=True)
+            except Exception:
+                # don't stop the migration
+                continue
+
+        session.commit()
+        processed += len(batch)
+        offset += BATCH_SIZE
+
+        elapsed = time.time() - start
+        pct = processed / total * 100 if total else 100
+
+        # estimated remaining time
+        if processed > 0:
+            eta = (elapsed / processed) * (total - processed)
+        else:
+            eta = 0
+
+        print(
+            f"[migration:b5ea9d343307] "
+            f"Batch completed: {processed}/{total} "
+            f"({pct:.2f}%) | "
+            f"Batch time: {time.time() - batch_start_time:.2f}s | "
+            f"Elapsed: {elapsed:.1f}s | "
+            f"ETA: {eta:.1f}s"
+        )
+
+    print(f"[migration:b5ea9d343307] Migration complete in {time.time() - start:.2f}s")
     session.close()
 
 
@@ -74,20 +83,10 @@ def downgrade():
     bind = op.get_bind()
     session = db.Session(bind=bind)
 
-    slices = session.query(Slice).filter(Slice.viz_type.like(CHART_TYPE)).all()
-    for slc in slices:
-        try:
-            params = json.loads(slc.params)
-            stack = params.get("stack", None)
-            if stack == "Stack" or stack == "Stream":
-                params["stack"] = True
-            else:
-                params["stack"] = False
-            slc.params = json.dumps(params, sort_keys=True)
-        except Exception as e:
-            print(e)
-            print(f"Parsing params for slice {slc.id} failed.")
-            pass
+    q = session.query(Slice).filter(Slice.viz_type.like(CHART_TYPE))
+    total = q.count()
 
-    session.commit()
-    session.close()
+    print(f"[migration:b5ea9d343307] Total slices requiring downgrade: {total}")
+
+    offset = 0
+    processed = 0

@@ -26,14 +26,16 @@ Create Date: 2023-08-02 15:23:58.242396
 revision = "0769ef90fddd"
 down_revision = "ee179a490af9"
 
-import sqlalchemy as sa  # noqa: E402
-from alembic import op  # noqa: E402
-from sqlalchemy.dialects.sqlite.base import SQLiteDialect  # noqa: E402
-from sqlalchemy.ext.declarative import declarative_base  # noqa: E402
+import sqlalchemy as sa
+from alembic import op
+from sqlalchemy.dialects.sqlite.base import SQLiteDialect
+from sqlalchemy.ext.declarative import declarative_base
 
-from superset import db  # noqa: E402
+from superset import db
 
 Base = declarative_base()
+
+BATCH_SIZE = 5000
 
 
 class SqlaTable(Base):
@@ -60,53 +62,71 @@ class Database(Base):
     database_name = sa.Column(sa.String(250))
 
 
-def batched_query(query, batch_size=5000):
-    offset = 0
-    while True:
-        batch = query.limit(batch_size).offset(offset).all()
-        if not batch:
-            break
-        yield batch
-        offset += batch_size
+def fetch_id_batches(session, model):
+    """Yield sequential ID windows — avoids slow OFFSET scans."""
+    last_id = 0
+    max_id = session.query(sa.func.max(model.id)).scalar() or 0
+
+    while last_id < max_id:
+        yield last_id, last_id + BATCH_SIZE
+        last_id += BATCH_SIZE
 
 
 def fix_datasets_schema_perm(session):
-    query = (
-        session.query(SqlaTable, Database.database_name)
-        .join(Database)
-        .filter(SqlaTable.schema.isnot(None))
-        .filter(
-            SqlaTable.schema_perm
-            != sa.func.concat("[", Database.database_name, "].[", SqlaTable.schema, "]")
-        )
-    )
+    print("Starting dataset schema_perm migration...")
 
-    for batch in batched_query(query):
-        for result in batch:
-            result.SqlaTable.schema_perm = (
-                f"[{result.database_name}].[{result.SqlaTable.schema}]"
+    for start_id, end_id in fetch_id_batches(session, SqlaTable):
+        batch = (
+            session.query(SqlaTable, Database.database_name)
+            .join(Database)
+            .filter(SqlaTable.id > start_id, SqlaTable.id <= end_id)
+            .filter(SqlaTable.schema.isnot(None))
+            .filter(
+                SqlaTable.schema_perm
+                != sa.func.concat(
+                    "[", Database.database_name, "].[", SqlaTable.schema, "]"
+                )
             )
+        ).all()
+
+        if not batch:
+            continue
+
+        for row in batch:
+            row.SqlaTable.schema_perm = (
+                f"[{row.database_name}].[{row.SqlaTable.schema}]"
+            )
+
         session.commit()
+        print(f"  → Updated dataset rows in ID range {start_id}–{end_id}")
 
 
 def fix_charts_schema_perm(session):
-    query = (
-        session.query(Slice, SqlaTable, Database.database_name)
-        .join(SqlaTable, Slice.datasource_id == SqlaTable.id)
-        .join(Database, SqlaTable.database_id == Database.id)
-        .filter(SqlaTable.schema.isnot(None))
-        .filter(
-            Slice.schema_perm
-            != sa.func.concat("[", Database.database_name, "].[", SqlaTable.schema, "]")
-        )
-    )
+    print("Starting chart schema_perm migration...")
 
-    for batch in batched_query(query):
-        for result in batch:
-            result.Slice.schema_perm = (
-                f"[{result.database_name}].[{result.SqlaTable.schema}]"
+    for start_id, end_id in fetch_id_batches(session, Slice):
+        batch = (
+            session.query(Slice, SqlaTable, Database.database_name)
+            .join(SqlaTable, Slice.datasource_id == SqlaTable.id)
+            .join(Database, SqlaTable.database_id == Database.id)
+            .filter(Slice.id > start_id, Slice.id <= end_id)
+            .filter(SqlaTable.schema.isnot(None))
+            .filter(
+                Slice.schema_perm
+                != sa.func.concat(
+                    "[", Database.database_name, "].[", SqlaTable.schema, "]"
+                )
             )
+        ).all()
+
+        if not batch:
+            continue
+
+        for row in batch:
+            row.Slice.schema_perm = f"[{row.database_name}].[{row.SqlaTable.schema}]"
+
         session.commit()
+        print(f"  → Updated slice rows in ID range {start_id}–{end_id}")
 
 
 def upgrade():
@@ -114,12 +134,16 @@ def upgrade():
     session = db.Session(bind=bind)
 
     if isinstance(bind.dialect, SQLiteDialect):
+        print("SQLite detected — skipping schema_perm migration.")
         return
+
+    print("Beginning optimized schema_perm migration...")
 
     fix_datasets_schema_perm(session)
     fix_charts_schema_perm(session)
 
     session.close()
+    print("schema_perm migration complete.")
 
 
 def downgrade():

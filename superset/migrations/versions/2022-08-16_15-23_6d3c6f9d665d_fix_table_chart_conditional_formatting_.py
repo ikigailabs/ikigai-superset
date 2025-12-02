@@ -44,35 +44,61 @@ class Slice(Base):
 
 
 def upgrade():
+    import math
+    from datetime import datetime
+
     bind = op.get_bind()
     session = db.Session(bind=bind)
 
-    for slc in session.query(Slice).filter(Slice.viz_type == "table"):
-        params = json.loads(slc.params)
-        conditional_formatting = params.get("conditional_formatting", [])
-        if conditional_formatting:
+    BATCH_SIZE = 2000
+
+    total = session.query(Slice).filter(Slice.viz_type == "table").count()
+    num_batches = math.ceil(total / BATCH_SIZE)
+
+    print(f"[Migration] Found {total} table slices to update ({num_batches} batches)")
+
+    for batch_idx in range(num_batches):
+        batch = (
+            session.query(Slice)
+            .filter(Slice.viz_type == "table")
+            .limit(BATCH_SIZE)
+            .offset(batch_idx * BATCH_SIZE)
+            .all()
+        )
+
+        for slc in batch:
+            params = json.loads(slc.params or "{}")
+            conditional_formatting = params.get("conditional_formatting", [])
+
+            if not conditional_formatting:
+                continue
+
             new_conditional_formatting = []
             for formatter in conditional_formatting:
                 color_scheme = formatter.get("colorScheme")
-                new_color_scheme = None
-                if color_scheme == "rgb(0,255,0)":
-                    # supersetTheme.colors.success.light1
-                    new_color_scheme = "#ACE1C4"
-                elif color_scheme == "rgb(255,255,0)":
-                    # supersetTheme.colors.alert.light1
-                    new_color_scheme = "#FDE380"
-                elif color_scheme == "rgb(255,0,0)":
-                    # supersetTheme.colors.error.light1
-                    new_color_scheme = "#EFA1AA"
+                mapping = {
+                    "rgb(0,255,0)": "#ACE1C4",
+                    "rgb(255,255,0)": "#FDE380",
+                    "rgb(255,0,0)": "#EFA1AA",
+                }
+                new_color_scheme = mapping.get(color_scheme)
                 if new_color_scheme:
                     new_conditional_formatting.append(
                         {**formatter, "colorScheme": new_color_scheme}
                     )
                 else:
                     new_conditional_formatting.append(formatter)
+
             params["conditional_formatting"] = new_conditional_formatting
             slc.params = json.dumps(params)
-            session.commit()
+
+        session.commit()
+
+        print(
+            f"[{datetime.utcnow().isoformat()}] Batch {batch_idx+1}/{num_batches} committed "
+            f"({(batch_idx+1)/num_batches:.1%})"
+        )
+
     session.close()
 
 

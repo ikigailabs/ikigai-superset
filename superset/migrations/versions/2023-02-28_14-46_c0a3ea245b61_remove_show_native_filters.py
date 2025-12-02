@@ -44,20 +44,41 @@ class Dashboard(Base):
 
 
 def upgrade():
+    import math
+    from datetime import datetime
+
     bind = op.get_bind()
     session = db.Session(bind=bind)
 
-    for dashboard in session.query(Dashboard).all():
-        try:
-            json_metadata = json.loads(dashboard.json_metadata)
+    BATCH_SIZE = 2000
 
-            if "show_native_filters" in json_metadata:
-                del json_metadata["show_native_filters"]
-                dashboard.json_metadata = json.dumps(json_metadata)
-        except Exception:  # pylint: disable=broad-except  # noqa: S110
-            pass
+    total = session.query(Dashboard).count()
+    num_batches = math.ceil(total / BATCH_SIZE)
 
-    session.commit()
+    print(f"[Migration] Updating {total} dashboards in {num_batches} batches")
+
+    for batch_idx in range(num_batches):
+        dashboards = (
+            session.query(Dashboard)
+            .limit(BATCH_SIZE)
+            .offset(batch_idx * BATCH_SIZE)
+            .all()
+        )
+
+        for dash in dashboards:
+            try:
+                meta = json.loads(dash.json_metadata or "{}")
+                if "show_native_filters" in meta:
+                    del meta["show_native_filters"]
+                    dash.json_metadata = json.dumps(meta)
+            except Exception:
+                pass
+
+        session.commit()
+        print(
+            f"[{datetime.utcnow().isoformat()}] Batch {batch_idx+1}/{num_batches} committed"
+        )
+
     session.close()
 
 
