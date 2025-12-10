@@ -27,13 +27,13 @@ from copy import deepcopy
 from datetime import datetime, timedelta
 from hashlib import md5
 from typing import Any
+from superset.migrations.shared.utils import DEFAULT_BATCH_SIZE
 
 from alembic import op
 from sqlalchemy import Column, Integer, or_, String, Text
 from sqlalchemy.ext.declarative import declarative_base
 
 from superset import db
-from superset.migrations.shared.utils import paginated_update
 from superset.utils import json
 from superset.utils.date_parser import get_since_until
 
@@ -99,17 +99,30 @@ def upgrade():
     bind = op.get_bind()
     session = db.Session(bind=bind)
 
-    for slc in paginated_update(
-        session.query(Slice).filter(
-            or_(Slice.viz_type == "pop_kpi", Slice.viz_type == "table")
-        )
-    ):
+    batch_size = DEFAULT_BATCH_SIZE
+    batch_updates = 0
+
+    query = (
+        session.query(Slice)
+        .filter(or_(Slice.viz_type == "pop_kpi", Slice.viz_type == "table"))
+        .yield_per(batch_size)
+        .enable_eagerloads(False)
+    )
+
+    for slc in query:
         try:
             if not slc.params:  # Noop if there's no params on the slice
                 continue
-            params = json.loads(slc.params)
-            updated_slice_params = upgrade_comparison_params(params)
-            slc.params = json.dumps(updated_slice_params)
+            original_params = json.loads(slc.params)
+            updated_params = upgrade_comparison_params(original_params)
+
+            # Only persist when there is an actual change to reduce writes
+            if updated_params != original_params:
+                slc.params = json.dumps(updated_params)
+                batch_updates += 1
+
+                if batch_updates % batch_size == 0:
+                    session.commit()
         except Exception as ex:
             session.rollback()
             logger.exception(
@@ -118,7 +131,8 @@ def upgrade():
             )
             raise Exception(f"An error occurred while upgrading slice: {ex}") from ex
 
-    session.commit()
+    if batch_updates % batch_size != 0:
+        session.commit()
     session.close()
 
 
@@ -199,17 +213,29 @@ def downgrade():
     bind = op.get_bind()
     session = db.Session(bind=bind)
 
-    for slc in paginated_update(
-        session.query(Slice).filter(
-            Slice.viz_type == "pop_kpi" or Slice.viz_type == "table"
-        )
-    ):
+    batch_size = DEFAULT_BATCH_SIZE
+    batch_updates = 0
+
+    query = (
+        session.query(Slice)
+        .filter(or_(Slice.viz_type == "pop_kpi", Slice.viz_type == "table"))
+        .yield_per(batch_size)
+        .enable_eagerloads(False)
+    )
+
+    for slc in query:
         try:
-            if not slc.params:  # Noop if there's no params on the slice
+            if not slc.params:
                 continue
-            params = json.loads(slc.params)
-            updated_slice_params = downgrade_comparison_params(params)
-            slc.params = json.dumps(updated_slice_params)
+            original_params = json.loads(slc.params)
+            updated_params = downgrade_comparison_params(original_params)
+
+            if updated_params != original_params:
+                slc.params = json.dumps(updated_params)
+                batch_updates += 1
+
+                if batch_updates % batch_size == 0:
+                    session.commit()
         except Exception as ex:
             session.rollback()
             logger.exception(
@@ -218,5 +244,6 @@ def downgrade():
             )
             raise Exception(f"An error occurred while downgrading slice: {ex}") from ex
 
-    session.commit()
+    if batch_updates % batch_size != 0:
+        session.commit()
     session.close()
