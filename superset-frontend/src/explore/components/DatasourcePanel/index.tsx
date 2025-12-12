@@ -37,7 +37,7 @@ import { getDatasourceAsSaveableDataset } from 'src/utils/datasourceUtils';
 import { Input } from 'src/components/Input';
 import { FAST_DEBOUNCE } from 'src/constants';
 import { ExploreActions } from 'src/explore/actions/exploreActions';
-import Control from 'src/explore/components/Control';
+// import Control from 'src/explore/components/Control';
 import { useDebounceValue } from 'src/hooks/useDebounceValue';
 import DatasourcePanelItem, {
   ITEM_HEIGHT,
@@ -391,7 +391,7 @@ export default function DataSourcePanel({
         />
       )}
       {/* @ts-ignore */}
-      <Control {...datasourceControl} name="datasource" actions={actions} />
+      {/* <Control {...datasourceControl} name="datasource" actions={actions} /> */}
       {datasource.id != null && mainBody}
     </DatasourceContainer>
   );

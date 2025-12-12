@@ -139,8 +139,13 @@ const undoRedoDisabled = theme => css`
 `;
 
 const saveBtnStyle = theme => css`
-  min-width: ${theme.gridUnit * 17}px;
-  height: ${theme.gridUnit * 8}px;
+  color: '#fff;
+  font-size: 14px;
+  padding: 0px 15px,
+  background-color: #4a4a4a,
+  & > span[role='img'] {
+    margin-right: 0;
+  }
 `;
 
 const discardBtnStyle = theme => css`

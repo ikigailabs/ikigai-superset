@@ -61,9 +61,9 @@ const defaultTheme = {
       help: '#737373',
     },
     primary: {
-      base: '#7822ff',
-      dark1: '#7822ff',
-      dark2: '#156378',
+      base: '#4a4a4a',
+      dark1: '#4a4a4a',
+      dark2: '#4a4a4a',
       light1: '#79CADE',
       light2: '#A5DAE9',
       light3: '#D2EDF4',
