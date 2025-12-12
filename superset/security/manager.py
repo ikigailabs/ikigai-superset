@@ -1007,27 +1007,39 @@ class SupersetSecurityManager(  # pylint: disable=too-many-public-methods
         from superset.models import core as models
 
         logger.info("Fetching a set of all perms to lookup which ones are missing")
-        all_pvs = set()
-        for pv in self._get_all_pvms():
-            if pv.permission and pv.view_menu:
-                all_pvs.add((pv.permission.name, pv.view_menu.name))
+        # NOTE: avoid loading full PermissionView ORM objects (and eagerly-loaded relationships)
+        # just to build a membership set; this can be very slow on large installs.
+        session = self.get_session
+        all_pvs: set[tuple[str, str]] = set(
+            session.query(Permission.name, ViewMenu.name)
+            .select_from(PermissionView)
+            .join(PermissionView.permission)
+            .join(PermissionView.view_menu)
+            .filter(
+                PermissionView.permission_id.isnot(None),
+                PermissionView.view_menu_id.isnot(None),
+            )
+            .all()
+        )
 
-        def merge_pv(view_menu: str, perm: Optional[str]) -> None:
-            """Create permission view menu only if it doesn't exist"""
-            if view_menu and perm and (view_menu, perm) not in all_pvs:
-                self.add_permission_view_menu(view_menu, perm)
+        def ensure_pv(permission: str, view_menu: Optional[str]) -> None:
+            """Create permission-view_menu only if it doesn't exist."""
+            if permission and view_menu and (permission, view_menu) not in all_pvs:
+                self.add_permission_view_menu(permission, view_menu)
+                # Keep local membership cache in sync to prevent redundant work in-process.
+                all_pvs.add((permission, view_menu))
 
         logger.info("Creating missing datasource permissions.")
         datasources = SqlaTable.get_all_datasources()
         for datasource in datasources:
-            merge_pv("datasource_access", datasource.get_perm())
-            merge_pv("schema_access", datasource.get_schema_perm())
-            merge_pv("catalog_access", datasource.get_catalog_perm())
+            ensure_pv("datasource_access", datasource.get_perm())
+            ensure_pv("schema_access", datasource.get_schema_perm())
+            ensure_pv("catalog_access", datasource.get_catalog_perm())
 
         logger.info("Creating missing database permissions.")
         databases = self.get_session.query(models.Database).all()
         for database in databases:
-            merge_pv("database_access", database.perm)
+            ensure_pv("database_access", database.perm)
 
     def clean_perms(self) -> None:
         """
