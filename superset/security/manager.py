@@ -1007,27 +1007,77 @@ class SupersetSecurityManager(  # pylint: disable=too-many-public-methods
         from superset.models import core as models
 
         logger.info("Fetching a set of all perms to lookup which ones are missing")
+        fetch_start = time.perf_counter()
         all_pvs = set()
         for pv in self._get_all_pvms():
             if pv.permission and pv.view_menu:
                 all_pvs.add((pv.permission.name, pv.view_menu.name))
+        logger.info(
+            "Finished fetching existing perms: %d permission/view pairs loaded in %.2fs",
+            len(all_pvs),
+            time.perf_counter() - fetch_start,
+        )
 
-        def merge_pv(view_menu: str, perm: Optional[str]) -> None:
+        def merge_pv(view_menu: str, perm: Optional[str]) -> bool:
             """Create permission view menu only if it doesn't exist"""
             if view_menu and perm and (view_menu, perm) not in all_pvs:
                 self.add_permission_view_menu(view_menu, perm)
+                all_pvs.add((view_menu, perm))
+                return True
+            return False
 
-        logger.info("Creating missing datasource permissions.")
         datasources = SqlaTable.get_all_datasources()
-        for datasource in datasources:
-            merge_pv("datasource_access", datasource.get_perm())
-            merge_pv("schema_access", datasource.get_schema_perm())
-            merge_pv("catalog_access", datasource.get_catalog_perm())
+        datasource_total = len(datasources)
+        logger.info(
+            "Creating missing datasource permissions for %d datasources.",
+            datasource_total,
+        )
+        datasource_start = time.perf_counter()
+        datasource_created = {"datasource": 0, "schema": 0, "catalog": 0}
+        for idx, datasource in enumerate(datasources, 1):
+            if merge_pv("datasource_access", datasource.get_perm()):
+                datasource_created["datasource"] += 1
+            if merge_pv("schema_access", datasource.get_schema_perm()):
+                datasource_created["schema"] += 1
+            if merge_pv("catalog_access", datasource.get_catalog_perm()):
+                datasource_created["catalog"] += 1
 
-        logger.info("Creating missing database permissions.")
+            if idx % 500 == 0 or idx == datasource_total:
+                total_created = sum(datasource_created.values())
+                logger.info(
+                    (
+                        "Datasource perms progress: %d/%d processed; created "
+                        "datasource=%d schema=%d catalog=%d (total %d); elapsed %.2fs"
+                    ),
+                    idx,
+                    datasource_total,
+                    datasource_created["datasource"],
+                    datasource_created["schema"],
+                    datasource_created["catalog"],
+                    total_created,
+                    time.perf_counter() - datasource_start,
+                )
+
         databases = self.get_session.query(models.Database).all()
-        for database in databases:
-            merge_pv("database_access", database.perm)
+        database_total = len(databases)
+        logger.info(
+            "Creating missing database permissions for %d databases.",
+            database_total,
+        )
+        database_start = time.perf_counter()
+        database_created = 0
+        for idx, database in enumerate(databases, 1):
+            if merge_pv("database_access", database.perm):
+                database_created += 1
+
+            if idx % 200 == 0 or idx == database_total:
+                logger.info(
+                    "Database perms progress: %d/%d processed; created=%d; elapsed %.2fs",
+                    idx,
+                    database_total,
+                    database_created,
+                    time.perf_counter() - database_start,
+                )
 
     def clean_perms(self) -> None:
         """
