@@ -51,10 +51,17 @@ const propTypes = {
   saveDisabled: PropTypes.bool,
 };
 
-const saveButtonStyles = theme => css`
-  color: ${theme.colors.primary.dark2};
+const saveButtonStyles = () => css`
+  color: #fff;
+  font-size: 14px;
+  padding: 0px 15px;
+  background-color: #4a4a4a !important;
   & > span[role='img'] {
     margin-right: 0;
+  }
+  &:hover {
+    background-color: #3a3a3a !important;
+    color: #fff !important;
   }
 `;
 

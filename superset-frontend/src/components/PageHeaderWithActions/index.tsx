@@ -21,7 +21,7 @@ import { css, SupersetTheme, t, useTheme } from '@superset-ui/core';
 import { AntdDropdown, AntdDropdownProps } from 'src/components';
 import { TooltipPlacement } from 'src/components/Tooltip';
 import {
-  DynamicEditableTitle,
+  // DynamicEditableTitle,
   DynamicEditableTitleProps,
 } from '../DynamicEditableTitle';
 import CertifiedBadge, { CertifiedBadgeProps } from '../CertifiedBadge';
@@ -137,10 +137,15 @@ export const PageHeaderWithActions = ({
   tooltipProps,
 }: PageHeaderWithActionsProps) => {
   const theme = useTheme();
+
+  showTitlePanelItems = false;
+  showMenuDropdown = false;
+  editableTitleProps;
+
   return (
     <div css={headerStyles} className="header-with-actions">
       <div className="title-panel">
-        <DynamicEditableTitle {...editableTitleProps} />
+        {/* <DynamicEditableTitle {...editableTitleProps} /> */}
         {showTitlePanelItems && (
           <div css={buttonsStyles}>
             {certificatiedBadgeProps?.certifiedBy && (

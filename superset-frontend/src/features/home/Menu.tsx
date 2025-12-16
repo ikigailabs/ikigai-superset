@@ -355,5 +355,6 @@ export default function MenuWrapper({ data, ...rest }: MenuProps) {
   newMenuData.menu = cleanedMenu;
   newMenuData.settings = settings;
 
-  return <Menu data={newMenuData} {...rest} />;
+  // return <Menu data={newMenuData} {...rest} />;
+  return null;
 }
