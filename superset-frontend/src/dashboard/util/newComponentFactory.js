@@ -30,11 +30,8 @@ import {
   TAB_TYPE,
   DYNAMIC_TYPE,
   IKI_DYNAMIC_SINGLE_MARKDOWN_TYPE,
-  IKI_TABLE_TYPE,
-  IKI_RUN_PIPELINE_TYPE,
   IKI_EITL_ROW_TYPE,
   IKI_EITL_COLUMN_TYPE,
-  IKI_DATASET_DOWNLOAD_TYPE,
 } from './componentTypes';
 
 import {
@@ -58,11 +55,8 @@ const typeToDefaultMetaData = {
   },
   [MARKDOWN_TYPE]: { width: GRID_DEFAULT_CHART_WIDTH, height: 50 },
   [IKI_DYNAMIC_SINGLE_MARKDOWN_TYPE]: { width: 12, height: 50 },
-  [IKI_TABLE_TYPE]: { width: GRID_DEFAULT_CHART_WIDTH, height: 50 },
-  [IKI_RUN_PIPELINE_TYPE]: { width: GRID_DEFAULT_CHART_WIDTH, height: 50 },
   [IKI_EITL_ROW_TYPE]: { width: GRID_DEFAULT_CHART_WIDTH, height: 50 },
   [IKI_EITL_COLUMN_TYPE]: { width: GRID_DEFAULT_CHART_WIDTH, height: 50 },
-  [IKI_DATASET_DOWNLOAD_TYPE]: { width: GRID_DEFAULT_CHART_WIDTH, height: 50 },
   [ROW_TYPE]: { background: BACKGROUND_TRANSPARENT },
   [TABS_TYPE]: null,
   [TAB_TYPE]: {

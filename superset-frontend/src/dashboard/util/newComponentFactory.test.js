@@ -30,10 +30,6 @@ import {
   ROW_TYPE,
   TABS_TYPE,
   TAB_TYPE,
-  IKI_TABLE_TYPE,
-  IKI_RUN_PIPELINE_TYPE,
-  IKI_EITL_ROW_TYPE,
-  IKI_EITL_COLUMN_TYPE,
 } from 'src/dashboard/util/componentTypes';
 
 const types = [
@@ -48,10 +44,6 @@ const types = [
   ROW_TYPE,
   TABS_TYPE,
   TAB_TYPE,
-  IKI_TABLE_TYPE,
-  IKI_RUN_PIPELINE_TYPE,
-  IKI_EITL_ROW_TYPE,
-  IKI_EITL_COLUMN_TYPE,
 ];
 
 describe('newEntityFactory', () => {

@@ -45,11 +45,8 @@ import {
   TAB_TYPE,
   DYNAMIC_TYPE,
   IKI_DYNAMIC_SINGLE_MARKDOWN_TYPE,
-  IKI_TABLE_TYPE,
-  IKI_RUN_PIPELINE_TYPE,
   IKI_EITL_ROW_TYPE,
   IKI_EITL_COLUMN_TYPE,
-  IKI_DATASET_DOWNLOAD_TYPE,
 } from './componentTypes';
 
 import { DASHBOARD_ROOT_DEPTH as rootDepth } from './constants';
@@ -72,11 +69,8 @@ const parentMaxDepthLookup = {
     [DYNAMIC_TYPE]: depthOne,
     [MARKDOWN_TYPE]: depthOne,
     [IKI_DYNAMIC_SINGLE_MARKDOWN_TYPE]: depthOne,
-    [IKI_TABLE_TYPE]: depthOne,
-    [IKI_RUN_PIPELINE_TYPE]: depthOne,
     [IKI_EITL_ROW_TYPE]: depthOne,
     [IKI_EITL_COLUMN_TYPE]: depthOne,
-    [IKI_DATASET_DOWNLOAD_TYPE]: depthOne,
     [COLUMN_TYPE]: depthOne,
     [DIVIDER_TYPE]: depthOne,
     [HEADER_TYPE]: depthOne,
@@ -90,9 +84,7 @@ const parentMaxDepthLookup = {
     [MARKDOWN_TYPE]: depthFour,
     [COLUMN_TYPE]: depthFour,
     [IKI_DYNAMIC_SINGLE_MARKDOWN_TYPE]: depthFour,
-    [IKI_DATASET_DOWNLOAD_TYPE]: depthFour,
     [IKI_EITL_ROW_TYPE]: depthFour,
-    [IKI_RUN_PIPELINE_TYPE]: depthFour,
   },
 
   [TABS_TYPE]: {
@@ -104,11 +96,8 @@ const parentMaxDepthLookup = {
     [DYNAMIC_TYPE]: depthFive,
     [MARKDOWN_TYPE]: depthFive,
     [IKI_DYNAMIC_SINGLE_MARKDOWN_TYPE]: depthFive,
-    [IKI_TABLE_TYPE]: depthFive,
-    [IKI_RUN_PIPELINE_TYPE]: depthFive,
     [IKI_EITL_ROW_TYPE]: depthFive,
     [IKI_EITL_COLUMN_TYPE]: depthFive,
-    [IKI_DATASET_DOWNLOAD_TYPE]: depthFive,
     [COLUMN_TYPE]: depthThree,
     [DIVIDER_TYPE]: depthFive,
     [HEADER_TYPE]: depthFive,
@@ -121,11 +110,8 @@ const parentMaxDepthLookup = {
     [HEADER_TYPE]: depthFive,
     [MARKDOWN_TYPE]: depthFive,
     [IKI_DYNAMIC_SINGLE_MARKDOWN_TYPE]: depthFive,
-    [IKI_TABLE_TYPE]: depthFive,
-    [IKI_RUN_PIPELINE_TYPE]: depthFive,
     [IKI_EITL_ROW_TYPE]: depthFive,
     [IKI_EITL_COLUMN_TYPE]: depthFive,
-    [IKI_DATASET_DOWNLOAD_TYPE]: depthFive,
     [ROW_TYPE]: depthThree,
     [DIVIDER_TYPE]: depthThree,
     [TABS_TYPE]: depthThree,
@@ -138,11 +124,8 @@ const parentMaxDepthLookup = {
   [HEADER_TYPE]: {},
   [MARKDOWN_TYPE]: {},
   [IKI_DYNAMIC_SINGLE_MARKDOWN_TYPE]: {},
-  [IKI_TABLE_TYPE]: {},
-  [IKI_RUN_PIPELINE_TYPE]: {},
   [IKI_EITL_ROW_TYPE]: {},
   [IKI_EITL_COLUMN_TYPE]: {},
-  [IKI_DATASET_DOWNLOAD_TYPE]: {},
 };
 
 interface IsValidChildProps {
