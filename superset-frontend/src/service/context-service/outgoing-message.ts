@@ -1,9 +1,10 @@
 import type { CustomMarkdown, DashboardLayout } from 'src/dashboard/types';
-import type { PlatformFilter } from 'src/utils/filterUtils';
+import type { PlatformFilter } from './map-superset-filters-to-platform-spec';
 
 type OutgoingMessagePayload = {
   dashboardLayoutUpdated: DashboardLayout;
   editModeUpdated: boolean;
+  filtersUpdated: PlatformFilter[];
   customMarkdownsRequested: null;
   createCustomMarkdownRequested: null;
   editCustomMarkdownRequested: CustomMarkdown;
@@ -14,7 +15,6 @@ type OutgoingMessagePayload = {
   };
   elementsRefreshEvent: string[];
   refreshDashboardRequested: void;
-  sendFilters: PlatformFilter[];
 };
 
 type OutgoingMessageType = keyof OutgoingMessagePayload;

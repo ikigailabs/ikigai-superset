@@ -1,14 +1,13 @@
 import { postChartFormData } from 'src/components/Chart/chartAction';
 import { UPDATE_COMPONENTS } from 'src/dashboard/actions/dashboardLayout';
 import { setCustomMarkdowns } from 'src/dashboard/actions/dashboardState';
-
+import type { CustomMarkdown, CustomMarkdowns } from 'src/dashboard/types';
 import { LOG_EVENT } from 'src/logger/actions';
 import { LOG_ACTIONS_FORCE_REFRESH_CHART } from 'src/logger/LogUtils';
 import { CURRENT_VERSION } from 'src/migrations/dynamic-markdown/migration-runner';
+import { mapSupersetFiltersToPlatformSpec } from './map-superset-filters-to-platform-spec';
 
-import type { CustomMarkdown, CustomMarkdowns } from 'src/dashboard/types';
-import type { PlatformFilter } from 'src/utils/filterUtils';
-import type { IncomingMessageUnion } from './incoming-message';
+import type { IncomingMessage, IncomingMessageType } from './incoming-message';
 import type { OutgoingMessage } from './outgoing-message';
 
 /**
@@ -59,11 +58,17 @@ export class SupersetContextService {
     this.sendMessageToCustomElements(message);
   }
 
-  public async sendFilters(filters: PlatformFilter[]) {
-    this.sendMessageToCustomElements({
+  public async sendFilters() {
+    const { store } = await import('src/views/store');
+    const filterBoxFilters = store.getState().dashboardFilters;
+    const filters = mapSupersetFiltersToPlatformSpec(filterBoxFilters);
+
+    const message: OutgoingMessage = {
+      type: 'filtersUpdated',
       payload: filters,
-      type: 'sendFilters',
-    });
+    };
+
+    this.sendMessageToCustomElements(message);
   }
 
   public sendDatasetsToRefresh(
@@ -153,13 +158,15 @@ export class SupersetContextService {
     });
   }
 
-  private onMessage = (event: MessageEvent<IncomingMessageUnion>) => {
+  private onMessage = <K extends IncomingMessageType>(
+    event: MessageEvent<IncomingMessage<K>>,
+  ) => {
     if (event.origin !== this.topLevelOrigin) return;
 
-    const { correlationId } = event.data ?? {};
-    if (!event.data.type) return;
+    const { type, correlationId, payload } = event.data ?? {};
+    if (!type) return;
 
-    switch (event.data.type) {
+    switch (type) {
       case 'getDashboardLayout': {
         this.handleGetDashboardLayout(event.source!, correlationId!);
         break;
@@ -169,8 +176,13 @@ export class SupersetContextService {
         this.handleSetCustomElementAliasId(
           event.source!,
           correlationId!,
-          event.data.payload!,
+          payload,
         );
+        break;
+      }
+
+      case 'requestFilters': {
+        this.handleRequestFilters(event.source!, correlationId!);
         break;
       }
 
@@ -178,19 +190,19 @@ export class SupersetContextService {
         this.handleNotifyUpdateSupersetCharts(
           event.source!,
           correlationId!,
-          event.data.payload!.chartIds,
+          payload as any,
         );
         break;
       }
 
       case 'sendCustomMarkdowns': {
-        this.handleSetCustomMarkdowns(event.data.payload!);
+        this.handleSetCustomMarkdowns(payload as any);
         break;
       }
 
       case 'notifyUpdateCustomElementCharts': {
         this.sendDatasetsToRefresh(
-          event.data.payload!.datasetAliasIds,
+          payload as unknown as string[],
           correlationId!,
         );
         break;
@@ -261,6 +273,26 @@ export class SupersetContextService {
     );
   }
 
+  private async handleRequestFilters(
+    source: MessageEventSource,
+    correlationId: string,
+  ) {
+    const { store } = await import('src/views/store');
+    const filterBoxFilters = store.getState().dashboardFilters;
+    const filters = mapSupersetFiltersToPlatformSpec(filterBoxFilters);
+
+    const message: OutgoingMessage = {
+      type: 'filtersUpdated',
+      payload: filters,
+    };
+
+    source.postMessage(message, { targetOrigin: this.topLevelOrigin });
+    source.postMessage(
+      { correlationId },
+      { targetOrigin: this.topLevelOrigin },
+    );
+  }
+
   private async handleGetDashboardLayout(
     source: MessageEventSource,
     correlationId: string,
@@ -280,10 +312,7 @@ export class SupersetContextService {
   private async handleSetCustomElementAliasId(
     source: MessageEventSource,
     correlationId: string,
-    payload: {
-      supersetComponentId: string;
-      customComponentAliasId: string;
-    },
+    payload: any,
   ) {
     const { store } = await import('src/views/store');
     const { supersetComponentId, customComponentAliasId } = payload;
