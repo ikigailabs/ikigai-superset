@@ -21,11 +21,8 @@ import {
   CHART_TYPE,
   MARKDOWN_TYPE,
   DYNAMIC_TYPE,
-  IKI_DEEPCAST_TYPE,
   IKI_RUN_PIPELINE_TYPE,
-  IKI_FORECAST_MODULE_TYPE,
   IKI_DATASET_DOWNLOAD_TYPE,
-  IKI_DYNAMIC_MARKDOWN_TYPE,
   IKI_DYNAMIC_SINGLE_MARKDOWN_TYPE,
 } from './componentTypes';
 
@@ -37,10 +34,7 @@ export default function componentIsResizable(entity: { type: string }) {
       MARKDOWN_TYPE,
       DYNAMIC_TYPE,
       IKI_RUN_PIPELINE_TYPE,
-      IKI_DEEPCAST_TYPE,
-      IKI_FORECAST_MODULE_TYPE,
       IKI_DATASET_DOWNLOAD_TYPE,
-      IKI_DYNAMIC_MARKDOWN_TYPE,
       IKI_DYNAMIC_SINGLE_MARKDOWN_TYPE,
     ].indexOf(entity.type) > -1
   );
