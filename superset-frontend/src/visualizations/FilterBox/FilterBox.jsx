@@ -126,6 +126,37 @@ const StyledFilterContainer = styled.div`
   `}
 `;
 
+const SelectActionRow = styled.div`
+  ${({ theme }) => `
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: ${theme.gridUnit}px;
+  `}
+`;
+
+const SelectAllButton = styled.button`
+  ${({ theme }) => `
+    background: transparent;
+    border: 0;
+    padding: 0;
+    color: ${theme.colors.grayscale.base};
+    font-size: ${theme.typography.sizes.s}px;
+    line-height: 1;
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+      color: ${theme.colors.grayscale.dark1};
+      text-decoration: underline;
+    }
+
+    &:disabled {
+      cursor: default;
+      color: ${theme.colors.grayscale.light1};
+      text-decoration: none;
+    }
+  `}
+`;
+
 class FilterBox extends React.PureComponent {
   constructor(props) {
     super(props);
@@ -410,6 +441,17 @@ class FilterBox extends React.PureComponent {
     const data = filtersChoices[key] || [];
     let value = selectedValues[key] || null;
 
+    const isAsyncSelect =
+      searchAllOptions && data.length >= FILTER_OPTIONS_LIMIT;
+    const allValues = data
+      .map(option => option?.id)
+      .filter(v => v !== null && v !== undefined);
+    const showSelectAll =
+      isMultiple &&
+      !isAsyncSelect &&
+      allValues.length > 0 &&
+      typeof allValues[0] === 'string';
+
     // Assign default value if required
     if (value === undefined && defaultValue) {
       // multiple values are separated by semicolons
@@ -417,35 +459,50 @@ class FilterBox extends React.PureComponent {
     }
 
     return (
-      <OnPasteSelect
-        cacheOptions
-        loadOptions={this.debounceLoadOptions(key)}
-        defaultOptions={this.transformOptions(data)}
-        key={key}
-        placeholder={t('Type or Select [%s]', label)}
-        isMulti={isMultiple}
-        isClearable={isClearable}
-        value={value}
-        options={this.transformOptions(data)}
-        onChange={newValue => {
-          // avoid excessive re-renders
-          if (newValue !== value) {
-            this.changeFilter(key, newValue);
-          }
-        }}
-        // TODO try putting this back once react-select is upgraded
-        // onFocus={() => this.onFilterMenuOpen(key)}
-        onMenuOpen={() => this.onFilterMenuOpen(key)}
-        onBlur={() => this.onFilterMenuClose(key)}
-        onMenuClose={() => this.onFilterMenuClose(key)}
-        selectWrap={
-          searchAllOptions && data.length >= FILTER_OPTIONS_LIMIT
-            ? AsyncCreatableSelect
-            : CreatableSelect
-        }
-        noResultsText={t('No results found')}
-        forceOverflow
-      />
+      <>
+        {showSelectAll && (
+          <SelectActionRow>
+            <SelectAllButton
+              type="button"
+              title={t('Select all options')}
+              aria-label={t('Select all options')}
+              onClick={e => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.changeFilter(key, allValues);
+              }}
+            >
+              {t('Select all')}
+            </SelectAllButton>
+          </SelectActionRow>
+        )}
+
+        <OnPasteSelect
+          cacheOptions
+          loadOptions={this.debounceLoadOptions(key)}
+          defaultOptions={this.transformOptions(data)}
+          key={key}
+          placeholder={t('Type or Select [%s]', label)}
+          isMulti={isMultiple}
+          isClearable={isClearable}
+          value={value}
+          options={this.transformOptions(data)}
+          onChange={newValue => {
+            // avoid excessive re-renders
+            if (newValue !== value) {
+              this.changeFilter(key, newValue);
+            }
+          }}
+          // TODO try putting this back once react-select is upgraded
+          // onFocus={() => this.onFilterMenuOpen(key)}
+          onMenuOpen={() => this.onFilterMenuOpen(key)}
+          onBlur={() => this.onFilterMenuClose(key)}
+          onMenuClose={() => this.onFilterMenuClose(key)}
+          selectWrap={isAsyncSelect ? AsyncCreatableSelect : CreatableSelect}
+          noResultsText={t('No results found')}
+          forceOverflow
+        />
+      </>
     );
   }
 
