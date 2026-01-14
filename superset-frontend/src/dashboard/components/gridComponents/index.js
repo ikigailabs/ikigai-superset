@@ -31,6 +31,7 @@ import {
   IKI_EITL_ROW_TYPE,
   IKI_EITL_COLUMN_TYPE,
   IKI_DATASET_DOWNLOAD_TYPE,
+  IKI_DYNAMIC_MARKDOWN_TYPE,
   IKI_DYNAMIC_SINGLE_MARKDOWN_TYPE,
 } from '../../util/componentTypes';
 
@@ -49,6 +50,7 @@ import IkiRunPipeline from './IkiRunPipeline';
 import IkiEitlRow from './IkiEitlRow';
 import IkiEitlColumn from './IkiEitlColumn';
 import IkiDatasetDownload from './IkiDatasetDownload';
+import IkiDynamicMarkdown from './IkiDynamicMarkdown';
 
 export { default as ChartHolder } from './ChartHolder';
 export { default as Markdown } from './Markdown';
@@ -75,6 +77,7 @@ export const componentLookup = {
   [TAB_TYPE]: Tab,
   [TABS_TYPE]: TabsConnected,
   [DYNAMIC_TYPE]: DynamicComponent,
+  [IKI_DYNAMIC_MARKDOWN_TYPE]: IkiDynamicMarkdown,
   [IKI_DYNAMIC_SINGLE_MARKDOWN_TYPE]: IkiDynamicSingleMarkdown,
   [IKI_TABLE_TYPE]: IkiTable,
   [IKI_RUN_PIPELINE_TYPE]: IkiRunPipeline,

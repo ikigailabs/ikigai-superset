@@ -23,6 +23,7 @@ import {
   DYNAMIC_TYPE,
   IKI_RUN_PIPELINE_TYPE,
   IKI_DATASET_DOWNLOAD_TYPE,
+  IKI_DYNAMIC_MARKDOWN_TYPE,
   IKI_DYNAMIC_SINGLE_MARKDOWN_TYPE,
 } from './componentTypes';
 
@@ -35,6 +36,7 @@ export default function componentIsResizable(entity: { type: string }) {
       DYNAMIC_TYPE,
       IKI_RUN_PIPELINE_TYPE,
       IKI_DATASET_DOWNLOAD_TYPE,
+      IKI_DYNAMIC_MARKDOWN_TYPE,
       IKI_DYNAMIC_SINGLE_MARKDOWN_TYPE,
     ].indexOf(entity.type) > -1
   );
