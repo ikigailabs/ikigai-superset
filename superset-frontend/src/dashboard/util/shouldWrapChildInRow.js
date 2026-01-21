@@ -22,11 +22,8 @@ import {
   COLUMN_TYPE,
   MARKDOWN_TYPE,
   TAB_TYPE,
-  IKI_DEEPCAST_TYPE,
   IKI_RUN_PIPELINE_TYPE,
-  IKI_FORECAST_MODULE_TYPE,
   IKI_DATASET_DOWNLOAD_TYPE,
-  IKI_DYNAMIC_MARKDOWN_TYPE,
   IKI_DYNAMIC_SINGLE_MARKDOWN_TYPE,
 } from './componentTypes';
 
@@ -35,11 +32,8 @@ const typeToWrapChildLookup = {
     [CHART_TYPE]: true,
     [COLUMN_TYPE]: true,
     [MARKDOWN_TYPE]: true,
-    [IKI_DEEPCAST_TYPE]: true,
     [IKI_RUN_PIPELINE_TYPE]: true,
-    [IKI_FORECAST_MODULE_TYPE]: true,
     [IKI_DATASET_DOWNLOAD_TYPE]: true,
-    [IKI_DYNAMIC_MARKDOWN_TYPE]: true,
     [IKI_DYNAMIC_SINGLE_MARKDOWN_TYPE]: true,
   },
 
@@ -47,11 +41,8 @@ const typeToWrapChildLookup = {
     [CHART_TYPE]: true,
     [COLUMN_TYPE]: true,
     [MARKDOWN_TYPE]: true,
-    [IKI_DEEPCAST_TYPE]: true,
     [IKI_RUN_PIPELINE_TYPE]: true,
-    [IKI_FORECAST_MODULE_TYPE]: true,
     [IKI_DATASET_DOWNLOAD_TYPE]: true,
-    [IKI_DYNAMIC_MARKDOWN_TYPE]: true,
     [IKI_DYNAMIC_SINGLE_MARKDOWN_TYPE]: true,
   },
 };
