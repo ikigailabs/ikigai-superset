@@ -466,36 +466,40 @@ class FilterBox extends React.PureComponent {
 
     return (
       <>
-        {showClearAll && (
-          <ClearAllButton
-            type="button"
-            title={t('Clear all options')}
-            aria-label={t('Clear all options')}
-            onClick={e => {
-              e.preventDefault();
-              e.stopPropagation();
-              this.changeFilter(key, []);
-            }}
-          >
-            {t('Clear all')}
-          </ClearAllButton>
-        )}
-        {showSelectAll && (
-          <SelectActionRow>
-            <SelectAllButton
-              type="button"
-              title={t('Select all options')}
-              aria-label={t('Select all options')}
-              onClick={e => {
-                e.preventDefault();
-                e.stopPropagation();
-                this.changeFilter(key, allValues);
-              }}
-            >
-              {t('Select all')}
-            </SelectAllButton>
-          </SelectActionRow>
-        )}
+        {showSelectAll ||
+          (showClearAll && (
+            <SelectActionRow>
+              {showClearAll && (
+                <ClearAllButton
+                  type="button"
+                  title={t('Clear all options')}
+                  aria-label={t('Clear all options')}
+                  onClick={e => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.changeFilter(key, []);
+                  }}
+                >
+                  {t('Clear all')}
+                </ClearAllButton>
+              )}
+
+              {showSelectAll && (
+                <SelectAllButton
+                  type="button"
+                  title={t('Select all options')}
+                  aria-label={t('Select all options')}
+                  onClick={e => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.changeFilter(key, allValues);
+                  }}
+                >
+                  {t('Select all')}
+                </SelectAllButton>
+              )}
+            </SelectActionRow>
+          ))}
 
         <OnPasteSelect
           cacheOptions
