@@ -466,6 +466,20 @@ class FilterBox extends React.PureComponent {
 
     return (
       <>
+        {showClearAll && (
+          <ClearAllButton
+            type="button"
+            title={t('Clear all options')}
+            aria-label={t('Clear all options')}
+            onClick={e => {
+              e.preventDefault();
+              e.stopPropagation();
+              this.changeFilter(key, []);
+            }}
+          >
+            {t('Clear all')}
+          </ClearAllButton>
+        )}
         {showSelectAll && (
           <SelectActionRow>
             <SelectAllButton
@@ -480,20 +494,6 @@ class FilterBox extends React.PureComponent {
             >
               {t('Select all')}
             </SelectAllButton>
-            {showClearAll && (
-              <ClearAllButton
-                type="button"
-                title={t('Clear all options')}
-                aria-label={t('Clear all options')}
-                onClick={e => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  this.changeFilter(key, []);
-                }}
-              >
-                {t('Clear all')}
-              </ClearAllButton>
-            )}
           </SelectActionRow>
         )}
 
