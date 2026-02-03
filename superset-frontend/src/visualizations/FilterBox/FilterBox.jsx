@@ -131,6 +131,7 @@ const SelectActionRow = styled.div`
     display: flex;
     justify-content: flex-end;
     margin-bottom: ${theme.gridUnit}px;
+    gap: ${theme.gridUnit * 2}px;
   `}
 `;
 
@@ -156,6 +157,8 @@ const SelectAllButton = styled.button`
     }
   `}
 `;
+
+const ClearAllButton = styled(SelectAllButton)``;
 
 class FilterBox extends React.PureComponent {
   constructor(props) {
@@ -458,22 +461,42 @@ class FilterBox extends React.PureComponent {
       value = isMultiple ? defaultValue.split(';') : defaultValue;
     }
 
+    const showClearAll =
+      showSelectAll && Array.isArray(value) && value.length > 3;
+
     return (
       <>
-        {showSelectAll && (
+        {(showSelectAll || showClearAll) && (
           <SelectActionRow>
-            <SelectAllButton
-              type="button"
-              title={t('Select all options')}
-              aria-label={t('Select all options')}
-              onClick={e => {
-                e.preventDefault();
-                e.stopPropagation();
-                this.changeFilter(key, allValues);
-              }}
-            >
-              {t('Select all')}
-            </SelectAllButton>
+            {showClearAll && (
+              <ClearAllButton
+                type="button"
+                title={t('Clear all options')}
+                aria-label={t('Clear all options')}
+                onClick={e => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  this.changeFilter(key, []);
+                }}
+              >
+                {t('Clear all')}
+              </ClearAllButton>
+            )}
+
+            {showSelectAll && (
+              <SelectAllButton
+                type="button"
+                title={t('Select all options')}
+                aria-label={t('Select all options')}
+                onClick={e => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  this.changeFilter(key, allValues);
+                }}
+              >
+                {t('Select all')}
+              </SelectAllButton>
+            )}
           </SelectActionRow>
         )}
 
