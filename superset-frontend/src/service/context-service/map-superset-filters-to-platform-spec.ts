@@ -37,7 +37,7 @@ function mapFilterFields(columns: DashboardFilter['columns']) {
     const filterField: PlatformFilterField = {
       label: key,
       value: columnValue,
-      multiple: columnValue.length > 1,
+      multiple: columnValue?.length > 1,
     };
 
     return filterField;
